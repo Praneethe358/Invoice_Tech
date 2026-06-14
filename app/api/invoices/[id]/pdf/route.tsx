@@ -60,6 +60,8 @@ export async function GET(
       items: typedInvoice.items,
       total: Number(typedInvoice.total),
       customerPhone: typedInvoice.customer_phone,
+      customerName: typedInvoice.customer_name,
+      paymentStatus: typedInvoice.payment_status,
     });
 
     const filename = `${typedInvoice.invoice_number}_${typedShop.name.replace(/\s+/g, '_')}.pdf`;

@@ -22,6 +22,8 @@ export default function InvoiceBuilderClient({ products }: Props) {
   const [items, setItems] = useState<InvoiceItem[]>([]);
   const [phone, setPhone] = useState('');
   const [phoneError, setPhoneError] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [paymentStatus, setPaymentStatus] = useState<'paid' | 'unpaid'>('paid');
   const [customName, setCustomName] = useState('');
   const [customPrice, setCustomPrice] = useState('');
   const [showCustom, setShowCustom] = useState(false);
@@ -118,6 +120,8 @@ export default function InvoiceBuilderClient({ products }: Props) {
         body: JSON.stringify({
           items,
           customer_phone: phone.trim(),
+          customer_name: customerName.trim() || undefined,
+          payment_status: paymentStatus,
         }),
       });
 
@@ -282,8 +286,19 @@ export default function InvoiceBuilderClient({ products }: Props) {
           </section>
         )}
 
-        {/* Customer Phone */}
-        <section className="mb-6">
+        {/* Customer Details Form */}
+        <section className="bg-white rounded-2xl border border-[#e5e7eb] p-4 space-y-4 mb-6">
+          <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide">
+            Customer details
+          </h2>
+
+          <Input
+            label="Customer Name"
+            placeholder="e.g. PRANEETH"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+          />
+
           <Input
             label="Customer WhatsApp Number"
             placeholder="9876543210"
@@ -300,6 +315,37 @@ export default function InvoiceBuilderClient({ products }: Props) {
             onBlur={handlePhoneBlur}
             error={phoneError}
           />
+
+          {/* Payment Status Segmented Control */}
+          <div>
+            <label className="block text-xs font-semibold text-[#4b5563] uppercase tracking-wide mb-2">
+              Payment Status
+            </label>
+            <div className="grid grid-cols-2 gap-2 bg-[#f3f4f6] p-1 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setPaymentStatus('paid')}
+                className={`py-2 text-xs font-bold rounded-lg transition-all ${
+                  paymentStatus === 'paid'
+                    ? 'bg-[#1a6b3c] text-white shadow-sm'
+                    : 'text-[#4b5563] hover:text-[#111827]'
+                }`}
+              >
+                Paid
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentStatus('unpaid')}
+                className={`py-2 text-xs font-bold rounded-lg transition-all ${
+                  paymentStatus === 'unpaid'
+                    ? 'bg-red-600 text-white shadow-sm'
+                    : 'text-[#4b5563] hover:text-[#111827]'
+                }`}
+              >
+                Unpaid
+              </button>
+            </div>
+          </div>
         </section>
       </PageTransition>
 

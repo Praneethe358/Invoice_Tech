@@ -64,6 +64,10 @@ export async function POST(
       { day: 'numeric', month: 'long', year: 'numeric' }
     );
 
+    const balanceDue = typedInvoice.payment_status === 'unpaid' ? Number(typedInvoice.total) : 0;
+    const customerName = typedInvoice.customer_name ? typedInvoice.customer_name.trim().toUpperCase() : '';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
+
     // Step 1: Generate PDF
     const pdfBuffer = await generateInvoicePDF({
       shopName: typedShop.name,
@@ -73,6 +77,8 @@ export async function POST(
       items: typedInvoice.items,
       total: Number(typedInvoice.total),
       customerPhone: typedInvoice.customer_phone,
+      customerName: typedInvoice.customer_name,
+      paymentStatus: typedInvoice.payment_status,
     });
 
     const filename = `${typedInvoice.invoice_number}_${typedShop.name.replace(/\s+/g, '_')}.pdf`;
@@ -81,23 +87,20 @@ export async function POST(
     const mediaId = await uploadMediaToWhatsApp(pdfBuffer, filename);
 
     // Step 3: Send document message
+    const greetingName = customerName ? ` ${customerName}` : '';
     const caption = [
-      `🧾 *INVOICE FROM ${typedShop.name.toUpperCase()}* 🧾`,
+      `Hey${greetingName} ,`,
       '',
-      'Dear Customer,',
+      'Thank you for your business',
       '',
-      'Thank you for shopping with us! Your invoice is ready and has been attached below.',
+      'Your Sales Invoice is ready! Check the details below',
       '',
-      '━━━━━━━━━━━━━━━━━━━',
-      '📦 *Invoice Summary:*',
-      `• *Invoice No:* ${typedInvoice.invoice_number}`,
-      `• *Total Amount:* ₹${Number(typedInvoice.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
-      `• *Date:* ${dateStr}`,
-      '━━━━━━━━━━━━━━━━━━━',
+      `Sales Invoice No: ${typedInvoice.invoice_number}`,
+      `Invoice Amount: ₹${Number(typedInvoice.total).toFixed(1)}`,
+      `Balance Due: ₹${balanceDue.toFixed(1)}`,
       '',
-      'Please find the detailed PDF receipt attached. We appreciate your business and hope to serve you again soon! 😊✨',
-      '',
-      '🙏 *Thank you!*',
+      'Happy to serve you',
+      `${typedShop.name.toUpperCase()}.`,
     ].join('\n');
 
     await sendDocumentMessage(

@@ -219,6 +219,8 @@ interface InvoicePDFProps {
   items: InvoiceItem[];
   total: number;
   customerPhone?: string;
+  customerName?: string;
+  paymentStatus?: string;
 }
 
 function InvoicePDF({
@@ -229,12 +231,17 @@ function InvoicePDF({
   items,
   total,
   customerPhone,
+  customerName,
+  paymentStatus,
 }: InvoicePDFProps) {
   const formattedPhone = customerPhone
     ? customerPhone.startsWith('+')
       ? customerPhone
       : `+91 ${customerPhone.slice(-10)}`
     : 'Walk-in Customer';
+
+  const clientName = customerName ? customerName.trim() : 'Walk-in Customer';
+  const isPaid = paymentStatus !== 'unpaid';
 
   return (
     <Document>
@@ -254,7 +261,17 @@ function InvoicePDF({
           </View>
           <View style={styles.invoiceTitleSection}>
             <Text style={styles.invoiceTitle}>TAX INVOICE</Text>
-            <Text style={styles.badge}>PAID</Text>
+            <Text
+              style={[
+                styles.badge,
+                !isPaid ? {
+                  backgroundColor: '#fee2e2',
+                  color: '#ef4444',
+                } : {},
+              ]}
+            >
+              {isPaid ? 'PAID' : 'UNPAID'}
+            </Text>
           </View>
         </View>
 
@@ -262,8 +279,8 @@ function InvoicePDF({
         <View style={styles.infoGrid}>
           <View style={styles.infoCol}>
             <Text style={styles.infoLabel}>Billed To</Text>
-            <Text style={styles.infoValue}>{formattedPhone}</Text>
-            <Text style={styles.infoValueSub}>Customer Receipt</Text>
+            <Text style={styles.infoValue}>{clientName}</Text>
+            <Text style={styles.infoValueSub}>{formattedPhone}</Text>
           </View>
           <View style={[styles.infoCol, { alignItems: 'flex-end' }]}>
             <Text style={styles.infoLabel}>Invoice Details</Text>
