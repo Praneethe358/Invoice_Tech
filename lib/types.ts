@@ -24,6 +24,8 @@ export interface Invoice {
   shop_id: string;
   invoice_number: string;
   customer_phone: string;
+  customer_name?: string;
+  payment_status?: string;
   items: InvoiceItem[];
   total: number;
   status: InvoiceStatus;
@@ -45,6 +47,8 @@ export interface InvoiceItem {
 export interface CreateInvoicePayload {
   items: InvoiceItem[];
   customer_phone: string;
+  customer_name?: string;
+  payment_status?: string;
 }
 
 export interface CreateInvoiceResponse {

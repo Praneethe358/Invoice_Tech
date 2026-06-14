@@ -31,6 +31,8 @@ create table invoices (
   shop_id uuid not null references shops(id) on delete cascade,
   invoice_number text not null,
   customer_phone text not null,
+  customer_name text,
+  payment_status text not null default 'paid',
   items jsonb not null,
   total numeric(10,2) not null,
   status text not null default 'created',

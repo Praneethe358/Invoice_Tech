@@ -104,41 +104,43 @@ export default function Navbar() {
       </nav>
 
       {/* Bottom Navigation — BillBook style */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e8eaed] safe-area-inset-bottom">
-        <div className="max-w-lg mx-auto flex items-center justify-around h-16">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
+      {pathname !== '/invoice/new' && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e8eaed] safe-area-inset-bottom">
+          <div className="max-w-lg mx-auto flex items-center justify-around h-16">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
 
-            if (item.isMain) {
+              if (item.isMain) {
+                return (
+                  <Link key={item.href} href={item.href}>
+                    <motion.div
+                      whileTap={{ scale: 0.9 }}
+                      className="w-12 h-12 -mt-5 rounded-2xl bg-[#1a6b3c] text-white shadow-lg shadow-[#1a6b3c]/25 flex items-center justify-center"
+                    >
+                      {item.icon}
+                    </motion.div>
+                  </Link>
+                );
+              }
+
               return (
-                <Link key={item.href} href={item.href}>
-                  <motion.div
-                    whileTap={{ scale: 0.9 }}
-                    className="w-12 h-12 -mt-5 rounded-2xl bg-[#1a6b3c] text-white shadow-lg shadow-[#1a6b3c]/25 flex items-center justify-center"
-                  >
-                    {item.icon}
-                  </motion.div>
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex flex-col items-center gap-1 min-w-[64px] py-2 transition-colors relative ${
+                    isActive
+                      ? 'text-[#1a6b3c] bottom-nav-active'
+                      : 'text-[#9ca3af]'
+                  }`}
+                >
+                  {item.icon}
+                  <span className="text-[10px] font-semibold">{item.label}</span>
                 </Link>
               );
-            }
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex flex-col items-center gap-1 min-w-[64px] py-2 transition-colors relative ${
-                  isActive
-                    ? 'text-[#1a6b3c] bottom-nav-active'
-                    : 'text-[#9ca3af]'
-                }`}
-              >
-                {item.icon}
-                <span className="text-[10px] font-semibold">{item.label}</span>
-              </Link>
-            );
-          })}
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

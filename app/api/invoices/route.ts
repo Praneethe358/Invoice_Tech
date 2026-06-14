@@ -69,6 +69,8 @@ export async function POST(request: NextRequest) {
         shop_id: shop.id,
         invoice_number: invoiceNumber,
         customer_phone: body.customer_phone.trim(),
+        customer_name: body.customer_name?.trim() || null,
+        payment_status: body.payment_status || 'paid',
         items: body.items,
         total: Number(total.toFixed(2)),
         status: 'created',

@@ -72,6 +72,7 @@ export async function POST(
       date: dateStr,
       items: typedInvoice.items,
       total: Number(typedInvoice.total),
+      customerPhone: typedInvoice.customer_phone,
     });
 
     const filename = `${typedInvoice.invoice_number}_${typedShop.name.replace(/\s+/g, '_')}.pdf`;
@@ -81,13 +82,22 @@ export async function POST(
 
     // Step 3: Send document message
     const caption = [
-      `Hi! Your invoice from ${typedShop.name} is ready.`,
+      `🧾 *INVOICE FROM ${typedShop.name.toUpperCase()}* 🧾`,
       '',
-      `Invoice No: ${typedInvoice.invoice_number}`,
-      `Amount: ₹${Number(typedInvoice.total).toLocaleString('en-IN')}`,
-      `Date: ${dateStr}`,
+      'Dear Customer,',
       '',
-      'Thank you for your business! 🙏',
+      'Thank you for shopping with us! Your invoice is ready and has been attached below.',
+      '',
+      '━━━━━━━━━━━━━━━━━━━',
+      '📦 *Invoice Summary:*',
+      `• *Invoice No:* ${typedInvoice.invoice_number}`,
+      `• *Total Amount:* ₹${Number(typedInvoice.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
+      `• *Date:* ${dateStr}`,
+      '━━━━━━━━━━━━━━━━━━━',
+      '',
+      'Please find the detailed PDF receipt attached. We appreciate your business and hope to serve you again soon! 😊✨',
+      '',
+      '🙏 *Thank you!*',
     ].join('\n');
 
     await sendDocumentMessage(
