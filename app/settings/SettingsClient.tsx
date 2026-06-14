@@ -31,7 +31,45 @@ export default function SettingsClient({
     shop.address || ''
   );
   const [shopPhone, setShopPhone] = useState(shop.phone || '');
+  const [invoicePrefix, setInvoicePrefix] = useState(shop.invoice_prefix || 'INV');
+  const [logoUrl, setLogoUrl] = useState(shop.logo_url || '');
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [savingShop, setSavingShop] = useState(false);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      showToast('Only JPG, PNG, and WebP are allowed', 'error');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      showToast('Logo must be less than 2MB', 'error');
+      return;
+    }
+
+    setUploadingLogo(true);
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${shop.id}/logo.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('shop-logos')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      showToast('Failed to upload logo', 'error');
+      setUploadingLogo(false);
+      return;
+    }
+
+    const { data } = supabase.storage.from('shop-logos').getPublicUrl(filePath);
+    
+    setLogoUrl(data.publicUrl);
+    setUploadingLogo(false);
+    showToast('Logo uploaded', 'success');
+  };
 
   const handleSaveShop = async (e: FormEvent) => {
     e.preventDefault();
@@ -43,6 +81,8 @@ export default function SettingsClient({
         name: shopName.trim(),
         address: shopAddress.trim() || null,
         phone: shopPhone.trim() || null,
+        invoice_prefix: invoicePrefix.trim() || 'INV',
+        logo_url: logoUrl || null,
       })
       .eq('id', shop.id);
 
@@ -61,6 +101,7 @@ export default function SettingsClient({
   const [newPrice, setNewPrice] = useState('');
   const [addingProduct, setAddingProduct] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editPrice, setEditPrice] = useState('');
 
@@ -107,6 +148,7 @@ export default function SettingsClient({
       setProducts((prev) => prev.filter((p) => p.id !== id));
       showToast('Product deleted', 'success');
     }
+    setConfirmDeleteId(null);
   };
 
   const startEdit = (product: Product) => {
@@ -160,11 +202,49 @@ export default function SettingsClient({
             onSubmit={handleSaveShop}
             className="bg-white rounded-2xl border border-[#e5e7eb] p-4 space-y-4"
           >
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-[#4b5563] uppercase tracking-wide">
+                Shop Logo
+              </label>
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-xl border border-[#e5e7eb] overflow-hidden flex items-center justify-center bg-[#f9fafb]">
+                  {logoUrl ? (
+                    <img src={logoUrl} alt="Logo preview" className="w-full h-full object-contain" />
+                  ) : (
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <polyline points="21 15 16 10 5 21" />
+                    </svg>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <input
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp"
+                    onChange={handleLogoUpload}
+                    disabled={uploadingLogo}
+                    className="block w-full text-sm text-[#4b5563] file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-[#f3f4f6] file:text-[#111827] hover:file:bg-[#e5e7eb] transition-colors cursor-pointer"
+                  />
+                  <p className="text-[10px] text-[#6b7280] mt-1">
+                    JPG, PNG, WebP up to 2MB. 
+                    {uploadingLogo && <span className="text-[#1a6b3c] ml-1">Uploading...</span>}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <Input
               label="Shop Name"
               value={shopName}
               onChange={(e) => setShopName(e.target.value)}
               required
+            />
+            <Input
+              label="Invoice Prefix"
+              value={invoicePrefix}
+              onChange={(e) => setInvoicePrefix(e.target.value)}
+              placeholder="e.g. INV, AF"
             />
             <Input
               label="Address"
@@ -217,6 +297,13 @@ export default function SettingsClient({
               </Button>
             </div>
           </div>
+
+          {/* Product Limit Warning */}
+          {products.length > 50 && (
+            <div className="mb-4 p-3 bg-amber-50 text-amber-800 text-xs rounded-xl border border-amber-200">
+              You have a large catalog — consider removing unused items to keep your invoice builder fast.
+            </div>
+          )}
 
           {/* Product List */}
           {products.length === 0 ? (
@@ -293,13 +380,30 @@ export default function SettingsClient({
                             ✏️
                           </button>
                           <button
-                            onClick={() =>
-                              handleDeleteProduct(product.id)
-                            }
+                            onClick={() => setConfirmDeleteId(product.id)}
                             className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-red-50 text-[#dc2626] transition-colors"
                             aria-label={`Delete ${product.name}`}
                           >
                             🗑️
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {confirmDeleteId === product.id && editingId !== product.id && (
+                      <div className="mt-3 pt-3 border-t border-[#e5e7eb] flex items-center justify-between text-sm">
+                        <p className="text-[#111827] font-medium">Delete {product.name}?</p>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => setConfirmDeleteId(null)} 
+                            className="px-3 py-1.5 bg-[#f3f4f6] text-[#4b5563] rounded-lg font-semibold text-xs hover:bg-[#e5e7eb]"
+                          >
+                            No
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteProduct(product.id)} 
+                            className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg font-semibold text-xs hover:bg-red-100"
+                          >
+                            Yes
                           </button>
                         </div>
                       </div>

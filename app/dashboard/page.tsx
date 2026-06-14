@@ -23,7 +23,7 @@ export default async function DashboardPage() {
 
   if (!shop) redirect('/signup');
 
-  // Fetch recent invoices
+  // Fetch recent invoices for the list
   const { data: invoices } = await supabase
     .from('invoices')
     .select('*')
@@ -34,22 +34,38 @@ export default async function DashboardPage() {
   const typedShop = shop as Shop;
   const typedInvoices = (invoices ?? []) as Invoice[];
 
-  // Stats
-  const totalInvoices = typedInvoices.length;
-  const today = new Date().toDateString();
-  const sentToday = typedInvoices.filter(
-    (inv) => new Date(inv.created_at).toDateString() === today
-  ).length;
-  const totalRevenue = typedInvoices.reduce(
-    (sum, inv) => sum + Number(inv.total),
-    0
-  );
+  // Fetch stats data (single lightweight query)
+  const { data: allInvoicesData } = await supabase
+    .from('invoices')
+    .select('status, created_at')
+    .eq('shop_id', shop.id);
+
+  let totalInvoices = 0;
+  let thisMonth = 0;
+  let failedInvoices = 0;
+
+  if (allInvoicesData) {
+    totalInvoices = allInvoicesData.length;
+    
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    allInvoicesData.forEach((inv) => {
+      if (inv.status === 'failed') failedInvoices++;
+      
+      const invDate = new Date(inv.created_at);
+      if (invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear) {
+        thisMonth++;
+      }
+    });
+  }
 
   return (
     <DashboardClient
       shop={typedShop}
       invoices={typedInvoices}
-      stats={{ totalInvoices, sentToday, totalRevenue }}
+      stats={{ totalInvoices, thisMonth, failedInvoices }}
     />
   );
 }

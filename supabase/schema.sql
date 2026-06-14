@@ -56,3 +56,26 @@ create policy "own products" on products for all
 
 create policy "own invoices" on invoices for all
   using (shop_id in (select id from shops where auth_user_id = auth.uid()));
+
+-- ═══════════════════════════════════════════
+-- Storage: shop-logos
+-- ═══════════════════════════════════════════
+
+insert into storage.buckets (id, name, public)
+values ('shop-logos', 'shop-logos', true)
+on conflict (id) do nothing;
+
+create policy "Public Access" on storage.objects for select
+  using (bucket_id = 'shop-logos');
+
+create policy "Shop owners can upload logos" on storage.objects for insert
+  with check (
+    bucket_id = 'shop-logos' and
+    auth.role() = 'authenticated'
+  );
+
+create policy "Shop owners can update logos" on storage.objects for update
+  using (
+    bucket_id = 'shop-logos' and
+    auth.role() = 'authenticated'
+  );

@@ -6,6 +6,7 @@ export interface Shop {
   name: string;
   address: string | null;
   phone: string | null;
+  logo_url?: string | null;
   invoice_prefix: string;
   next_invoice_number: number;
   created_at: string;

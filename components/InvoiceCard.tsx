@@ -1,6 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useToast } from '@/components/Toast';
 import { Invoice } from '@/lib/types';
 
 function maskPhone(phone: string): string {
@@ -40,13 +43,36 @@ interface InvoiceCardProps {
 
 export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
   const status = statusConfig(invoice.status);
+  const router = useRouter();
+  const { showToast } = useToast();
+  const [resending, setResending] = useState(false);
+
+  const handleResend = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setResending(true);
+    try {
+      const res = await fetch(`/api/invoices/${invoice.id}/send`, {
+        method: 'POST',
+      });
+      if (!res.ok) {
+        showToast('Failed to resend invoice', 'error');
+      } else {
+        showToast('Invoice resent successfully', 'success');
+        router.refresh();
+      }
+    } catch (err) {
+      showToast('An unexpected error occurred', 'error');
+    }
+    setResending(false);
+  };
 
   return (
     <motion.div
+      onClick={() => router.push(`/invoice/${invoice.id}`)}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: 'easeOut', delay: index * 0.03 }}
-      className="glass-card-light rounded-2xl p-4 hover:shadow-md transition-shadow"
+      className="glass-card-light rounded-2xl p-4 hover:shadow-md transition-shadow cursor-pointer relative"
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2.5">
@@ -65,14 +91,42 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
             </p>
           </div>
         </div>
-        <div className="text-right">
+        <div className="text-right flex flex-col items-end gap-1">
           <p className="text-base font-extrabold text-[#1a1d26] tabular-nums">
             ₹{Number(invoice.total).toLocaleString('en-IN')}
           </p>
-          <span className={`inline-flex items-center gap-1 text-[10px] font-semibold ${status.text} ${status.bg} px-2 py-0.5 rounded-full`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
-            {status.label}
-          </span>
+          <div className="flex items-center gap-2">
+            {invoice.status === 'failed' && (
+              <button
+                onClick={handleResend}
+                disabled={resending}
+                className="w-6 h-6 flex items-center justify-center rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                title="Resend Invoice"
+              >
+                {resending ? (
+                  <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="2" x2="12" y2="6"></line>
+                    <line x1="12" y1="18" x2="12" y2="22"></line>
+                    <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+                    <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+                    <line x1="2" y1="12" x2="6" y2="12"></line>
+                    <line x1="18" y1="12" x2="22" y2="12"></line>
+                    <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+                    <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+                  </svg>
+                ) : (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <polyline points="1 4 1 10 7 10"></polyline>
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                  </svg>
+                )}
+              </button>
+            )}
+            <span className={`inline-flex items-center gap-1 text-[10px] font-semibold ${status.text} ${status.bg} px-2 py-0.5 rounded-full`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
+              {status.label}
+            </span>
+          </div>
         </div>
       </div>
     </motion.div>

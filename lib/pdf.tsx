@@ -4,6 +4,7 @@ import {
   Page,
   Text,
   View,
+  Image,
   StyleSheet,
   renderToBuffer,
 } from '@react-pdf/renderer';
@@ -53,6 +54,12 @@ const styles = StyleSheet.create({
     fontSize: 8.5,
     color: TEXT_MUTED,
     marginBottom: 2,
+  },
+  logo: {
+    maxHeight: 60,
+    maxWidth: 120,
+    marginBottom: 10,
+    objectFit: 'contain',
   },
   invoiceTitleSection: {
     alignItems: 'flex-end',
@@ -221,6 +228,8 @@ interface InvoicePDFProps {
   customerPhone?: string;
   customerName?: string;
   paymentStatus?: string;
+  shopPhone?: string | null;
+  logoBase64?: string | null;
 }
 
 function InvoicePDF({
@@ -233,6 +242,8 @@ function InvoicePDF({
   customerPhone,
   customerName,
   paymentStatus,
+  shopPhone,
+  logoBase64,
 }: InvoicePDFProps) {
   const formattedPhone = customerPhone
     ? customerPhone.startsWith('+')
@@ -252,11 +263,17 @@ function InvoicePDF({
         {/* Brand Header */}
         <View style={styles.headerContainer}>
           <View style={styles.shopSection}>
+            {logoBase64 && (
+              <Image src={logoBase64} style={styles.logo} />
+            )}
             <Text style={styles.shopName}>{shopName}</Text>
             {shopAddress ? (
               <Text style={styles.shopAddress}>{shopAddress}</Text>
             ) : (
               <Text style={styles.shopAddress}>Tamil Nadu, India</Text>
+            )}
+            {shopPhone && (
+              <Text style={styles.shopAddress}>{shopPhone}</Text>
             )}
           </View>
           <View style={styles.invoiceTitleSection}>

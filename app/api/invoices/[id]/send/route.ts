@@ -47,7 +47,7 @@ export async function POST(
     // Fetch shop
     const { data: shop, error: shopError } = await supabase
       .from('shops')
-      .select('name, address')
+      .select('name, address, phone, logo_url')
       .eq('id', typedInvoice.shop_id)
       .single();
 
@@ -58,27 +58,44 @@ export async function POST(
       );
     }
 
-    const typedShop = shop as Pick<Shop, 'name' | 'address'>;
-    const dateStr = new Date(typedInvoice.created_at).toLocaleDateString(
-      'en-IN',
-      { day: 'numeric', month: 'long', year: 'numeric' }
-    );
+    const typedShop = shop as Pick<Shop, 'name' | 'address' | 'phone'> & { logo_url?: string | null };
+
+    // Fetch and convert logo
+    let logoBase64 = null;
+    if (typedShop.logo_url) {
+      try {
+        const logoRes = await fetch(typedShop.logo_url);
+        if (logoRes.ok) {
+          const arrayBuffer = await logoRes.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
+          const ext = typedShop.logo_url.split('.').pop()?.split('?')[0] || 'png';
+          logoBase64 = `data:image/${ext};base64,${buffer.toString('base64')}`;
+        }
+      } catch (e) {
+        console.error('Failed to load shop logo:', e);
+      }
+    }
 
     const balanceDue = typedInvoice.payment_status === 'unpaid' ? Number(typedInvoice.total) : 0;
     const customerName = typedInvoice.customer_name ? typedInvoice.customer_name.trim().toUpperCase() : '';
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
 
     // Step 1: Generate PDF
     const pdfBuffer = await generateInvoicePDF({
       shopName: typedShop.name,
       shopAddress: typedShop.address || '',
       invoiceNumber: typedInvoice.invoice_number,
-      date: dateStr,
+      date: new Date(typedInvoice.created_at).toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }),
       items: typedInvoice.items,
       total: Number(typedInvoice.total),
       customerPhone: typedInvoice.customer_phone,
       customerName: typedInvoice.customer_name,
       paymentStatus: typedInvoice.payment_status,
+      shopPhone: typedShop.phone,
+      logoBase64,
     });
 
     const filename = `${typedInvoice.invoice_number}_${typedShop.name.replace(/\s+/g, '_')}.pdf`;
