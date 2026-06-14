@@ -37,12 +37,13 @@ export default async function DashboardPage() {
   // Fetch stats data (single lightweight query)
   const { data: allInvoicesData } = await supabase
     .from('invoices')
-    .select('status, created_at')
+    .select('status, created_at, total, amount_paid, payment_status')
     .eq('shop_id', shop.id);
 
   let totalInvoices = 0;
   let thisMonth = 0;
   let failedInvoices = 0;
+  let totalOutstanding = 0;
 
   if (allInvoicesData) {
     totalInvoices = allInvoicesData.length;
@@ -58,6 +59,13 @@ export default async function DashboardPage() {
       if (invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear) {
         thisMonth++;
       }
+
+      const paymentStatus = inv.payment_status || 'unpaid';
+      if (paymentStatus === 'unpaid' || paymentStatus === 'partial') {
+        const totalVal = Number(inv.total || 0);
+        const paidVal = Number(inv.amount_paid || 0);
+        totalOutstanding += (totalVal - paidVal);
+      }
     });
   }
 
@@ -71,7 +79,13 @@ export default async function DashboardPage() {
     <DashboardClient
       shop={typedShop}
       invoices={typedInvoices}
-      stats={{ totalInvoices, thisMonth, failedInvoices, totalCustomers: totalCustomers ?? 0 }}
+      stats={{
+        totalInvoices,
+        thisMonth,
+        failedInvoices,
+        totalCustomers: totalCustomers ?? 0,
+        totalOutstanding,
+      }}
     />
   );
 }

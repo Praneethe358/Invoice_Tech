@@ -30,6 +30,10 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
   const [confirmDelete, setConfirmDelete] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
+  // Bulk sending state
+  const [bulkSending, setBulkSending] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState('');
+
   const handleSaveName = async () => {
     const trimmed = nameValue.trim();
     if (!trimmed || trimmed === customer.name) {
@@ -91,6 +95,35 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
     }
   };
 
+  const handleSendBulkReminders = async () => {
+    if (outstandingInvoices.length === 0) return;
+    setBulkSending(true);
+    let successCount = 0;
+
+    for (let i = 0; i < outstandingInvoices.length; i++) {
+      const inv = outstandingInvoices[i];
+      setBulkProgress(`Sending ${i + 1} of ${outstandingInvoices.length}...`);
+
+      try {
+        const res = await fetch(`/api/invoices/${inv.id}/remind`, {
+          method: 'POST',
+        });
+        if (res.ok) {
+          successCount++;
+        }
+        // Wait 500ms between calls to avoid rate limiting
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      } catch (err) {
+        console.error(`Failed to send reminder for invoice ${inv.id}:`, err);
+      }
+    }
+
+    showToast(`${successCount} reminder${successCount !== 1 ? 's' : ''} sent ✓`, 'success');
+    setBulkSending(false);
+    setBulkProgress('');
+    router.refresh();
+  };
+
   const lastInvoiceDate = invoices.length > 0
     ? new Date(invoices[0].created_at).toLocaleDateString('en-IN', {
         day: 'numeric', month: 'short', year: 'numeric',
@@ -102,6 +135,16 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
     { label: 'Total Spent', value: `₹${Number(customer.total_spent).toLocaleString('en-IN')}` },
     { label: 'Last Billed', value: lastInvoiceDate },
   ];
+
+  const outstandingInvoices = invoices.filter(
+    (inv) => inv.payment_status === 'unpaid' || inv.payment_status === 'partial'
+  );
+
+  const totalOutstanding = outstandingInvoices.reduce((sum: number, inv) => {
+    const total = Number(inv.total);
+    const amountPaid = Number(inv.amount_paid || 0);
+    return sum + (total - amountPaid);
+  }, 0);
 
   return (
     <div className="min-h-screen bg-[#f5f6fa]">
@@ -191,6 +234,75 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
               </p>
             </motion.div>
           ))}
+        </div>
+
+        {/* Outstanding Ledger Section */}
+        <div className="mb-6">
+          {totalOutstanding > 0 ? (
+            <div className="bg-white rounded-3xl border border-[#e5e7eb] overflow-hidden shadow-sm">
+              <div className="bg-amber-50/50 border-b border-[#e5e7eb] p-5">
+                <p className="text-[10px] font-bold text-amber-800 uppercase tracking-wider mb-1">
+                  Outstanding Balance
+                </p>
+                <p className="text-2xl font-extrabold text-amber-600">
+                  ₹{totalOutstanding.toLocaleString('en-IN')}
+                </p>
+              </div>
+
+              <div className="p-4 space-y-3">
+                <div className="space-y-2">
+                  {outstandingInvoices.map((inv) => {
+                    const due = Number(inv.total) - Number(inv.amount_paid || 0);
+                    return (
+                      <div
+                        key={inv.id}
+                        onClick={() => router.push(`/invoice/${inv.id}`)}
+                        className="flex items-center justify-between p-3 rounded-xl bg-[#f9fafb] border border-[#e5e7eb] hover:border-amber-500 transition-colors cursor-pointer"
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold text-[#1a1d26]">
+                            {inv.invoice_number}
+                          </span>
+                          <span className="text-[10px] text-[#9ca3af]">
+                            {new Date(inv.created_at).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                            })}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-xs font-extrabold text-red-600">
+                            ₹{due.toLocaleString('en-IN')} due
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={handleSendBulkReminders}
+                  disabled={bulkSending}
+                  className="w-full mt-1.5 py-2.5 rounded-xl text-xs font-bold bg-[#d97706] hover:bg-[#b45309] text-white transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                  {bulkSending ? bulkProgress : 'Send Reminder for All'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-emerald-50/50 border border-emerald-100 rounded-3xl p-5 text-center shadow-sm">
+              <p className="text-sm font-bold text-emerald-700 flex items-center justify-center gap-1.5">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                All paid ✓ — No outstanding balance
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Invoice History */}

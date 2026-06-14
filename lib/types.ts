@@ -33,13 +33,19 @@ export interface Product {
   created_at: string;
 }
 
+export type PaymentStatus = 'unpaid' | 'partial' | 'paid';
+
 export interface Invoice {
   id: string;
   shop_id: string;
   invoice_number: string;
   customer_phone: string;
   customer_name?: string;
-  payment_status?: string;
+  payment_status: PaymentStatus;
+  amount_paid: number;
+  payment_note?: string | null;
+  paid_at?: string | null;
+  sent_reminders?: number;
   items: InvoiceItem[];
   total: number;
   status: InvoiceStatus;

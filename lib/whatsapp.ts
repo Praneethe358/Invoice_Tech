@@ -99,3 +99,40 @@ export async function sendDocumentMessage(
     );
   }
 }
+
+/**
+ * Send a plain text message via WhatsApp Cloud API.
+ */
+export async function sendTextMessage(
+  to: string,
+  bodyText: string
+): Promise<void> {
+  const phoneNumberId = getPhoneNumberId();
+  const accessToken = getAccessToken();
+
+  const response = await fetch(
+    `${GRAPH_API_BASE}/${phoneNumberId}/messages`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to: `91${to}`,
+        type: 'text',
+        text: {
+          body: bodyText,
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const err = (await response.json()) as WhatsAppErrorResponse;
+    throw new Error(
+      `WhatsApp text send failed: ${err.error?.message || response.statusText}`
+    );
+  }
+}

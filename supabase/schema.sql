@@ -102,3 +102,15 @@ create policy "own customers" on customers for all
   using (
     shop_id in (select id from shops where auth_user_id = auth.uid())
   );
+
+-- ═══════════════════════════════════════════
+-- Payment Tracking (Phase 4)
+-- ═══════════════════════════════════════════
+
+alter table invoices 
+  add column if not exists payment_status text not null default 'unpaid',
+  add column if not exists amount_paid numeric(10,2) not null default 0,
+  add column if not exists payment_note text,
+  add column if not exists paid_at timestamptz,
+  add column if not exists sent_reminders integer not null default 0;
+

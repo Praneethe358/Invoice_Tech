@@ -36,6 +36,18 @@ function timeAgo(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 }
 
+function paymentStatusConfig(status: string) {
+  switch (status) {
+    case 'paid':
+      return { bg: 'bg-[#16a34a] text-white', label: 'Paid' };
+    case 'partial':
+      return { bg: 'bg-[#d97706] text-white', label: 'Partial' };
+    case 'unpaid':
+    default:
+      return { bg: 'bg-[#dc2626] text-white', label: 'Unpaid' };
+  }
+}
+
 interface InvoiceCardProps {
   invoice: Invoice;
   index?: number;
@@ -43,6 +55,7 @@ interface InvoiceCardProps {
 
 export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
   const status = statusConfig(invoice.status);
+  const payment = paymentStatusConfig(invoice.payment_status || 'unpaid');
   const router = useRouter();
   const { showToast } = useToast();
   const [resending, setResending] = useState(false);
@@ -125,6 +138,9 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
             <span className={`inline-flex items-center gap-1 text-[10px] font-semibold ${status.text} ${status.bg} px-2 py-0.5 rounded-full`}>
               <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
               {status.label}
+            </span>
+            <span className={`inline-flex items-center text-[10px] font-bold ${payment.bg} px-2 py-0.5 rounded-full shadow-sm`}>
+              {payment.label}
             </span>
           </div>
         </div>

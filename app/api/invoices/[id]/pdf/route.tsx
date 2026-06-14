@@ -78,6 +78,7 @@ export async function GET(
       customerPhone: typedInvoice.customer_phone,
       customerName: typedInvoice.customer_name,
       paymentStatus: typedInvoice.payment_status,
+      amountPaid: Number(typedInvoice.amount_paid || 0),
       shopPhone: typedShop.phone,
       logoBase64,
     });

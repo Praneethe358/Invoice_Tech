@@ -136,11 +136,23 @@ export async function POST(
     // Step 5: Auto-save/update customer record (silent — never affects response)
     try {
       const customerPhone = typedInvoice.customer_phone;
-      const invoiceTotal = Number(typedInvoice.total);
+
+      // Recalculate customer's total spent and invoices count from database
+      const { data: customerInvoices } = await supabase
+        .from('invoices')
+        .select('amount_paid')
+        .eq('shop_id', typedInvoice.shop_id)
+        .eq('customer_phone', customerPhone);
+
+      const totalSpent = (customerInvoices ?? []).reduce(
+        (sum: number, item: any) => sum + Number(item.amount_paid || 0),
+        0
+      );
+      const totalInvoices = customerInvoices ? customerInvoices.length : 0;
 
       const { data: existing } = await supabase
         .from('customers')
-        .select('id, total_invoices, total_spent')
+        .select('id')
         .eq('shop_id', typedInvoice.shop_id)
         .eq('phone', customerPhone)
         .single();
@@ -149,8 +161,8 @@ export async function POST(
         await supabase
           .from('customers')
           .update({
-            total_invoices: existing.total_invoices + 1,
-            total_spent: Number(existing.total_spent) + invoiceTotal,
+            total_invoices: totalInvoices,
+            total_spent: totalSpent,
           })
           .eq('id', existing.id);
       } else {
@@ -161,8 +173,8 @@ export async function POST(
             phone: customerPhone,
             name: typedInvoice.customer_name?.trim() || 'Customer',
             tag: 'regular',
-            total_invoices: 1,
-            total_spent: invoiceTotal,
+            total_invoices: totalInvoices,
+            total_spent: totalSpent,
           });
       }
     } catch (customerErr) {

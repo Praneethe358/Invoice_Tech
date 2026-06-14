@@ -62,6 +62,10 @@ export async function POST(request: NextRequest) {
       0
     );
 
+    const payment_status = body.payment_status || 'paid';
+    const amount_paid = payment_status === 'paid' ? Number(total.toFixed(2)) : 0;
+    const paid_at = payment_status === 'paid' ? new Date().toISOString() : null;
+
     // Insert invoice
     const { data: invoice, error: insertError } = await supabase
       .from('invoices')
@@ -70,7 +74,9 @@ export async function POST(request: NextRequest) {
         invoice_number: invoiceNumber,
         customer_phone: body.customer_phone.trim(),
         customer_name: body.customer_name?.trim() || null,
-        payment_status: body.payment_status || 'paid',
+        payment_status,
+        amount_paid,
+        paid_at,
         items: body.items,
         total: Number(total.toFixed(2)),
         status: 'created',

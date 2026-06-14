@@ -214,6 +214,23 @@ const styles = StyleSheet.create({
     borderTopColor: '#f3f4f6',
     paddingTop: 8,
   },
+  stampContainer: {
+    borderWidth: 2,
+    borderColor: '#16a34a',
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginTop: 10,
+    alignSelf: 'center',
+    transform: 'rotate(-5deg)',
+  },
+  stampText: {
+    fontSize: 14,
+    fontFamily: 'Helvetica-Bold',
+    color: '#16a34a',
+    letterSpacing: 1.5,
+    textAlign: 'center',
+  },
 });
 
 // ─── PDF Component ────────────────────────────────────────────
@@ -228,6 +245,7 @@ interface InvoicePDFProps {
   customerPhone?: string;
   customerName?: string;
   paymentStatus?: string;
+  amountPaid?: number;
   shopPhone?: string | null;
   logoBase64?: string | null;
 }
@@ -241,7 +259,8 @@ function InvoicePDF({
   total,
   customerPhone,
   customerName,
-  paymentStatus,
+  paymentStatus = 'unpaid',
+  amountPaid = 0,
   shopPhone,
   logoBase64,
 }: InvoicePDFProps) {
@@ -252,7 +271,22 @@ function InvoicePDF({
     : 'Walk-in Customer';
 
   const clientName = customerName ? customerName.trim() : 'Walk-in Customer';
-  const isPaid = paymentStatus !== 'unpaid';
+  
+  const amountPaidVal = Number(amountPaid || 0);
+  const balanceVal = total - amountPaidVal;
+
+  let badgeStyle = {};
+  let statusText = 'UNPAID';
+  if (paymentStatus === 'paid') {
+    badgeStyle = { backgroundColor: '#e6f4ea', color: '#1a6b3c' };
+    statusText = 'PAID';
+  } else if (paymentStatus === 'partial') {
+    badgeStyle = { backgroundColor: '#fef3c7', color: '#b45309' };
+    statusText = 'PARTIAL';
+  } else {
+    badgeStyle = { backgroundColor: '#fee2e2', color: '#ef4444' };
+    statusText = 'UNPAID';
+  }
 
   return (
     <Document>
@@ -278,16 +312,8 @@ function InvoicePDF({
           </View>
           <View style={styles.invoiceTitleSection}>
             <Text style={styles.invoiceTitle}>TAX INVOICE</Text>
-            <Text
-              style={[
-                styles.badge,
-                !isPaid ? {
-                  backgroundColor: '#fee2e2',
-                  color: '#ef4444',
-                } : {},
-              ]}
-            >
-              {isPaid ? 'PAID' : 'UNPAID'}
+            <Text style={[styles.badge, badgeStyle]}>
+              {statusText}
             </Text>
           </View>
         </View>
@@ -339,9 +365,32 @@ function InvoicePDF({
               <Text style={styles.summaryValue}>₹0.00</Text>
             </View>
             <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Total Paid</Text>
+              <Text style={styles.totalLabel}>Total Amount</Text>
               <Text style={styles.totalValue}>₹{total.toFixed(2)}</Text>
             </View>
+            {paymentStatus === 'paid' ? (
+              <View style={styles.stampContainer}>
+                <Text style={styles.stampText}>PAID ✓</Text>
+              </View>
+            ) : paymentStatus === 'partial' ? (
+              <View style={{ marginTop: 8, borderTopWidth: 1, borderTopColor: '#e5e7eb', paddingTop: 6 }}>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Amount Paid</Text>
+                  <Text style={styles.summaryValue}>₹{amountPaidVal.toFixed(2)}</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={[styles.summaryLabel, { color: '#dc2626', fontFamily: 'Helvetica-Bold' }]}>Balance Due</Text>
+                  <Text style={[styles.summaryValue, { color: '#dc2626', fontFamily: 'Helvetica-Bold' }]}>₹{balanceVal.toFixed(2)}</Text>
+                </View>
+              </View>
+            ) : (
+              <View style={{ marginTop: 8, borderTopWidth: 1, borderTopColor: '#e5e7eb', paddingTop: 6 }}>
+                <View style={styles.summaryRow}>
+                  <Text style={[styles.summaryLabel, { color: '#dc2626', fontFamily: 'Helvetica-Bold' }]}>Balance Due</Text>
+                  <Text style={[styles.summaryValue, { color: '#dc2626', fontFamily: 'Helvetica-Bold' }]}>₹{total.toFixed(2)}</Text>
+                </View>
+              </View>
+            )}
           </View>
         </View>
 

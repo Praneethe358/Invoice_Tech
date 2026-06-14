@@ -17,6 +17,7 @@ interface DashboardClientProps {
     thisMonth: number;
     failedInvoices: number;
     totalCustomers: number;
+    totalOutstanding: number;
   };
 }
 
@@ -29,7 +30,7 @@ export default function DashboardClient({
   const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'sent' | 'failed'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'sent' | 'failed' | 'unpaid' | 'partial' | 'paid' | 'unpaid_partial'>('all');
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(initialInvoices.length === 20);
 
@@ -52,7 +53,13 @@ export default function DashboardClient({
       .order('created_at', { ascending: false });
 
     if (statusFilter !== 'all') {
-      query = query.eq('status', statusFilter);
+      if (['unpaid', 'partial', 'paid'].includes(statusFilter)) {
+        query = query.eq('payment_status', statusFilter);
+      } else if (statusFilter === 'unpaid_partial') {
+        query = query.in('payment_status', ['unpaid', 'partial']);
+      } else {
+        query = query.eq('status', statusFilter);
+      }
     }
 
     if (debouncedSearch) {
@@ -77,15 +84,25 @@ export default function DashboardClient({
   }, [debouncedSearch, statusFilter, shop.id, invoices.length, supabase]);
 
   useEffect(() => {
-    // We don't fetch on initial mount unless search or filter changed,
-    // because initialInvoices are already loaded.
-    // Wait, if search/filter changes, fetch from scratch.
-    // If it's empty, and we are not initial, fetch.
     fetchInvoices(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch, statusFilter]);
 
   const statCards = [
+    {
+      key: 'outstanding',
+      label: 'Outstanding',
+      value: `₹${Number(stats.totalOutstanding || 0).toLocaleString('en-IN')}`,
+      iconBg: 'bg-[#d97706]',
+      isOutstanding: true,
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      ),
+    },
     {
       key: 'total',
       label: 'Total Invoices',
@@ -166,21 +183,27 @@ export default function DashboardClient({
           </div>
         </div>
 
-        {/* Stat cards — overlapping the header */}
-        <div className="grid grid-cols-4 gap-2 -mt-14 mb-6">
+        {/* Stat cards — overlapping the header (Scrollable horizontally) */}
+        <div className="flex gap-2.5 overflow-x-auto pb-4 -mt-14 mb-6 scrollbar-none -mx-4 px-4">
           {statCards.map((card, i) => (
             <motion.div
               key={card.key}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, delay: i * 0.06 }}
-              onClick={() => card.href && (window.location.href = card.href)}
-              className={`glass-card-light rounded-2xl p-3.5 text-center relative ${card.href ? 'cursor-pointer' : ''}`}
+              onClick={() => {
+                if (card.key === 'outstanding') {
+                  setStatusFilter('unpaid_partial');
+                } else if (card.href) {
+                  window.location.href = card.href;
+                }
+              }}
+              className={`glass-card-light rounded-2xl p-3.5 text-center relative flex-shrink-0 min-w-[105px] flex-1 cursor-pointer`}
             >
               <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center mx-auto mb-2`}>
                 {card.icon}
               </div>
-              <p className={`text-lg font-extrabold tabular-nums leading-tight ${card.isFailed ? 'text-red-600' : 'text-[#1a1d26]'}`}>
+              <p className={`text-lg font-extrabold tabular-nums leading-tight ${card.isFailed ? 'text-red-600' : card.isOutstanding ? 'text-[#d97706]' : 'text-[#1a1d26]'}`}>
                 {card.value}
               </p>
               <p className="text-[10px] text-[#9ca3af] font-medium mt-1 uppercase tracking-wide">
@@ -188,7 +211,10 @@ export default function DashboardClient({
               </p>
               {card.isFailed && (
                 <button 
-                  onClick={() => setStatusFilter('failed')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setStatusFilter('failed');
+                  }}
                   className="text-[9px] font-bold text-red-600 uppercase tracking-wide absolute bottom-1 right-0 left-0"
                 >
                   Fix now →
@@ -197,6 +223,21 @@ export default function DashboardClient({
             </motion.div>
           ))}
         </div>
+
+        {/* Filtered by Outstanding Reset Banner */}
+        {statusFilter === 'unpaid_partial' && (
+          <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-2xl p-3.5 mb-5">
+            <p className="text-xs font-semibold text-amber-800">
+              Filtered: Unpaid & Partially Paid invoices
+            </p>
+            <button
+              onClick={() => setStatusFilter('all')}
+              className="text-xs font-bold text-amber-600 hover:text-amber-800"
+            >
+              Clear
+            </button>
+          </div>
+        )}
 
         {/* Search and Filter */}
         <div className="mb-6 space-y-3">
@@ -213,18 +254,25 @@ export default function DashboardClient({
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
           </div>
-          <div className="flex gap-2">
-            {(['all', 'sent', 'failed'] as const).map((status) => (
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
+            {([
+              { key: 'all', label: 'All' },
+              { key: 'sent', label: 'Sent' },
+              { key: 'failed', label: 'Failed' },
+              { key: 'unpaid', label: 'Unpaid' },
+              { key: 'partial', label: 'Partial' },
+              { key: 'paid', label: 'Paid' },
+            ] as const).map((item) => (
               <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold capitalize transition-all ${
-                  statusFilter === status
+                key={item.key}
+                onClick={() => setStatusFilter(item.key)}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold capitalize transition-all shrink-0 ${
+                  statusFilter === item.key
                     ? 'bg-[#1a6b3c] text-white shadow-sm'
                     : 'bg-white text-[#6b7280] border border-[#e5e7eb] hover:bg-[#f9fafb]'
                 }`}
               >
-                {status}
+                {item.label}
               </button>
             ))}
           </div>
