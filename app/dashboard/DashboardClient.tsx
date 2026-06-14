@@ -70,13 +70,13 @@ export default function DashboardClient({
 
       <PageTransition className="max-w-lg mx-auto px-4 pb-24">
         {/* Header with greeting */}
-        <div className="gradient-hero gradient-hero-mesh rounded-b-3xl -mx-4 px-6 pt-6 pb-20 -mt-0.5">
+        <div className="gradient-hero gradient-hero-mesh rounded-b-3xl -mx-4 px-6 pt-6 pb-20 -mt-0.5 shadow-lg">
           <div className="flex items-center justify-between mb-1">
             <div>
-              <p className="text-emerald-200/70 text-xs font-medium">
+              <p className="text-black text-xs font-semibold">
                 Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}
               </p>
-              <h1 className="text-xl font-bold text-white">
+              <h1 className="text-xl font-extrabold text-black mt-1">
                 {shop.name}
               </h1>
             </div>
