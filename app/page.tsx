@@ -56,10 +56,10 @@ const features = [
 ];
 
 const stats = [
-  { value: '1Cr+', label: 'Invoices Generated' },
-  { value: '50K+', label: 'Active Shops' },
-  { value: '4.8★', label: 'User Rating' },
-  { value: '< 30s', label: 'Avg. Invoice Time' },
+  { value: 'TN', label: 'Built for Tamil Nadu shops' },
+  { value: '📱', label: 'WhatsApp-native invoicing' },
+  { value: '< 30s', label: 'Per invoice' },
+  { value: '₹0', label: 'To start using' },
 ];
 
 const steps = [
@@ -180,26 +180,6 @@ export default function LandingPage() {
                 >
                   Log In
                 </Link>
-              </div>
-
-              {/* Trust indicators */}
-              <div className="flex items-center gap-4 mt-8">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="w-8 h-8 rounded-full bg-emerald-400/20 border-2 border-[#1a6b3c] flex items-center justify-center text-xs font-bold text-white"
-                    >
-                      {['S', 'R', 'K', 'M'][i - 1]}
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <div className="flex text-amber-400 text-sm">★★★★★</div>
-                  <p className="text-xs text-[#d1ebd9]">
-                    Rated 4.8 by shop owners
-                  </p>
-                </div>
               </div>
             </motion.div>
 
