@@ -61,7 +61,7 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
               {invoice.invoice_number}
             </p>
             <p className="text-[11px] text-[#9ca3af]">
-              {maskPhone(invoice.customer_phone)} · {timeAgo(invoice.created_at)}
+              {maskPhone(invoice.customer_phone)} · <span suppressHydrationWarning>{timeAgo(invoice.created_at)}</span>
             </p>
           </div>
         </div>
