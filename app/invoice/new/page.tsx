@@ -32,6 +32,7 @@ export default async function NewInvoicePage() {
   return (
     <InvoiceBuilderClient
       products={(products ?? []) as Product[]}
+      shopId={shop.id}
     />
   );
 }

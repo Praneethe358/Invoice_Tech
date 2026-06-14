@@ -133,6 +133,42 @@ export async function POST(
       .update({ status: 'sent' })
       .eq('id', id);
 
+    // Step 5: Auto-save/update customer record (silent — never affects response)
+    try {
+      const customerPhone = typedInvoice.customer_phone;
+      const invoiceTotal = Number(typedInvoice.total);
+
+      const { data: existing } = await supabase
+        .from('customers')
+        .select('id, total_invoices, total_spent')
+        .eq('shop_id', typedInvoice.shop_id)
+        .eq('phone', customerPhone)
+        .single();
+
+      if (existing) {
+        await supabase
+          .from('customers')
+          .update({
+            total_invoices: existing.total_invoices + 1,
+            total_spent: Number(existing.total_spent) + invoiceTotal,
+          })
+          .eq('id', existing.id);
+      } else {
+        await supabase
+          .from('customers')
+          .insert({
+            shop_id: typedInvoice.shop_id,
+            phone: customerPhone,
+            name: typedInvoice.customer_name?.trim() || 'Customer',
+            tag: 'regular',
+            total_invoices: 1,
+            total_spent: invoiceTotal,
+          });
+      }
+    } catch (customerErr) {
+      console.error('Auto-save customer error (non-fatal):', customerErr);
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Invoice sent successfully',

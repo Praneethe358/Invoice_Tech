@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
@@ -11,14 +11,17 @@ import Button from '@/components/Button';
 import Input from '@/components/Input';
 import SuccessAnimation from '@/components/SuccessAnimation';
 import { useToast } from '@/components/Toast';
-import { Product, InvoiceItem, ApiError } from '@/lib/types';
+import { createClient } from '@/lib/supabase/client';
+import { Product, InvoiceItem, Customer, ApiError } from '@/lib/types';
 import { validatePhone } from '@/lib/validators';
 
 interface Props {
   products: Product[];
+  shopId: string;
 }
 
-export default function InvoiceBuilderClient({ products }: Props) {
+export default function InvoiceBuilderClient({ products, shopId }: Props) {
+  const supabase = createClient();
   const [items, setItems] = useState<InvoiceItem[]>([]);
   const [phone, setPhone] = useState('');
   const [phoneError, setPhoneError] = useState('');
@@ -31,6 +34,62 @@ export default function InvoiceBuilderClient({ products }: Props) {
   const [successInvoice, setSuccessInvoice] = useState('');
   const router = useRouter();
   const { showToast } = useToast();
+
+  // ─── Customer autocomplete ─────────────────────────────────
+  const [suggestions, setSuggestions] = useState<Customer[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [debouncedPhone, setDebouncedPhone] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Debounce phone input for search
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedPhone(phone), 300);
+    return () => clearTimeout(timer);
+  }, [phone]);
+
+  // Search customers when phone changes
+  useEffect(() => {
+    if (!debouncedPhone || debouncedPhone.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const search = async () => {
+      const { data } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('shop_id', shopId)
+        .or(`phone.ilike.%${debouncedPhone}%,name.ilike.%${debouncedPhone}%`)
+        .limit(5);
+
+      const results = (data ?? []) as Customer[];
+      setSuggestions(results);
+      setShowSuggestions(results.length > 0);
+    };
+
+    search();
+  }, [debouncedPhone, shopId, supabase]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectCustomer = (c: Customer) => {
+    setPhone(c.phone.slice(-10));
+    setCustomerName(c.name);
+    setSelectedCustomer(c);
+    setShowSuggestions(false);
+    setPhoneError('');
+  };
 
   // ─── Item management ─────────────────────────────────────
   const addOrIncrement = useCallback(
@@ -299,22 +358,72 @@ export default function InvoiceBuilderClient({ products }: Props) {
             onChange={(e) => setCustomerName(e.target.value)}
           />
 
-          <Input
-            label="Customer WhatsApp Number"
-            placeholder="9876543210"
-            prefix="+91"
-            type="tel"
-            inputMode="numeric"
-            maxLength={10}
-            value={phone}
-            onChange={(e) => {
-              const val = e.target.value.replace(/\D/g, '');
-              setPhone(val);
-              if (phoneError) setPhoneError('');
-            }}
-            onBlur={handlePhoneBlur}
-            error={phoneError}
-          />
+          <div className="relative" ref={dropdownRef}>
+            <Input
+              label="Customer WhatsApp Number"
+              placeholder="9876543210"
+              prefix="+91"
+              type="tel"
+              inputMode="numeric"
+              maxLength={10}
+              value={phone}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, '');
+                setPhone(val);
+                setSelectedCustomer(null);
+                if (phoneError) setPhoneError('');
+              }}
+              onFocus={() => {
+                if (suggestions.length > 0) setShowSuggestions(true);
+              }}
+              onBlur={handlePhoneBlur}
+              error={phoneError}
+            />
+
+            {/* Autocomplete Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white rounded-xl border border-[#e5e7eb] shadow-lg overflow-hidden">
+                {suggestions.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => selectCustomer(c)}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#f9fafb] transition-colors min-h-[44px]"
+                  >
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
+                      c.tag === 'vip' ? 'bg-[#fef3c7] text-[#b45309]' : 'bg-[#f3f4f6] text-[#6b7280]'
+                    }`}>
+                      {c.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-[#111827] truncate">{c.name}</p>
+                      <p className="text-xs text-[#6b7280]">+91 {c.phone.slice(-10)}</p>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase shrink-0 ${
+                      c.tag === 'vip' ? 'bg-[#fef3c7] text-[#b45309]' : 'bg-[#f3f4f6] text-[#6b7280]'
+                    }`}>
+                      {c.tag}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Selected customer indicator */}
+            {selectedCustomer && (
+              <p className="text-xs text-[#1a6b3c] font-semibold mt-1.5">
+                Sending to: {selectedCustomer.name} ({selectedCustomer.tag === 'vip' ? 'VIP' : 'Regular'})
+              </p>
+            )}
+
+            {/* New customer hint */}
+            {!selectedCustomer && phone.length === 10 && suggestions.length === 0 && !showSuggestions && (
+              <p className="text-xs text-[#6b7280] font-medium mt-1.5">
+                New customer — will be saved after sending
+              </p>
+            )}
+          </div>
 
           {/* Payment Status Segmented Control */}
           <div>

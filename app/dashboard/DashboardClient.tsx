@@ -16,6 +16,7 @@ interface DashboardClientProps {
     totalInvoices: number;
     thisMonth: number;
     failedInvoices: number;
+    totalCustomers: number;
   };
 }
 
@@ -123,6 +124,21 @@ export default function DashboardClient({
         </svg>
       ),
     },
+    {
+      key: 'customers',
+      label: 'Customers',
+      value: stats.totalCustomers,
+      iconBg: 'stat-gradient-1',
+      href: '/customers',
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      ),
+    },
   ];
 
   return (
@@ -151,14 +167,15 @@ export default function DashboardClient({
         </div>
 
         {/* Stat cards — overlapping the header */}
-        <div className="grid grid-cols-3 gap-3 -mt-14 mb-6">
+        <div className="grid grid-cols-4 gap-2 -mt-14 mb-6">
           {statCards.map((card, i) => (
             <motion.div
               key={card.key}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, delay: i * 0.06 }}
-              className="glass-card-light rounded-2xl p-3.5 text-center relative"
+              onClick={() => card.href && (window.location.href = card.href)}
+              className={`glass-card-light rounded-2xl p-3.5 text-center relative ${card.href ? 'cursor-pointer' : ''}`}
             >
               <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center mx-auto mb-2`}>
                 {card.icon}

@@ -79,3 +79,26 @@ create policy "Shop owners can update logos" on storage.objects for update
     bucket_id = 'shop-logos' and
     auth.role() = 'authenticated'
   );
+
+-- ═══════════════════════════════════════════
+-- Customers table (Phase 3)
+-- ═══════════════════════════════════════════
+
+create table customers (
+  id uuid primary key default gen_random_uuid(),
+  shop_id uuid not null references shops(id) on delete cascade,
+  name text not null,
+  phone text not null,
+  tag text not null default 'regular',
+  total_invoices integer not null default 0,
+  total_spent numeric(10,2) not null default 0,
+  created_at timestamptz not null default now(),
+  unique(shop_id, phone)
+);
+
+alter table customers enable row level security;
+
+create policy "own customers" on customers for all
+  using (
+    shop_id in (select id from shops where auth_user_id = auth.uid())
+  );

@@ -61,11 +61,17 @@ export default async function DashboardPage() {
     });
   }
 
+  // Fetch customer count
+  const { count: totalCustomers } = await supabase
+    .from('customers')
+    .select('id', { count: 'exact', head: true })
+    .eq('shop_id', shop.id);
+
   return (
     <DashboardClient
       shop={typedShop}
       invoices={typedInvoices}
-      stats={{ totalInvoices, thisMonth, failedInvoices }}
+      stats={{ totalInvoices, thisMonth, failedInvoices, totalCustomers: totalCustomers ?? 0 }}
     />
   );
 }

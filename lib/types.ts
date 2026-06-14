@@ -12,6 +12,19 @@ export interface Shop {
   created_at: string;
 }
 
+export type CustomerTag = 'regular' | 'vip';
+
+export interface Customer {
+  id: string;
+  shop_id: string;
+  name: string;
+  phone: string;
+  tag: CustomerTag;
+  total_invoices: number;
+  total_spent: number;
+  created_at: string;
+}
+
 export interface Product {
   id: string;
   shop_id: string;
