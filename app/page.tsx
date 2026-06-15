@@ -177,6 +177,7 @@ const industries = [
   {
     name: 'Retail Stores',
     desc: 'Perfect for grocery, apparel, and hardware shops looking to move from paper billbooks to digital WhatsApp receipts.',
+    highlights: ['Instant PDF Sharing', 'Custom GST Billing', 'Offline Bill Drafts'],
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M4 8L6 22C6 24.2091 7.79086 26 10 26H22C24.2091 26 26 24.2091 26 22L28 8H4Z" fill="url(#retailGrad)" />
@@ -194,6 +195,7 @@ const industries = [
   {
     name: 'Pharmacies & Chemists',
     desc: 'Quickly detail medicines, autocomplete repeat customers, and add standard tax fields with ease.',
+    highlights: ['Expiry Tracking', 'Quick Search', 'Tax Code Presets'],
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="8" y="10" width="16" height="16" rx="3" fill="url(#pharmGrad)" />
@@ -211,6 +213,7 @@ const industries = [
   {
     name: 'Restaurants & Cafes',
     desc: 'Send instant digital receipts directly to diners, reducing waiting lines and saving printing costs.',
+    highlights: ['Table-wise Billing', 'KOT Printing', 'Zero Paper Cost'],
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M6 18H26C26 22.4183 22.4183 26 18 26H14C9.58172 26 6 22.4183 6 18Z" fill="url(#restGrad)" />
@@ -229,6 +232,7 @@ const industries = [
   {
     name: 'Freelancers & Agencies',
     desc: 'Create quotations, outline service deliverables, and track outstanding balances for client projects.',
+    highlights: ['Quotations & Estimates', 'One-click Reminders', 'UPI Pre-fill'],
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="12" fill="url(#freeGrad)" />
@@ -269,6 +273,7 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [simulatorStep, setSimulatorStep] = useState(0);
+  const [activeSector, setActiveSector] = useState(0);
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -280,6 +285,13 @@ export default function LandingPage() {
     const timer = setInterval(() => {
       setSimulatorStep((prev) => (prev + 1) % 3);
     }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSector((prev) => (prev + 1) % 4);
+    }, 3500);
     return () => clearInterval(timer);
   }, []);
 
@@ -1006,10 +1018,10 @@ export default function LandingPage() {
 
       {/* ─── Capabilities alternating Section ──────────────────── */}
       <section id="features" className="py-20 bg-white border-b border-[#e8eaed]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-28">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12 lg:space-y-28">
 
           {/* Feature 1: GST Billing & WhatsApp Sharing */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          <div className="bg-gradient-to-b from-white to-slate-50/40 p-6 md:p-8 rounded-3xl border border-slate-200/70 shadow-xs lg:bg-none lg:p-0 lg:border-0 lg:shadow-none grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
             {/* Left Graphic */}
             <div className="lg:col-span-6 relative flex justify-center">
               <div className="absolute inset-0 bg-emerald-50 rounded-full blur-3xl opacity-50 -z-10 scale-90" />
@@ -1021,73 +1033,36 @@ export default function LandingPage() {
             </div>
             {/* Right Content */}
             <div className="lg:col-span-6 space-y-6">
-              <span className="inline-block text-[10px] bg-emerald-50 text-[#1a6b3c] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+              <span className="inline-block text-[10px] bg-emerald-50 text-[#1a6b3c] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider border border-emerald-100/50">
                 WhatsApp-Native Delivery
               </span>
-              <h3 className="text-2xl sm:text-3xl font-extrabold text-[#1a1d26] tracking-tight">
+              <h3 className="text-xl sm:text-3xl font-extrabold text-[#1a1d26] tracking-tight leading-snug">
                 Create GST Bills online and share them with customers
               </h3>
-              <p className="text-base text-[#4b5563] leading-relaxed">
+              <p className="text-xs sm:text-base text-[#4b5563] leading-relaxed font-medium">
                 <strong>What it does:</strong> Varavu&apos;s GST billing software lets you generate fully GST-compliant tax invoices in under 20 seconds. Instead of wasting money on thermal printers and paper rolls, deliver branded PDF receipts directly to your customer&apos;s WhatsApp instantly.
               </p>
-              <ul className="space-y-3 pt-2">
+              <ul className="space-y-2.5 pt-2">
                 {[
                   "Generate compliant tax invoices with custom SGST/CGST rates",
                   "Send PDFs instantly on WhatsApp without saving contacts",
                   "Completely offline billing - syncs automatically when online"
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2.5 text-sm text-[#4b5563]">
-                    <svg className="w-5 h-5 text-[#1a6b3c] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    <span>{item}</span>
+                  <li key={idx} className="flex items-start gap-3 text-xs sm:text-sm text-[#4b5563] font-semibold">
+                    <div className="w-5 h-5 rounded-full bg-emerald-50 text-[#1a6b3c] flex items-center justify-center shrink-0 border border-emerald-100/30 mt-0.5">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </div>
+                    <span className="pt-0.5">{item}</span>
                   </li>
                 ))}
               </ul>
-            </div>
-          </div>
-
-          {/* Feature 2: Inventory & Stock Tracking */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-            {/* Left Content */}
-            <div className="lg:col-span-6 order-2 lg:order-1 space-y-6">
-              <span className="inline-block text-[10px] bg-pink-50 text-pink-700 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-                Inventory Control
-              </span>
-              <h3 className="text-2xl sm:text-3xl font-extrabold text-[#1a1d26] tracking-tight">
-                Manage Small Business Inventory Seamlessly
-              </h3>
-              <p className="text-base text-[#4b5563] leading-relaxed">
-                <strong>What it does:</strong> Keep a live, automated view of your stock levels. As you invoice customers, Varavu automatically updates inventory levels in real-time. Setup low-stock notifications to restock critical items before you run out.
-              </p>
-              <ul className="space-y-3 pt-2">
-                {[
-                  "Live stock tracking across grocery, retail, or pharmacy products",
-                  "Auto-updates inventory quantities directly upon invoice completion",
-                  "Fast item autocomplete to add products to bills in 1 tap"
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2.5 text-sm text-[#4b5563]">
-                    <svg className="w-5 h-5 text-[#1a6b3c] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            {/* Right Graphic */}
-            <div className="lg:col-span-6 order-1 lg:order-2 relative flex justify-center">
-              <div className="absolute inset-0 bg-pink-50 rounded-full blur-3xl opacity-50 -z-10 scale-90" />
-              <img
-                src="/inventory_stock.png"
-                alt="Inventory and stock tracking management"
-                className="w-full max-w-[420px] h-auto object-contain drop-shadow-2xl rounded-2xl"
-              />
             </div>
           </div>
 
           {/* Feature 3: Payment Tracking & UPI Reminders */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          <div className="bg-gradient-to-b from-white to-slate-50/40 p-6 md:p-8 rounded-3xl border border-slate-200/70 shadow-xs lg:bg-none lg:p-0 lg:border-0 lg:shadow-none grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
             {/* Left Graphic */}
             <div className="lg:col-span-6 relative flex justify-center">
               <div className="absolute inset-0 bg-blue-50 rounded-full blur-3xl opacity-50 -z-10 scale-90" />
@@ -1099,26 +1074,28 @@ export default function LandingPage() {
             </div>
             {/* Right Content */}
             <div className="lg:col-span-6 space-y-6">
-              <span className="inline-block text-[10px] bg-blue-50 text-blue-700 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+              <span className="inline-block text-[10px] bg-blue-50 text-blue-700 font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider border border-blue-100/50">
                 Payment Status &amp; UPI
               </span>
-              <h3 className="text-2xl sm:text-3xl font-extrabold text-[#1a1d26] tracking-tight">
+              <h3 className="text-xl sm:text-3xl font-extrabold text-[#1a1d26] tracking-tight leading-snug">
                 Track Outstanding Balances &amp; Collect via UPI
               </h3>
-              <p className="text-base text-[#4b5563] leading-relaxed">
+              <p className="text-xs sm:text-base text-[#4b5563] leading-relaxed font-medium">
                 <strong>What it does:</strong> Say goodbye to manually checking notebook ledgers. Monitor paid, partially paid, and unpaid statuses directly from your dashboard. Send polite payment reminders with a pre-filled UPI payment link on WhatsApp.
               </p>
-              <ul className="space-y-3 pt-2">
+              <ul className="space-y-2.5 pt-2">
                 {[
                   "Detailed customer directory showing total outstanding balance",
                   "One-tap payments reminders with pre-filled WhatsApp texts",
                   "Direct UPI link integration for frictionless customer payments"
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2.5 text-sm text-[#4b5563]">
-                    <svg className="w-5 h-5 text-[#1a6b3c] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    <span>{item}</span>
+                  <li key={idx} className="flex items-start gap-3 text-xs sm:text-sm text-[#4b5563] font-semibold">
+                    <div className="w-5 h-5 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 border border-blue-100/30 mt-0.5">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </div>
+                    <span className="pt-0.5">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -1131,14 +1108,41 @@ export default function LandingPage() {
       {/* ─── How It Works ─────────────────────────────────────── */}
       <section id="how-it-works" className="py-20 bg-white border-y border-[#e8eaed]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-xl mx-auto mb-16">
-            <h2 className="text-xs font-bold text-[#1a6b3c] uppercase tracking-widest mb-3">Workflow</h2>
-            <h3 className="text-3xl font-extrabold text-[#1a1d26] tracking-tight">
-              Create and share bills in three simple steps
+          <div className="text-center max-w-xl mx-auto mb-12 md:mb-16 space-y-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold tracking-widest uppercase bg-emerald-50 text-[#1a6b3c] border border-emerald-100/80">
+              Workflow
+            </span>
+            <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 leading-tight">
+              Create and share bills in <span className="bg-gradient-to-r from-[#1a6b3c] to-[#2e9354] bg-clip-text text-transparent">three simple steps</span>
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+          {/* Mobile Connected Stepper (Visible only on mobile) */}
+          <div className="block md:hidden relative pl-4 pr-2 space-y-12">
+            {/* Vertical timeline line */}
+            <div className="absolute left-[36px] top-6 bottom-6 w-0.5 border-l-2 border-dashed border-[#1a6b3c]/25" />
+            
+            {steps.map((step, idx) => (
+              <div key={idx} className="relative flex gap-6 items-start">
+                {/* Step Circle with Icon */}
+                <div className="relative z-10 shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-white to-slate-50 text-[#1a6b3c] flex items-center justify-center border border-slate-200/80 shadow-md">
+                  {step.icon}
+                  {/* Step Number Badge */}
+                  <span className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-gradient-to-br from-[#1a6b3c] to-[#22875a] text-white text-[10px] font-extrabold flex items-center justify-center shadow-md border-2 border-white">
+                    {step.num}
+                  </span>
+                </div>
+                {/* Step Content */}
+                <div className="space-y-1.5 pt-1">
+                  <h4 className="text-sm font-extrabold text-slate-800 tracking-tight">{step.title}</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed font-medium">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Stepper (Hidden on mobile) */}
+          <div className="hidden md:grid md:grid-cols-3 gap-12 relative">
             {steps.map((step, idx) => (
               <div key={idx} className="text-center space-y-4 relative">
                 {/* Horizontal dotted connector on desktop */}
@@ -1163,14 +1167,96 @@ export default function LandingPage() {
       {/* ─── Industry Solutions ───────────────────────────────── */}
       <section className="py-20 bg-[#f8fafc] border-b border-[#e8eaed]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-xl mx-auto mb-16">
-            <h2 className="text-xs font-bold text-[#1a6b3c] uppercase tracking-widest mb-3">Sectors</h2>
-            <h3 className="text-3xl font-extrabold text-[#1a1d26] tracking-tight">
-              Built for businesses across Tamil Nadu
+          <div className="text-center max-w-xl mx-auto mb-12 md:mb-16 space-y-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold tracking-widest uppercase bg-emerald-50 text-[#1a6b3c] border border-emerald-100/80">
+              Sectors
+            </span>
+            <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 leading-tight">
+              Tailored for businesses across <span className="bg-gradient-to-r from-[#1a6b3c] to-[#2e9354] bg-clip-text text-transparent">Tamil Nadu</span>
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Mobile Sectors Selector (Visible only on mobile) */}
+          <div className="block md:hidden space-y-6">
+            {/* Scrollable Tab bar */}
+            <div className="flex gap-2.5 overflow-x-auto pb-3 no-scrollbar snap-x snap-mandatory">
+              {industries.map((ind, idx) => {
+                const isActive = activeSector === idx;
+                const tabLabel = ind.name.split(' & ')[0];
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveSector(idx)}
+                    className={`snap-center shrink-0 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 ${
+                      isActive
+                        ? 'bg-gradient-to-r from-[#1a6b3c] to-[#22875a] text-white border-[#1a6b3c] shadow-md shadow-[#1a6b3c]/15'
+                        : 'bg-white text-slate-600 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="w-4 h-4 scale-[0.7] -mr-1 -ml-1 shrink-0 flex items-center justify-center">
+                      {ind.icon}
+                    </div>
+                    {tabLabel}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Display Card for Active Sector */}
+            <div className="bg-white p-6 pt-8 rounded-3xl border border-slate-200/85 shadow-lg shadow-slate-100/50 relative overflow-hidden transition-all duration-300">
+              {/* Green gradient top accent bar */}
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#1a6b3c] to-[#22875a]" />
+
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-slate-50 to-emerald-50/30 flex items-center justify-center shrink-0 shadow-xs border border-slate-100">
+                  {industries[activeSector].icon}
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-base font-extrabold text-[#1a1d26]">
+                    {industries[activeSector].name}
+                  </h4>
+                  <span className="inline-flex items-center gap-1.5 text-[9px] font-extrabold text-[#1a6b3c] bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100/50">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#1a6b3c] animate-pulse" />
+                    Custom Solution
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-500 leading-relaxed font-medium mt-4">
+                {industries[activeSector].desc}
+              </p>
+
+              {/* Highlights Checklist */}
+              <div className="mt-6 pt-5 border-t border-slate-100/80 space-y-3">
+                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Key Benefits:</p>
+                <div className="grid grid-cols-1 gap-2.5">
+                  {industries[activeSector].highlights?.map((hl, hlIdx) => (
+                    <div key={hlIdx} className="flex items-center gap-3 bg-slate-50/60 border border-slate-100 p-3 rounded-2xl transition-all hover:bg-emerald-50/20 hover:border-emerald-100/50">
+                      <div className="w-6 h-6 rounded-full bg-emerald-50 text-[#1a6b3c] flex items-center justify-center shrink-0 border border-emerald-100/30">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </div>
+                      <span className="font-semibold text-[13px] text-slate-700">{hl}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* CTA Link */}
+              <div className="mt-6">
+                <Link
+                  href="/signup"
+                  className="block w-full text-center bg-gradient-to-r from-[#1a6b3c] to-[#22875a] hover:from-[#155d33] hover:to-[#1a6b3c] text-white py-4 rounded-2xl text-xs font-extrabold transition-all shadow-md shadow-[#1a6b3c]/15 hover:shadow-lg hover:shadow-[#1a6b3c]/20 hover:-translate-y-[1px]"
+                >
+                  Start {industries[activeSector].name} Billing Free →
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Sectors Grid (Hidden on mobile) */}
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-2 gap-8">
             {industries.map((ind, idx) => (
               <div
                 key={idx}
