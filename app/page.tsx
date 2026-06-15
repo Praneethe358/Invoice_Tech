@@ -479,107 +479,97 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Right Content - Interactive Mobile Mockup Simulator (Explaining the workflow) */}
+            {/* Right Content - Responsive Mockup (Phone on Mobile, Laptop on Desktop) */}
             <div className="lg:col-span-5 flex flex-col items-center justify-center w-full">
-              <div className="w-full max-w-[260px] sm:max-w-[280px] bg-[#090d16] rounded-[40px] p-2.5 shadow-2xl border-4 border-slate-800 relative aspect-[9/18.2] overflow-hidden select-none">
+              
+              {/* Tabs visible on both mobile and desktop to switch simulator step */}
+              <div className="flex gap-1.5 p-1 bg-slate-100/90 rounded-xl w-full max-w-[280px] text-[10px] font-bold mb-4 shadow-inner">
+                <button
+                  onClick={() => setSimulatorStep(0)}
+                  className={`flex-1 py-1.5 rounded-lg transition-all text-center ${
+                    simulatorStep === 0 ? 'bg-[#1a6b3c] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  1. Entry
+                </button>
+                <button
+                  onClick={() => setSimulatorStep(1)}
+                  className={`flex-1 py-1.5 rounded-lg transition-all text-center ${
+                    simulatorStep === 1 ? 'bg-[#1a6b3c] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  2. Preview
+                </button>
+                <button
+                  onClick={() => setSimulatorStep(2)}
+                  className={`flex-1 py-1.5 rounded-lg transition-all text-center ${
+                    simulatorStep === 2 ? 'bg-[#1a6b3c] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  3. WhatsApp
+                </button>
+              </div>
+
+              {/* MOBILE MOCKUP: Single premium smartphone frame (visible only on mobile) */}
+              <div className="block lg:hidden w-full max-w-[250px] sm:max-w-[270px] bg-[#090d16] rounded-[40px] p-2.5 shadow-2xl border-4 border-slate-800 relative aspect-[9/18.2] overflow-hidden select-none">
                 {/* Notch */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-26 h-4 bg-[#090d16] rounded-b-xl z-20" />
                 
                 {/* Internal Screen Content */}
                 <div className="bg-[#f8fafc] h-full rounded-[30px] overflow-hidden flex flex-col">
                   {/* App Header */}
-                  <div className="bg-[#1a6b3c] text-white p-4 pt-7 pb-3.5 flex justify-between items-center shadow-xs shrink-0">
+                  <div className="bg-[#1a6b3c] text-white p-3 pt-6 pb-3 flex justify-between items-center shadow-xs shrink-0">
                     <div className="flex items-center gap-1.5">
-                      <div className="w-5 h-5 rounded bg-white/15 flex items-center justify-center">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                      <div className="w-4.5 h-4.5 rounded bg-white/15 flex items-center justify-center">
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
                           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                         </svg>
                       </div>
-                      <span className="font-extrabold text-[12px] tracking-tight">Varavu Invoice</span>
+                      <span className="font-extrabold text-[11px] tracking-tight">Varavu Invoice</span>
                     </div>
-                    <span className="text-[7px] bg-white/20 px-2 py-0.5 rounded-full font-bold">Tamil Nadu</span>
-                  </div>
-
-                  {/* Interactive Steps Tabs */}
-                  <div className="flex gap-1 p-1 bg-slate-100/80 rounded-lg mx-3.5 my-2.5 text-[9px] font-bold shrink-0">
-                    <button
-                      onClick={() => setSimulatorStep(0)}
-                      className={`flex-1 py-1 rounded transition-all text-center ${
-                        simulatorStep === 0 ? 'bg-[#1a6b3c] text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
-                      }`}
-                    >
-                      1. Entry
-                    </button>
-                    <button
-                      onClick={() => setSimulatorStep(1)}
-                      className={`flex-1 py-1 rounded transition-all text-center ${
-                        simulatorStep === 1 ? 'bg-[#1a6b3c] text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
-                      }`}
-                    >
-                      2. Preview
-                    </button>
-                    <button
-                      onClick={() => setSimulatorStep(2)}
-                      className={`flex-1 py-1 rounded transition-all text-center ${
-                        simulatorStep === 2 ? 'bg-[#1a6b3c] text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
-                      }`}
-                    >
-                      3. WhatsApp
-                    </button>
+                    <span className="text-[6px] bg-white/20 px-1.5 py-0.5 rounded-full font-bold">Tamil Nadu</span>
                   </div>
 
                   {/* Simulated Screen Body Content */}
-                  <div className="flex-1 px-3.5 pb-4 flex flex-col overflow-hidden">
+                  <div className="flex-1 px-3 pb-3 flex flex-col overflow-hidden pt-2">
                     {simulatorStep === 0 && (
                       <div className="flex-1 flex flex-col justify-between overflow-hidden">
-                        {/* Step 1: Quick entry form */}
-                        <div className="space-y-3">
+                        <div className="space-y-2.5">
                           <div className="flex justify-between items-center pb-1 border-b border-slate-100">
-                            <span className="text-[9px] font-bold text-slate-800 uppercase">New Invoice</span>
-                            <span className="text-[7px] text-slate-400 font-semibold">Step 1 of 3</span>
+                            <span className="text-[8px] font-bold text-slate-800 uppercase">New Invoice</span>
+                            <span className="text-[6px] text-slate-400 font-semibold">Step 1 of 3</span>
+                          </div>
+
+                          <div className="space-y-0.5">
+                            <label className="text-[6.5px] text-slate-400 font-extrabold uppercase">Bill To (Customer)</label>
+                            <div className="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200/60 shadow-2xs">
+                              <span className="text-[8px] font-extrabold text-slate-800">Ramesh Kumar</span>
+                              <span className="text-[6px] text-slate-400">Chennai</span>
+                            </div>
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[7px] text-slate-400 font-extrabold uppercase tracking-wide">Bill To (Customer)</label>
-                            <div className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-xs">
-                              <div className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex items-center justify-center text-[5px] text-white font-bold">✓</span>
-                                <span className="text-[9px] font-extrabold text-slate-800">Ramesh Kumar</span>
-                              </div>
-                              <span className="text-[7px] text-slate-400">Chennai</span>
-                            </div>
-                          </div>
-
-                          <div className="space-y-1.5">
-                            <label className="text-[7px] text-slate-400 font-extrabold uppercase tracking-wide">Items &amp; Quantities</label>
-                            
-                            {/* Item 1 */}
-                            <div className="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-xs flex justify-between items-center">
+                            <label className="text-[6.5px] text-slate-400 font-extrabold uppercase">Items &amp; Quantities</label>
+                            <div className="bg-white p-2 rounded-lg border border-slate-200/60 shadow-2xs flex justify-between items-center text-[7.5px]">
                               <div>
-                                <h6 className="text-[9px] font-extrabold text-slate-800">Ponni Rice (25kg Bag)</h6>
-                                <p className="text-[7px] text-slate-400">Qty: 2 &times; ₹1,200.00</p>
+                                <h6 className="font-extrabold text-slate-800">Ponni Rice (25kg Bag)</h6>
+                                <p className="text-[6px] text-slate-400">Qty: 2 &times; ₹1,200.00</p>
                               </div>
-                              <span className="text-[9px] font-extrabold text-slate-800">₹2,400.00</span>
+                              <span className="font-extrabold text-slate-800">₹2,400.00</span>
                             </div>
-
-                            {/* Item 2 */}
-                            <div className="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-xs flex justify-between items-center">
+                            <div className="bg-white p-2 rounded-lg border border-slate-200/60 shadow-2xs flex justify-between items-center text-[7.5px]">
                               <div>
-                                <h6 className="text-[9px] font-extrabold text-slate-800">Toor Dal (10kg Bag)</h6>
-                                <p className="text-[7px] text-slate-400">Qty: 1 &times; ₹1,450.00</p>
+                                <h6 className="font-extrabold text-slate-800">Toor Dal (10kg Bag)</h6>
+                                <p className="text-[6px] text-slate-400">Qty: 1 &times; ₹1,450.00</p>
                               </div>
-                              <span className="text-[9px] font-extrabold text-slate-800">₹1,450.00</span>
+                              <span className="font-extrabold text-slate-800">₹1,450.00</span>
                             </div>
-                          </div>
-
-                          <div className="border-dashed border border-slate-200 rounded-lg p-2 text-center bg-slate-50 cursor-pointer">
-                            <span className="text-[7px] text-[#1a6b3c] font-bold">+ Add Another Item</span>
                           </div>
                         </div>
 
                         <button
                           onClick={() => setSimulatorStep(1)}
-                          className="w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white py-2 rounded-xl text-[9px] font-extrabold shadow-sm mt-3 flex items-center justify-center gap-1 transition-all"
+                          className="w-full bg-[#1a6b3c] text-white py-1.5 rounded-lg text-[8px] font-extrabold shadow-sm mt-2 flex items-center justify-center gap-1"
                         >
                           Generate Invoice Preview →
                         </button>
@@ -588,76 +578,54 @@ export default function LandingPage() {
 
                     {simulatorStep === 1 && (
                       <div className="flex-1 flex flex-col justify-between overflow-hidden">
-                        {/* Step 2: Invoice Preview */}
                         <div className="flex-1 flex flex-col overflow-hidden">
                           <div className="flex justify-between items-center pb-1 border-b border-slate-100 shrink-0">
-                            <span className="text-[9px] font-bold text-slate-800 uppercase">Tax Invoice</span>
-                            <span className="text-[7px] text-slate-400 font-semibold">Step 2 of 3</span>
+                            <span className="text-[8px] font-bold text-slate-800 uppercase">Tax Invoice</span>
+                            <span className="text-[6px] text-slate-400 font-semibold">Step 2 of 3</span>
                           </div>
 
-                          <div className="flex-1 bg-white border border-slate-200/60 rounded-2xl p-3 shadow-xs mt-2 overflow-y-auto space-y-2.5 text-[7px] text-slate-600">
-                            <div className="flex justify-between items-start border-b border-slate-100 pb-1.5">
+                          <div className="flex-1 bg-white border border-slate-200/60 rounded-xl p-2 shadow-2xs mt-1.5 overflow-y-auto space-y-2 text-[6px] text-slate-600">
+                            <div className="flex justify-between items-start border-b border-slate-100 pb-1">
                               <div>
-                                <h5 className="font-extrabold text-slate-850 text-[8px] text-[#1a6b3c]">VARAVU STORE</h5>
-                                <p className="text-[6px] text-slate-400">GSTIN: 33AAAAA0000A1Z1</p>
+                                <h5 className="font-extrabold text-[#1a6b3c] text-[7px]">VARAVU STORE</h5>
+                                <p className="text-[5px] text-slate-400">GSTIN: 33AAAAA0000A1Z1</p>
                               </div>
                               <div className="text-right">
-                                <p className="font-extrabold text-slate-850">TAX INVOICE</p>
-                                <p className="text-[6px] text-slate-400">#INV-2026-08</p>
+                                <p className="font-extrabold">TAX INVOICE</p>
+                                <p className="text-[5px] text-slate-400">#INV-2026-08</p>
                               </div>
                             </div>
-
-                            <div className="flex justify-between border-b border-slate-50 pb-1.5">
+                            <div className="flex justify-between">
                               <div>
-                                <p className="font-bold text-slate-850">Bill To:</p>
-                                <p className="font-extrabold text-[#1a6b3c]">Ramesh Kumar</p>
-                                <p className="text-[6px]">Chennai, TN</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="font-bold">Date: 15-06-2026</p>
-                                <p>Terms: Due on Receipt</p>
+                                <p className="font-bold text-slate-800">Bill To: Ramesh Kumar</p>
+                                <p className="text-[5px]">Chennai, TN</p>
                               </div>
                             </div>
-
-                            <div className="space-y-1">
-                              <div className="flex justify-between font-bold text-slate-850 border-b border-slate-100 pb-1">
+                            <div className="space-y-0.5">
+                              <div className="flex justify-between font-bold text-slate-800 border-b border-slate-100 pb-0.5">
                                 <span>Items</span>
-                                <span className="w-12 text-right">Amt</span>
+                                <span>Amt</span>
                               </div>
-                              <div className="flex justify-between text-[6px]">
+                              <div className="flex justify-between">
                                 <span>Ponni Rice &times; 2</span>
                                 <span>₹2,400.00</span>
                               </div>
-                              <div className="flex justify-between text-[6px]">
+                              <div className="flex justify-between">
                                 <span>Toor Dal &times; 1</span>
                                 <span>₹1,450.00</span>
                               </div>
                             </div>
-
-                            <div className="border-t border-slate-100 pt-2 space-y-0.5 text-right font-medium">
-                              <div className="flex justify-between text-[6px]">
-                                <span>Subtotal:</span>
-                                <span>₹3,850.00</span>
-                              </div>
-                              <div className="flex justify-between text-[6px]">
-                                <span>CGST/SGST (5%):</span>
-                                <span>₹192.50</span>
-                              </div>
-                              <div className="flex justify-between font-extrabold border-t border-slate-50 pt-1 text-[8px] text-[#1a6b3c]">
-                                <span>Grand Total:</span>
-                                <span>₹4,042.50</span>
-                              </div>
+                            <div className="border-t border-slate-100 pt-1 text-right font-bold text-[7px] text-[#1a6b3c] flex justify-between">
+                              <span>Grand Total:</span>
+                              <span>₹4,042.50</span>
                             </div>
                           </div>
                         </div>
 
                         <button
                           onClick={() => setSimulatorStep(2)}
-                          className="w-full bg-[#16a34a] hover:bg-emerald-600 text-white py-2 rounded-xl text-[9px] font-extrabold shadow-sm mt-3 flex items-center justify-center gap-1 transition-all"
+                          className="w-full bg-[#16a34a] text-white py-1.5 rounded-lg text-[8px] font-extrabold shadow-sm mt-2 flex items-center justify-center gap-1"
                         >
-                          <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.456L0 24zm6.59-4.846c1.6.95 3.488 1.459 5.407 1.46 5.538 0 10.046-4.51 10.05-10.05.002-2.684-1.038-5.207-2.93-7.1-1.894-1.892-4.41-2.933-7.098-2.935C6.54 3.53 2.03 8.04 2.026 13.58c-.001 1.956.513 3.868 1.49 5.5l-.973 3.55 3.639-.955z"/>
-                          </svg>
                           Send via WhatsApp 💬
                         </button>
                       </div>
@@ -665,60 +633,286 @@ export default function LandingPage() {
 
                     {simulatorStep === 2 && (
                       <div className="flex-1 flex flex-col justify-between overflow-hidden">
-                        {/* Step 3: WhatsApp Chat simulation */}
                         <div className="flex-1 flex flex-col overflow-hidden">
-                          {/* Chat User Header */}
-                          <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100 shrink-0">
-                            <div className="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-[7px] text-white font-extrabold">RK</div>
+                          <div className="flex items-center gap-1.5 pb-1 border-b border-slate-100 shrink-0">
+                            <div className="w-4 h-4 rounded-full bg-emerald-600 flex items-center justify-center text-[6px] text-white font-bold">RK</div>
                             <div>
-                              <h6 className="text-[8px] font-extrabold text-slate-800 leading-tight">Ramesh Kumar</h6>
-                              <p className="text-[5px] text-emerald-600 font-bold">online</p>
+                              <h6 className="text-[7px] font-bold text-slate-800 leading-tight">Ramesh Kumar</h6>
+                              <p className="text-[4px] text-emerald-600 font-bold">online</p>
                             </div>
                           </div>
 
-                          {/* Chat Conversation */}
-                          <div className="flex-1 py-3 space-y-2.5 overflow-y-auto flex flex-col justify-end text-[7px] font-medium leading-relaxed">
-                            {/* Customer Message */}
-                            <div className="bg-white p-2 rounded-lg max-w-[85%] self-start border border-slate-200/50 shadow-2xs">
-                              <p className="text-[7.5px] text-slate-700">Please send today's delivery bill.</p>
-                            </div>
-
-                            {/* WhatsApp PDF Bubble */}
-                            <div className="bg-[#dcf8c6] p-2.5 rounded-lg max-w-[85%] self-end border border-emerald-200/50 shadow-2xs space-y-1">
-                              <div className="flex items-center gap-1.5 bg-emerald-800/10 p-1.5 rounded border border-emerald-800/5">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" strokeWidth="2.5">
-                                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                  <polyline points="14 2 14 8 20 8" />
-                                </svg>
-                                <div className="leading-tight">
-                                  <p className="text-[6.5px] font-extrabold text-slate-800">INV_Ramesh.pdf</p>
-                                  <p className="text-[5px] text-slate-500">42 KB • PDF Invoice</p>
-                                </div>
-                              </div>
-                              <p className="text-[7px] text-slate-700 pt-0.5">
+                          <div className="flex-1 py-1.5 space-y-1.5 overflow-y-auto flex flex-col justify-end text-[6px]">
+                            <div className="bg-[#dcf8c6] p-1.5 rounded-lg max-w-[90%] self-end border border-emerald-200/50 shadow-2xs space-y-0.5">
+                              <p className="text-[6.5px] font-bold text-slate-800">INV_Ramesh.pdf</p>
+                              <p className="text-[6.5px] text-slate-700">
                                 Dear Ramesh, here is your invoice of **₹4,042.50** from Varavu Store. Pay online: *upi.varavu.in/pay*
                               </p>
-                              <div className="flex justify-end items-center gap-0.5 text-[5.5px] text-slate-400 mt-1">
-                                <span>10:16 AM</span>
-                                <span className="text-emerald-600 font-extrabold">✓✓</span>
-                              </div>
                             </div>
-
-                            {/* Customer Reply */}
-                            <div className="bg-white p-2 rounded-lg max-w-[85%] self-start border border-slate-200/50 shadow-2xs flex items-center gap-1.5">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
-                              <p className="text-[7.5px] text-slate-800 font-extrabold">Perfect! Done payment via GPay.</p>
+                            <div className="bg-white p-1 rounded-lg max-w-[85%] self-start border border-slate-200/50 shadow-2xs">
+                              <p className="text-[6.5px] text-slate-800 font-bold">Perfect! Done payment via GPay.</p>
                             </div>
                           </div>
                         </div>
 
-                        <div className="bg-emerald-50 border border-emerald-100/60 p-2.5 rounded-2xl text-center shrink-0 flex items-center justify-center gap-1.5 mt-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[6px] font-bold">✓</span>
-                          <span className="text-[8.5px] text-[#1a6b3c] font-extrabold">Invoice Sent &amp; Paid!</span>
+                        <div className="bg-emerald-50 border border-emerald-100/60 p-1.5 rounded-xl text-center shrink-0 flex items-center justify-center gap-1.5 mt-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[5px] font-bold">✓</span>
+                          <span className="text-[7.5px] text-[#1a6b3c] font-extrabold">Invoice Sent &amp; Paid!</span>
                         </div>
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
+
+              {/* DESKTOP MOCKUP: Premium laptop frame (visible only on desktop) */}
+              <div className="hidden lg:flex flex-col items-center w-full max-w-[480px] xl:max-w-[520px] select-none">
+                {/* Screen Bezel Frame */}
+                <div className="w-full bg-[#1e293b] rounded-t-2xl p-2.5 shadow-2xl border-x-2 border-t-2 border-slate-700 relative aspect-[16/10.5] overflow-hidden flex flex-col">
+                  {/* Camera lens */}
+                  <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-slate-900 z-30" />
+                  
+                  {/* Screen Content Wrapper */}
+                  <div className="flex-1 bg-[#f8fafc] rounded-lg overflow-hidden flex flex-col border border-slate-800">
+                    {/* App Web Interface Header */}
+                    <div className="bg-[#1a6b3c] text-white px-3.5 py-2 flex justify-between items-center shadow-xs shrink-0">
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded bg-white/20 flex items-center justify-center">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          </svg>
+                        </div>
+                        <span className="font-extrabold text-[12px] tracking-tight">Varavu Invoicing</span>
+                      </div>
+                      <div className="flex items-center gap-2.5 text-[8px] font-bold text-emerald-100 bg-[#155d33] px-2 py-0.5 rounded-md">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Live Store Dashboard
+                      </div>
+                    </div>
+
+                    {/* App Internal Body: Sidebar + Content */}
+                    <div className="flex-1 flex overflow-hidden">
+                      {/* Sidebar */}
+                      <aside className="w-24 bg-[#111827] text-slate-400 p-2 text-[8px] font-bold space-y-1 shrink-0 flex flex-col justify-between border-r border-slate-800">
+                        <div className="space-y-1">
+                          <div className="p-1.5 rounded bg-slate-800 text-white flex items-center gap-1 cursor-pointer">
+                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>Invoices</span>
+                          </div>
+                          {["Customers", "Inventory", "Reports", "Settings"].map((lbl, idx) => (
+                            <div key={idx} className="p-1.5 rounded hover:bg-slate-900 flex items-center gap-1 cursor-pointer">
+                              <span className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+                              <span>{lbl}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="p-1 bg-[#1a6b3c]/20 text-[#22c55e] text-center rounded text-[6.5px]">
+                          Tamil Nadu
+                        </div>
+                      </aside>
+
+                      {/* Main Dynamic View Content */}
+                      <main className="flex-1 p-3 bg-slate-50 overflow-hidden flex flex-col justify-between">
+                        {simulatorStep === 0 && (
+                          <div className="flex-1 flex flex-col justify-between">
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center pb-1 border-b border-slate-200">
+                                <h4 className="text-[10px] font-extrabold text-slate-800">Create Tax Invoice</h4>
+                                <span className="text-[7px] text-[#1a6b3c] font-bold bg-emerald-50 px-1.5 py-0.5 rounded">Quick Entry</span>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-2 text-[7.5px]">
+                                <div className="space-y-0.5">
+                                  <span className="text-slate-400 font-bold block uppercase tracking-wide">Customer (WhatsApp Number)</span>
+                                  <div className="bg-white p-2 rounded-lg border border-slate-200 font-bold text-slate-800 flex justify-between items-center">
+                                    <span>Ramesh Kumar</span>
+                                    <span className="text-slate-400 font-normal">+91 98765 43210</span>
+                                  </div>
+                                </div>
+                                <div className="space-y-0.5">
+                                  <span className="text-slate-400 font-bold block uppercase tracking-wide">Tax Mode</span>
+                                  <div className="bg-white p-2 rounded-lg border border-slate-200 font-bold text-slate-800">
+                                    <span>GST Enabled (5% SGST/CGST)</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Items Table */}
+                              <div className="space-y-1">
+                                <span className="text-[7.5px] text-slate-400 font-bold block uppercase tracking-wide">Selected Items</span>
+                                <div className="bg-white rounded-lg border border-slate-200 overflow-hidden text-[7px]">
+                                  <div className="bg-slate-50 p-1.5 flex justify-between font-bold text-slate-700 border-b border-slate-200">
+                                    <span className="w-1/2">Product Description</span>
+                                    <span className="w-1/6 text-center">Qty</span>
+                                    <span className="w-1/6 text-right">Price</span>
+                                    <span className="w-1/6 text-right">Total</span>
+                                  </div>
+                                  <div className="p-1.5 flex justify-between text-slate-600 border-b border-slate-100">
+                                    <span className="w-1/2 font-bold text-slate-850">Ponni Rice (25kg Bag)</span>
+                                    <span className="w-1/6 text-center">2</span>
+                                    <span className="w-1/6 text-right">₹1,200.00</span>
+                                    <span className="w-1/6 text-right font-bold">₹2,400.00</span>
+                                  </div>
+                                  <div className="p-1.5 flex justify-between text-slate-600">
+                                    <span className="w-1/2 font-bold text-slate-850">Toor Dal (10kg Bag)</span>
+                                    <span className="w-1/6 text-center">1</span>
+                                    <span className="w-1/6 text-right">₹1,450.00</span>
+                                    <span className="w-1/6 text-right font-bold">₹1,450.00</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => setSimulatorStep(1)}
+                              className="w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white py-1.5 rounded-lg text-[8.5px] font-bold shadow-sm flex items-center justify-center gap-1.5 transition-all mt-2"
+                            >
+                              Generate Tax Invoice &amp; Preview Details →
+                            </button>
+                          </div>
+                        )}
+
+                        {simulatorStep === 1 && (
+                          <div className="flex-1 flex flex-col justify-between">
+                            <div className="flex-1 grid grid-cols-12 gap-3 overflow-hidden">
+                              {/* Left actions */}
+                              <div className="col-span-4 space-y-2">
+                                <h4 className="text-[9px] font-bold text-slate-800">Invoice Actions</h4>
+                                <div className="space-y-1.5">
+                                  <div className="p-1.5 bg-emerald-50 text-[#1a6b3c] border border-emerald-250 rounded-lg text-[7.5px] font-extrabold flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    <span>GST Calculated</span>
+                                  </div>
+                                  <div className="p-1.5 bg-slate-100 rounded-lg text-[6.5px] text-slate-500 font-bold">
+                                    PDF Size: 42 KB
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Right A4 Preview */}
+                              <div className="col-span-8 bg-white border border-slate-200 rounded-lg p-2.5 shadow-xs flex flex-col justify-between overflow-y-auto text-[6px] text-slate-600">
+                                <div className="flex justify-between items-start border-b border-slate-100 pb-1.5">
+                                  <div>
+                                    <h5 className="font-extrabold text-[#1a6b3c] text-[7.5px]">VARAVU STORE</h5>
+                                    <p className="text-[5px]">GSTIN: 33AAAAA0000A1Z1</p>
+                                    <p className="text-[5px]">Chennai, Tamil Nadu</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="font-extrabold text-slate-850">TAX INVOICE</p>
+                                    <p className="font-bold">#INV-2026-08</p>
+                                    <p>Date: 15-06-2026</p>
+                                  </div>
+                                </div>
+                                <div className="py-1">
+                                  <p className="font-bold text-slate-850">Bill To:</p>
+                                  <p className="font-extrabold text-[#1a6b3c]">Ramesh Kumar</p>
+                                  <p>Contact: +91 98765 43210</p>
+                                </div>
+                                <div className="space-y-1">
+                                  <div className="flex justify-between font-bold border-b border-slate-250 pb-0.5 text-slate-700">
+                                    <span>Description</span>
+                                    <span>Amount</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Ponni Rice &times; 2</span>
+                                    <span>₹2,400.00</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Toor Dal &times; 1</span>
+                                    <span>₹1,450.00</span>
+                                  </div>
+                                </div>
+                                <div className="border-t border-slate-100 pt-1.5 space-y-0.5 text-right font-semibold">
+                                  <div className="flex justify-between text-[5.5px]">
+                                    <span>Subtotal:</span>
+                                    <span>₹3,850.00</span>
+                                  </div>
+                                  <div className="flex justify-between text-[5.5px]">
+                                    <span>GST (5%):</span>
+                                    <span>₹192.50</span>
+                                  </div>
+                                  <div className="flex justify-between font-extrabold border-t border-slate-100 pt-0.5 text-[7px] text-[#1a6b3c]">
+                                    <span>Total:</span>
+                                    <span>₹4,042.50</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => setSimulatorStep(2)}
+                              className="w-full bg-[#16a34a] hover:bg-emerald-600 text-white py-1.5 rounded-lg text-[8.5px] font-bold shadow-sm flex items-center justify-center gap-1.5 transition-all mt-2"
+                            >
+                              Send Branded Invoice PDF via WhatsApp 💬
+                            </button>
+                          </div>
+                        )}
+
+                        {simulatorStep === 2 && (
+                          <div className="flex-1 flex flex-col justify-between">
+                            {/* WhatsApp Web desktop interface simulation */}
+                            <div className="flex-1 bg-[#efeae2] border border-slate-200 rounded-lg overflow-hidden flex flex-col">
+                              {/* WhatsApp Header bar */}
+                              <div className="bg-[#f0f2f5] p-2 flex justify-between items-center border-b border-slate-200 shrink-0 text-[8px]">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-[7px] text-white font-bold">RK</div>
+                                  <div className="leading-tight">
+                                    <h6 className="font-extrabold text-slate-800">Ramesh Kumar</h6>
+                                    <p className="text-[5px] text-emerald-600 font-medium">online</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Chat conversation area */}
+                              <div className="flex-1 p-2 space-y-2 flex flex-col justify-end text-[7px]">
+                                {/* Customer Question */}
+                                <div className="bg-white p-2 rounded-lg max-w-[75%] self-start shadow-2xs">
+                                  Please share today&apos;s invoice.
+                                </div>
+
+                                {/* PDF message bubble */}
+                                <div className="bg-[#dcf8c6] p-2 rounded-lg max-w-[75%] self-end shadow-2xs space-y-1">
+                                  <div className="flex items-center gap-1.5 bg-[#128c7e]/10 p-1.5 rounded">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" strokeWidth="2.5">
+                                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                      <polyline points="14 2 14 8 20 8" />
+                                    </svg>
+                                    <div>
+                                      <p className="font-bold text-slate-800">INV_Ramesh.pdf</p>
+                                      <p className="text-[5.5px] text-slate-400">42 KB • PDF Receipt</p>
+                                    </div>
+                                  </div>
+                                  <p className="text-[6.5px]">
+                                    Dear Ramesh Kumar, your invoice of **₹4,042.50** from Varavu Store is ready. Pay online: *upi.varavu.in/pay*
+                                  </p>
+                                  <div className="text-right text-[5px] text-slate-400">
+                                    10:16 AM <span className="text-blue-500">✓✓</span>
+                                  </div>
+                                </div>
+
+                                {/* Customer Confirmation */}
+                                <div className="bg-white p-2 rounded-lg max-w-[75%] self-start shadow-2xs">
+                                  Perfect! Paid ₹4,042.50 via UPI GPay.
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-emerald-50 border border-emerald-100/60 p-2.5 rounded-xl text-center shrink-0 flex items-center justify-center gap-1.5 mt-2">
+                              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[6px] font-bold">✓</span>
+                              <span className="text-[9px] text-[#1a6b3c] font-extrabold">Paid successfully via UPI!</span>
+                            </div>
+                          </div>
+                        )}
+                      </main>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Laptop Keyboard dock base */}
+                <div className="w-[108%] h-3 bg-slate-800 rounded-b-xl relative -bottom-1 -left-[4%] border-t border-slate-700 shadow-md">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-slate-950 rounded-b-sm" />
                 </div>
               </div>
             </div>
@@ -813,14 +1007,6 @@ export default function LandingPage() {
       {/* ─── Capabilities alternating Section ──────────────────── */}
       <section id="features" className="py-20 bg-white border-b border-[#e8eaed]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-28">
-          
-          {/* Section Heading */}
-          <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-xs font-bold text-[#1a6b3c] uppercase tracking-widest mb-3">Capabilities</h2>
-            <h3 className="text-3xl sm:text-4xl font-extrabold text-[#1a1d26] tracking-tight">
-              A lightweight billing system tailored to your daily shop operations
-            </h3>
-          </div>
 
           {/* Feature 1: GST Billing & WhatsApp Sharing */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
