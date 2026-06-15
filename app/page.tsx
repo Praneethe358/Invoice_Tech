@@ -388,6 +388,16 @@ export default function LandingPage() {
             </Link>
           </div>
 
+          {/* Mobile Right: Login */}
+          <div className="flex md:hidden items-center">
+            <Link
+              href="/login"
+              className="text-xs font-bold text-[#1a6b3c] border border-[#1a6b3c]/20 bg-emerald-50/50 hover:bg-emerald-50 px-3.5 py-1.5 rounded-lg transition-colors"
+            >
+              Log in
+            </Link>
+          </div>
+
         </div>
       </nav>
 
