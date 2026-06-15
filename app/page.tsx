@@ -268,6 +268,7 @@ const faqs = [
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [simulatorStep, setSimulatorStep] = useState(0);
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -275,12 +276,21 @@ export default function LandingPage() {
     }
   }, []);
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSimulatorStep((prev) => (prev + 1) % 3);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#f5f6fa] text-[#1a1d26]">
       {/* ─── Navbar ───────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-[#e8eaed]">
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-[#e8eaed]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
+          
+          {/* Desktop Left: Logo */}
+          <Link href="/" className="hidden md:flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-[#1a6b3c] flex items-center justify-center">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -291,6 +301,42 @@ export default function LandingPage() {
               Varavu
             </span>
           </Link>
+
+          {/* Mobile Left: Hamburger + Logo (aligned left) */}
+          <div className="flex md:hidden items-center gap-3">
+            {/* Hamburger Toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 text-[#4b5563] hover:text-[#1a1d26] rounded-lg hover:bg-[#f3f4f6] transition-all"
+              aria-label="Toggle menu"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                {mobileMenuOpen ? (
+                  <>
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </>
+                ) : (
+                  <>
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                  </>
+                )}
+              </svg>
+            </button>
+
+            {/* Logo next to Hamburger */}
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-[#1a6b3c] flex items-center justify-center shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+              </div>
+              <span className="font-extrabold text-[#1a1d26] text-lg tracking-tight">Varavu</span>
+            </Link>
+          </div>
 
           {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-8">
@@ -330,134 +376,77 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          {/* Mobile Hamburguer Toggle */}
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="md:hidden p-2 text-[#4b5563] hover:text-[#1a1d26] rounded-lg hover:bg-[#f3f4f6] transition-all"
-            aria-label="Open menu"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </button>
         </div>
       </nav>
 
-      {/* ─── Mobile Sidebar Drawer ───────────────────────────── */}
+      {/* ─── Mobile Dropdown Overlay (Vyapar Style) ────────────── */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
-            {/* Backdrop overlay */}
+            {/* Backdrop overlay below header */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+              className="fixed inset-0 top-16 z-40 bg-black/40 backdrop-blur-sm md:hidden"
             />
 
-            {/* Sidebar drawer container */}
+            {/* Dropdown container */}
             <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-[320px] bg-white shadow-2xl flex flex-col"
+              initial={{ opacity: 0, y: -16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="fixed top-16 left-0 right-0 z-50 w-full bg-white border-b border-[#e8eaed] shadow-2xl flex flex-col md:hidden overflow-y-auto max-h-[calc(100vh-64px)]"
             >
-              {/* Header inside drawer */}
-              <div className="p-4 border-b border-[#e8eaed] flex items-center justify-between bg-[#f9fafb]">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-[#1a6b3c] flex items-center justify-center">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                    </svg>
-                  </div>
-                  <span className="font-bold text-[#1a1d26] text-base">Varavu</span>
-                </div>
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 text-[#4b5563] hover:text-[#1a1d26] rounded-lg hover:bg-[#f3f4f6] transition-all"
-                  aria-label="Close menu"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Navigation Links with Icons & Subtexts */}
-              <div className="flex-1 px-4 py-6 overflow-y-auto space-y-4">
+              {/* Vertical Links */}
+              <div className="flex flex-col space-y-4 px-6 pt-6">
                 <a
                   href="#features"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-start gap-4 p-3 rounded-xl hover:bg-[#f3f4f6] transition-all group"
+                  className="text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] py-1 border-b border-slate-100/50 transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-[#1a6b3c]/8 text-[#1a6b3c] flex items-center justify-center group-hover:bg-[#1a6b3c] group-hover:text-white transition-all shrink-0">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-[#1a1d26]">Features</p>
-                    <p className="text-xs text-[#6b7280] mt-0.5">Explore invoicing, catalogs & stats</p>
-                  </div>
+                  Features
                 </a>
-
                 <a
                   href="#how-it-works"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-start gap-4 p-3 rounded-xl hover:bg-[#f3f4f6] transition-all group"
+                  className="text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] py-1 border-b border-slate-100/50 transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-[#1a6b3c]/8 text-[#1a6b3c] flex items-center justify-center group-hover:bg-[#1a6b3c] group-hover:text-white transition-all shrink-0">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-[#1a1d26]">How It Works</p>
-                    <p className="text-xs text-[#6b7280] mt-0.5">See the 30-second workflow</p>
-                  </div>
+                  How It Works
                 </a>
-
                 <a
                   href="#faq"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-start gap-4 p-3 rounded-xl hover:bg-[#f3f4f6] transition-all group"
+                  className="text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] py-1 border-b border-slate-100/50 transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-[#1a6b3c]/8 text-[#1a6b3c] flex items-center justify-center group-hover:bg-[#1a6b3c] group-hover:text-white transition-all shrink-0">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                      <line x1="12" y1="17" x2="12.01" y2="17" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-[#1a1d26]">FAQ</p>
-                    <p className="text-xs text-[#6b7280] mt-0.5">Frequently asked questions</p>
-                  </div>
+                  FAQ
                 </a>
-              </div>
-
-              {/* Footer Buttons */}
-              <div className="p-6 border-t border-[#e8eaed] bg-[#f9fafb] flex flex-col gap-3">
                 <Link
                   href="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] transition-colors py-3 border border-[#e8eaed] bg-white rounded-xl"
+                  className="text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] py-1 border-b border-slate-100/50 transition-colors"
                 >
-                  Log in
+                  Login
                 </Link>
+              </div>
+
+              {/* Description Text */}
+              <div className="px-6 pt-6">
+                <p className="text-xs text-[#6b7280] leading-relaxed">
+                  Easy WhatsApp billing, manage customer payments, track outstanding balances, control inventory, and simplify accounting with Varavu - Tamil Nadu&apos;s best lightweight billing software. Start billing free today.
+                </p>
+              </div>
+
+              {/* Download / Start Free Action Button */}
+              <div className="px-6 py-6 pb-8">
                 <Link
                   href="/signup"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center text-sm font-bold text-white bg-[#1a6b3c] hover:bg-[#155d33] py-3 rounded-xl transition-colors shadow-sm"
+                  className="block w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white text-center font-extrabold text-sm py-3 px-4 rounded-xl transition-colors shadow-sm"
                 >
-                  Start Free
+                  Start Billing Free Now!
                 </Link>
               </div>
             </motion.div>
@@ -466,136 +455,269 @@ export default function LandingPage() {
       </AnimatePresence>
 
       {/* ─── Hero Section ─────────────────────────────────────── */}
-      <section className="relative bg-white pt-16 sm:pt-24 pb-16 overflow-hidden border-b border-[#e8eaed]">
+      <section className="relative bg-white pt-12 sm:pt-20 pb-16 overflow-hidden border-b border-[#e8eaed]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Content */}
-            <div className="lg:col-span-7 space-y-6">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#1a1d26] leading-[1.12] tracking-tight">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+            {/* Left Content (Centered on mobile, left-aligned on desktop) */}
+            <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#1a1d26] leading-[1.15] tracking-tight max-w-2xl lg:max-w-none">
                 Best WhatsApp Billing Software for Small Business
               </h1>
 
-              <p className="text-lg text-[#6b7280] leading-relaxed max-w-xl">
+              <p className="text-base sm:text-lg text-[#6b7280] leading-relaxed max-w-xl">
                 Easy WhatsApp billing, manage customer payments, track outstanding balances, control inventory, and simplify accounting with Varavu - Tamil Nadu&apos;s best lightweight billing web app. Start billing free today.
               </p>
 
               {/* Action Buttons */}
-              <div className="pt-2">
+              <div className="pt-2 w-full sm:w-auto">
                 <Link
                   href="/signup"
-                  className="inline-block bg-[#1a6b3c] hover:bg-[#155d33] text-white font-extrabold text-lg px-12 py-4.5 rounded-xl transition-all shadow-md hover:shadow-lg shadow-[#1a6b3c]/10"
+                  className="inline-block w-full sm:w-auto text-center bg-[#1a6b3c] hover:bg-[#155d33] text-white font-extrabold text-lg px-12 py-4 rounded-xl transition-all shadow-md hover:shadow-lg shadow-[#1a6b3c]/10"
                 >
                   Start Invoicing Free!
                 </Link>
               </div>
             </div>
 
-            {/* Right Content - Multi-Device Mockup (Desktop + Phone + Invoice) */}
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-full max-w-[480px] h-[300px] sm:h-[350px] mx-auto flex items-center justify-center">
-                {/* Desktop Monitor Mockup */}
-                <div className="absolute bottom-6 right-8 w-[80%] h-[70%] bg-[#1e293b] rounded-2xl p-2 shadow-2xl border border-[#334155] flex flex-col justify-between overflow-hidden z-10">
-                  {/* Top Bar */}
-                  <div className="flex items-center gap-1.5 pb-1 border-b border-slate-700/50">
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                    <span className="text-[9px] text-slate-400 ml-2 font-mono">dashboard.varavu.in</span>
-                  </div>
-                  {/* Main Screen Content */}
-                  <div className="flex-1 p-2 flex flex-col justify-between space-y-2">
-                    <div className="flex justify-between items-center bg-slate-800/80 p-2 rounded-lg border border-slate-700/30">
-                      <div className="space-y-0.5">
-                        <span className="text-[8px] uppercase tracking-wide text-slate-400 font-bold">Total Sales</span>
-                        <h5 className="text-xs font-bold text-white">₹48,930.00</h5>
+            {/* Right Content - Interactive Mobile Mockup Simulator (Explaining the workflow) */}
+            <div className="lg:col-span-5 flex flex-col items-center justify-center w-full">
+              <div className="w-full max-w-[260px] sm:max-w-[280px] bg-[#090d16] rounded-[40px] p-2.5 shadow-2xl border-4 border-slate-800 relative aspect-[9/18.2] overflow-hidden select-none">
+                {/* Notch */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-26 h-4 bg-[#090d16] rounded-b-xl z-20" />
+                
+                {/* Internal Screen Content */}
+                <div className="bg-[#f8fafc] h-full rounded-[30px] overflow-hidden flex flex-col">
+                  {/* App Header */}
+                  <div className="bg-[#1a6b3c] text-white p-4 pt-7 pb-3.5 flex justify-between items-center shadow-xs shrink-0">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-5 h-5 rounded bg-white/15 flex items-center justify-center">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        </svg>
                       </div>
-                      <div className="w-10 h-4 bg-emerald-500/20 text-emerald-400 text-[8px] font-bold flex items-center justify-center rounded">
-                        +12% wk
-                      </div>
+                      <span className="font-extrabold text-[12px] tracking-tight">Varavu Invoice</span>
                     </div>
-                    {/* Mock chart outline */}
-                    <div className="flex-1 bg-slate-800/40 rounded-lg p-2 flex items-end justify-between gap-1 border border-slate-700/25">
-                      {[40, 65, 35, 78, 52, 90, 60, 85].map((val, i) => (
-                        <div
-                          key={i}
-                          style={{ height: `${val}%` }}
-                          className={`w-full rounded-t-sm transition-all duration-300 ${
-                            i === 5 ? 'bg-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-slate-700'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  {/* Bottom Bar */}
-                  <div className="h-2.5 bg-slate-850 border-t border-slate-800 flex items-center justify-center">
-                    <span className="w-12 h-1 bg-slate-700 rounded-full" />
-                  </div>
-                </div>
-
-                {/* Monitor Stand/Base */}
-                <div className="absolute bottom-1 right-[24%] w-[12%] h-6 bg-[#475569] rounded-t-sm z-0" />
-                <div className="absolute bottom-0 right-[15%] w-[30%] h-2 bg-[#64748b] rounded-full z-0" />
-
-                {/* Overlapping Phone Mockup */}
-                <div className="absolute top-6 left-2 w-[28%] h-[78%] bg-[#090d16] rounded-[24px] p-1 shadow-2xl border border-slate-800 z-30 flex flex-col justify-between overflow-hidden">
-                  {/* Ear Piece/Notch */}
-                  <div className="absolute top-1 left-1/2 -translate-x-1/2 w-10 h-2 bg-[#090d16] rounded-full z-40" />
-                  
-                  {/* Screen Content */}
-                  <div className="flex-1 bg-[#15803d] rounded-[22px] p-2 flex flex-col justify-between text-white overflow-hidden relative">
-                    {/* Top Status */}
-                    <div className="flex justify-between items-center text-[7px] font-medium pt-1 opacity-90">
-                      <span>9:41</span>
-                      <div className="flex items-center gap-0.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-white/30" />
-                        <span className="w-2.5 h-1.5 bg-white rounded-sm" />
-                      </div>
-                    </div>
-
-                    {/* Chat Bubble */}
-                    <div className="flex-1 flex flex-col justify-end space-y-2 pb-2">
-                      <div className="bg-emerald-900/40 p-1.5 rounded-lg border border-emerald-800/30 text-[8px] max-w-[90%] self-end">
-                        <span className="font-bold block text-emerald-300">Varavu Invoice</span>
-                        Here is your PDF receipt for ₹670.00.
-                      </div>
-                      <div className="bg-white text-slate-800 p-1.5 rounded-lg text-[8px] max-w-[90%] self-start shadow-sm font-medium">
-                        Thank you, received!
-                      </div>
-                    </div>
-
-                    {/* Action Send Button */}
-                    <div className="bg-[#16a34a] py-1 text-center rounded-lg text-[9px] font-bold shadow-sm">
-                      Delivered ✓
-                    </div>
-                  </div>
-                </div>
-
-                {/* Floating Invoice PDF sheet */}
-                <div className="absolute -top-4 right-2 w-[35%] h-[72%] bg-white rounded-lg p-2.5 shadow-xl border border-slate-200 z-20 rotate-3 flex flex-col justify-between">
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between items-center border-b border-slate-100 pb-1">
-                      <span className="text-[8px] font-extrabold text-[#1a6b3c]">TAX INVOICE</span>
-                      <span className="text-[6px] text-slate-400">#INV-2849</span>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-[7px] text-slate-800 font-bold border-b border-slate-50 pb-0.5">
-                        <span>Items</span>
-                        <span>Amt</span>
-                      </div>
-                      <div className="flex justify-between text-[6px] text-slate-500">
-                        <span>Ponni Rice</span>
-                        <span>₹340.00</span>
-                      </div>
-                      <div className="flex justify-between text-[6px] text-slate-500">
-                        <span>Toor Dal</span>
-                        <span>₹145.00</span>
-                      </div>
-                    </div>
+                    <span className="text-[7px] bg-white/20 px-2 py-0.5 rounded-full font-bold">Tamil Nadu</span>
                   </div>
 
-                  <div className="border-t border-slate-100 pt-1.5 flex justify-between items-center">
-                    <span className="text-[7px] font-bold text-slate-800">Total</span>
-                    <span className="text-[7px] font-extrabold text-emerald-700">₹485.00</span>
+                  {/* Interactive Steps Tabs */}
+                  <div className="flex gap-1 p-1 bg-slate-100/80 rounded-lg mx-3.5 my-2.5 text-[9px] font-bold shrink-0">
+                    <button
+                      onClick={() => setSimulatorStep(0)}
+                      className={`flex-1 py-1 rounded transition-all text-center ${
+                        simulatorStep === 0 ? 'bg-[#1a6b3c] text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      1. Entry
+                    </button>
+                    <button
+                      onClick={() => setSimulatorStep(1)}
+                      className={`flex-1 py-1 rounded transition-all text-center ${
+                        simulatorStep === 1 ? 'bg-[#1a6b3c] text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      2. Preview
+                    </button>
+                    <button
+                      onClick={() => setSimulatorStep(2)}
+                      className={`flex-1 py-1 rounded transition-all text-center ${
+                        simulatorStep === 2 ? 'bg-[#1a6b3c] text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      3. WhatsApp
+                    </button>
+                  </div>
+
+                  {/* Simulated Screen Body Content */}
+                  <div className="flex-1 px-3.5 pb-4 flex flex-col overflow-hidden">
+                    {simulatorStep === 0 && (
+                      <div className="flex-1 flex flex-col justify-between overflow-hidden">
+                        {/* Step 1: Quick entry form */}
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center pb-1 border-b border-slate-100">
+                            <span className="text-[9px] font-bold text-slate-800 uppercase">New Invoice</span>
+                            <span className="text-[7px] text-slate-400 font-semibold">Step 1 of 3</span>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[7px] text-slate-400 font-extrabold uppercase tracking-wide">Bill To (Customer)</label>
+                            <div className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-xs">
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex items-center justify-center text-[5px] text-white font-bold">✓</span>
+                                <span className="text-[9px] font-extrabold text-slate-800">Ramesh Kumar</span>
+                              </div>
+                              <span className="text-[7px] text-slate-400">Chennai</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label className="text-[7px] text-slate-400 font-extrabold uppercase tracking-wide">Items &amp; Quantities</label>
+                            
+                            {/* Item 1 */}
+                            <div className="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-xs flex justify-between items-center">
+                              <div>
+                                <h6 className="text-[9px] font-extrabold text-slate-800">Ponni Rice (25kg Bag)</h6>
+                                <p className="text-[7px] text-slate-400">Qty: 2 &times; ₹1,200.00</p>
+                              </div>
+                              <span className="text-[9px] font-extrabold text-slate-800">₹2,400.00</span>
+                            </div>
+
+                            {/* Item 2 */}
+                            <div className="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-xs flex justify-between items-center">
+                              <div>
+                                <h6 className="text-[9px] font-extrabold text-slate-800">Toor Dal (10kg Bag)</h6>
+                                <p className="text-[7px] text-slate-400">Qty: 1 &times; ₹1,450.00</p>
+                              </div>
+                              <span className="text-[9px] font-extrabold text-slate-800">₹1,450.00</span>
+                            </div>
+                          </div>
+
+                          <div className="border-dashed border border-slate-200 rounded-lg p-2 text-center bg-slate-50 cursor-pointer">
+                            <span className="text-[7px] text-[#1a6b3c] font-bold">+ Add Another Item</span>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => setSimulatorStep(1)}
+                          className="w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white py-2 rounded-xl text-[9px] font-extrabold shadow-sm mt-3 flex items-center justify-center gap-1 transition-all"
+                        >
+                          Generate Invoice Preview →
+                        </button>
+                      </div>
+                    )}
+
+                    {simulatorStep === 1 && (
+                      <div className="flex-1 flex flex-col justify-between overflow-hidden">
+                        {/* Step 2: Invoice Preview */}
+                        <div className="flex-1 flex flex-col overflow-hidden">
+                          <div className="flex justify-between items-center pb-1 border-b border-slate-100 shrink-0">
+                            <span className="text-[9px] font-bold text-slate-800 uppercase">Tax Invoice</span>
+                            <span className="text-[7px] text-slate-400 font-semibold">Step 2 of 3</span>
+                          </div>
+
+                          <div className="flex-1 bg-white border border-slate-200/60 rounded-2xl p-3 shadow-xs mt-2 overflow-y-auto space-y-2.5 text-[7px] text-slate-600">
+                            <div className="flex justify-between items-start border-b border-slate-100 pb-1.5">
+                              <div>
+                                <h5 className="font-extrabold text-slate-850 text-[8px] text-[#1a6b3c]">VARAVU STORE</h5>
+                                <p className="text-[6px] text-slate-400">GSTIN: 33AAAAA0000A1Z1</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-extrabold text-slate-850">TAX INVOICE</p>
+                                <p className="text-[6px] text-slate-400">#INV-2026-08</p>
+                              </div>
+                            </div>
+
+                            <div className="flex justify-between border-b border-slate-50 pb-1.5">
+                              <div>
+                                <p className="font-bold text-slate-850">Bill To:</p>
+                                <p className="font-extrabold text-[#1a6b3c]">Ramesh Kumar</p>
+                                <p className="text-[6px]">Chennai, TN</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-bold">Date: 15-06-2026</p>
+                                <p>Terms: Due on Receipt</p>
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <div className="flex justify-between font-bold text-slate-850 border-b border-slate-100 pb-1">
+                                <span>Items</span>
+                                <span className="w-12 text-right">Amt</span>
+                              </div>
+                              <div className="flex justify-between text-[6px]">
+                                <span>Ponni Rice &times; 2</span>
+                                <span>₹2,400.00</span>
+                              </div>
+                              <div className="flex justify-between text-[6px]">
+                                <span>Toor Dal &times; 1</span>
+                                <span>₹1,450.00</span>
+                              </div>
+                            </div>
+
+                            <div className="border-t border-slate-100 pt-2 space-y-0.5 text-right font-medium">
+                              <div className="flex justify-between text-[6px]">
+                                <span>Subtotal:</span>
+                                <span>₹3,850.00</span>
+                              </div>
+                              <div className="flex justify-between text-[6px]">
+                                <span>CGST/SGST (5%):</span>
+                                <span>₹192.50</span>
+                              </div>
+                              <div className="flex justify-between font-extrabold border-t border-slate-50 pt-1 text-[8px] text-[#1a6b3c]">
+                                <span>Grand Total:</span>
+                                <span>₹4,042.50</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => setSimulatorStep(2)}
+                          className="w-full bg-[#16a34a] hover:bg-emerald-600 text-white py-2 rounded-xl text-[9px] font-extrabold shadow-sm mt-3 flex items-center justify-center gap-1 transition-all"
+                        >
+                          <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.456L0 24zm6.59-4.846c1.6.95 3.488 1.459 5.407 1.46 5.538 0 10.046-4.51 10.05-10.05.002-2.684-1.038-5.207-2.93-7.1-1.894-1.892-4.41-2.933-7.098-2.935C6.54 3.53 2.03 8.04 2.026 13.58c-.001 1.956.513 3.868 1.49 5.5l-.973 3.55 3.639-.955z"/>
+                          </svg>
+                          Send via WhatsApp 💬
+                        </button>
+                      </div>
+                    )}
+
+                    {simulatorStep === 2 && (
+                      <div className="flex-1 flex flex-col justify-between overflow-hidden">
+                        {/* Step 3: WhatsApp Chat simulation */}
+                        <div className="flex-1 flex flex-col overflow-hidden">
+                          {/* Chat User Header */}
+                          <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100 shrink-0">
+                            <div className="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-[7px] text-white font-extrabold">RK</div>
+                            <div>
+                              <h6 className="text-[8px] font-extrabold text-slate-800 leading-tight">Ramesh Kumar</h6>
+                              <p className="text-[5px] text-emerald-600 font-bold">online</p>
+                            </div>
+                          </div>
+
+                          {/* Chat Conversation */}
+                          <div className="flex-1 py-3 space-y-2.5 overflow-y-auto flex flex-col justify-end text-[7px] font-medium leading-relaxed">
+                            {/* Customer Message */}
+                            <div className="bg-white p-2 rounded-lg max-w-[85%] self-start border border-slate-200/50 shadow-2xs">
+                              <p className="text-[7.5px] text-slate-700">Please send today's delivery bill.</p>
+                            </div>
+
+                            {/* WhatsApp PDF Bubble */}
+                            <div className="bg-[#dcf8c6] p-2.5 rounded-lg max-w-[85%] self-end border border-emerald-200/50 shadow-2xs space-y-1">
+                              <div className="flex items-center gap-1.5 bg-emerald-800/10 p-1.5 rounded border border-emerald-800/5">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" strokeWidth="2.5">
+                                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                  <polyline points="14 2 14 8 20 8" />
+                                </svg>
+                                <div className="leading-tight">
+                                  <p className="text-[6.5px] font-extrabold text-slate-800">INV_Ramesh.pdf</p>
+                                  <p className="text-[5px] text-slate-500">42 KB • PDF Invoice</p>
+                                </div>
+                              </div>
+                              <p className="text-[7px] text-slate-700 pt-0.5">
+                                Dear Ramesh, here is your invoice of **₹4,042.50** from Varavu Store. Pay online: *upi.varavu.in/pay*
+                              </p>
+                              <div className="flex justify-end items-center gap-0.5 text-[5.5px] text-slate-400 mt-1">
+                                <span>10:16 AM</span>
+                                <span className="text-emerald-600 font-extrabold">✓✓</span>
+                              </div>
+                            </div>
+
+                            {/* Customer Reply */}
+                            <div className="bg-white p-2 rounded-lg max-w-[85%] self-start border border-slate-200/50 shadow-2xs flex items-center gap-1.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                              <p className="text-[7.5px] text-slate-800 font-extrabold">Perfect! Done payment via GPay.</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-emerald-50 border border-emerald-100/60 p-2.5 rounded-2xl text-center shrink-0 flex items-center justify-center gap-1.5 mt-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[6px] font-bold">✓</span>
+                          <span className="text-[8.5px] text-[#1a6b3c] font-extrabold">Invoice Sent &amp; Paid!</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -605,11 +727,11 @@ export default function LandingPage() {
       </section>
 
       {/* ─── Below Qualities (Sub-Hero Bar) ───────────────────── */}
-      <section className="bg-white border-b border-[#e8eaed] py-12">
+      <section className="bg-white border-b border-[#e8eaed] py-10 md:py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center items-start">
+          <div className="flex md:grid md:grid-cols-4 gap-8 md:gap-8 text-center items-start overflow-x-auto md:overflow-x-visible no-scrollbar snap-x snap-mandatory scroll-smooth pb-4 md:pb-0">
             {/* Quality 1 */}
-            <div className="flex flex-col items-center space-y-4">
+            <div className="min-w-[220px] md:min-w-0 flex-shrink-0 snap-center flex flex-col items-center space-y-4">
               <div className="text-[#1a6b3c] flex items-center justify-center">
                 <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="16" cy="16" r="13" />
@@ -627,7 +749,7 @@ export default function LandingPage() {
             </div>
 
             {/* Quality 2 */}
-            <div className="flex flex-col items-center space-y-4">
+            <div className="min-w-[220px] md:min-w-0 flex-shrink-0 snap-center flex flex-col items-center space-y-4">
               <div className="text-[#1a6b3c] flex items-center justify-center">
                 <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="9" y="4" width="14" height="24" rx="3" />
@@ -642,9 +764,9 @@ export default function LandingPage() {
             </div>
 
             {/* Quality 3 */}
-            <div className="flex flex-col items-center space-y-4">
+            <div className="min-w-[220px] md:min-w-0 flex-shrink-0 snap-center flex flex-col items-center space-y-4">
               <div className="text-[#1a6b3c] flex items-center justify-center">
-                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round">
+                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M8 4L24 16L8 28V4Z" />
                   <path d="M8 4L19 16L8 28" />
                   <path d="M19 16L8 16" />
@@ -659,7 +781,7 @@ export default function LandingPage() {
             </div>
 
             {/* Quality 4 */}
-            <div className="flex flex-col items-center space-y-4">
+            <div className="min-w-[220px] md:min-w-0 flex-shrink-0 snap-center flex flex-col items-center space-y-4">
               <div className="text-[#1a6b3c] flex items-center justify-center">
                 <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="10" y="6" width="18" height="13" rx="2" />
@@ -676,6 +798,14 @@ export default function LandingPage() {
                 <p className="text-xs text-[#6b7280] font-semibold mt-0.5">Use on Mobile/Desktop</p>
               </div>
             </div>
+          </div>
+
+          {/* Swipe indicator (visible only on mobile) */}
+          <div className="flex md:hidden justify-center items-center gap-1.5 mt-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1a6b3c]"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
           </div>
         </div>
       </section>

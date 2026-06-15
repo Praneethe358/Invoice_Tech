@@ -156,3 +156,13 @@ input[type="number"] { -moz-appearance: textfield; }
   background: linear-gradient(135deg, rgba(26, 107, 60, 0.08), rgba(34, 135, 90, 0.04));
   border: 1px solid rgba(26, 107, 60, 0.12);
 }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
