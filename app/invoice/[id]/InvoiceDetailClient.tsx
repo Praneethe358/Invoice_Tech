@@ -36,7 +36,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
 
   // Watch cooldown
   useEffect(() => {
-    const expiryStr = localStorage.getItem(`vynkrova_cooldown_${inv.id}`);
+    const expiryStr = localStorage.getItem(`varavu_cooldown_${inv.id}`);
     if (expiryStr) {
       const expiry = parseInt(expiryStr, 10);
       const remaining = Math.ceil((expiry - Date.now()) / 1000);
@@ -52,7 +52,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
       setCooldown((prev) => {
         const next = prev - 1;
         if (next <= 0) {
-          localStorage.removeItem(`vynkrova_cooldown_${inv.id}`);
+          localStorage.removeItem(`varavu_cooldown_${inv.id}`);
           clearInterval(interval);
         }
         return next;
@@ -199,7 +199,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
 
       // Set cooldown
       const expiry = Date.now() + 60000;
-      localStorage.setItem(`vynkrova_cooldown_${inv.id}`, expiry.toString());
+      localStorage.setItem(`varavu_cooldown_${inv.id}`, expiry.toString());
       setCooldown(60);
 
       // Locally increment reminders count

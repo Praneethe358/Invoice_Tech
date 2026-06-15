@@ -60,13 +60,13 @@ export default function LoginPage() {
                 <polyline points="14 2 14 8 20 8" />
               </svg>
             </div>
-            <span className="text-xl font-bold text-white">Vynkrova</span>
+            <span className="text-xl font-bold text-white">Varavu</span>
           </div>
           <h2 className="text-4xl font-extrabold text-white leading-tight mb-4">
             Invoice smarter,<br />not harder.
           </h2>
           <p className="text-[#e6f4ea] text-lg leading-relaxed">
-            Join 50,000+ shop owners who save time with professional WhatsApp invoicing.
+            Professional WhatsApp invoicing built for small shops.
           </p>
           <div className="mt-12 grid grid-cols-2 gap-4">
             {[
@@ -98,14 +98,14 @@ export default function LoginPage() {
                 <polyline points="14 2 14 8 20 8" />
               </svg>
             </div>
-            <span className="text-lg font-bold text-[#1a1d26]">Vynkrova</span>
+            <span className="text-lg font-bold text-[#1a1d26]">Varavu</span>
           </div>
 
           <h1 className="text-2xl font-extrabold text-[#1a1d26] mb-1">
             Welcome back
           </h1>
           <p className="text-sm text-[#6b7280] mb-8">
-            Sign in to your Vynkrova account
+            Sign in to your Varavu account
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">

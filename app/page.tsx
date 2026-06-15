@@ -121,7 +121,7 @@ export default function LandingPage() {
               </svg>
             </div>
             <span className="font-bold text-lg text-[#1a1d26] tracking-tight">
-              Vynkrova
+              Varavu
             </span>
           </Link>
 
@@ -209,7 +209,7 @@ export default function LandingPage() {
                       <polyline points="14 2 14 8 20 8" />
                     </svg>
                   </div>
-                  <span className="font-bold text-[#1a1d26] text-base">Vynkrova</span>
+                  <span className="font-bold text-[#1a1d26] text-base">Varavu</span>
                 </div>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
@@ -335,7 +335,7 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-gradient-to-b from-emerald-400/20 to-transparent rounded-3xl blur-2xl transform scale-110" />
                 <Image
                   src="/hero-mockup.png"
-                  alt="Vynkrova Invoice Dashboard"
+                  alt="Varavu Invoice Dashboard"
                   width={400}
                   height={600}
                   className="relative rounded-3xl shadow-2xl shadow-black/30"
@@ -496,10 +496,10 @@ export default function LandingPage() {
                   <polyline points="14 2 14 8 20 8" />
                 </svg>
               </div>
-              <span className="font-bold text-[#1a1d26]">Vynkrova Invoice</span>
+              <span className="font-bold text-[#1a1d26]">Varavu Invoice</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-[#6b7280]">
-              <span>© {new Date().getFullYear()} Vynkrova</span>
+              <span>© {new Date().getFullYear()} Varavu</span>
               <span>·</span>
               <span>Made in India 🇮🇳</span>
             </div>

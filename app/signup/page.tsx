@@ -63,7 +63,7 @@ export default function SignupPage() {
                 <polyline points="14 2 14 8 20 8" />
               </svg>
             </div>
-            <span className="text-xl font-bold text-white">Vynkrova</span>
+            <span className="text-xl font-bold text-white">Varavu</span>
           </div>
           <h2 className="text-4xl font-extrabold text-white leading-tight mb-4">
             Start invoicing<br />in 2 minutes.
@@ -99,7 +99,7 @@ export default function SignupPage() {
                 <polyline points="14 2 14 8 20 8" />
               </svg>
             </div>
-            <span className="text-lg font-bold text-[#1a1d26]">Vynkrova</span>
+            <span className="text-lg font-bold text-[#1a1d26]">Varavu</span>
           </div>
 
           <h1 className="text-2xl font-extrabold text-[#1a1d26] mb-1">Create your account</h1>

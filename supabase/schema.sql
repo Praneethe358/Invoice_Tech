@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════
--- Vynkrova Invoice — Supabase Schema
+-- Varavu Invoice — Supabase Schema
 -- Run this in your Supabase SQL Editor:
 -- https://supabase.com/dashboard/project/_/sql
 -- ═══════════════════════════════════════════

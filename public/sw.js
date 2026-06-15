@@ -1,7 +1,7 @@
-// Vynkrova Invoice — Service Worker
+// Varavu Invoice — Service Worker
 // Provides offline caching for PWA installability
 
-const CACHE_NAME = 'vynkrova-v1';
+const CACHE_NAME = 'varavu-v1';
 const STATIC_ASSETS = [
   '/',
   '/login',

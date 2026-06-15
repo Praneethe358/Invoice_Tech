@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Vynkrova Invoice',
-    short_name: 'Vynkrova',
+    name: 'Varavu Invoice',
+    short_name: 'Varavu',
     description:
       'Send professional invoices to customers on WhatsApp instantly.',
     start_url: '/dashboard',

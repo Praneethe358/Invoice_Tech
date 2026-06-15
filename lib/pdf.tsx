@@ -405,7 +405,7 @@ function InvoicePDF({
 
         {/* Footer Accent */}
         <Text style={styles.footer}>
-          Thank you for shopping! • Powered by Vynkrova Invoice
+          Thank you for shopping! • Powered by Varavu Invoice
         </Text>
       </Page>
     </Document>
