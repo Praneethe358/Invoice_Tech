@@ -607,78 +607,73 @@ export default function LandingPage() {
       {/* ─── Below Qualities (Sub-Hero Bar) ───────────────────── */}
       <section className="bg-white border-b border-[#e8eaed] py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 text-center items-start">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center items-start">
             {/* Quality 1 */}
-            <div className="flex flex-col items-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 text-[#1a6b3c] flex items-center justify-center">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-                  <line x1="9" y1="9" x2="9.01" y2="9" />
-                  <line x1="15" y1="9" x2="15.01" y2="9" />
+            <div className="flex flex-col items-center space-y-4">
+              <div className="text-[#1a6b3c] flex items-center justify-center">
+                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="16" cy="16" r="13" />
+                  <path d="M11 14a2 2 0 0 1 4 0" />
+                  <path d="M17 14a2 2 0 0 1 4 0" />
+                  <path d="M11 18c0 3 2.5 5 5 5s5-2 5-5H11z" fill="#1a6b3c" />
                 </svg>
               </div>
-              <div>
-                <h4 className="text-xl font-bold text-[#1a1d26]">1.5 Lakh+</h4>
+              <div className="space-y-1">
+                <h4 className="text-xl font-extrabold text-[#1a1d26]">
+                  1.5 Lakh<span className="text-[#1a6b3c]">+</span>
+                </h4>
                 <p className="text-xs text-[#6b7280] font-semibold mt-0.5">Happy Shop Owners</p>
               </div>
             </div>
 
             {/* Quality 2 */}
-            <div className="flex flex-col items-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 text-[#1a6b3c] flex items-center justify-center">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-                  <line x1="12" y1="18" x2="12.01" y2="18" />
+            <div className="flex flex-col items-center space-y-4">
+              <div className="text-[#1a6b3c] flex items-center justify-center">
+                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="9" y="4" width="14" height="24" rx="3" />
+                  <line x1="9" y1="8" x2="23" y2="8" />
+                  <line x1="9" y1="24" x2="23" y2="24" />
                 </svg>
               </div>
-              <div>
-                <h4 className="text-xl font-bold text-[#1a1d26]">Free</h4>
+              <div className="space-y-1">
+                <h4 className="text-xl font-extrabold text-[#1a1d26]">Free</h4>
                 <p className="text-xs text-[#6b7280] font-semibold mt-0.5">Web &amp; PWA App</p>
               </div>
             </div>
 
             {/* Quality 3 */}
-            <div className="flex flex-col items-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 text-[#1a6b3c] flex items-center justify-center">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            <div className="flex flex-col items-center space-y-4">
+              <div className="text-[#1a6b3c] flex items-center justify-center">
+                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round">
+                  <path d="M8 4L24 16L8 28V4Z" />
+                  <path d="M8 4L19 16L8 28" />
+                  <path d="M19 16L8 16" />
                 </svg>
               </div>
-              <div>
-                <h4 className="text-xl font-bold text-[#1a1d26]">Rated 4.9/5</h4>
+              <div className="space-y-1">
+                <h4 className="text-xl font-extrabold text-[#1a1d26]">
+                  Rated 4.9<span className="text-[#1a6b3c]">/5</span>
+                </h4>
                 <p className="text-xs text-[#6b7280] font-semibold mt-0.5">User Satisfaction</p>
               </div>
             </div>
 
             {/* Quality 4 */}
-            <div className="flex flex-col items-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 text-[#1a6b3c] flex items-center justify-center">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-                  <line x1="8" y1="21" x2="16" y2="21" />
-                  <line x1="12" y1="17" x2="12" y2="21" />
-                  <rect x="17" y="11" width="5" height="10" rx="1" fill="#1a6b3c" />
+            <div className="flex flex-col items-center space-y-4">
+              <div className="text-[#1a6b3c] flex items-center justify-center">
+                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="10" y="6" width="18" height="13" rx="2" />
+                  <path d="M16 19v4m-3 0h6" />
+                  <rect x="4" y="11" width="7" height="12" rx="1" fill="white" />
+                  <line x1="4" y1="14" x2="11" y2="14" />
+                  <line x1="4" y1="20" x2="11" y2="20" />
                 </svg>
               </div>
-              <div>
-                <h4 className="text-xl font-bold text-[#1a1d26]">Multi-Device</h4>
+              <div className="space-y-1">
+                <h4 className="text-xl font-extrabold text-[#1a1d26]">
+                  Multi-<span className="text-[#1a6b3c]">Device</span>
+                </h4>
                 <p className="text-xs text-[#6b7280] font-semibold mt-0.5">Use on Mobile/Desktop</p>
-              </div>
-            </div>
-
-            {/* Quality 5 */}
-            <div className="flex flex-col items-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 text-[#1a6b3c] flex items-center justify-center">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                  <path d="M12 6v6l4 2" />
-                </svg>
-              </div>
-              <div>
-                <h4 className="text-xl font-bold text-[#1a1d26]">Offline-First</h4>
-                <p className="text-xs text-[#6b7280] font-semibold mt-0.5">Works Without Internet</p>
               </div>
             </div>
           </div>
