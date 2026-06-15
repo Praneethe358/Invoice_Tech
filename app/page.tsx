@@ -1,9 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const features = [
   {
@@ -100,6 +100,8 @@ const steps = [
 ];
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(() => {});
@@ -123,7 +125,24 @@ export default function LandingPage() {
             </span>
           </Link>
 
-          <div className="flex items-center gap-3">
+          {/* Desktop Links */}
+          <div className="hidden md:flex items-center gap-8">
+            <a
+              href="#features"
+              className="text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] transition-colors"
+            >
+              Features
+            </a>
+            <a
+              href="#how-it-works"
+              className="text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] transition-colors"
+            >
+              How It Works
+            </a>
+          </div>
+
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center gap-3">
             <Link
               href="/login"
               className="text-sm font-medium text-[#6b7280] hover:text-[#1a1d26] transition-colors px-3 py-2"
@@ -137,7 +156,129 @@ export default function LandingPage() {
               Start Free
             </Link>
           </div>
+
+          {/* Mobile Menu Button (Hamburger) */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-[#4b5563] hover:text-[#1a1d26] transition-colors focus:outline-none"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            ) : (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            )}
+          </button>
         </div>
+
+        {/* Mobile Sidebar Menu Drawer */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setMobileMenuOpen(false)}
+                className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+              />
+
+              {/* Sidebar Panel */}
+              <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed top-0 right-0 bottom-0 z-50 w-[300px] bg-white shadow-2xl border-l border-[#e8eaed] flex flex-col md:hidden"
+              >
+                {/* Header */}
+                <div className="h-16 px-6 flex items-center justify-between border-b border-[#e8eaed]">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-[#1a6b3c] flex items-center justify-center">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                      </svg>
+                    </div>
+                    <span className="font-bold text-[#1a1d26] text-base">Vynkrova</span>
+                  </div>
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-2 text-[#4b5563] hover:text-[#1a1d26] rounded-lg hover:bg-[#f3f4f6] transition-all"
+                    aria-label="Close menu"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Navigation Links with Icons & Subtexts */}
+                <div className="flex-1 px-4 py-6 overflow-y-auto space-y-4">
+                  <a
+                    href="#features"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-start gap-4 p-3 rounded-xl hover:bg-[#f3f4f6] transition-all group"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-[#1a6b3c]/8 text-[#1a6b3c] flex items-center justify-center group-hover:bg-[#1a6b3c] group-hover:text-white transition-all shrink-0">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-[#1a1d26]">Features</p>
+                      <p className="text-xs text-[#6b7280] mt-0.5">Explore invoicing, catalogs & stats</p>
+                    </div>
+                  </a>
+
+                  <a
+                    href="#how-it-works"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-start gap-4 p-3 rounded-xl hover:bg-[#f3f4f6] transition-all group"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-[#1a6b3c]/8 text-[#1a6b3c] flex items-center justify-center group-hover:bg-[#1a6b3c] group-hover:text-white transition-all shrink-0">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-[#1a1d26]">How It Works</p>
+                      <p className="text-xs text-[#6b7280] mt-0.5">See the 30-second workflow</p>
+                    </div>
+                  </a>
+                </div>
+
+                {/* Footer Buttons */}
+                <div className="p-6 border-t border-[#e8eaed] bg-[#f9fafb] flex flex-col gap-3">
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] transition-colors py-3 border border-[#e8eaed] bg-white rounded-xl"
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    href="/signup"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center text-sm font-bold text-white bg-[#1a6b3c] hover:bg-[#155d33] py-3 rounded-xl transition-colors shadow-sm"
+                  >
+                    Start Free
+                  </Link>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* ─── Hero ─────────────────────────────────────────────── */}
@@ -235,7 +376,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── Features Grid ────────────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-20">
+      <section id="features" className="max-w-6xl mx-auto px-4 sm:px-6 pb-20">
         <div className="text-center mb-12">
           <p className="text-xs font-semibold text-[#1a6b3c] uppercase tracking-widest mb-2">
             Everything you need
@@ -270,7 +411,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── How It Works ─────────────────────────────────────── */}
-      <section className="bg-[#fafbfc] border-y border-[#e8eaed]">
+      <section id="how-it-works" className="bg-[#fafbfc] border-y border-[#e8eaed]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-20">
           <div className="text-center mb-14">
             <p className="text-xs font-semibold text-[#1a6b3c] uppercase tracking-widest mb-2">
@@ -328,7 +469,7 @@ export default function LandingPage() {
               Ready to go paperless?
             </h2>
             <p className="text-lg text-[#e6f4ea] mb-8 max-w-md mx-auto">
-              Join 50,000+ shop owners who send invoices on WhatsApp with Vynkrova.
+              The easiest and fastest way to invoice customers on WhatsApp.
             </p>
             <Link
               href="/signup"
