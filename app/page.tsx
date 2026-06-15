@@ -810,48 +810,135 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Capabilities Grid Section ────────────────────────── */}
-      <section id="features" className="py-20 bg-[#f8fafc]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+      {/* ─── Capabilities alternating Section ──────────────────── */}
+      <section id="features" className="py-20 bg-white border-b border-[#e8eaed]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-28">
+          
+          {/* Section Heading */}
+          <div className="text-center max-w-2xl mx-auto">
             <h2 className="text-xs font-bold text-[#1a6b3c] uppercase tracking-widest mb-3">Capabilities</h2>
             <h3 className="text-3xl sm:text-4xl font-extrabold text-[#1a1d26] tracking-tight">
               A lightweight billing system tailored to your daily shop operations
             </h3>
-            <p className="text-sm text-[#4b5563] mt-3">
-              Varavu replaces heavy, expensive desktop software with an instant billing tool you can use directly from your smartphone.
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feat, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{ duration: 0.35, delay: idx * 0.05 }}
-                className={`bg-white p-6 rounded-2xl border border-[#e8eaed] transition-all flex flex-col justify-between group ${feat.hoverClass}`}
-              >
-                <div>
-                  <div className={`w-14 h-14 rounded-xl ${feat.color} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-sm`}>
-                    {feat.icon}
-                  </div>
-                  <h4 className="text-lg font-bold text-[#1a1d26] mb-2 flex items-center gap-2">
-                    {feat.title}
-                    {feat.tag && (
-                      <span className="text-[10px] bg-[#1a6b3c]/8 text-[#1a6b3c] font-semibold px-2 py-0.5 rounded">
-                        {feat.tag}
-                      </span>
-                    )}
-                  </h4>
-                  <p className="text-sm text-[#4b5563] leading-relaxed">
-                    {feat.description}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+          {/* Feature 1: GST Billing & WhatsApp Sharing */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            {/* Left Graphic */}
+            <div className="lg:col-span-6 relative flex justify-center">
+              <div className="absolute inset-0 bg-emerald-50 rounded-full blur-3xl opacity-50 -z-10 scale-90" />
+              <img
+                src="/billing_whatsapp.png"
+                alt="GST billing and WhatsApp sharing"
+                className="w-full max-w-[440px] h-auto object-contain drop-shadow-2xl rounded-2xl"
+              />
+            </div>
+            {/* Right Content */}
+            <div className="lg:col-span-6 space-y-6">
+              <span className="inline-block text-[10px] bg-emerald-50 text-[#1a6b3c] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+                WhatsApp-Native Delivery
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-[#1a1d26] tracking-tight">
+                Create GST Bills online and share them with customers
+              </h3>
+              <p className="text-base text-[#4b5563] leading-relaxed">
+                <strong>What it does:</strong> Varavu&apos;s GST billing software lets you generate fully GST-compliant tax invoices in under 20 seconds. Instead of wasting money on thermal printers and paper rolls, deliver branded PDF receipts directly to your customer&apos;s WhatsApp instantly.
+              </p>
+              <ul className="space-y-3 pt-2">
+                {[
+                  "Generate compliant tax invoices with custom SGST/CGST rates",
+                  "Send PDFs instantly on WhatsApp without saving contacts",
+                  "Completely offline billing - syncs automatically when online"
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-2.5 text-sm text-[#4b5563]">
+                    <svg className="w-5 h-5 text-[#1a6b3c] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
+
+          {/* Feature 2: Inventory & Stock Tracking */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            {/* Left Content */}
+            <div className="lg:col-span-6 order-2 lg:order-1 space-y-6">
+              <span className="inline-block text-[10px] bg-pink-50 text-pink-700 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+                Inventory Control
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-[#1a1d26] tracking-tight">
+                Manage Small Business Inventory Seamlessly
+              </h3>
+              <p className="text-base text-[#4b5563] leading-relaxed">
+                <strong>What it does:</strong> Keep a live, automated view of your stock levels. As you invoice customers, Varavu automatically updates inventory levels in real-time. Setup low-stock notifications to restock critical items before you run out.
+              </p>
+              <ul className="space-y-3 pt-2">
+                {[
+                  "Live stock tracking across grocery, retail, or pharmacy products",
+                  "Auto-updates inventory quantities directly upon invoice completion",
+                  "Fast item autocomplete to add products to bills in 1 tap"
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-2.5 text-sm text-[#4b5563]">
+                    <svg className="w-5 h-5 text-[#1a6b3c] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Right Graphic */}
+            <div className="lg:col-span-6 order-1 lg:order-2 relative flex justify-center">
+              <div className="absolute inset-0 bg-pink-50 rounded-full blur-3xl opacity-50 -z-10 scale-90" />
+              <img
+                src="/inventory_stock.png"
+                alt="Inventory and stock tracking management"
+                className="w-full max-w-[420px] h-auto object-contain drop-shadow-2xl rounded-2xl"
+              />
+            </div>
+          </div>
+
+          {/* Feature 3: Payment Tracking & UPI Reminders */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            {/* Left Graphic */}
+            <div className="lg:col-span-6 relative flex justify-center">
+              <div className="absolute inset-0 bg-blue-50 rounded-full blur-3xl opacity-50 -z-10 scale-90" />
+              <img
+                src="/payments_reminders.png"
+                alt="UPI payment status and reminders"
+                className="w-full max-w-[400px] h-auto object-contain drop-shadow-2xl rounded-2xl"
+              />
+            </div>
+            {/* Right Content */}
+            <div className="lg:col-span-6 space-y-6">
+              <span className="inline-block text-[10px] bg-blue-50 text-blue-700 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+                Payment Status &amp; UPI
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-[#1a1d26] tracking-tight">
+                Track Outstanding Balances &amp; Collect via UPI
+              </h3>
+              <p className="text-base text-[#4b5563] leading-relaxed">
+                <strong>What it does:</strong> Say goodbye to manually checking notebook ledgers. Monitor paid, partially paid, and unpaid statuses directly from your dashboard. Send polite payment reminders with a pre-filled UPI payment link on WhatsApp.
+              </p>
+              <ul className="space-y-3 pt-2">
+                {[
+                  "Detailed customer directory showing total outstanding balance",
+                  "One-tap payments reminders with pre-filled WhatsApp texts",
+                  "Direct UPI link integration for frictionless customer payments"
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-2.5 text-sm text-[#4b5563]">
+                    <svg className="w-5 h-5 text-[#1a6b3c] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
         </div>
       </section>
 
