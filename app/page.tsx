@@ -1127,25 +1127,82 @@ export default function LandingPage() {
 
       {/* ─── Capabilities alternating Section ──────────────────── */}
       <section id="features" className="py-12 md:py-20 bg-white border-b border-[#e8eaed]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10 md:space-y-12 lg:space-y-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10 md:space-y-12 lg:space-y-16">
 
           {/* Feature 1: GST Billing & WhatsApp Sharing */}
-          <div className="bg-gradient-to-b from-white to-slate-50/40 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-slate-200/70 shadow-xs lg:bg-none lg:p-0 lg:border-0 lg:shadow-none grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 md:gap-8 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-center">
             {/* Left Graphic */}
-            <div className="lg:col-span-6 relative flex justify-center">
-              <div className="absolute inset-0 bg-emerald-50 rounded-full blur-3xl opacity-50 -z-10 scale-90" />
+            <div className="lg:col-span-6 relative flex justify-center py-6 sm:py-10">
+              {/* Vyapar-style circular backdrop and floating elements */}
+              <div className="absolute inset-0 -z-10 select-none pointer-events-none flex items-center justify-center">
+                {/* Large offset soft-colored circle */}
+                <div className="w-[260px] h-[260px] sm:w-[350px] sm:h-[350px] rounded-full bg-[#fce7f3] opacity-80 translate-x-2 translate-y-2" />
+                
+                {/* Floating WhatsApp Logo (top-left) */}
+                <motion.div 
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                  className="absolute top-[8%] left-[12%] sm:left-[15%] w-10 h-10 rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] flex items-center justify-center border border-slate-100"
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="#22c55e">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.97-1.862-1.868-4.339-2.898-6.977-2.899-5.437 0-9.862 4.37-9.866 9.8.001 2.028.531 4.008 1.547 5.753l-.979 3.578 3.676-.965zm10.741-6.733c-.292-.146-1.727-.852-1.992-.949-.264-.096-.456-.146-.649.146-.193.291-.747.949-.916 1.144-.168.193-.336.218-.629.072-1.879-.942-3.137-1.624-4.385-3.76-.328-.562.328-.521.939-1.74.101-.203.051-.38-.025-.527-.076-.146-.649-1.564-.89-2.144-.233-.563-.473-.487-.649-.496-.168-.008-.36-.01-.553-.01-.193 0-.507.073-.772.361-.264.292-1.011.99-1.011 2.414s1.036 2.796 1.18 2.99c.145.195 2.036 3.111 4.934 4.364.689.299 1.228.479 1.648.613.693.22 1.324.19 1.822.115.556-.083 1.727-.706 1.97-.1.388 2.443.264 4.542.074 5.097-.091.264-.265.457-.557.603z" />
+                  </svg>
+                </motion.div>
+
+                {/* Floating Violet Paper Plane (top-right) */}
+                <motion.div 
+                  animate={{ y: [0, 8, 0], x: [0, 4, 0] }}
+                  transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+                  className="absolute top-[5%] right-[10%] sm:right-[15%]"
+                >
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="1.5" className="rotate-[15deg]">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                  </svg>
+                </motion.div>
+
+                {/* Floating Green Paper Plane (bottom-left) */}
+                <motion.div 
+                  animate={{ y: [0, -8, 0], x: [0, -4, 0] }}
+                  transition={{ repeat: Infinity, duration: 6, ease: "easeInOut", delay: 1 }}
+                  className="absolute bottom-[10%] left-[8%] sm:left-[12%]"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="1.5" className="rotate-[-25deg]">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                  </svg>
+                </motion.div>
+
+                {/* Floating Yellow Mail/Envelope (bottom-right) */}
+                <motion.div 
+                  animate={{ y: [0, 6, 0] }}
+                  transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 0.5 }}
+                  className="absolute bottom-[10%] right-[10%] sm:right-[15%] w-9 h-9 rounded-lg bg-amber-400 shadow-[0_4px_12px_rgba(0,0,0,0.08)] flex items-center justify-center text-white border border-amber-300"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
+                  </svg>
+                </motion.div>
+
+                {/* Dotted curve paths */}
+                <svg className="absolute w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] fill-none opacity-40">
+                  <path d="M 60,60 Q 140,20 220,40" stroke="#cbd5e1" strokeWidth="1.5" strokeDasharray="4 4" />
+                  <path d="M 40,220 Q 120,280 240,200" stroke="#cbd5e1" strokeWidth="1.5" strokeDasharray="4 4" />
+                </svg>
+              </div>
+
               <img
                 src="/billing_whatsapp.png"
                 alt="GST billing and WhatsApp sharing"
-                className="w-full max-w-[320px] sm:max-w-[440px] h-auto object-contain drop-shadow-2xl rounded-2xl"
+                className="w-full max-w-[280px] sm:max-w-[380px] md:max-w-[420px] h-auto object-contain drop-shadow-2xl relative z-10"
               />
             </div>
+
             {/* Right Content */}
             <div className="lg:col-span-6 space-y-3 sm:space-y-4 md:space-y-6">
               <span className="inline-block text-[9px] sm:text-[10px] bg-emerald-50 text-[#1a6b3c] font-extrabold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full uppercase tracking-wider border border-emerald-100/50">
                 WhatsApp-Native Delivery
               </span>
-              <h3 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-[#1a1d26] tracking-tight leading-snug">
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#1a1d26] tracking-tight leading-snug">
                 Create GST Bills online and share them with customers
               </h3>
               <p className="text-[13px] sm:text-sm md:text-base text-[#4b5563] leading-relaxed font-medium">
@@ -1170,23 +1227,14 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Feature 3: Payment Tracking & UPI Reminders */}
-          <div className="bg-gradient-to-b from-white to-slate-50/40 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-slate-200/70 shadow-xs lg:bg-none lg:p-0 lg:border-0 lg:shadow-none grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 md:gap-8 lg:gap-16 items-center">
-            {/* Left Graphic */}
-            <div className="lg:col-span-6 relative flex justify-center">
-              <div className="absolute inset-0 bg-blue-50 rounded-full blur-3xl opacity-50 -z-10 scale-90" />
-              <img
-                src="/payments_reminders.png"
-                alt="UPI payment status and reminders"
-                className="w-full max-w-[300px] sm:max-w-[400px] h-auto object-contain drop-shadow-2xl rounded-2xl"
-              />
-            </div>
-            {/* Right Content */}
-            <div className="lg:col-span-6 space-y-3 sm:space-y-4 md:space-y-6">
+          {/* Feature 2: Payment Tracking & UPI Reminders (Alternating) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-center">
+            {/* Left Content (order-2 on mobile, order-1 on desktop) */}
+            <div className="lg:col-span-6 lg:order-1 space-y-3 sm:space-y-4 md:space-y-6">
               <span className="inline-block text-[9px] sm:text-[10px] bg-blue-50 text-blue-700 font-extrabold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full uppercase tracking-wider border border-blue-100/50">
                 Payment Status &amp; UPI
               </span>
-              <h3 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-[#1a1d26] tracking-tight leading-snug">
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#1a1d26] tracking-tight leading-snug">
                 Track Outstanding Balances &amp; Collect via UPI
               </h3>
               <p className="text-[13px] sm:text-sm md:text-base text-[#4b5563] leading-relaxed font-medium">
@@ -1208,6 +1256,56 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
+            </div>
+
+            {/* Right Graphic (order-1 on mobile, order-2 on desktop) */}
+            <div className="lg:col-span-6 lg:order-2 relative flex justify-center py-6 sm:py-10">
+              {/* Vyapar-style circular backdrop and floating elements */}
+              <div className="absolute inset-0 -z-10 select-none pointer-events-none flex items-center justify-center">
+                {/* Large offset soft-colored circle */}
+                <div className="w-[260px] h-[260px] sm:w-[350px] sm:h-[350px] rounded-full bg-[#dcfce7] opacity-80 -translate-x-2 translate-y-2" />
+                
+                {/* Floating Checkmark Badge */}
+                <motion.div 
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                  className="absolute top-[10%] right-[12%] sm:right-[15%] w-10 h-10 rounded-full bg-emerald-500 shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-white border border-emerald-400"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </motion.div>
+
+                {/* Floating Credit Card Badge */}
+                <motion.div 
+                  animate={{ y: [0, 8, 0] }}
+                  transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 0.5 }}
+                  className="absolute bottom-[12%] left-[10%] sm:left-[15%] w-11 h-8 rounded-lg bg-indigo-600 shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-white border border-indigo-500"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                    <line x1="2" y1="10" x2="22" y2="10" />
+                  </svg>
+                </motion.div>
+
+                {/* Floating Bank/UPI Badge */}
+                <motion.div 
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 1 }}
+                  className="absolute top-[8%] left-[12%] sm:left-[18%] w-9 h-9 rounded-lg bg-sky-500 shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-white border border-sky-400"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <rect x="3" y="10" width="18" height="11" rx="2" />
+                    <path d="M12 2L2 7h20L12 2z" />
+                  </svg>
+                </motion.div>
+              </div>
+
+              <img
+                src="/payments_reminders.png"
+                alt="UPI payment status and reminders"
+                className="w-full max-w-[260px] sm:max-w-[340px] md:max-w-[380px] h-auto object-contain drop-shadow-2xl relative z-10"
+              />
             </div>
           </div>
 
