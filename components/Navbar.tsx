@@ -78,7 +78,7 @@ export default function Navbar() {
                 <polyline points="14 2 14 8 20 8" />
               </svg>
             </div>
-            <span className="font-bold text-[#1a1d26] text-sm">Varavu</span>
+            <span className="font-heading font-black text-[#1a1d26] text-sm">Varavu</span>
           </Link>
 
           <button

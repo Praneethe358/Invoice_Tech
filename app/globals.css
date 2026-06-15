@@ -15,7 +15,8 @@
   --color-warning: #f59e0b;
   --color-error: #dc2626;
   --color-info: #3b82f6;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Outfit', 'Plus Jakarta Sans', sans-serif;
 }
 
 /* ─── Base ────────────────────────────────────────────────── */
@@ -28,6 +29,11 @@ html {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
 }
 
 body {
@@ -165,4 +171,23 @@ input[type="number"] { -moz-appearance: textfield; }
 .no-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+/* ─── Landing page mobile polish (scoped) ─────────────────── */
+
+@media (max-width: 639px) {
+  .landing-page {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  .landing-page section {
+    scroll-margin-top: 3.5rem;
+  }
+
+  .landing-page h1,
+  .landing-page h2,
+  .landing-page h3 {
+    text-wrap: balance;
+  }
 }

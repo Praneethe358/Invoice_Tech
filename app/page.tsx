@@ -296,10 +296,10 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f5f6fa] text-[#1a1d26]">
+    <div className="landing-page min-h-screen bg-[#f5f6fa] text-[#1a1d26]">
       {/* ─── Navbar ───────────────────────────────────────────── */}
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-[#e8eaed]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 md:h-16 flex items-center justify-between">
           
           {/* Desktop Left: Logo */}
           <Link href="/" className="hidden md:flex items-center gap-2.5">
@@ -309,7 +309,7 @@ export default function LandingPage() {
                 <polyline points="14 2 14 8 20 8" />
               </svg>
             </div>
-            <span className="font-bold text-lg text-[#1a1d26] tracking-tight">
+            <span className="font-heading font-black text-lg text-[#1a1d26] tracking-tight">
               Varavu
             </span>
           </Link>
@@ -346,7 +346,7 @@ export default function LandingPage() {
                   <polyline points="14 2 14 8 20 8" />
                 </svg>
               </div>
-              <span className="font-extrabold text-[#1a1d26] text-lg tracking-tight">Varavu</span>
+              <span className="font-heading font-black text-[#1a1d26] text-base sm:text-lg tracking-tight">Varavu</span>
             </Link>
           </div>
 
@@ -401,7 +401,7 @@ export default function LandingPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 top-16 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 top-14 md:top-16 z-40 bg-black/40 backdrop-blur-sm md:hidden"
             />
 
             {/* Dropdown container */}
@@ -410,10 +410,10 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="fixed top-16 left-0 right-0 z-50 w-full bg-white border-b border-[#e8eaed] shadow-2xl flex flex-col md:hidden overflow-y-auto max-h-[calc(100vh-64px)]"
+              className="fixed top-14 md:top-16 left-0 right-0 z-50 w-full bg-white border-b border-[#e8eaed] shadow-2xl flex flex-col md:hidden overflow-y-auto max-h-[calc(100vh-56px)] md:max-h-[calc(100vh-64px)]"
             >
               {/* Vertical Links */}
-              <div className="flex flex-col space-y-4 px-6 pt-6">
+              <div className="flex flex-col space-y-3 px-5 pt-4">
                 <a
                   href="#features"
                   onClick={() => setMobileMenuOpen(false)}
@@ -445,14 +445,14 @@ export default function LandingPage() {
               </div>
 
               {/* Description Text */}
-              <div className="px-6 pt-6">
-                <p className="text-xs text-[#6b7280] leading-relaxed">
+              <div className="px-5 pt-4">
+                <p className="text-[11px] text-[#6b7280] leading-relaxed">
                   Easy WhatsApp billing, manage customer payments, track outstanding balances, control inventory, and simplify accounting with Varavu - Tamil Nadu&apos;s best lightweight billing software. Start billing free today.
                 </p>
               </div>
 
               {/* Download / Start Free Action Button */}
-              <div className="px-6 py-6 pb-8">
+              <div className="px-5 py-4 pb-6">
                 <Link
                   href="/signup"
                   onClick={() => setMobileMenuOpen(false)}
@@ -467,220 +467,325 @@ export default function LandingPage() {
       </AnimatePresence>
 
       {/* ─── Hero Section ─────────────────────────────────────── */}
-      <section className="relative bg-white pt-12 sm:pt-20 pb-16 overflow-hidden border-b border-[#e8eaed]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+      <section className="relative bg-[#fafbfe] pt-8 sm:pt-16 lg:pt-20 pb-12 sm:pb-16 lg:pb-20 overflow-hidden border-b border-[#e8eaed]">
+        {/* Modern radial mesh gradient backgrounds for depth */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none overflow-hidden -z-10">
+          <div className="absolute top-[-10%] left-[5%] w-[45%] aspect-square rounded-full bg-emerald-100/30 blur-[120px]" />
+          <div className="absolute bottom-[20%] right-[5%] w-[40%] aspect-square rounded-full bg-[#1a6b3c]/5 blur-[120px]" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-12 items-center">
             {/* Left Content (Centered on mobile, left-aligned on desktop) */}
-            <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#1a1d26] leading-[1.15] tracking-tight max-w-2xl lg:max-w-none">
-                Best WhatsApp Billing Software for Small Business
+            <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-5 sm:space-y-6">
+
+              <h1 className="text-[1.8rem] sm:text-[2.25rem] md:text-5xl lg:text-6xl font-black text-[#1a1d26] tracking-tight leading-[1.2] max-w-2xl lg:max-w-none">
+                Best <span className="bg-gradient-to-r from-emerald-600 to-[#1a6b3c] bg-clip-text text-transparent">WhatsApp Billing</span> Software for Small Business
               </h1>
 
-              <p className="text-base sm:text-lg text-[#6b7280] leading-relaxed max-w-xl">
-                Easy WhatsApp billing, manage customer payments, track outstanding balances, control inventory, and simplify accounting with Varavu - Tamil Nadu&apos;s best lightweight billing web app. Start billing free today.
+              <p className="text-[13px] sm:text-base md:text-lg text-[#525f7a] leading-relaxed max-w-xl">
+                Easy WhatsApp billing, manage customer payments, track outstanding balances, control inventory, and simplify accounting with <strong className="text-slate-800">Varavu</strong> - Tamil Nadu&apos;s best lightweight billing web app. Start billing free today.
               </p>
 
-              {/* Action Buttons */}
-              <div className="pt-2 w-full sm:w-auto">
+              {/* Action Buttons & Trust Badges */}
+              <div className="pt-2 w-full sm:w-auto flex flex-col items-center lg:items-start gap-3">
                 <Link
                   href="/signup"
-                  className="inline-block w-full sm:w-auto text-center bg-[#1a6b3c] hover:bg-[#155d33] text-white font-extrabold text-lg px-12 py-4 rounded-xl transition-all shadow-md hover:shadow-lg shadow-[#1a6b3c]/10"
+                  className="w-full sm:w-auto text-center bg-[#1a6b3c] hover:bg-[#155d33] text-white font-extrabold text-base sm:text-lg px-10 py-4 rounded-xl transition-all shadow-md hover:shadow-lg shadow-[#1a6b3c]/15 hover:-translate-y-0.5 flex items-center justify-center gap-2 group"
                 >
-                  Start Invoicing Free!
+                  <span>Start Invoicing Free</span>
+                  <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  </svg>
                 </Link>
+                <div className="flex items-center gap-2 text-[11px] sm:text-xs text-slate-500 font-semibold mt-1">
+                  <span className="text-emerald-700 font-bold">✓ Free Forever</span>
+                  <span>•</span>
+                  <span>No Setup Required</span>
+                  <span>•</span>
+                  <span>UPI Ready</span>
+                </div>
               </div>
             </div>
 
             {/* Right Content - Responsive Mockup (Phone on Mobile, Laptop on Desktop) */}
             <div className="lg:col-span-5 flex flex-col items-center justify-center w-full">
               
-              {/* Tabs visible on both mobile and desktop to switch simulator step */}
-              <div className="flex gap-1.5 p-1 bg-slate-100/90 rounded-xl w-full max-w-[280px] text-[10px] font-bold mb-4 shadow-inner">
+              {/* Premium Pill Switcher */}
+              <div className="flex gap-1.5 p-1 bg-slate-200/60 backdrop-blur-md rounded-xl w-full max-w-[280px] sm:max-w-[300px] text-[10.5px] font-extrabold mb-5 sm:mb-6 shadow-2xs border border-slate-200/60">
                 <button
                   onClick={() => setSimulatorStep(0)}
-                  className={`flex-1 py-1.5 rounded-lg transition-all text-center ${
-                    simulatorStep === 0 ? 'bg-[#1a6b3c] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                  className={`flex-1 py-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 ${
+                    simulatorStep === 0 
+                      ? 'bg-[#1a6b3c] text-white shadow-sm' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                   }`}
                 >
-                  1. Entry
+                  <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] ${simulatorStep === 0 ? 'bg-white/25 text-white' : 'bg-slate-300/80 text-slate-700'}`}>1</span>
+                  <span>Entry</span>
                 </button>
                 <button
                   onClick={() => setSimulatorStep(1)}
-                  className={`flex-1 py-1.5 rounded-lg transition-all text-center ${
-                    simulatorStep === 1 ? 'bg-[#1a6b3c] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                  className={`flex-1 py-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 ${
+                    simulatorStep === 1 
+                      ? 'bg-[#1a6b3c] text-white shadow-sm' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                   }`}
                 >
-                  2. Preview
+                  <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] ${simulatorStep === 1 ? 'bg-white/25 text-white' : 'bg-slate-300/80 text-slate-700'}`}>2</span>
+                  <span>Preview</span>
                 </button>
                 <button
                   onClick={() => setSimulatorStep(2)}
-                  className={`flex-1 py-1.5 rounded-lg transition-all text-center ${
-                    simulatorStep === 2 ? 'bg-[#1a6b3c] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                  className={`flex-1 py-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 ${
+                    simulatorStep === 2 
+                      ? 'bg-[#1a6b3c] text-white shadow-sm' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                   }`}
                 >
-                  3. WhatsApp
+                  <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] ${simulatorStep === 2 ? 'bg-white/25 text-white' : 'bg-slate-300/80 text-slate-700'}`}>3</span>
+                  <span>Send</span>
                 </button>
               </div>
 
-              {/* MOBILE MOCKUP: Single premium smartphone frame (visible only on mobile) */}
-              <div className="block lg:hidden w-full max-w-[250px] sm:max-w-[270px] bg-[#090d16] rounded-[40px] p-2.5 shadow-2xl border-4 border-slate-800 relative aspect-[9/18.2] overflow-hidden select-none">
-                {/* Notch */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-26 h-4 bg-[#090d16] rounded-b-xl z-20" />
+              {/* MOBILE MOCKUP: Larger, premium smartphone frame (visible only on mobile) */}
+              <div className="relative block lg:hidden w-full max-w-[260px] sm:max-w-[290px] aspect-[9/18.3] mx-auto select-none mt-2">
+                {/* Background glow behind phone mockup */}
+                <div className="absolute inset-[-12px] bg-emerald-500/15 blur-2xl rounded-[48px] -z-10" />
                 
-                {/* Internal Screen Content */}
-                <div className="bg-[#f8fafc] h-full rounded-[30px] overflow-hidden flex flex-col">
-                  {/* App Header */}
-                  <div className="bg-[#1a6b3c] text-white p-3 pt-6 pb-3 flex justify-between items-center shadow-xs shrink-0">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-4.5 h-4.5 rounded bg-white/15 flex items-center justify-center">
-                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        </svg>
-                      </div>
-                      <span className="font-extrabold text-[11px] tracking-tight">Varavu Invoice</span>
-                    </div>
-                    <span className="text-[6px] bg-white/20 px-1.5 py-0.5 rounded-full font-bold">Tamil Nadu</span>
+                {/* Internal Smartphone frame */}
+                <div className="w-full h-full bg-[#0b0f19] rounded-[42px] p-2.5 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.3)] border-[3.5px] border-slate-800 relative overflow-hidden flex flex-col">
+                  {/* Smartphone Notch */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-5 bg-[#0b0f19] rounded-b-2xl z-20 flex items-center justify-center">
+                    <div className="w-8 h-1 bg-slate-800 rounded-full mb-1" />
                   </div>
-
-                  {/* Simulated Screen Body Content */}
-                  <div className="flex-1 px-3 pb-3 flex flex-col overflow-hidden pt-2">
-                    {simulatorStep === 0 && (
-                      <div className="flex-1 flex flex-col justify-between overflow-hidden">
-                        <div className="space-y-2.5">
-                          <div className="flex justify-between items-center pb-1 border-b border-slate-100">
-                            <span className="text-[8px] font-bold text-slate-800 uppercase">New Invoice</span>
-                            <span className="text-[6px] text-slate-400 font-semibold">Step 1 of 3</span>
-                          </div>
-
-                          <div className="space-y-0.5">
-                            <label className="text-[6.5px] text-slate-400 font-extrabold uppercase">Bill To (Customer)</label>
-                            <div className="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200/60 shadow-2xs">
-                              <span className="text-[8px] font-extrabold text-slate-800">Ramesh Kumar</span>
-                              <span className="text-[6px] text-slate-400">Chennai</span>
-                            </div>
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-[6.5px] text-slate-400 font-extrabold uppercase">Items &amp; Quantities</label>
-                            <div className="bg-white p-2 rounded-lg border border-slate-200/60 shadow-2xs flex justify-between items-center text-[7.5px]">
-                              <div>
-                                <h6 className="font-extrabold text-slate-800">Ponni Rice (25kg Bag)</h6>
-                                <p className="text-[6px] text-slate-400">Qty: 2 &times; ₹1,200.00</p>
-                              </div>
-                              <span className="font-extrabold text-slate-800">₹2,400.00</span>
-                            </div>
-                            <div className="bg-white p-2 rounded-lg border border-slate-200/60 shadow-2xs flex justify-between items-center text-[7.5px]">
-                              <div>
-                                <h6 className="font-extrabold text-slate-800">Toor Dal (10kg Bag)</h6>
-                                <p className="text-[6px] text-slate-400">Qty: 1 &times; ₹1,450.00</p>
-                              </div>
-                              <span className="font-extrabold text-slate-800">₹1,450.00</span>
-                            </div>
-                          </div>
+                  
+                  {/* Internal Screen Content */}
+                  <div className="bg-[#f8fafc] h-full rounded-[32px] overflow-hidden flex flex-col border border-slate-950/5 relative">
+                    {/* App Header */}
+                    <div className="bg-[#1a6b3c] text-white p-3 pt-6 pb-3 flex justify-between items-center shadow-xs shrink-0">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-4.5 h-4.5 rounded bg-white/15 flex items-center justify-center">
+                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          </svg>
                         </div>
-
-                        <button
-                          onClick={() => setSimulatorStep(1)}
-                          className="w-full bg-[#1a6b3c] text-white py-1.5 rounded-lg text-[8px] font-extrabold shadow-sm mt-2 flex items-center justify-center gap-1"
-                        >
-                          Generate Invoice Preview →
-                        </button>
+                        <span className="font-extrabold text-[11.5px] tracking-tight">Varavu Invoice</span>
                       </div>
-                    )}
+                      <span className="text-[6.5px] bg-white/20 px-2 py-0.5 rounded-full font-bold">Tamil Nadu</span>
+                    </div>
 
-                    {simulatorStep === 1 && (
-                      <div className="flex-1 flex flex-col justify-between overflow-hidden">
-                        <div className="flex-1 flex flex-col overflow-hidden">
-                          <div className="flex justify-between items-center pb-1 border-b border-slate-100 shrink-0">
-                            <span className="text-[8px] font-bold text-slate-800 uppercase">Tax Invoice</span>
-                            <span className="text-[6px] text-slate-400 font-semibold">Step 2 of 3</span>
-                          </div>
+                    {/* Simulated Screen Body Content with smooth animations */}
+                    <div className="flex-1 px-3 pb-3 flex flex-col overflow-hidden pt-2.5">
+                      <AnimatePresence mode="wait">
+                        {simulatorStep === 0 && (
+                          <motion.div
+                            key="step0"
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.25 }}
+                            className="flex-1 flex flex-col justify-between overflow-hidden"
+                          >
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-center pb-1.5 border-b border-slate-100">
+                                <span className="text-[8.5px] font-bold text-slate-850 uppercase">New Invoice</span>
+                                <span className="text-[6px] text-slate-400 font-semibold">Step 1 of 3</span>
+                              </div>
 
-                          <div className="flex-1 bg-white border border-slate-200/60 rounded-xl p-2 shadow-2xs mt-1.5 overflow-y-auto space-y-2 text-[6px] text-slate-600">
-                            <div className="flex justify-between items-start border-b border-slate-100 pb-1">
-                              <div>
-                                <h5 className="font-extrabold text-[#1a6b3c] text-[7px]">VARAVU STORE</h5>
-                                <p className="text-[5px] text-slate-400">GSTIN: 33AAAAA0000A1Z1</p>
+                              <div className="space-y-0.5">
+                                <label className="text-[6.5px] text-slate-400 font-extrabold uppercase">Bill To (Customer)</label>
+                                <div className="flex items-center justify-between bg-white p-2.5 rounded-lg border border-slate-200/70 shadow-2xs">
+                                  <span className="text-[8.5px] font-extrabold text-slate-850">Ramesh Kumar</span>
+                                  <span className="text-[6.5px] text-slate-450 font-medium">+91 98765 43210</span>
+                                </div>
                               </div>
-                              <div className="text-right">
-                                <p className="font-extrabold">TAX INVOICE</p>
-                                <p className="text-[5px] text-slate-400">#INV-2026-08</p>
-                              </div>
-                            </div>
-                            <div className="flex justify-between">
-                              <div>
-                                <p className="font-bold text-slate-800">Bill To: Ramesh Kumar</p>
-                                <p className="text-[5px]">Chennai, TN</p>
-                              </div>
-                            </div>
-                            <div className="space-y-0.5">
-                              <div className="flex justify-between font-bold text-slate-800 border-b border-slate-100 pb-0.5">
-                                <span>Items</span>
-                                <span>Amt</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Ponni Rice &times; 2</span>
-                                <span>₹2,400.00</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Toor Dal &times; 1</span>
-                                <span>₹1,450.00</span>
-                              </div>
-                            </div>
-                            <div className="border-t border-slate-100 pt-1 text-right font-bold text-[7px] text-[#1a6b3c] flex justify-between">
-                              <span>Grand Total:</span>
-                              <span>₹4,042.50</span>
-                            </div>
-                          </div>
-                        </div>
 
-                        <button
-                          onClick={() => setSimulatorStep(2)}
-                          className="w-full bg-[#16a34a] text-white py-1.5 rounded-lg text-[8px] font-extrabold shadow-sm mt-2 flex items-center justify-center gap-1"
-                        >
-                          Send via WhatsApp 💬
-                        </button>
-                      </div>
-                    )}
-
-                    {simulatorStep === 2 && (
-                      <div className="flex-1 flex flex-col justify-between overflow-hidden">
-                        <div className="flex-1 flex flex-col overflow-hidden">
-                          <div className="flex items-center gap-1.5 pb-1 border-b border-slate-100 shrink-0">
-                            <div className="w-4 h-4 rounded-full bg-emerald-600 flex items-center justify-center text-[6px] text-white font-bold">RK</div>
-                            <div>
-                              <h6 className="text-[7px] font-bold text-slate-800 leading-tight">Ramesh Kumar</h6>
-                              <p className="text-[4px] text-emerald-600 font-bold">online</p>
+                              <div className="space-y-1.5">
+                                <label className="text-[6.5px] text-slate-400 font-extrabold uppercase">Items &amp; Quantities</label>
+                                <div className="bg-white p-2.5 rounded-lg border border-slate-200/70 shadow-2xs flex justify-between items-center text-[7.5px]">
+                                  <div>
+                                    <h6 className="font-extrabold text-slate-850">Ponni Rice (25kg Bag)</h6>
+                                    <p className="text-[6px] text-slate-400">Qty: 2 &times; ₹1,200.00</p>
+                                  </div>
+                                  <span className="font-extrabold text-slate-850">₹2,400.00</span>
+                                </div>
+                                <div className="bg-white p-2.5 rounded-lg border border-slate-200/70 shadow-2xs flex justify-between items-center text-[7.5px]">
+                                  <div>
+                                    <h6 className="font-extrabold text-slate-850">Toor Dal (10kg Bag)</h6>
+                                    <p className="text-[6px] text-slate-400">Qty: 1 &times; ₹1,450.00</p>
+                                  </div>
+                                  <span className="font-extrabold text-slate-850">₹1,450.00</span>
+                                </div>
+                              </div>
                             </div>
-                          </div>
 
-                          <div className="flex-1 py-1.5 space-y-1.5 overflow-y-auto flex flex-col justify-end text-[6px]">
-                            <div className="bg-[#dcf8c6] p-1.5 rounded-lg max-w-[90%] self-end border border-emerald-200/50 shadow-2xs space-y-0.5">
-                              <p className="text-[6.5px] font-bold text-slate-800">INV_Ramesh.pdf</p>
-                              <p className="text-[6.5px] text-slate-700">
-                                Dear Ramesh, here is your invoice of **₹4,042.50** from Varavu Store. Pay online: *upi.varavu.in/pay*
-                              </p>
-                            </div>
-                            <div className="bg-white p-1 rounded-lg max-w-[85%] self-start border border-slate-200/50 shadow-2xs">
-                              <p className="text-[6.5px] text-slate-800 font-bold">Perfect! Done payment via GPay.</p>
-                            </div>
-                          </div>
-                        </div>
+                            <button
+                              onClick={() => setSimulatorStep(1)}
+                              className="w-full bg-[#1a6b3c] text-white py-2 rounded-lg text-[8.5px] font-extrabold shadow-sm mt-2 flex items-center justify-center gap-1 active:scale-[0.98] transition-transform"
+                            >
+                              Generate Invoice Preview →
+                            </button>
+                          </motion.div>
+                        )}
 
-                        <div className="bg-emerald-50 border border-emerald-100/60 p-1.5 rounded-xl text-center shrink-0 flex items-center justify-center gap-1.5 mt-1.5">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[5px] font-bold">✓</span>
-                          <span className="text-[7.5px] text-[#1a6b3c] font-extrabold">Invoice Sent &amp; Paid!</span>
-                        </div>
-                      </div>
-                    )}
+                        {simulatorStep === 1 && (
+                          <motion.div
+                            key="step1"
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.25 }}
+                            className="flex-1 flex flex-col justify-between overflow-hidden"
+                          >
+                            <div className="flex-1 flex flex-col overflow-hidden">
+                              <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 shrink-0">
+                                <span className="text-[8.5px] font-bold text-slate-850 uppercase">Tax Invoice</span>
+                                <span className="text-[6px] text-slate-400 font-semibold">Step 2 of 3</span>
+                              </div>
+
+                              <div className="flex-1 bg-white border border-slate-200/70 rounded-xl p-2.5 shadow-2xs mt-2 overflow-y-auto space-y-2.5 text-[6px] text-slate-650">
+                                <div className="flex justify-between items-start border-b border-slate-100 pb-1.5">
+                                  <div>
+                                    <h5 className="font-extrabold text-[#1a6b3c] text-[7.5px]">VARAVU STORE</h5>
+                                    <p className="text-[5px] text-slate-400">GSTIN: 33AAAAA0000A1Z1</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="font-extrabold text-slate-850">TAX INVOICE</p>
+                                    <p className="text-[5px] text-slate-400 font-semibold">#INV-2026-08</p>
+                                  </div>
+                                </div>
+                                <div className="flex justify-between">
+                                  <div>
+                                    <p className="font-bold text-slate-850">Bill To: Ramesh Kumar</p>
+                                    <p className="text-[5px] text-slate-400">Chennai, TN</p>
+                                  </div>
+                                </div>
+                                <div className="space-y-0.5">
+                                  <div className="flex justify-between font-bold text-slate-850 border-b border-slate-100 pb-0.5">
+                                    <span>Items</span>
+                                    <span>Amt</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Ponni Rice &times; 2</span>
+                                    <span>₹2,400.00</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Toor Dal &times; 1</span>
+                                    <span>₹1,450.00</span>
+                                  </div>
+                                </div>
+                                <div className="border-t border-slate-100 pt-1.5 text-right font-bold text-[7.5px] text-[#1a6b3c] flex justify-between">
+                                  <span>Grand Total:</span>
+                                  <span>₹4,042.50</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => setSimulatorStep(2)}
+                              className="w-full bg-[#16a34a] text-white py-2 rounded-lg text-[8.5px] font-extrabold shadow-sm mt-2 flex items-center justify-center gap-1 active:scale-[0.98] transition-transform"
+                            >
+                              Send via WhatsApp 💬
+                            </button>
+                          </motion.div>
+                        )}
+
+                        {simulatorStep === 2 && (
+                          <motion.div
+                            key="step2"
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.25 }}
+                            className="flex-1 flex flex-col justify-between overflow-hidden"
+                          >
+                            <div className="flex-1 flex flex-col overflow-hidden">
+                              <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100 shrink-0">
+                                <div className="w-5.5 h-5.5 rounded-full bg-emerald-600 flex items-center justify-center text-[7.5px] text-white font-bold">RK</div>
+                                <div>
+                                  <h6 className="text-[7.5px] font-bold text-slate-850 leading-tight">Ramesh Kumar</h6>
+                                  <p className="text-[4px] text-emerald-600 font-extrabold uppercase tracking-wide">online</p>
+                                </div>
+                              </div>
+
+                              <div className="flex-1 py-2 space-y-2 overflow-y-auto flex flex-col justify-end text-[6.5px]">
+                                <div className="bg-[#dcf8c6] p-2 rounded-lg max-w-[90%] self-end border border-emerald-200/50 shadow-2xs space-y-1">
+                                  <p className="text-[7px] font-bold text-slate-850 flex items-center gap-1">
+                                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="red" strokeWidth="2.5">
+                                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    </svg>
+                                    <span>INV_Ramesh.pdf</span>
+                                  </p>
+                                  <p className="text-[6.5px] text-slate-700 leading-normal">
+                                    Dear Ramesh, here is your invoice of **₹4,042.50** from Varavu Store. Pay online: *upi.varavu.in/pay*
+                                  </p>
+                                </div>
+                                <div className="bg-white p-2 rounded-lg max-w-[85%] self-start border border-slate-200/50 shadow-2xs">
+                                  <p className="text-[6.5px] text-slate-850 font-bold">Perfect! Done payment via GPay.</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-emerald-50 border border-emerald-150 p-2 rounded-xl text-center shrink-0 flex items-center justify-center gap-1.5 mt-2">
+                              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[5.5px] font-bold">✓</span>
+                              <span className="text-[8px] text-[#1a6b3c] font-extrabold">Invoice Sent &amp; Paid!</span>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* DESKTOP MOCKUP: Premium laptop frame (visible only on desktop) */}
-              <div className="hidden lg:flex flex-col items-center w-full max-w-[480px] xl:max-w-[520px] select-none">
-                {/* Screen Bezel Frame */}
-                <div className="w-full bg-[#1e293b] rounded-t-2xl p-2.5 shadow-2xl border-x-2 border-t-2 border-slate-700 relative aspect-[16/10.5] overflow-hidden flex flex-col">
+              {/* DESKTOP MOCKUP: 3D laptop on white background (visible only on desktop) */}
+              <div className="hidden lg:block w-full max-w-[480px] xl:max-w-[520px] select-none">
+                <div className="hero-laptop-scene relative pt-2 pb-12">
+                  {/* Soft floor shadow */}
+                  <div
+                    aria-hidden
+                    className="hero-laptop-shadow pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 w-[82%] h-10"
+                  />
+
+                  <div className="hero-laptop-3d relative">
+                    {/* Floating invoice card — depth layer like reference */}
+                    <AnimatePresence mode="wait">
+                      {(simulatorStep === 1 || simulatorStep === 2) && (
+                        <motion.div
+                          key="float-invoice"
+                          initial={{ opacity: 0, x: 20, y: 10, rotateY: -8 }}
+                          animate={{ opacity: 1, x: 0, y: 0, rotateY: -8 }}
+                          exit={{ opacity: 0, x: 20, y: 10 }}
+                          transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
+                          className="hero-laptop-float absolute -right-6 xl:-right-10 top-[18%] z-30 w-[118px] bg-white rounded-lg border border-slate-200/80 p-2.5 pointer-events-none"
+                          style={{ transform: 'translateZ(48px) rotateY(-12deg) rotateX(4deg)' }}
+                        >
+                          <p className="text-[9px] font-extrabold text-[#1a6b3c] tracking-wide">INVOICE</p>
+                          <div className="mt-1.5 space-y-1 text-[5.5px] text-slate-500">
+                            <div className="flex justify-between font-bold text-slate-700 border-b border-slate-100 pb-0.5">
+                              <span>Item</span>
+                              <span>Amt</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Ponni Rice</span>
+                              <span>₹2,400</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Toor Dal</span>
+                              <span>₹1,450</span>
+                            </div>
+                            <div className="flex justify-between font-extrabold text-[#1a6b3c] border-t border-slate-100 pt-0.5 text-[6px]">
+                              <span>Total</span>
+                              <span>₹4,042</span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {/* Screen lid */}
+                    <div className="hero-laptop-lid w-full bg-[#1e293b] rounded-t-2xl p-2.5 border-x-2 border-t-2 border-slate-600/80 relative aspect-[16/10.5] overflow-hidden flex flex-col">
                   {/* Camera lens */}
                   <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-slate-900 z-30" />
                   
@@ -921,6 +1026,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </div>
+                  </div>
 
                 {/* Laptop Keyboard dock base */}
                 <div className="w-[108%] h-3 bg-slate-800 rounded-b-xl relative -bottom-1 -left-[4%] border-t border-slate-700 shadow-md">
@@ -930,66 +1036,67 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
+        </div>
       </section>
 
       {/* ─── Below Qualities (Sub-Hero Bar) ───────────────────── */}
-      <section className="bg-white border-b border-[#e8eaed] py-10 md:py-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex md:grid md:grid-cols-4 gap-8 md:gap-8 text-center items-start overflow-x-auto md:overflow-x-visible no-scrollbar snap-x snap-mandatory scroll-smooth pb-4 md:pb-0">
+      <section className="bg-white border-b border-[#e8eaed] py-8 md:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6 md:gap-8 text-center items-start">
             {/* Quality 1 */}
-            <div className="min-w-[220px] md:min-w-0 flex-shrink-0 snap-center flex flex-col items-center space-y-4">
+            <div className="flex flex-col items-center space-y-2 md:space-y-4">
               <div className="text-[#1a6b3c] flex items-center justify-center">
-                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
                   <circle cx="16" cy="16" r="13" />
                   <path d="M11 14a2 2 0 0 1 4 0" />
                   <path d="M17 14a2 2 0 0 1 4 0" />
                   <path d="M11 18c0 3 2.5 5 5 5s5-2 5-5H11z" fill="#1a6b3c" />
                 </svg>
               </div>
-              <div className="space-y-1">
-                <h4 className="text-xl font-extrabold text-[#1a1d26]">
+              <div className="space-y-0.5">
+                <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">
                   1.5 Lakh<span className="text-[#1a6b3c]">+</span>
                 </h4>
-                <p className="text-xs text-[#6b7280] font-semibold mt-0.5">Happy Shop Owners</p>
+                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">Happy Shop Owners</p>
               </div>
             </div>
 
             {/* Quality 2 */}
-            <div className="min-w-[220px] md:min-w-0 flex-shrink-0 snap-center flex flex-col items-center space-y-4">
+            <div className="flex flex-col items-center space-y-2 md:space-y-4">
               <div className="text-[#1a6b3c] flex items-center justify-center">
-                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
                   <rect x="9" y="4" width="14" height="24" rx="3" />
                   <line x1="9" y1="8" x2="23" y2="8" />
                   <line x1="9" y1="24" x2="23" y2="24" />
                 </svg>
               </div>
-              <div className="space-y-1">
-                <h4 className="text-xl font-extrabold text-[#1a1d26]">Free</h4>
-                <p className="text-xs text-[#6b7280] font-semibold mt-0.5">Web &amp; PWA App</p>
+              <div className="space-y-0.5">
+                <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">Free</h4>
+                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">Web &amp; PWA App</p>
               </div>
             </div>
 
             {/* Quality 3 */}
-            <div className="min-w-[220px] md:min-w-0 flex-shrink-0 snap-center flex flex-col items-center space-y-4">
+            <div className="flex flex-col items-center space-y-2 md:space-y-4">
               <div className="text-[#1a6b3c] flex items-center justify-center">
-                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
                   <path d="M8 4L24 16L8 28V4Z" />
                   <path d="M8 4L19 16L8 28" />
                   <path d="M19 16L8 16" />
                 </svg>
               </div>
-              <div className="space-y-1">
-                <h4 className="text-xl font-extrabold text-[#1a1d26]">
+              <div className="space-y-0.5">
+                <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">
                   Rated 4.9<span className="text-[#1a6b3c]">/5</span>
                 </h4>
-                <p className="text-xs text-[#6b7280] font-semibold mt-0.5">User Satisfaction</p>
+                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">User Satisfaction</p>
               </div>
             </div>
 
             {/* Quality 4 */}
-            <div className="min-w-[220px] md:min-w-0 flex-shrink-0 snap-center flex flex-col items-center space-y-4">
+            <div className="flex flex-col items-center space-y-2 md:space-y-4">
               <div className="text-[#1a6b3c] flex items-center justify-center">
-                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
                   <rect x="10" y="6" width="18" height="13" rx="2" />
                   <path d="M16 19v4m-3 0h6" />
                   <rect x="4" y="11" width="7" height="12" rx="1" fill="white" />
@@ -997,60 +1104,52 @@ export default function LandingPage() {
                   <line x1="4" y1="20" x2="11" y2="20" />
                 </svg>
               </div>
-              <div className="space-y-1">
-                <h4 className="text-xl font-extrabold text-[#1a1d26]">
+              <div className="space-y-0.5">
+                <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">
                   Multi-<span className="text-[#1a6b3c]">Device</span>
                 </h4>
-                <p className="text-xs text-[#6b7280] font-semibold mt-0.5">Use on Mobile/Desktop</p>
+                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">Use on Mobile/Desktop</p>
               </div>
             </div>
-          </div>
-
-          {/* Swipe indicator (visible only on mobile) */}
-          <div className="flex md:hidden justify-center items-center gap-1.5 mt-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#1a6b3c]"></span>
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
           </div>
         </div>
       </section>
 
       {/* ─── Capabilities alternating Section ──────────────────── */}
-      <section id="features" className="py-20 bg-white border-b border-[#e8eaed]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12 lg:space-y-28">
+      <section id="features" className="py-12 md:py-20 bg-white border-b border-[#e8eaed]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10 md:space-y-12 lg:space-y-28">
 
           {/* Feature 1: GST Billing & WhatsApp Sharing */}
-          <div className="bg-gradient-to-b from-white to-slate-50/40 p-6 md:p-8 rounded-3xl border border-slate-200/70 shadow-xs lg:bg-none lg:p-0 lg:border-0 lg:shadow-none grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
+          <div className="bg-gradient-to-b from-white to-slate-50/40 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-slate-200/70 shadow-xs lg:bg-none lg:p-0 lg:border-0 lg:shadow-none grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 md:gap-8 lg:gap-16 items-center">
             {/* Left Graphic */}
             <div className="lg:col-span-6 relative flex justify-center">
               <div className="absolute inset-0 bg-emerald-50 rounded-full blur-3xl opacity-50 -z-10 scale-90" />
               <img
                 src="/billing_whatsapp.png"
                 alt="GST billing and WhatsApp sharing"
-                className="w-full max-w-[440px] h-auto object-contain drop-shadow-2xl rounded-2xl"
+                className="w-full max-w-[320px] sm:max-w-[440px] h-auto object-contain drop-shadow-2xl rounded-2xl"
               />
             </div>
             {/* Right Content */}
-            <div className="lg:col-span-6 space-y-6">
-              <span className="inline-block text-[10px] bg-emerald-50 text-[#1a6b3c] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider border border-emerald-100/50">
+            <div className="lg:col-span-6 space-y-3 sm:space-y-4 md:space-y-6">
+              <span className="inline-block text-[9px] sm:text-[10px] bg-emerald-50 text-[#1a6b3c] font-extrabold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full uppercase tracking-wider border border-emerald-100/50">
                 WhatsApp-Native Delivery
               </span>
-              <h3 className="text-xl sm:text-3xl font-extrabold text-[#1a1d26] tracking-tight leading-snug">
+              <h3 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-[#1a1d26] tracking-tight leading-snug">
                 Create GST Bills online and share them with customers
               </h3>
-              <p className="text-xs sm:text-base text-[#4b5563] leading-relaxed font-medium">
+              <p className="text-[13px] sm:text-sm md:text-base text-[#4b5563] leading-relaxed font-medium">
                 <strong>What it does:</strong> Varavu&apos;s GST billing software lets you generate fully GST-compliant tax invoices in under 20 seconds. Instead of wasting money on thermal printers and paper rolls, deliver branded PDF receipts directly to your customer&apos;s WhatsApp instantly.
               </p>
-              <ul className="space-y-2.5 pt-2">
+              <ul className="space-y-2 sm:space-y-2.5 pt-1 sm:pt-2">
                 {[
                   "Generate compliant tax invoices with custom SGST/CGST rates",
                   "Send PDFs instantly on WhatsApp without saving contacts",
                   "Completely offline billing - syncs automatically when online"
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-xs sm:text-sm text-[#4b5563] font-semibold">
-                    <div className="w-5 h-5 rounded-full bg-emerald-50 text-[#1a6b3c] flex items-center justify-center shrink-0 border border-emerald-100/30 mt-0.5">
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                  <li key={idx} className="flex items-start gap-2.5 sm:gap-3 text-[13px] sm:text-sm text-[#4b5563] font-semibold">
+                    <div className="w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full bg-emerald-50 text-[#1a6b3c] flex items-center justify-center shrink-0 border border-emerald-100/30 mt-0.5">
+                      <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
                     </div>
@@ -1062,36 +1161,36 @@ export default function LandingPage() {
           </div>
 
           {/* Feature 3: Payment Tracking & UPI Reminders */}
-          <div className="bg-gradient-to-b from-white to-slate-50/40 p-6 md:p-8 rounded-3xl border border-slate-200/70 shadow-xs lg:bg-none lg:p-0 lg:border-0 lg:shadow-none grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
+          <div className="bg-gradient-to-b from-white to-slate-50/40 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-slate-200/70 shadow-xs lg:bg-none lg:p-0 lg:border-0 lg:shadow-none grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 md:gap-8 lg:gap-16 items-center">
             {/* Left Graphic */}
             <div className="lg:col-span-6 relative flex justify-center">
               <div className="absolute inset-0 bg-blue-50 rounded-full blur-3xl opacity-50 -z-10 scale-90" />
               <img
                 src="/payments_reminders.png"
                 alt="UPI payment status and reminders"
-                className="w-full max-w-[400px] h-auto object-contain drop-shadow-2xl rounded-2xl"
+                className="w-full max-w-[300px] sm:max-w-[400px] h-auto object-contain drop-shadow-2xl rounded-2xl"
               />
             </div>
             {/* Right Content */}
-            <div className="lg:col-span-6 space-y-6">
-              <span className="inline-block text-[10px] bg-blue-50 text-blue-700 font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider border border-blue-100/50">
+            <div className="lg:col-span-6 space-y-3 sm:space-y-4 md:space-y-6">
+              <span className="inline-block text-[9px] sm:text-[10px] bg-blue-50 text-blue-700 font-extrabold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full uppercase tracking-wider border border-blue-100/50">
                 Payment Status &amp; UPI
               </span>
-              <h3 className="text-xl sm:text-3xl font-extrabold text-[#1a1d26] tracking-tight leading-snug">
+              <h3 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-[#1a1d26] tracking-tight leading-snug">
                 Track Outstanding Balances &amp; Collect via UPI
               </h3>
-              <p className="text-xs sm:text-base text-[#4b5563] leading-relaxed font-medium">
+              <p className="text-[13px] sm:text-sm md:text-base text-[#4b5563] leading-relaxed font-medium">
                 <strong>What it does:</strong> Say goodbye to manually checking notebook ledgers. Monitor paid, partially paid, and unpaid statuses directly from your dashboard. Send polite payment reminders with a pre-filled UPI payment link on WhatsApp.
               </p>
-              <ul className="space-y-2.5 pt-2">
+              <ul className="space-y-2 sm:space-y-2.5 pt-1 sm:pt-2">
                 {[
                   "Detailed customer directory showing total outstanding balance",
                   "One-tap payments reminders with pre-filled WhatsApp texts",
                   "Direct UPI link integration for frictionless customer payments"
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-xs sm:text-sm text-[#4b5563] font-semibold">
-                    <div className="w-5 h-5 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 border border-blue-100/30 mt-0.5">
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                  <li key={idx} className="flex items-start gap-2.5 sm:gap-3 text-[13px] sm:text-sm text-[#4b5563] font-semibold">
+                    <div className="w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 border border-blue-100/30 mt-0.5">
+                      <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
                     </div>
@@ -1106,36 +1205,36 @@ export default function LandingPage() {
       </section>
 
       {/* ─── How It Works ─────────────────────────────────────── */}
-      <section id="how-it-works" className="py-20 bg-white border-y border-[#e8eaed]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-xl mx-auto mb-12 md:mb-16 space-y-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold tracking-widest uppercase bg-emerald-50 text-[#1a6b3c] border border-emerald-100/80">
+      <section id="how-it-works" className="py-12 md:py-20 bg-white border-y border-[#e8eaed]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-xl mx-auto mb-8 md:mb-16 space-y-2 sm:space-y-3">
+            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-extrabold tracking-widest uppercase bg-emerald-50 text-[#1a6b3c] border border-emerald-100/80">
               Workflow
             </span>
-            <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 leading-tight">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 leading-tight">
               Create and share bills in <span className="bg-gradient-to-r from-[#1a6b3c] to-[#2e9354] bg-clip-text text-transparent">three simple steps</span>
             </h3>
           </div>
 
           {/* Mobile Connected Stepper (Visible only on mobile) */}
-          <div className="block md:hidden relative pl-4 pr-2 space-y-12">
+          <div className="block md:hidden relative pl-3 pr-1 space-y-7">
             {/* Vertical timeline line */}
-            <div className="absolute left-[36px] top-6 bottom-6 w-0.5 border-l-2 border-dashed border-[#1a6b3c]/25" />
+            <div className="absolute left-[30px] top-5 bottom-5 w-0.5 border-l-2 border-dashed border-[#1a6b3c]/25" />
             
             {steps.map((step, idx) => (
-              <div key={idx} className="relative flex gap-6 items-start">
+              <div key={idx} className="relative flex gap-4 items-start">
                 {/* Step Circle with Icon */}
-                <div className="relative z-10 shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-white to-slate-50 text-[#1a6b3c] flex items-center justify-center border border-slate-200/80 shadow-md">
+                <div className="relative z-10 shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-white to-slate-50 text-[#1a6b3c] flex items-center justify-center border border-slate-200/80 shadow-md [&>svg]:w-5 [&>svg]:h-5">
                   {step.icon}
                   {/* Step Number Badge */}
-                  <span className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-gradient-to-br from-[#1a6b3c] to-[#22875a] text-white text-[10px] font-extrabold flex items-center justify-center shadow-md border-2 border-white">
+                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br from-[#1a6b3c] to-[#22875a] text-white text-[9px] font-extrabold flex items-center justify-center shadow-md border-2 border-white">
                     {step.num}
                   </span>
                 </div>
                 {/* Step Content */}
-                <div className="space-y-1.5 pt-1">
-                  <h4 className="text-sm font-extrabold text-slate-800 tracking-tight">{step.title}</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed font-medium">{step.desc}</p>
+                <div className="space-y-1 pt-0.5">
+                  <h4 className="text-[13px] font-extrabold text-slate-800 tracking-tight">{step.title}</h4>
+                  <p className="text-[12px] text-slate-500 leading-relaxed font-medium">{step.desc}</p>
                 </div>
               </div>
             ))}
@@ -1165,21 +1264,21 @@ export default function LandingPage() {
       </section>
 
       {/* ─── Industry Solutions ───────────────────────────────── */}
-      <section className="py-20 bg-[#f8fafc] border-b border-[#e8eaed]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-xl mx-auto mb-12 md:mb-16 space-y-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold tracking-widest uppercase bg-emerald-50 text-[#1a6b3c] border border-emerald-100/80">
+      <section className="py-12 md:py-20 bg-[#f8fafc] border-b border-[#e8eaed]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-xl mx-auto mb-8 md:mb-16 space-y-2 sm:space-y-3">
+            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-extrabold tracking-widest uppercase bg-emerald-50 text-[#1a6b3c] border border-emerald-100/80">
               Sectors
             </span>
-            <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 leading-tight">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 leading-tight">
               Tailored for businesses across <span className="bg-gradient-to-r from-[#1a6b3c] to-[#2e9354] bg-clip-text text-transparent">Tamil Nadu</span>
             </h3>
           </div>
 
           {/* Mobile Sectors Selector (Visible only on mobile) */}
-          <div className="block md:hidden space-y-6">
+          <div className="block md:hidden space-y-4">
             {/* Scrollable Tab bar */}
-            <div className="flex gap-2.5 overflow-x-auto pb-3 no-scrollbar snap-x snap-mandatory">
+            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory">
               {industries.map((ind, idx) => {
                 const isActive = activeSector === idx;
                 const tabLabel = ind.name.split(' & ')[0];
@@ -1187,7 +1286,7 @@ export default function LandingPage() {
                   <button
                     key={idx}
                     onClick={() => setActiveSector(idx)}
-                    className={`snap-center shrink-0 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 ${
+                    className={`snap-center shrink-0 px-3 py-2 rounded-lg text-[11px] font-bold transition-all border flex items-center gap-1.5 ${
                       isActive
                         ? 'bg-gradient-to-r from-[#1a6b3c] to-[#22875a] text-white border-[#1a6b3c] shadow-md shadow-[#1a6b3c]/15'
                         : 'bg-white text-slate-600 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
@@ -1203,16 +1302,16 @@ export default function LandingPage() {
             </div>
 
             {/* Display Card for Active Sector */}
-            <div className="bg-white p-6 pt-8 rounded-3xl border border-slate-200/85 shadow-lg shadow-slate-100/50 relative overflow-hidden transition-all duration-300">
+            <div className="bg-white p-5 pt-6 rounded-2xl border border-slate-200/85 shadow-lg shadow-slate-100/50 relative overflow-hidden transition-all duration-300">
               {/* Green gradient top accent bar */}
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#1a6b3c] to-[#22875a]" />
 
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-slate-50 to-emerald-50/30 flex items-center justify-center shrink-0 shadow-xs border border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-slate-50 to-emerald-50/30 flex items-center justify-center shrink-0 shadow-xs border border-slate-100 [&>svg]:w-6 [&>svg]:h-6">
                   {industries[activeSector].icon}
                 </div>
-                <div className="space-y-1">
-                  <h4 className="text-base font-extrabold text-[#1a1d26]">
+                <div className="space-y-0.5">
+                  <h4 className="text-sm font-extrabold text-[#1a1d26]">
                     {industries[activeSector].name}
                   </h4>
                   <span className="inline-flex items-center gap-1.5 text-[9px] font-extrabold text-[#1a6b3c] bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100/50">
@@ -1222,32 +1321,32 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <p className="text-xs text-slate-500 leading-relaxed font-medium mt-4">
+              <p className="text-[12px] text-slate-500 leading-relaxed font-medium mt-3">
                 {industries[activeSector].desc}
               </p>
 
               {/* Highlights Checklist */}
-              <div className="mt-6 pt-5 border-t border-slate-100/80 space-y-3">
-                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Key Benefits:</p>
-                <div className="grid grid-cols-1 gap-2.5">
+              <div className="mt-4 pt-4 border-t border-slate-100/80 space-y-2.5">
+                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Key Benefits:</p>
+                <div className="grid grid-cols-1 gap-2">
                   {industries[activeSector].highlights?.map((hl, hlIdx) => (
-                    <div key={hlIdx} className="flex items-center gap-3 bg-slate-50/60 border border-slate-100 p-3 rounded-2xl transition-all hover:bg-emerald-50/20 hover:border-emerald-100/50">
-                      <div className="w-6 h-6 rounded-full bg-emerald-50 text-[#1a6b3c] flex items-center justify-center shrink-0 border border-emerald-100/30">
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <div key={hlIdx} className="flex items-center gap-2.5 bg-slate-50/60 border border-slate-100 p-2.5 rounded-xl transition-all hover:bg-emerald-50/20 hover:border-emerald-100/50">
+                      <div className="w-5 h-5 rounded-full bg-emerald-50 text-[#1a6b3c] flex items-center justify-center shrink-0 border border-emerald-100/30">
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
                       </div>
-                      <span className="font-semibold text-[13px] text-slate-700">{hl}</span>
+                      <span className="font-semibold text-[12px] text-slate-700">{hl}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* CTA Link */}
-              <div className="mt-6">
+              <div className="mt-4">
                 <Link
                   href="/signup"
-                  className="block w-full text-center bg-gradient-to-r from-[#1a6b3c] to-[#22875a] hover:from-[#155d33] hover:to-[#1a6b3c] text-white py-4 rounded-2xl text-xs font-extrabold transition-all shadow-md shadow-[#1a6b3c]/15 hover:shadow-lg hover:shadow-[#1a6b3c]/20 hover:-translate-y-[1px]"
+                  className="block w-full text-center bg-gradient-to-r from-[#1a6b3c] to-[#22875a] hover:from-[#155d33] hover:to-[#1a6b3c] text-white py-3 rounded-xl text-[11px] font-extrabold transition-all shadow-md shadow-[#1a6b3c]/15 hover:shadow-lg hover:shadow-[#1a6b3c]/20"
                 >
                   Start {industries[activeSector].name} Billing Free →
                 </Link>
@@ -1276,16 +1375,16 @@ export default function LandingPage() {
       </section>
 
       {/* ─── FAQ Section ──────────────────────────────────────── */}
-      <section id="faq" className="py-20 bg-white">
+      <section id="faq" className="py-12 md:py-20 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-xs font-bold text-[#1a6b3c] uppercase tracking-widest mb-3">FAQ</h2>
-            <h3 className="text-3xl font-extrabold text-[#1a1d26] tracking-tight">
+          <div className="text-center mb-8 md:mb-16">
+            <h2 className="text-[10px] sm:text-xs font-bold text-[#1a6b3c] uppercase tracking-widest mb-2 sm:mb-3">FAQ</h2>
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#1a1d26] tracking-tight">
               Frequently Asked Questions
             </h3>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {faqs.map((faq, idx) => {
               const isOpen = activeFaq === idx;
               return (
@@ -1295,9 +1394,9 @@ export default function LandingPage() {
                 >
                   <button
                     onClick={() => setActiveFaq(isOpen ? null : idx)}
-                    className="w-full px-6 py-4 text-left flex justify-between items-center gap-4 bg-white hover:bg-[#fafbfc]"
+                    className="w-full px-4 sm:px-6 py-3.5 sm:py-4 text-left flex justify-between items-center gap-3 bg-white hover:bg-[#fafbfc]"
                   >
-                    <span className="font-bold text-sm text-[#1a1d26]">{faq.q}</span>
+                    <span className="font-bold text-[13px] sm:text-sm text-[#1a1d26]">{faq.q}</span>
                     <svg
                       width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
                       className={`text-[#4b5563] transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`}
@@ -1313,7 +1412,7 @@ export default function LandingPage() {
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2, ease: 'easeInOut' }}
                       >
-                        <div className="px-6 pb-5 pt-2 text-xs text-[#4b5563] leading-relaxed border-t border-[#e8eaed]/65 bg-[#fcfdfe]">
+                        <div className="px-4 sm:px-6 pb-4 sm:pb-5 pt-1.5 sm:pt-2 text-[12px] sm:text-xs text-[#4b5563] leading-relaxed border-t border-[#e8eaed]/65 bg-[#fcfdfe]">
                           {faq.a}
                         </div>
                       </motion.div>
@@ -1327,18 +1426,18 @@ export default function LandingPage() {
       </section>
 
       {/* ─── Call to Action (CTA) ─────────────────────────────── */}
-      <section className="py-20 bg-[#f8fafc] border-t border-[#e8eaed]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-6">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+      <section className="py-12 md:py-20 bg-[#f8fafc] border-t border-[#e8eaed]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-4 sm:space-y-6">
+          <h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
             Boost your billing speed and collections today
           </h2>
-          <p className="text-base text-[#4b5563] max-w-lg mx-auto">
+          <p className="text-sm sm:text-base text-[#4b5563] max-w-lg mx-auto">
             Join other shop owners in Tamil Nadu saving time and paperwork with Varavu Invoice. Free setup.
           </p>
-          <div className="pt-2">
+          <div className="pt-1">
             <Link
               href="/signup"
-              className="inline-flex items-center gap-2 bg-[#1a6b3c] hover:bg-[#155d33] text-white font-bold text-base px-10 py-4 rounded-xl transition-all shadow-md hover:shadow-lg shadow-[#1a6b3c]/10"
+              className="inline-flex items-center gap-2 bg-[#1a6b3c] hover:bg-[#155d33] text-white font-bold text-sm sm:text-base px-8 sm:px-10 py-3.5 sm:py-4 rounded-xl transition-all shadow-md hover:shadow-lg shadow-[#1a6b3c]/10"
             >
               Get Started Free
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -1352,10 +1451,10 @@ export default function LandingPage() {
 
       {/* ─── Footer ───────────────────────────────────────────── */}
       <footer className="bg-white border-t border-[#e8eaed] text-sm text-[#4b5563]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pb-12 border-b border-[#e8eaed]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 pb-8 md:pb-12 border-b border-[#e8eaed]">
             {/* Logo/Info column */}
-            <div className="col-span-2 md:col-span-1 space-y-4">
+            <div className="col-span-2 md:col-span-1 space-y-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-7 h-7 rounded-lg bg-[#1a6b3c] flex items-center justify-center">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
@@ -1363,7 +1462,7 @@ export default function LandingPage() {
                     <polyline points="14 2 14 8 20 8" />
                   </svg>
                 </div>
-                <span className="font-bold text-base text-[#1a1d26]">Varavu Invoice</span>
+                <span className="font-heading font-black text-base text-[#1a1d26]">Varavu Invoice</span>
               </div>
               <p className="text-xs text-[#6b7280] leading-relaxed">
                 Simple, lightweight billing software designed for small businesses, supermarkets, and freelancers in Tamil Nadu.
@@ -1403,7 +1502,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between pt-8 text-xs text-[#6b7280] gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between pt-6 md:pt-8 text-[11px] sm:text-xs text-[#6b7280] gap-3">
             <div>
               © {new Date().getFullYear()} Varavu. All rights reserved.
             </div>
