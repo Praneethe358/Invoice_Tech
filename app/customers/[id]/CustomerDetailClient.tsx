@@ -65,9 +65,9 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
   }, [activeTab, customer.id]);
 
   const handleSaveName = async () => {
-    const trimmed = nameValue.trim();
-    if (!trimmed || trimmed === customer.name) {
-      setNameValue(customer.name);
+    const trimmed = nameValue.trim().toUpperCase();
+    if (!trimmed || trimmed === customer.name.toUpperCase()) {
+      setNameValue(customer.name.toUpperCase());
       setEditingName(false);
       return;
     }
@@ -83,6 +83,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
       setNameValue(customer.name);
     } else {
       setCustomer(prev => ({ ...prev, name: trimmed }));
+      setNameValue(trimmed);
       showToast('Name updated', 'success');
     }
     setSavingName(false);
@@ -222,7 +223,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
                     setEditingName(true);
                     setTimeout(() => nameInputRef.current?.focus(), 50);
                   }}
-                  className="text-xl font-extrabold text-[#111827] cursor-text hover:text-[#1a6b3c] transition-colors"
+                  className="text-xl font-extrabold text-[#111827] cursor-text hover:text-[#1a6b3c] transition-colors uppercase"
                   title="Click to edit"
                 >
                   {customer.name}

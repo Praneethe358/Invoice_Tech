@@ -85,7 +85,7 @@ export default function CatalogCard({
     >
       <div className="pr-12 w-full">
         <div className="flex items-center gap-1">
-          <p className="text-sm font-semibold text-[#111827] truncate flex-1">
+          <p className="text-sm font-semibold text-[#111827] truncate flex-1 uppercase">
             {product.name}
           </p>
         </div>

@@ -323,7 +323,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
               Billed To
             </h2>
             {inv.customer_name && (
-              <p className="text-base font-bold text-[#111827] mb-1">{inv.customer_name}</p>
+              <p className="text-base font-bold text-[#111827] mb-1 uppercase">{inv.customer_name}</p>
             )}
             <p className="text-sm text-[#4b5563]">+91 {inv.customer_phone}</p>
           </div>
@@ -337,7 +337,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
                 <div key={idx} className="flex justify-between items-start">
                   <div>
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <p className="text-sm font-bold text-[#111827]">{item.name}</p>
+                      <p className="text-sm font-bold text-[#111827] uppercase">{item.name}</p>
                       {shop.gst_registered && item.gst_rate !== undefined && item.gst_rate > 0 && (
                         <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-[#e6f4ea] text-[#1a6b3c] border border-[#d1e7dd]">
                           {item.gst_rate}% GST

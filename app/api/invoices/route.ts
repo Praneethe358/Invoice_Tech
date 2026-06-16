@@ -91,8 +91,25 @@ export async function POST(request: NextRequest) {
 
     const total = subtotal + totalGst;
     const payment_status = body.payment_status || 'paid';
-    const amount_paid = payment_status === 'paid' ? Number(total.toFixed(2)) : 0;
+    
+    if (payment_status === 'partial') {
+      const amt = Number(body.amount_paid);
+      if (isNaN(amt) || amt <= 0 || amt >= total) {
+        return NextResponse.json(
+          { error: 'Partial payment amount must be greater than 0 and less than the invoice total.' } satisfies ApiError,
+          { status: 400 }
+        );
+      }
+    }
+
+    const amount_paid = payment_status === 'paid'
+      ? Number(total.toFixed(2))
+      : payment_status === 'partial'
+      ? Number(body.amount_paid)
+      : 0;
+
     const paid_at = payment_status === 'paid' ? new Date().toISOString() : null;
+    const uses_payments_table = payment_status === 'paid' || payment_status === 'partial';
 
     // Insert invoice
     const { data: invoice, error: insertError } = await supabase
@@ -101,7 +118,7 @@ export async function POST(request: NextRequest) {
         shop_id: shop.id,
         invoice_number: invoiceNumber,
         customer_phone: body.customer_phone.trim(),
-        customer_name: body.customer_name?.trim() || null,
+        customer_name: body.customer_name?.trim().toUpperCase() || null,
         payment_status,
         amount_paid,
         paid_at,
@@ -109,6 +126,7 @@ export async function POST(request: NextRequest) {
         total: Number(total.toFixed(2)),
         status: 'created',
         uses_items_table: true,
+        uses_payments_table,
         subtotal: Number(subtotal.toFixed(2)),
         total_cgst: Number(totalCgst.toFixed(2)),
         total_sgst: Number(totalSgst.toFixed(2)),
@@ -123,6 +141,25 @@ export async function POST(request: NextRequest) {
         { error: 'Failed to create invoice. Please try again.' } satisfies ApiError,
         { status: 500 }
       );
+    }
+
+    // Insert into payments table if paid or partial
+    if (payment_status === 'paid' || payment_status === 'partial') {
+      const { error: paymentInsertError } = await supabase
+        .from('payments')
+        .insert({
+          invoice_id: invoice.id,
+          shop_id: shop.id,
+          customer_phone: body.customer_phone.trim(),
+          amount: amount_paid,
+          payment_method: body.payment_method || 'cash',
+          note: body.payment_note?.trim() || (payment_status === 'paid' ? 'Paid on invoice creation' : 'Partial payment on invoice creation'),
+          paid_at: paid_at || new Date().toISOString(),
+        });
+
+      if (paymentInsertError) {
+        console.error('Payment record insert error on invoice creation:', paymentInsertError);
+      }
     }
 
     // Insert line items into invoice_items table

@@ -135,11 +135,11 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: 'easeOut', delay: index * 0.03 }}
-      className="glass-card-light rounded-2xl p-4 hover:shadow-md transition-shadow cursor-pointer relative"
+      className="bg-white border border-[#e5e7eb] rounded-none p-4 hover:shadow-md transition-shadow cursor-pointer relative"
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-[#1a6b3c]/8 flex items-center justify-center text-[#1a6b3c]">
+          <div className="w-9 h-9 rounded-none bg-[#1a6b3c]/8 flex items-center justify-center text-[#1a6b3c]">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <polyline points="14 2 14 8 20 8" />
@@ -223,9 +223,9 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md bg-white rounded-t-3xl p-6 pb-8 space-y-4 shadow-xl border border-[#e5e7eb] max-h-[90vh] overflow-y-auto mb-0"
+              className="w-full max-w-md bg-white rounded-none p-6 pb-8 space-y-4 shadow-xl border border-[#e5e7eb] max-h-[90vh] overflow-y-auto mb-0"
             >
-              <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-1" />
+              <div className="w-12 h-1 bg-gray-200 rounded-none mx-auto mb-1" />
               <div className="flex justify-between items-center border-b border-[#f3f4f6] pb-3">
                 <div className="space-y-0.5 text-left">
                   <h3 className="text-sm font-extrabold text-[#111827]">Quick Record Payment</h3>

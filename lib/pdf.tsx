@@ -285,7 +285,7 @@ function InvoicePDF({
       : `+91 ${customerPhone.slice(-10)}`
     : 'Walk-in Customer';
 
-  const clientName = customerName ? customerName.trim() : 'Walk-in Customer';
+  const clientName = customerName ? customerName.trim().toUpperCase() : 'WALK-IN CUSTOMER';
   
   const amountPaidVal = Number(amountPaid || 0);
   const balanceVal = total - amountPaidVal;
@@ -316,7 +316,7 @@ function InvoicePDF({
   const sgstVal = totalGstVal / 2;
 
   // Group by HSN code (only if gstRegistered)
-  const hsnGroups = React.useMemo(() => {
+  const hsnGroups = (() => {
     if (!gstRegistered) return [];
     const groups: Record<string, { taxable: number; cgst: number; sgst: number; rate: number }> = {};
     items.forEach((item) => {
@@ -342,7 +342,7 @@ function InvoicePDF({
       sgst: data.sgst,
       totalGst: data.cgst + data.sgst,
     }));
-  }, [items, gstRegistered]);
+  })();
 
   return (
     <Document>
@@ -431,7 +431,7 @@ function InvoicePDF({
               <View key={i} style={styles.tableRow}>
                 {gstRegistered ? (
                   <>
-                    <Text style={styles.colItemGst}>{item.name}</Text>
+                    <Text style={styles.colItemGst}>{item.name.toUpperCase()}</Text>
                     <Text style={styles.colHsnGst}>{item.hsn_code || '—'}</Text>
                     <Text style={styles.colQtyGst}>{item.quantity}</Text>
                     <Text style={styles.colRateGst}>₹{Number(item.price).toFixed(2)}</Text>
@@ -442,7 +442,7 @@ function InvoicePDF({
                   </>
                 ) : (
                   <>
-                    <Text style={styles.colItem}>{item.name}</Text>
+                    <Text style={styles.colItem}>{item.name.toUpperCase()}</Text>
                     <Text style={styles.colQty}>{item.quantity}</Text>
                     <Text style={styles.colRate}>₹{Number(item.price).toFixed(2)}</Text>
                     <Text style={styles.colAmount}>₹{baseAmount.toFixed(2)}</Text>

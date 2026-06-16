@@ -267,7 +267,7 @@ export async function POST(
           .insert({
             shop_id: typedInvoice.shop_id,
             phone: customerPhone,
-            name: typedInvoice.customer_name?.trim() || 'Customer',
+            name: (typedInvoice.customer_name?.trim() || 'Customer').toUpperCase(),
             tag: 'regular',
             total_invoices: totalInvoices,
             total_spent: totalSpent,

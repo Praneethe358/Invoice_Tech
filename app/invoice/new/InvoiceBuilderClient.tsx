@@ -36,7 +36,10 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
   const [phone, setPhone] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [customerName, setCustomerName] = useState('');
-  const [paymentStatus, setPaymentStatus] = useState<'paid' | 'unpaid'>('paid');
+  const [paymentStatus, setPaymentStatus] = useState<'paid' | 'unpaid' | 'partial'>('paid');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'upi' | 'bank_transfer' | 'other'>('cash');
+  const [paymentNote, setPaymentNote] = useState('');
+  const [partialAmount, setPartialAmount] = useState('');
   const [customName, setCustomName] = useState('');
   const [customPrice, setCustomPrice] = useState('');
   const [customHsn, setCustomHsn] = useState('');
@@ -247,7 +250,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
 
   // ─── Custom item ──────────────────────────────────────────
   const handleAddCustom = () => {
-    const name = customName.trim();
+    const name = customName.trim().toUpperCase();
     const price = parseFloat(customPrice);
     const hsn = customHsn.trim();
     const gstRate = parseFloat(customGst) || 0;
@@ -320,6 +323,15 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
 
   const handleSend = async () => {
     if (!canSend) return;
+
+    if (paymentStatus === 'partial') {
+      const amt = Number(partialAmount);
+      if (isNaN(amt) || amt <= 0 || amt >= total) {
+        showToast(`Partial amount must be between ₹0.01 and ₹${(total - 0.01).toFixed(2)}`, 'error');
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -336,8 +348,11 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
             gst_rate: item.gst_rate || 0,
           })),
           customer_phone: phone.trim(),
-          customer_name: customerName.trim() || undefined,
+          customer_name: customerName.trim().toUpperCase() || undefined,
           payment_status: paymentStatus,
+          payment_method: (paymentStatus === 'paid' || paymentStatus === 'partial') ? paymentMethod : undefined,
+          payment_note: (paymentStatus === 'paid' || paymentStatus === 'partial') ? (paymentNote.trim() || undefined) : undefined,
+          amount_paid: paymentStatus === 'partial' ? Number(partialAmount) : undefined,
         }),
       });
 
@@ -515,11 +530,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
               );
             })}
           </div>
-        ) : (
-          <div className="p-3 bg-blue-50 text-blue-800 text-xs rounded-xl border border-blue-200">
-            💡 <strong>Tip:</strong> Go to <strong>Settings → Product Catalog</strong> to group your products into categories!
-          </div>
-        )}
+        ) : null}
       </div>
     )}
 
@@ -777,7 +788,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
             <label className="block text-xs font-semibold text-[#4b5563] uppercase tracking-wide mb-2">
               Payment Status
             </label>
-            <div className="grid grid-cols-2 gap-2 bg-[#f3f4f6] p-1 rounded-xl">
+            <div className="grid grid-cols-3 gap-2 bg-[#f3f4f6] p-1 rounded-xl">
               <button
                 type="button"
                 onClick={() => setPaymentStatus('paid')}
@@ -791,6 +802,17 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
               </button>
               <button
                 type="button"
+                onClick={() => setPaymentStatus('partial')}
+                className={`py-2 text-xs font-bold rounded-lg transition-all ${
+                  paymentStatus === 'partial'
+                    ? 'bg-[#d97706] text-white shadow-sm'
+                    : 'text-[#4b5563] hover:text-[#111827]'
+                }`}
+              >
+                Partial
+              </button>
+              <button
+                type="button"
                 onClick={() => setPaymentStatus('unpaid')}
                 className={`py-2 text-xs font-bold rounded-lg transition-all ${
                   paymentStatus === 'unpaid'
@@ -801,6 +823,75 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
                 Unpaid
               </button>
             </div>
+
+            <AnimatePresence>
+              {(paymentStatus === 'paid' || paymentStatus === 'partial') && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                  animate={{ opacity: 1, height: 'auto', marginTop: 12 }}
+                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                  className="overflow-hidden space-y-3"
+                >
+                  {paymentStatus === 'partial' && (
+                    <div>
+                      <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
+                        Amount Paid Upfront
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-3 text-sm font-semibold text-gray-400">₹</span>
+                        <Input
+                          type="number"
+                          placeholder="e.g. 500"
+                          value={partialAmount}
+                          onChange={(e) => setPartialAmount(e.target.value)}
+                          className="pl-7"
+                          max={total}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
+                      Payment Method
+                    </label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {(
+                        [
+                          { value: 'cash', label: '💵 Cash' },
+                          { value: 'upi', label: '📱 UPI' },
+                          { value: 'bank_transfer', label: '🏦 Bank' },
+                          { value: 'other', label: '⚙️ Other' },
+                        ] as const
+                      ).map((method) => (
+                        <button
+                          key={method.value}
+                          type="button"
+                          onClick={() => setPaymentMethod(method.value)}
+                          className={`py-2 px-1 text-[11px] font-bold rounded-xl border transition-all text-center ${
+                            paymentMethod === method.value
+                              ? 'bg-[#1a6b3c]/10 text-[#1a6b3c] border-[#1a6b3c]'
+                              : 'bg-[#f9fafb] text-[#4b5563] border-[#e5e7eb] hover:bg-[#f3f4f6]'
+                          }`}
+                        >
+                          {method.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
+                      Payment Note (Optional)
+                    </label>
+                    <Input
+                      placeholder="e.g. Received via GPay / Advance payment"
+                      value={paymentNote}
+                      onChange={(e) => setPaymentNote(e.target.value)}
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </section>
       </PageTransition>

@@ -42,6 +42,16 @@ const navItems = [
     isMain: true,
   },
   {
+    href: '/catalog',
+    label: 'Catalog',
+    desktopOnly: true,
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+      </svg>
+    ),
+  },
+  {
     href: '/payments',
     label: 'Payments',
     icon: (
@@ -264,10 +274,12 @@ export default function Navbar() {
       {pathname !== '/invoice/new' && (
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e8eaed] safe-area-inset-bottom md:hidden">
           <div className="max-w-lg mx-auto flex items-center justify-around h-16">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
+            {navItems
+              .filter((item) => !item.desktopOnly)
+              .map((item) => {
+                const isActive = pathname === item.href;
 
-              if (item.isMain) {
+                if (item.isMain) {
                 return (
                   <Link key={item.href} href={item.href}>
                     <motion.div

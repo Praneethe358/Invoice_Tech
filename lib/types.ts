@@ -108,6 +108,9 @@ export interface CreateInvoicePayload {
   customer_phone: string;
   customer_name?: string;
   payment_status?: string;
+  payment_method?: string;
+  payment_note?: string;
+  amount_paid?: number;
 }
 
 export interface CreateInvoiceResponse {

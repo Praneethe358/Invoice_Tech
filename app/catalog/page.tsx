@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { Shop } from '@/lib/types';
-import SettingsClient from './SettingsClient';
+import { Shop, Product } from '@/lib/types';
+import CatalogClient from './CatalogClient';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SettingsPage() {
+export default async function CatalogPage() {
   const supabase = await createClient();
 
   const {
@@ -22,9 +22,16 @@ export default async function SettingsPage() {
 
   if (!shop) redirect('/signup');
 
+  const { data: products } = await supabase
+    .from('products')
+    .select('*')
+    .eq('shop_id', shop.id)
+    .order('created_at', { ascending: true });
+
   return (
-    <SettingsClient
+    <CatalogClient
       shop={shop as Shop}
+      initialProducts={(products ?? []) as Product[]}
     />
   );
 }

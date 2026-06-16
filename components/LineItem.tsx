@@ -26,7 +26,7 @@ export default function LineItem({ item, onQtyChange, gstRegistered = false }: L
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 flex-wrap">
-          <p className="text-sm font-semibold text-[#111827] truncate">
+          <p className="text-sm font-semibold text-[#111827] truncate uppercase">
             {item.name}
           </p>
           {gstRegistered && item.gst_rate !== undefined && item.gst_rate > 0 && (

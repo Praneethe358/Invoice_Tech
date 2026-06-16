@@ -57,7 +57,7 @@ export default async function DashboardPage() {
       
       const invDate = new Date(inv.created_at);
       if (invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear) {
-        thisMonth++;
+        thisMonth += Number(inv.total || 0);
       }
 
       const paymentStatus = inv.payment_status || 'unpaid';
