@@ -162,9 +162,9 @@ export default function DashboardClient({
     <div className="min-h-screen bg-[#f5f6fa]">
       <Navbar />
 
-      <PageTransition className="max-w-lg mx-auto px-4 pb-24">
+      <PageTransition className="max-w-lg md:max-w-5xl mx-auto px-4 md:px-8 py-6 pb-24">
         {/* Header with greeting */}
-        <div className="premium-header-gradient rounded-b-3xl -mx-4 px-6 pt-6 pb-20 -mt-0.5 shadow-lg">
+        <div className="premium-header-gradient rounded-b-3xl -mx-4 md:-mx-8 px-6 md:px-10 pt-6 pb-20 -mt-6.5 shadow-lg">
           <div className="flex items-center justify-between mb-1">
             <div>
               <p className="text-[#d1ebd9] text-xs font-semibold">
@@ -183,8 +183,8 @@ export default function DashboardClient({
           </div>
         </div>
 
-        {/* Stat cards — overlapping the header (Scrollable horizontally) */}
-        <div className="flex gap-2.5 overflow-x-auto pb-4 -mt-14 mb-6 scrollbar-none -mx-4 px-4">
+        {/* Stat cards — overlapping the header */}
+        <div className="flex gap-2.5 overflow-x-auto pb-4 -mt-14 mb-6 scrollbar-none -mx-4 px-4 md:grid md:grid-cols-5 md:gap-4 md:overflow-visible md:-mx-0 md:px-0">
           {statCards.map((card, i) => (
             <motion.div
               key={card.key}
@@ -198,7 +198,7 @@ export default function DashboardClient({
                   window.location.href = card.href;
                 }
               }}
-              className={`glass-card-light rounded-2xl p-3.5 text-center relative flex-shrink-0 min-w-[105px] flex-1 cursor-pointer`}
+              className={`glass-card-light rounded-2xl p-3.5 text-center relative flex-shrink-0 min-w-[105px] md:min-w-0 flex-1 cursor-pointer hover:shadow-md transition-shadow`}
             >
               <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center mx-auto mb-2`}>
                 {card.icon}

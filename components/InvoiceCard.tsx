@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useToast } from '@/components/Toast';
@@ -59,6 +59,56 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
   const router = useRouter();
   const { showToast } = useToast();
   const [resending, setResending] = useState(false);
+
+  // Quick Payment state
+  const balanceDue = Number(invoice.total) - Number(invoice.amount_paid || 0);
+  const [showPaySheet, setShowPaySheet] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState(balanceDue.toString());
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'upi' | 'bank_transfer' | 'other'>('cash');
+  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [paymentNote, setPaymentNote] = useState('');
+  const [savingPayment, setSavingPayment] = useState(false);
+
+  const handleRecordPayment = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const amount = Number(paymentAmount);
+    if (isNaN(amount) || amount <= 0) {
+      showToast('Please enter a valid amount', 'error');
+      return;
+    }
+    if (amount > balanceDue + 0.01) {
+      showToast(`Amount cannot exceed balance due ₹${balanceDue.toFixed(2)}`, 'error');
+      return;
+    }
+
+    setSavingPayment(true);
+    try {
+      const res = await fetch('/api/payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          invoice_id: invoice.id,
+          amount,
+          payment_method: paymentMethod,
+          note: paymentNote.trim(),
+          paid_at: paymentDate,
+        }),
+      });
+
+      if (!res.ok) {
+        const json = await res.json();
+        throw new Error(json.error || 'Failed to record payment');
+      }
+
+      showToast(`₹${amount} payment recorded successfully`, 'success');
+      setShowPaySheet(false);
+      router.refresh();
+    } catch (err: any) {
+      showToast(err.message || 'Error recording payment', 'error');
+    } finally {
+      setSavingPayment(false);
+    }
+  };
 
   const handleResend = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -142,9 +192,151 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
             <span className={`inline-flex items-center text-[10px] font-bold ${payment.bg} px-2 py-0.5 rounded-full shadow-sm`}>
               {payment.label}
             </span>
+            {invoice.payment_status !== 'paid' && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowPaySheet(true);
+                }}
+                className="inline-flex items-center text-[10px] font-extrabold bg-[#1a6b3c]/10 hover:bg-[#1a6b3c]/20 text-[#1a6b3c] px-2 py-0.5 rounded-full transition-colors cursor-pointer border border-[#1a6b3c]/20"
+              >
+                + Pay
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showPaySheet && (
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowPaySheet(false);
+            }}
+            className="fixed inset-0 bg-[#111827]/40 backdrop-blur-xs z-50 flex items-end justify-center px-4"
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 26, stiffness: 220 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md bg-white rounded-t-3xl p-6 pb-8 space-y-4 shadow-xl border border-[#e5e7eb] max-h-[90vh] overflow-y-auto mb-0"
+            >
+              <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-1" />
+              <div className="flex justify-between items-center border-b border-[#f3f4f6] pb-3">
+                <div className="space-y-0.5 text-left">
+                  <h3 className="text-sm font-extrabold text-[#111827]">Quick Record Payment</h3>
+                  <p className="text-[10px] text-[#9ca3af] font-medium">Invoice: {invoice.invoice_number}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowPaySheet(false);
+                  }}
+                  className="text-xs text-[#9ca3af] hover:text-[#111827] font-semibold"
+                >
+                  Close
+                </button>
+              </div>
+
+              {/* Pay in Full option */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPaymentAmount(balanceDue.toString());
+                }}
+                className="w-full bg-[#1a6b3c]/5 hover:bg-[#1a6b3c]/10 text-[#1a6b3c] text-xs font-extrabold py-2 rounded-xl border border-dashed border-[#1a6b3c]/20 transition-all text-center"
+              >
+                Pay in Full (₹{balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })})
+              </button>
+
+              <div className="space-y-3 text-left">
+                <div>
+                  <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wide mb-1">
+                    Amount Received (₹)
+                  </label>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    max={balanceDue}
+                    min={0.01}
+                    className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#1a6b3c]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wide mb-1">
+                    Payment Method
+                  </label>
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                    {(['cash', 'upi', 'bank_transfer', 'other'] as const).map((method) => (
+                      <button
+                        key={method}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPaymentMethod(method);
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap capitalize transition-all border ${
+                          paymentMethod === method
+                            ? 'bg-[#1a6b3c] text-white border-[#1a6b3c] shadow-sm'
+                            : 'bg-white text-[#4b5563] border-[#e5e7eb] hover:bg-gray-50'
+                        }`}
+                      >
+                        {method.replace('_', ' ')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wide mb-1">
+                    Payment Date
+                  </label>
+                  <input
+                    type="date"
+                    value={paymentDate}
+                    onChange={(e) => setPaymentDate(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#1a6b3c]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wide mb-1">
+                    Payment Note (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. GPay reference number, cash collected"
+                    value={paymentNote}
+                    onChange={(e) => setPaymentNote(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#1a6b3c]"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleRecordPayment}
+                  disabled={savingPayment}
+                  className="w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white text-xs font-bold py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
+                >
+                  {savingPayment ? 'Saving...' : 'Record Payment'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

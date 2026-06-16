@@ -114,3 +114,93 @@ alter table invoices
   add column if not exists paid_at timestamptz,
   add column if not exists sent_reminders integer not null default 0;
 
+-- ═══════════════════════════════════════════
+-- Phase 5 Database Changes
+-- ═══════════════════════════════════════════
+
+-- Add shop classification and GST fields to shops
+alter table shops
+  add column if not exists shop_type text not null default 'other',
+  add column if not exists gst_registered boolean not null default false,
+  add column if not exists gstin text,
+  add column if not exists business_type text not null default 'both',
+  add column if not exists inventory_enabled boolean not null default false,
+  add column if not exists onboarding_completed boolean not null default false;
+
+-- Add HSN and GST fields to products catalog
+alter table products
+  add column if not exists hsn_code text,
+  add column if not exists gst_rate numeric(5,2) not null default 0;
+
+-- New invoice_items table (replaces items JSONB in invoices)
+create table if not exists invoice_items (
+  id uuid primary key default gen_random_uuid(),
+  invoice_id uuid not null references invoices(id) on delete cascade,
+  name text not null,
+  hsn_code text,
+  price numeric(10,2) not null,
+  qty integer not null default 1,
+  gst_rate numeric(5,2) not null default 0,
+  cgst numeric(10,2) not null default 0,
+  sgst numeric(10,2) not null default 0,
+  line_total numeric(10,2) not null,
+  created_at timestamptz not null default now()
+);
+
+alter table invoice_items enable row level security;
+
+create policy "own invoice items" on invoice_items for all
+  using (
+    invoice_id in (
+      select id from invoices where shop_id in (
+        select id from shops where auth_user_id = auth.uid()
+      )
+    )
+  );
+
+-- Add a flag to distinguish old vs new invoices:
+alter table invoices
+  add column if not exists uses_items_table boolean not null default false;
+
+-- GST totals on invoices
+alter table invoices
+  add column if not exists subtotal numeric(10,2),
+  add column if not exists total_cgst numeric(10,2) not null default 0,
+  add column if not exists total_sgst numeric(10,2) not null default 0,
+  add column if not exists total_gst numeric(10,2) not null default 0;
+
+-- ═══════════════════════════════════════════
+-- Phase 6 Database Changes
+-- ═══════════════════════════════════════════
+
+-- Payments table: each row = one payment received
+create table if not exists payments (
+  id uuid primary key default gen_random_uuid(),
+  invoice_id uuid not null references invoices(id) on delete cascade,
+  shop_id uuid not null references shops(id) on delete cascade,
+  customer_phone text not null,
+  amount numeric(10,2) not null,
+  payment_method text not null default 'cash',
+  -- 'cash' | 'upi' | 'bank_transfer' | 'other'
+  note text,
+  paid_at timestamptz not null default now(),
+  created_at timestamptz not null default now()
+);
+
+alter table payments enable row level security;
+
+create policy "own payments" on payments for all
+  using (
+    shop_id in (
+      select id from shops where auth_user_id = auth.uid()
+    )
+  );
+
+-- Add outstanding_balance to customers for quick lookup
+alter table customers
+  add column if not exists outstanding_balance numeric(10,2) not null default 0;
+
+-- Add flag to distinguish old vs new invoices
+alter table invoices
+  add column if not exists uses_payments_table boolean not null default false;
+

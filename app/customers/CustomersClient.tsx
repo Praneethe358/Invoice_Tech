@@ -82,7 +82,7 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
     <div className="min-h-screen bg-[#f5f6fa]">
       <Navbar />
 
-      <PageTransition className="max-w-lg mx-auto px-4 py-6 pb-24">
+      <PageTransition className="max-w-lg md:max-w-5xl mx-auto px-4 md:px-8 py-6 pb-24">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>

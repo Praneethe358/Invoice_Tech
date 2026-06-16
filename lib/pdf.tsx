@@ -139,13 +139,24 @@ const styles = StyleSheet.create({
   colQty: { flex: 1, textAlign: 'center' },
   colRate: { flex: 1.5, textAlign: 'right' },
   colAmount: { flex: 1.5, textAlign: 'right', fontFamily: 'Helvetica-Bold' },
+
+  // GST Specific Columns
+  colItemGst: { flex: 2.2, paddingRight: 5 },
+  colHsnGst: { flex: 0.9, textAlign: 'center' },
+  colQtyGst: { flex: 0.6, textAlign: 'center' },
+  colRateGst: { flex: 1.0, textAlign: 'right' },
+  colGstPctGst: { flex: 0.8, textAlign: 'center' },
+  colCgstGst: { flex: 0.8, textAlign: 'right' },
+  colSgstGst: { flex: 0.8, textAlign: 'right' },
+  colAmountGst: { flex: 1.2, textAlign: 'right', fontFamily: 'Helvetica-Bold' },
+
   summaryContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginTop: 10,
   },
   summaryCard: {
-    width: '45%',
+    width: '48%',
     backgroundColor: LIGHT_BG,
     borderRadius: 8,
     borderWidth: 1,
@@ -248,6 +259,8 @@ interface InvoicePDFProps {
   amountPaid?: number;
   shopPhone?: string | null;
   logoBase64?: string | null;
+  gstRegistered?: boolean;
+  gstin?: string | null;
 }
 
 function InvoicePDF({
@@ -263,6 +276,8 @@ function InvoicePDF({
   amountPaid = 0,
   shopPhone,
   logoBase64,
+  gstRegistered = false,
+  gstin = null,
 }: InvoicePDFProps) {
   const formattedPhone = customerPhone
     ? customerPhone.startsWith('+')
@@ -288,6 +303,47 @@ function InvoicePDF({
     statusText = 'UNPAID';
   }
 
+  // Pre-calculate sums for summary
+  const subtotalVal = gstRegistered
+    ? items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0)
+    : total;
+
+  const totalGstVal = gstRegistered
+    ? items.reduce((sum, item) => sum + (Number(item.price) * item.quantity) * ((item.gst_rate || 0) / 100), 0)
+    : 0;
+
+  const cgstVal = totalGstVal / 2;
+  const sgstVal = totalGstVal / 2;
+
+  // Group by HSN code (only if gstRegistered)
+  const hsnGroups = React.useMemo(() => {
+    if (!gstRegistered) return [];
+    const groups: Record<string, { taxable: number; cgst: number; sgst: number; rate: number }> = {};
+    items.forEach((item) => {
+      const hsn = item.hsn_code || 'Other';
+      const baseAmount = Number(item.price) * item.quantity;
+      const rate = item.gst_rate || 0;
+      const gstAmount = baseAmount * (rate / 100);
+      const cgst = gstAmount / 2;
+      const sgst = gstAmount / 2;
+
+      if (!groups[hsn]) {
+        groups[hsn] = { taxable: 0, cgst: 0, sgst: 0, rate };
+      }
+      groups[hsn].taxable += baseAmount;
+      groups[hsn].cgst += cgst;
+      groups[hsn].sgst += sgst;
+    });
+    return Object.entries(groups).map(([hsn, data]) => ({
+      hsn,
+      rate: data.rate,
+      taxable: data.taxable,
+      cgst: data.cgst,
+      sgst: data.sgst,
+      totalGst: data.cgst + data.sgst,
+    }));
+  }, [items, gstRegistered]);
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -308,6 +364,11 @@ function InvoicePDF({
             )}
             {shopPhone && (
               <Text style={styles.shopAddress}>{shopPhone}</Text>
+            )}
+            {gstRegistered && gstin && (
+              <Text style={[styles.shopAddress, { fontFamily: 'Helvetica-Bold', color: GREEN, marginTop: 4 }]}>
+                GSTIN: {gstin}
+              </Text>
             )}
           </View>
           <View style={styles.invoiceTitleSection}>
@@ -336,34 +397,92 @@ function InvoicePDF({
         <View style={styles.table}>
           {/* Table Header */}
           <View style={styles.tableHeader}>
-            <Text style={[styles.tableHeaderText, styles.colItem]}>Description</Text>
-            <Text style={[styles.tableHeaderText, styles.colQty]}>Qty</Text>
-            <Text style={[styles.tableHeaderText, styles.colRate]}>Rate</Text>
-            <Text style={[styles.tableHeaderText, styles.colAmount]}>Amount</Text>
+            {gstRegistered ? (
+              <>
+                <Text style={[styles.tableHeaderText, styles.colItemGst]}>Description</Text>
+                <Text style={[styles.tableHeaderText, styles.colHsnGst]}>HSN</Text>
+                <Text style={[styles.tableHeaderText, styles.colQtyGst]}>Qty</Text>
+                <Text style={[styles.tableHeaderText, styles.colRateGst]}>Rate</Text>
+                <Text style={[styles.tableHeaderText, styles.colGstPctGst]}>GST%</Text>
+                <Text style={[styles.tableHeaderText, styles.colCgstGst]}>CGST</Text>
+                <Text style={[styles.tableHeaderText, styles.colSgstGst]}>SGST</Text>
+                <Text style={[styles.tableHeaderText, styles.colAmountGst]}>Amount</Text>
+              </>
+            ) : (
+              <>
+                <Text style={[styles.tableHeaderText, styles.colItem]}>Description</Text>
+                <Text style={[styles.tableHeaderText, styles.colQty]}>Qty</Text>
+                <Text style={[styles.tableHeaderText, styles.colRate]}>Rate</Text>
+                <Text style={[styles.tableHeaderText, styles.colAmount]}>Amount</Text>
+              </>
+            )}
           </View>
 
           {/* Table Body */}
-          {items.map((item, i) => (
-            <View key={i} style={styles.tableRow}>
-              <Text style={styles.colItem}>{item.name}</Text>
-              <Text style={styles.colQty}>{item.quantity}</Text>
-              <Text style={styles.colRate}>₹{Number(item.price).toFixed(2)}</Text>
-              <Text style={styles.colAmount}>₹{(Number(item.price) * item.quantity).toFixed(2)}</Text>
-            </View>
-          ))}
+          {items.map((item, i) => {
+            const baseAmount = Number(item.price) * item.quantity;
+            const gstRate = item.gst_rate || 0;
+            const gstAmount = baseAmount * (gstRate / 100);
+            const cgst = gstAmount / 2;
+            const sgst = gstAmount / 2;
+            const lineTotal = baseAmount + gstAmount;
+
+            return (
+              <View key={i} style={styles.tableRow}>
+                {gstRegistered ? (
+                  <>
+                    <Text style={styles.colItemGst}>{item.name}</Text>
+                    <Text style={styles.colHsnGst}>{item.hsn_code || '—'}</Text>
+                    <Text style={styles.colQtyGst}>{item.quantity}</Text>
+                    <Text style={styles.colRateGst}>₹{Number(item.price).toFixed(2)}</Text>
+                    <Text style={styles.colGstPctGst}>{gstRate}%</Text>
+                    <Text style={styles.colCgstGst}>₹{cgst.toFixed(2)}</Text>
+                    <Text style={styles.colSgstGst}>₹{sgst.toFixed(2)}</Text>
+                    <Text style={styles.colAmountGst}>₹{lineTotal.toFixed(2)}</Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.colItem}>{item.name}</Text>
+                    <Text style={styles.colQty}>{item.quantity}</Text>
+                    <Text style={styles.colRate}>₹{Number(item.price).toFixed(2)}</Text>
+                    <Text style={styles.colAmount}>₹{baseAmount.toFixed(2)}</Text>
+                  </>
+                )}
+              </View>
+            );
+          })}
         </View>
 
         {/* Totals Summary */}
         <View style={styles.summaryContainer}>
           <View style={styles.summaryCard}>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Subtotal</Text>
-              <Text style={styles.summaryValue}>₹{total.toFixed(2)}</Text>
-            </View>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>GST (Inclusive)</Text>
-              <Text style={styles.summaryValue}>₹0.00</Text>
-            </View>
+            {gstRegistered ? (
+              <>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Subtotal</Text>
+                  <Text style={styles.summaryValue}>₹{subtotalVal.toFixed(2)}</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>CGST</Text>
+                  <Text style={styles.summaryValue}>₹{cgstVal.toFixed(2)}</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>SGST</Text>
+                  <Text style={styles.summaryValue}>₹{sgstVal.toFixed(2)}</Text>
+                </View>
+              </>
+            ) : (
+              <>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Subtotal</Text>
+                  <Text style={styles.summaryValue}>₹{total.toFixed(2)}</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>GST (Inclusive)</Text>
+                  <Text style={styles.summaryValue}>₹0.00</Text>
+                </View>
+              </>
+            )}
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>Total Amount</Text>
               <Text style={styles.totalValue}>₹{total.toFixed(2)}</Text>
@@ -393,6 +512,29 @@ function InvoicePDF({
             )}
           </View>
         </View>
+
+        {/* HSN Summary Table (only if gstRegistered) */}
+        {gstRegistered && hsnGroups.length > 0 && (
+          <View style={[styles.table, { marginTop: 25 }]}>
+            <Text style={[styles.notesTitle, { marginBottom: 6 }]}>HSN Summary Table</Text>
+            <View style={styles.tableHeader}>
+              <Text style={[styles.tableHeaderText, { flex: 2 }]}>HSN Code</Text>
+              <Text style={[styles.tableHeaderText, { flex: 2, textAlign: 'right' }]}>Taxable Value</Text>
+              <Text style={[styles.tableHeaderText, { flex: 1.5, textAlign: 'right' }]}>CGST</Text>
+              <Text style={[styles.tableHeaderText, { flex: 1.5, textAlign: 'right' }]}>SGST</Text>
+              <Text style={[styles.tableHeaderText, { flex: 2, textAlign: 'right' }]}>Total Tax</Text>
+            </View>
+            {hsnGroups.map((group, idx) => (
+              <View key={idx} style={styles.tableRow}>
+                <Text style={{ flex: 2 }}>{group.hsn}</Text>
+                <Text style={{ flex: 2, textAlign: 'right' }}>₹{group.taxable.toFixed(2)}</Text>
+                <Text style={{ flex: 1.5, textAlign: 'right' }}>₹{group.cgst.toFixed(2)}</Text>
+                <Text style={{ flex: 1.5, textAlign: 'right' }}>₹{group.sgst.toFixed(2)}</Text>
+                <Text style={{ flex: 2, textAlign: 'right', fontFamily: 'Helvetica-Bold' }}>₹{group.totalGst.toFixed(2)}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         {/* Professional Terms and Notes */}
         <View style={styles.notesSection}>

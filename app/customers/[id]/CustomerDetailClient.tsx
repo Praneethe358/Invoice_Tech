@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
@@ -9,7 +9,7 @@ import InvoiceCard from '@/components/InvoiceCard';
 import EmptyState from '@/components/EmptyState';
 import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
-import { Customer, CustomerTag, Invoice, Shop } from '@/lib/types';
+import { Customer, CustomerTag, Invoice, Shop, Payment } from '@/lib/types';
 
 interface Props {
   customer: Customer;
@@ -33,6 +33,36 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
   // Bulk sending state
   const [bulkSending, setBulkSending] = useState(false);
   const [bulkProgress, setBulkProgress] = useState('');
+
+  // Tabs and Ledger State
+  const [activeTab, setActiveTab] = useState<'overview' | 'ledger' | 'invoices'>('overview');
+  const [ledgerEntries, setLedgerEntries] = useState<any[]>([]);
+  const [loadingLedger, setLoadingLedger] = useState(false);
+  const [ledgerStats, setLedgerStats] = useState({ total_billed: 0, total_paid: 0, outstanding: 0 });
+
+  useEffect(() => {
+    async function fetchLedger() {
+      if (activeTab !== 'ledger') return;
+      setLoadingLedger(true);
+      try {
+        const res = await fetch(`/api/customers/${customer.id}/ledger`);
+        if (res.ok) {
+          const json = await res.json();
+          setLedgerEntries(json.entries);
+          setLedgerStats({
+            total_billed: json.total_billed,
+            total_paid: json.total_paid,
+            outstanding: json.outstanding,
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load customer ledger:', err);
+      } finally {
+        setLoadingLedger(false);
+      }
+    }
+    fetchLedger();
+  }, [activeTab, customer.id]);
 
   const handleSaveName = async () => {
     const trimmed = nameValue.trim();
@@ -150,7 +180,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
     <div className="min-h-screen bg-[#f5f6fa]">
       <Navbar />
 
-      <PageTransition className="max-w-lg mx-auto px-4 py-6 pb-24">
+      <PageTransition className="max-w-lg md:max-w-5xl mx-auto px-4 md:px-8 py-6 pb-24">
         {/* Back button */}
         <button
           onClick={() => router.push('/customers')}
@@ -215,118 +245,214 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
             {savingTag ? 'Saving...' : customer.tag === 'vip' ? '★ VIP — Tap to make Regular' : 'Regular — Tap to make VIP ★'}
           </button>
         </div>
-
-        {/* Stats Row */}
-        <div className="grid grid-cols-3 gap-2 mb-6">
-          {statItems.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, delay: i * 0.08 }}
-              className="glass-card-light rounded-2xl p-3.5 text-center"
+            {/* Tab Selection Row */}
+        <div className="flex bg-white/60 backdrop-blur-sm border border-[#e5e7eb] p-1.5 rounded-2xl mb-6 gap-1">
+          {(['overview', 'ledger', 'invoices'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all capitalize ${
+                activeTab === tab
+                  ? 'bg-[#1a6b3c] text-white shadow-sm'
+                  : 'text-[#6b7280] hover:text-[#111827]'
+              }`}
             >
-              <p className="text-lg font-extrabold text-[#1a1d26] tabular-nums leading-tight">
-                {stat.value}
-              </p>
-              <p className="text-[10px] text-[#9ca3af] font-medium mt-1 uppercase tracking-wide">
-                {stat.label}
-              </p>
-            </motion.div>
+              {tab}
+            </button>
           ))}
         </div>
 
-        {/* Outstanding Ledger Section */}
-        <div className="mb-6">
-          {totalOutstanding > 0 ? (
-            <div className="bg-white rounded-3xl border border-[#e5e7eb] overflow-hidden shadow-sm">
-              <div className="bg-amber-50/50 border-b border-[#e5e7eb] p-5">
-                <p className="text-[10px] font-bold text-amber-800 uppercase tracking-wider mb-1">
-                  Outstanding Balance
-                </p>
-                <p className="text-2xl font-extrabold text-amber-600">
-                  ₹{totalOutstanding.toLocaleString('en-IN')}
-                </p>
-              </div>
-
-              <div className="p-4 space-y-3">
-                <div className="space-y-2">
-                  {outstandingInvoices.map((inv) => {
-                    const due = Number(inv.total) - Number(inv.amount_paid || 0);
-                    return (
-                      <div
-                        key={inv.id}
-                        onClick={() => router.push(`/invoice/${inv.id}`)}
-                        className="flex items-center justify-between p-3 rounded-xl bg-[#f9fafb] border border-[#e5e7eb] hover:border-amber-500 transition-colors cursor-pointer"
-                      >
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-[#1a1d26]">
-                            {inv.invoice_number}
-                          </span>
-                          <span className="text-[10px] text-[#9ca3af]">
-                            {new Date(inv.created_at).toLocaleDateString('en-IN', {
-                              day: 'numeric',
-                              month: 'short',
-                            })}
-                          </span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-xs font-extrabold text-red-600">
-                            ₹{due.toLocaleString('en-IN')} due
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <button
-                  onClick={handleSendBulkReminders}
-                  disabled={bulkSending}
-                  className="w-full mt-1.5 py-2.5 rounded-xl text-xs font-bold bg-[#d97706] hover:bg-[#b45309] text-white transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm"
+        {/* Tab Contents */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* Stats Row */}
+            <div className="grid grid-cols-3 gap-2">
+              {statItems.map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: i * 0.08 }}
+                  className="glass-card-light rounded-2xl p-3.5 text-center"
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                  </svg>
-                  {bulkSending ? bulkProgress : 'Send Reminder for All'}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-emerald-50/50 border border-emerald-100 rounded-3xl p-5 text-center shadow-sm">
-              <p className="text-sm font-bold text-emerald-700 flex items-center justify-center gap-1.5">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                All paid ✓ — No outstanding balance
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Invoice History */}
-        <div className="mb-6">
-          <h2 className="text-sm font-bold text-[#1a1d26] mb-3">Invoice History</h2>
-          {invoices.length === 0 ? (
-            <EmptyState
-              icon={
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[#d1d5db]">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
-              }
-              title="No invoices yet"
-              description="Invoices sent to this customer will appear here."
-            />
-          ) : (
-            <div className="flex flex-col gap-2.5">
-              {invoices.map((invoice, i) => (
-                <InvoiceCard key={invoice.id} invoice={invoice} index={i} />
+                  <p className="text-lg font-extrabold text-[#1a1d26] tabular-nums leading-tight">
+                    {stat.value}
+                  </p>
+                  <p className="text-[10px] text-[#9ca3af] font-medium mt-1 uppercase tracking-wide">
+                    {stat.label}
+                  </p>
+                </motion.div>
               ))}
             </div>
-          )}
-        </div>
+
+            {/* Outstanding Summary Card */}
+            <div>
+              {totalOutstanding > 0 ? (
+                <div className="bg-white rounded-3xl border border-[#e5e7eb] overflow-hidden shadow-sm">
+                  <div className="bg-amber-50/50 border-b border-[#e5e7eb] p-5">
+                    <p className="text-[10px] font-bold text-amber-800 uppercase tracking-wider mb-1">
+                      Outstanding Balance
+                    </p>
+                    <p className="text-2xl font-extrabold text-amber-600">
+                      ₹{totalOutstanding.toLocaleString('en-IN')}
+                    </p>
+                  </div>
+
+                  <div className="p-4 space-y-3">
+                    <div className="space-y-2">
+                      {outstandingInvoices.map((inv) => {
+                        const due = Number(inv.total) - Number(inv.amount_paid || 0);
+                        return (
+                          <div
+                            key={inv.id}
+                            onClick={() => router.push(`/invoice/${inv.id}`)}
+                            className="flex items-center justify-between p-3 rounded-xl bg-[#f9fafb] border border-[#e5e7eb] hover:border-amber-500 transition-colors cursor-pointer"
+                          >
+                            <div className="flex flex-col">
+                              <span className="text-xs font-bold text-[#1a1d26]">
+                                {inv.invoice_number}
+                              </span>
+                              <span className="text-[10px] text-[#9ca3af]">
+                                {new Date(inv.created_at).toLocaleDateString('en-IN', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                })}
+                              </span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-xs font-extrabold text-red-600">
+                                ₹{due.toLocaleString('en-IN')} due
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      onClick={handleSendBulkReminders}
+                      disabled={bulkSending}
+                      className="w-full mt-1.5 py-2.5 rounded-xl text-xs font-bold bg-[#d97706] hover:bg-[#b45309] text-white transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                      </svg>
+                      {bulkSending ? bulkProgress : 'Send Reminder for All'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-emerald-50/50 border border-emerald-100 rounded-3xl p-5 text-center shadow-sm">
+                  <p className="text-sm font-bold text-emerald-700 flex items-center justify-center gap-1.5">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    All paid ✓ — No outstanding balance
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'ledger' && (
+          <div className="space-y-4 animate-fadeIn">
+            <h2 className="text-xs font-bold text-[#6b7280] uppercase tracking-wider mb-2 pl-2">Customer Ledger Timeline</h2>
+            {loadingLedger ? (
+              <div className="text-center py-12">
+                <p className="text-xs text-[#9ca3af] italic animate-pulse">Loading transaction records...</p>
+              </div>
+            ) : ledgerEntries.length === 0 ? (
+              <div className="text-center py-8 bg-white border border-[#e5e7eb] rounded-3xl">
+                <p className="text-xs text-[#9ca3af] italic">No transaction history found for this customer.</p>
+              </div>
+            ) : (
+              <div className="relative pl-6 border-l-2 border-[#e5e7eb] ml-4 space-y-6">
+                {ledgerEntries.map((entry) => {
+                  const isInvoice = entry.type === 'invoice';
+                  return (
+                    <div key={entry.id} className="relative">
+                      {/* Timeline Dot */}
+                      <div className={`absolute -left-[33px] top-1.5 w-4 h-4 rounded-full border-4 border-[#f5f6fa] shadow-sm ${
+                        isInvoice ? 'bg-red-500' : 'bg-emerald-500'
+                      }`} />
+
+                      {/* Timeline Card */}
+                      <div className="bg-white border border-[#e5e7eb] rounded-2xl p-4 flex items-center justify-between shadow-sm hover:border-[#1a6b3c]/30 transition-all">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-md ${
+                              isInvoice ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'
+                            }`}>
+                              {isInvoice ? 'Invoice' : 'Payment'}
+                            </span>
+                            <span className="text-xs font-extrabold text-[#111827]">
+                              {entry.invoice_number}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-[#6b7280] font-medium">
+                            {new Date(entry.date).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
+                            {!isInvoice && entry.payment_method && ` · via ${entry.payment_method.toUpperCase()}`}
+                            {entry.note && ` · "${entry.note}"`}
+                          </p>
+                          {isInvoice && (
+                            <button
+                              onClick={() => router.push(`/invoice/${entry.invoice_id}`)}
+                              className="text-[10px] text-[#1a6b3c] hover:underline font-bold"
+                            >
+                              View Invoice →
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Amounts */}
+                        <div className="text-right space-y-0.5">
+                          <p className={`text-sm font-extrabold tabular-nums ${
+                            isInvoice ? 'text-red-600' : 'text-emerald-600'
+                          }`}>
+                            {isInvoice ? '+' : '-'}₹{Number(entry.amount).toLocaleString('en-IN')}
+                          </p>
+                          <p className="text-[10px] text-[#9ca3af] font-semibold">
+                            Balance: <span className="text-[#4b5563] font-bold">₹{Number(entry.running_balance).toLocaleString('en-IN')}</span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'invoices' && (
+          <div className="animate-fadeIn">
+            <h2 className="text-xs font-bold text-[#6b7280] uppercase tracking-wider mb-3 pl-2">Invoice History</h2>
+            {invoices.length === 0 ? (
+              <EmptyState
+                icon={
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[#d1d5db]">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                }
+                title="No invoices yet"
+                description="Invoices sent to this customer will appear here."
+              />
+            ) : (
+              <div className="flex flex-col gap-2.5">
+                {invoices.map((invoice, i) => (
+                  <InvoiceCard key={invoice.id} invoice={invoice} index={i} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Delete Customer */}
         <div className="pt-4 border-t border-[#e5e7eb]">

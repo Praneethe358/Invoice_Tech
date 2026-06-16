@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { sendTextMessage } from '@/lib/whatsapp';
 import { Invoice, Shop, ApiError } from '@/lib/types';
+import { getInvoicePaid } from '@/lib/payments';
 
 export async function POST(
   _request: NextRequest,
@@ -57,8 +58,10 @@ export async function POST(
     const typedShop = shop as Pick<Shop, 'name'>;
 
     const total = Number(typedInvoice.total);
-    const amountPaid = Number(typedInvoice.amount_paid || 0);
-    const balanceDue = total - amountPaid;
+    const amountPaid = typedInvoice.uses_payments_table
+      ? await getInvoicePaid(id)
+      : Number(typedInvoice.amount_paid || 0);
+    const balanceDue = Math.max(0, total - amountPaid);
     const invoiceDate = new Date(typedInvoice.created_at).toLocaleDateString('en-IN', {
       day: 'numeric',
       month: 'short',

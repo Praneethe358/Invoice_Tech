@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     // Get shop
     const { data: shop, error: shopError } = await supabase
       .from('shops')
-      .select('id, invoice_prefix, next_invoice_number')
+      .select('id, invoice_prefix, next_invoice_number, gst_registered')
       .eq('auth_user_id', user.id)
       .single();
 
@@ -56,12 +56,40 @@ export async function POST(request: NextRequest) {
     // Generate invoice number
     const invoiceNumber = `${shop.invoice_prefix}-${String(shop.next_invoice_number).padStart(4, '0')}`;
 
-    // Calculate total
-    const total = body.items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+    // Process items & calculate taxes
+    let subtotal = 0;
+    let totalCgst = 0;
+    let totalSgst = 0;
+    let totalGst = 0;
 
+    const processedItems = body.items.map((item) => {
+      const baseAmount = item.price * item.quantity;
+      subtotal += baseAmount;
+
+      let cgst = 0;
+      let sgst = 0;
+      let lineTotal = baseAmount;
+
+      if (shop.gst_registered) {
+        const gstRate = item.gst_rate || 0;
+        const gstAmount = baseAmount * (gstRate / 100);
+        cgst = Number((gstAmount / 2).toFixed(2));
+        sgst = Number((gstAmount / 2).toFixed(2));
+        lineTotal = Number((baseAmount + gstAmount).toFixed(2));
+        totalCgst += cgst;
+        totalSgst += sgst;
+        totalGst += gstAmount;
+      }
+
+      return {
+        ...item,
+        cgst,
+        sgst,
+        line_total: lineTotal,
+      };
+    });
+
+    const total = subtotal + totalGst;
     const payment_status = body.payment_status || 'paid';
     const amount_paid = payment_status === 'paid' ? Number(total.toFixed(2)) : 0;
     const paid_at = payment_status === 'paid' ? new Date().toISOString() : null;
@@ -77,9 +105,14 @@ export async function POST(request: NextRequest) {
         payment_status,
         amount_paid,
         paid_at,
-        items: body.items,
+        items: processedItems, // fallback copy
         total: Number(total.toFixed(2)),
         status: 'created',
+        uses_items_table: true,
+        subtotal: Number(subtotal.toFixed(2)),
+        total_cgst: Number(totalCgst.toFixed(2)),
+        total_sgst: Number(totalSgst.toFixed(2)),
+        total_gst: Number(totalGst.toFixed(2)),
       })
       .select('id, invoice_number')
       .single();
@@ -92,6 +125,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Insert line items into invoice_items table
+    const itemsToInsert = processedItems.map((item) => ({
+      invoice_id: invoice.id,
+      name: item.name,
+      hsn_code: item.hsn_code || null,
+      price: item.price,
+      qty: item.quantity,
+      gst_rate: item.gst_rate || 0,
+      cgst: item.cgst,
+      sgst: item.sgst,
+      line_total: item.line_total,
+    }));
+
+    const { error: itemsInsertError } = await supabase
+      .from('invoice_items')
+      .insert(itemsToInsert);
+
+    if (itemsInsertError) {
+      console.error('Invoice items insert error:', itemsInsertError);
+    }
+
     // Increment invoice number
     const { error: updateError } = await supabase
       .from('shops')
@@ -100,7 +154,6 @@ export async function POST(request: NextRequest) {
 
     if (updateError) {
       console.error('Invoice number update error:', updateError);
-      // Non-critical — invoice was created successfully
     }
 
     return NextResponse.json({

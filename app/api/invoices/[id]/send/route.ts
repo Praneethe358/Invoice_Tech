@@ -6,6 +6,7 @@ import {
   sendDocumentMessage,
 } from '@/lib/whatsapp';
 import { Invoice, Shop, ApiError } from '@/lib/types';
+import { syncCustomerOutstanding } from '@/lib/payments';
 
 export async function POST(
   _request: NextRequest,
@@ -47,7 +48,7 @@ export async function POST(
     // Fetch shop
     const { data: shop, error: shopError } = await supabase
       .from('shops')
-      .select('name, address, phone, logo_url')
+      .select('name, address, phone, logo_url, gst_registered, gstin')
       .eq('id', typedInvoice.shop_id)
       .single();
 
@@ -58,7 +59,30 @@ export async function POST(
       );
     }
 
-    const typedShop = shop as Pick<Shop, 'name' | 'address' | 'phone'> & { logo_url?: string | null };
+    const typedShop = shop as Shop;
+
+    // Fetch line items if uses_items_table is true
+    let invoiceItems = typedInvoice.items;
+    if (typedInvoice.uses_items_table) {
+      const { data: dbItems } = await supabase
+        .from('invoice_items')
+        .select('*')
+        .eq('invoice_id', typedInvoice.id)
+        .order('created_at', { ascending: true });
+
+      if (dbItems) {
+        invoiceItems = dbItems.map((item: any) => ({
+          name: item.name,
+          price: Number(item.price),
+          quantity: item.qty,
+          hsn_code: item.hsn_code,
+          gst_rate: Number(item.gst_rate),
+          cgst: Number(item.cgst),
+          sgst: Number(item.sgst),
+          line_total: Number(item.line_total),
+        }));
+      }
+    }
 
     // Fetch and convert logo
     let logoBase64 = null;
@@ -89,13 +113,15 @@ export async function POST(
         month: 'long',
         year: 'numeric',
       }),
-      items: typedInvoice.items,
+      items: invoiceItems,
       total: Number(typedInvoice.total),
       customerPhone: typedInvoice.customer_phone,
       customerName: typedInvoice.customer_name,
       paymentStatus: typedInvoice.payment_status,
       shopPhone: typedShop.phone,
       logoBase64,
+      gstRegistered: typedShop.gst_registered,
+      gstin: typedShop.gstin,
     });
 
     const filename = `${typedInvoice.invoice_number}_${typedShop.name.replace(/\s+/g, '_')}.pdf`;
@@ -127,10 +153,10 @@ export async function POST(
       caption
     );
 
-    // Step 4: Update status to sent
+    // Step 4: Update status to sent and enable payments tracking
     await supabase
       .from('invoices')
-      .update({ status: 'sent' })
+      .update({ status: 'sent', uses_payments_table: true })
       .eq('id', id);
 
     // Step 5: Auto-save/update customer record (silent — never affects response)
@@ -177,6 +203,9 @@ export async function POST(
             total_spent: totalSpent,
           });
       }
+
+      // Sync customer outstanding balance
+      await syncCustomerOutstanding(typedInvoice.shop_id, customerPhone);
     } catch (customerErr) {
       console.error('Auto-save customer error (non-fatal):', customerErr);
     }

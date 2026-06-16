@@ -10,6 +10,12 @@ export interface Shop {
   invoice_prefix: string;
   next_invoice_number: number;
   created_at: string;
+  shop_type: string;
+  gst_registered: boolean;
+  gstin: string | null;
+  business_type: string;
+  inventory_enabled: boolean;
+  onboarding_completed: boolean;
 }
 
 export type CustomerTag = 'regular' | 'vip';
@@ -23,6 +29,7 @@ export interface Customer {
   total_invoices: number;
   total_spent: number;
   created_at: string;
+  outstanding_balance?: number;
 }
 
 export interface Product {
@@ -31,9 +38,23 @@ export interface Product {
   name: string;
   price: number;
   created_at: string;
+  hsn_code?: string | null;
+  gst_rate?: number;
 }
 
 export type PaymentStatus = 'unpaid' | 'partial' | 'paid';
+
+export interface Payment {
+  id: string;
+  invoice_id: string;
+  shop_id: string;
+  customer_phone: string;
+  amount: number;
+  payment_method: string;
+  note?: string | null;
+  paid_at: string;
+  created_at: string;
+}
 
 export interface Invoice {
   id: string;
@@ -50,6 +71,12 @@ export interface Invoice {
   total: number;
   status: InvoiceStatus;
   created_at: string;
+  uses_items_table?: boolean;
+  uses_payments_table?: boolean;
+  subtotal?: number | null;
+  total_cgst?: number;
+  total_sgst?: number;
+  total_gst?: number;
 }
 
 export type InvoiceStatus = 'created' | 'sent' | 'failed';
@@ -60,6 +87,11 @@ export interface InvoiceItem {
   name: string;
   price: number;
   quantity: number;
+  hsn_code?: string | null;
+  gst_rate?: number;
+  cgst?: number;
+  sgst?: number;
+  line_total?: number;
 }
 
 // ─── API Request/Response Types ───────────────────────────────

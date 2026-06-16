@@ -14,13 +14,19 @@ import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
 import { Product, InvoiceItem, Customer, ApiError } from '@/lib/types';
 import { validatePhone } from '@/lib/validators';
+import { useMemo } from 'react';
 
 interface Props {
   products: Product[];
   shopId: string;
+  shop: {
+    id: string;
+    gst_registered: boolean;
+    gstin: string | null;
+  };
 }
 
-export default function InvoiceBuilderClient({ products, shopId }: Props) {
+export default function InvoiceBuilderClient({ products, shopId, shop }: Props) {
   const supabase = createClient();
   const [items, setItems] = useState<InvoiceItem[]>([]);
   const [phone, setPhone] = useState('');
@@ -29,6 +35,8 @@ export default function InvoiceBuilderClient({ products, shopId }: Props) {
   const [paymentStatus, setPaymentStatus] = useState<'paid' | 'unpaid'>('paid');
   const [customName, setCustomName] = useState('');
   const [customPrice, setCustomPrice] = useState('');
+  const [customHsn, setCustomHsn] = useState('');
+  const [customGst, setCustomGst] = useState('0');
   const [showCustom, setShowCustom] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successInvoice, setSuccessInvoice] = useState('');
@@ -93,7 +101,7 @@ export default function InvoiceBuilderClient({ products, shopId }: Props) {
 
   // ─── Item management ─────────────────────────────────────
   const addOrIncrement = useCallback(
-    (name: string, price: number) => {
+    (name: string, price: number, hsn_code?: string | null, gst_rate?: number) => {
       setItems((prev) => {
         const existing = prev.find((i) => i.name === name);
         if (existing) {
@@ -103,7 +111,7 @@ export default function InvoiceBuilderClient({ products, shopId }: Props) {
               : i
           );
         }
-        return [...prev, { name, price, quantity: 1 }];
+        return [...prev, { name, price, quantity: 1, hsn_code: hsn_code || null, gst_rate: gst_rate || 0 }];
       });
     },
     []
@@ -132,6 +140,8 @@ export default function InvoiceBuilderClient({ products, shopId }: Props) {
   const handleAddCustom = () => {
     const name = customName.trim();
     const price = parseFloat(customPrice);
+    const hsn = customHsn.trim();
+    const gstRate = parseFloat(customGst) || 0;
 
     if (!name) {
       showToast('Enter an item name', 'error');
@@ -142,9 +152,11 @@ export default function InvoiceBuilderClient({ products, shopId }: Props) {
       return;
     }
 
-    addOrIncrement(name, price);
+    addOrIncrement(name, price, hsn, gstRate);
     setCustomName('');
     setCustomPrice('');
+    setCustomHsn('');
+    setCustomGst('0');
     setShowCustom(false);
   };
 
@@ -157,11 +169,41 @@ export default function InvoiceBuilderClient({ products, shopId }: Props) {
     }
   };
 
-  // ─── Total ────────────────────────────────────────────────
-  const total = items.reduce(
-    (sum, i) => sum + i.price * i.quantity,
-    0
-  );
+  // ─── Total Calculations ────────────────────────────────────
+  const calculations = useMemo(() => {
+    let subtotal = 0;
+    let totalCgst = 0;
+    let totalSgst = 0;
+    let totalGst = 0;
+
+    items.forEach((item) => {
+      const baseAmount = item.price * item.quantity;
+      subtotal += baseAmount;
+
+      if (shop.gst_registered) {
+        const gstRate = item.gst_rate || 0;
+        const gstAmount = baseAmount * (gstRate / 100);
+        const cgst = gstAmount / 2;
+        const sgst = gstAmount / 2;
+
+        totalCgst += cgst;
+        totalSgst += sgst;
+        totalGst += gstAmount;
+      }
+    });
+
+    const total = subtotal + totalGst;
+
+    return {
+      subtotal,
+      cgst: totalCgst,
+      sgst: totalSgst,
+      totalGst,
+      total,
+    };
+  }, [items, shop.gst_registered]);
+
+  const total = calculations.total;
 
   // ─── Send Invoice ─────────────────────────────────────────
   const canSend =
@@ -177,7 +219,13 @@ export default function InvoiceBuilderClient({ products, shopId }: Props) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items,
+          items: items.map(item => ({
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            hsn_code: item.hsn_code || null,
+            gst_rate: item.gst_rate || 0,
+          })),
           customer_phone: phone.trim(),
           customer_name: customerName.trim() || undefined,
           payment_status: paymentStatus,
@@ -221,7 +269,7 @@ export default function InvoiceBuilderClient({ products, shopId }: Props) {
   return (
     <div className="min-h-screen bg-[#f9fafb]">
       <Navbar />
-      <PageTransition className="max-w-lg mx-auto px-4 py-6 pb-36">
+      <PageTransition className="max-w-lg md:max-w-5xl mx-auto px-4 md:px-8 py-6 pb-36">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <button
@@ -248,10 +296,13 @@ export default function InvoiceBuilderClient({ products, shopId }: Props) {
                   key={product.id}
                   product={product}
                   quantity={getItemQty(product.name)}
+                  gstRegistered={shop.gst_registered}
                   onTap={() =>
                     addOrIncrement(
                       product.name,
-                      Number(product.price)
+                      Number(product.price),
+                      product.hsn_code,
+                      product.gst_rate
                     )
                   }
                 />
@@ -294,6 +345,30 @@ export default function InvoiceBuilderClient({ products, shopId }: Props) {
                       />
                     </div>
                   </div>
+                  {shop.gst_registered && (
+                    <div className="flex gap-3">
+                      <div className="flex-1">
+                        <Input
+                          placeholder="HSN Code (optional)"
+                          value={customHsn}
+                          onChange={(e) => setCustomHsn(e.target.value)}
+                        />
+                      </div>
+                      <div className="w-28">
+                        <select
+                          value={customGst}
+                          onChange={(e) => setCustomGst(e.target.value)}
+                          className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none min-h-[44px]"
+                        >
+                          <option value="0">0% GST</option>
+                          <option value="5">5% GST</option>
+                          <option value="12">12% GST</option>
+                          <option value="18">18% GST</option>
+                          <option value="28">28% GST</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <Button
                       variant="primary"
@@ -338,9 +413,35 @@ export default function InvoiceBuilderClient({ products, shopId }: Props) {
                     onQtyChange={(qty) =>
                       updateQty(item.name, qty)
                     }
+                    gstRegistered={shop.gst_registered}
                   />
                 ))}
               </AnimatePresence>
+            </div>
+          </section>
+        )}
+
+        {/* Tax Breakdown Summary (only if gst_registered) */}
+        {shop.gst_registered && items.length > 0 && (
+          <section className="bg-white rounded-2xl border border-[#e5e7eb] p-4 space-y-2 mb-6 text-sm">
+            <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-2">
+              Tax Summary
+            </h2>
+            <div className="flex justify-between text-[#6b7280]">
+              <span>Subtotal (Base Value)</span>
+              <span className="tabular-nums">₹{calculations.subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-[#6b7280]">
+              <span>CGST (2.5% / 6% / 9% / 14%)</span>
+              <span className="tabular-nums">₹{calculations.cgst.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-[#6b7280]">
+              <span>SGST (2.5% / 6% / 9% / 14%)</span>
+              <span className="tabular-nums">₹{calculations.sgst.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold text-[#111827] border-t border-[#f3f4f6] pt-2 mt-1">
+              <span>Total (GST Inclusive)</span>
+              <span className="tabular-nums">₹{calculations.total.toFixed(2)}</span>
             </div>
           </section>
         )}
@@ -459,14 +560,14 @@ export default function InvoiceBuilderClient({ products, shopId }: Props) {
       </PageTransition>
 
       {/* Sticky Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-[#e5e7eb] z-30">
-        <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-white/90 backdrop-blur-lg border-t border-[#e5e7eb] z-30">
+        <div className="max-w-lg md:max-w-5xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
           <div>
             <p className="text-xs text-[#6b7280] font-medium">
               Total
             </p>
             <p className="text-2xl font-bold text-[#111827] tabular-nums">
-              ₹{total.toLocaleString('en-IN')}
+              ₹{total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
           </div>
           <Button
