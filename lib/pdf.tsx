@@ -513,29 +513,6 @@ function InvoicePDF({
           </View>
         </View>
 
-        {/* HSN Summary Table (only if gstRegistered) */}
-        {gstRegistered && hsnGroups.length > 0 && (
-          <View style={[styles.table, { marginTop: 25 }]}>
-            <Text style={[styles.notesTitle, { marginBottom: 6 }]}>HSN Summary Table</Text>
-            <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderText, { flex: 2 }]}>HSN Code</Text>
-              <Text style={[styles.tableHeaderText, { flex: 2, textAlign: 'right' }]}>Taxable Value</Text>
-              <Text style={[styles.tableHeaderText, { flex: 1.5, textAlign: 'right' }]}>CGST</Text>
-              <Text style={[styles.tableHeaderText, { flex: 1.5, textAlign: 'right' }]}>SGST</Text>
-              <Text style={[styles.tableHeaderText, { flex: 2, textAlign: 'right' }]}>Total Tax</Text>
-            </View>
-            {hsnGroups.map((group, idx) => (
-              <View key={idx} style={styles.tableRow}>
-                <Text style={{ flex: 2 }}>{group.hsn}</Text>
-                <Text style={{ flex: 2, textAlign: 'right' }}>₹{group.taxable.toFixed(2)}</Text>
-                <Text style={{ flex: 1.5, textAlign: 'right' }}>₹{group.cgst.toFixed(2)}</Text>
-                <Text style={{ flex: 1.5, textAlign: 'right' }}>₹{group.sgst.toFixed(2)}</Text>
-                <Text style={{ flex: 2, textAlign: 'right', fontFamily: 'Helvetica-Bold' }}>₹{group.totalGst.toFixed(2)}</Text>
-              </View>
-            ))}
-          </View>
-        )}
-
         {/* Professional Terms and Notes */}
         <View style={styles.notesSection}>
           <Text style={styles.notesTitle}>Terms & Conditions</Text>
