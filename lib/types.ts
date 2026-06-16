@@ -40,6 +40,13 @@ export interface Product {
   created_at: string;
   hsn_code?: string | null;
   gst_rate?: number;
+  stock_qty?: number;
+  low_stock_threshold?: number;
+  track_inventory?: boolean;
+  is_favorite?: boolean;
+  category?: string | null;
+  last_used_at?: string | null;
+  use_count?: number;
 }
 
 export type PaymentStatus = 'unpaid' | 'partial' | 'paid';

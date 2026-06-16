@@ -204,3 +204,42 @@ alter table customers
 alter table invoices
   add column if not exists uses_payments_table boolean not null default false;
 
+-- ═══════════════════════════════════════════
+-- Phase 7 Database Changes
+-- ═══════════════════════════════════════════
+
+-- Inventory fields on products
+alter table products
+  add column if not exists stock_qty integer not null default 0,
+  add column if not exists low_stock_threshold integer not null default 5,
+  add column if not exists track_inventory boolean not null default false,
+  add column if not exists is_favorite boolean not null default false,
+  add column if not exists category text,
+  add column if not exists last_used_at timestamptz,
+  add column if not exists use_count integer not null default 0;
+
+-- Inventory history log
+create table if not exists inventory_logs (
+  id uuid primary key default gen_random_uuid(),
+  shop_id uuid not null references shops(id) on delete cascade,
+  product_id uuid not null references products(id) on delete cascade,
+  invoice_id uuid references invoices(id) on delete set null,
+  change_qty integer not null,
+  -- negative = stock deducted (invoice sent)
+  -- positive = stock added (manual restock)
+  previous_qty integer not null,
+  new_qty integer not null,
+  reason text not null default 'invoice',
+  -- 'invoice' | 'restock' | 'adjustment' | 'return'
+  created_at timestamptz not null default now()
+);
+
+alter table inventory_logs enable row level security;
+
+create policy "own inventory logs" on inventory_logs for all
+  using (
+    shop_id in (
+      select id from shops where auth_user_id = auth.uid()
+    )
+  );
+

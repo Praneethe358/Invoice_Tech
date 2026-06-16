@@ -15,6 +15,8 @@ import { createClient } from '@/lib/supabase/client';
 import { Product, InvoiceItem, Customer, ApiError } from '@/lib/types';
 import { validatePhone } from '@/lib/validators';
 import { useMemo } from 'react';
+import { SHOP_CONFIG } from '@/lib/shop-config';
+import { ShopType } from '@/lib/starter-catalogs';
 
 interface Props {
   products: Product[];
@@ -23,6 +25,8 @@ interface Props {
     id: string;
     gst_registered: boolean;
     gstin: string | null;
+    inventory_enabled: boolean;
+    shop_type: string;
   };
 }
 
@@ -42,6 +46,111 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
   const [successInvoice, setSuccessInvoice] = useState('');
   const router = useRouter();
   const { showToast } = useToast();
+
+  const [localProducts, setLocalProducts] = useState<Product[]>(products);
+
+  useEffect(() => {
+    setLocalProducts(products);
+  }, [products]);
+
+  const config = SHOP_CONFIG[shop.shop_type as ShopType] || SHOP_CONFIG.other;
+
+  const categoriesExist = useMemo(() => {
+    return localProducts.some(p => p.category);
+  }, [localProducts]);
+
+  const activeCategories = useMemo(() => {
+    const list = Array.from(new Set(localProducts.map(p => p.category).filter(Boolean))) as string[];
+    if (localProducts.some(p => !p.category)) {
+      if (!list.includes('Others')) {
+        list.push('Others');
+      }
+    }
+    return list;
+  }, [localProducts]);
+
+  const [selectedCategoryTab, setSelectedCategoryTab] = useState<string>('All');
+
+  const filteredProducts = useMemo(() => {
+    if (!categoriesExist || selectedCategoryTab === 'All') return localProducts;
+    if (selectedCategoryTab === 'Others') {
+      return localProducts.filter(p => !p.category || p.category === 'Others');
+    }
+    return localProducts.filter(p => p.category === selectedCategoryTab);
+  }, [localProducts, categoriesExist, selectedCategoryTab]);
+
+  const favoriteProducts = useMemo(() => {
+    return localProducts.filter(p => p.is_favorite).slice(0, 8);
+  }, [localProducts]);
+
+  const recentlyUsedProducts = useMemo(() => {
+    return localProducts
+      .filter(p => p.last_used_at)
+      .sort((a, b) => new Date(b.last_used_at!).getTime() - new Date(a.last_used_at!).getTime())
+      .slice(0, 5);
+  }, [localProducts]);
+
+  const handleToggleFavorite = async (product: Product, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const nextVal = !product.is_favorite;
+
+    setLocalProducts((prev) =>
+      prev.map((p) => (p.id === product.id ? { ...p, is_favorite: nextVal } : p))
+    );
+
+    const { error } = await supabase
+      .from('products')
+      .update({ is_favorite: nextVal })
+      .eq('id', product.id);
+
+    if (error) {
+      setLocalProducts((prev) =>
+        prev.map((p) => (p.id === product.id ? { ...p, is_favorite: !nextVal } : p))
+      );
+      showToast('Failed to update favorite status', 'error');
+    } else {
+      showToast(nextVal ? `"${product.name}" added to Favorites` : `"${product.name}" removed from Favorites`, 'success');
+    }
+  };
+
+  const handlePriceUpdate = async (product: Product, newPrice: number) => {
+    setLocalProducts((prev) =>
+      prev.map((p) => (p.id === product.id ? { ...p, price: newPrice } : p))
+    );
+
+    const { error } = await supabase
+      .from('products')
+      .update({ price: newPrice })
+      .eq('id', product.id);
+
+    if (error) {
+      setLocalProducts((prev) =>
+        prev.map((p) => (p.id === product.id ? { ...p, price: product.price } : p))
+      );
+      showToast('Failed to update price', 'error');
+    } else {
+      showToast(`Price of "${product.name}" updated to ₹${newPrice}`, 'success');
+    }
+  };
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 350);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const searchedProducts = useMemo(() => {
+    const query = debouncedSearchQuery.trim().toLowerCase();
+    if (!query) return filteredProducts;
+    return filteredProducts.filter(
+      p =>
+        p.name.toLowerCase().includes(query) ||
+        (p.category && p.category.toLowerCase().includes(query)) ||
+        (p.hsn_code && p.hsn_code.toLowerCase().includes(query))
+    );
+  }, [filteredProducts, debouncedSearchQuery]);
 
   // ─── Customer autocomplete ─────────────────────────────────
   const [suggestions, setSuggestions] = useState<Customer[]>([]);
@@ -284,32 +393,169 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
           </h1>
         </div>
 
-        {/* Catalog */}
-        {products.length > 0 && (
+        {/* Search Bar */}
+        {localProducts.length > 0 && (
+          <div className="mb-6">
+            <Input
+              placeholder="🔍 Search items by name, category, or HSN..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        )}
+
+        {/* Favourites Section */}
+        {favoriteProducts.length > 0 && (
           <section className="mb-6">
-            <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-3">
-              Tap to add
+            <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-3 flex items-center gap-1">
+              ⭐ Favourites
             </h2>
             <div className="grid grid-cols-2 gap-3">
-              {products.map((product) => (
+              {favoriteProducts.map((product) => (
                 <CatalogCard
-                  key={product.id}
+                  key={`fav-${product.id}`}
                   product={product}
                   quantity={getItemQty(product.name)}
                   gstRegistered={shop.gst_registered}
-                  onTap={() =>
+                  onTap={() => {
+                    if (shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= 0) {
+                      showToast(`⚠️ Warning: "${product.name}" is out of stock. You can still dispatch, but stock will go negative.`, 'warning');
+                    }
                     addOrIncrement(
                       product.name,
                       Number(product.price),
                       product.hsn_code,
                       product.gst_rate
-                    )
-                  }
+                    );
+                  }}
+                  onFavoriteToggle={(e) => handleToggleFavorite(product, e)}
+                  onPriceUpdate={(newPrice) => handlePriceUpdate(product, newPrice)}
+                  inventoryEnabled={shop.inventory_enabled}
+                  stockUnitShort={config.stockUnitShort || undefined}
                 />
               ))}
             </div>
           </section>
         )}
+
+        {/* Recently Used Section */}
+        {recentlyUsedProducts.length > 0 && (
+          <section className="mb-6">
+            <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-3 flex items-center gap-1">
+              🕐 Recently Used
+            </h2>
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
+              {recentlyUsedProducts.map((product) => (
+                <div key={`recent-${product.id}`} className="min-w-[150px] max-w-[180px] shrink-0">
+                  <CatalogCard
+                    product={product}
+                    quantity={getItemQty(product.name)}
+                    gstRegistered={shop.gst_registered}
+                    onTap={() => {
+                      if (shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= 0) {
+                        showToast(`⚠️ Warning: "${product.name}" is out of stock. You can still dispatch, but stock will go negative.`, 'warning');
+                      }
+                      addOrIncrement(
+                        product.name,
+                        Number(product.price),
+                        product.hsn_code,
+                        product.gst_rate
+                      );
+                    }}
+                    onFavoriteToggle={(e) => handleToggleFavorite(product, e)}
+                    onPriceUpdate={(newPrice) => handlePriceUpdate(product, newPrice)}
+                    inventoryEnabled={shop.inventory_enabled}
+                    stockUnitShort={config.stockUnitShort || undefined}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Categories Tab Strip / Tip Banner */}
+        {localProducts.length > 0 && (
+          <div className="mb-4">
+            {categoriesExist ? (
+              <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-none">
+                <button
+                  onClick={() => setSelectedCategoryTab('All')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+                    selectedCategoryTab === 'All'
+                      ? 'bg-[#1a6b3c] text-white'
+                      : 'bg-[#f3f4f6] text-[#4b5563] hover:bg-[#e5e7eb]'
+                  }`}
+                >
+                  All
+                  <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
+                    selectedCategoryTab === 'All' ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    {localProducts.length}
+                  </span>
+                </button>
+                {activeCategories.map(cat => {
+                  const count = localProducts.filter(p => p.category === cat || (cat === 'Others' && !p.category)).length;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategoryTab(cat)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+                        selectedCategoryTab === cat
+                          ? 'bg-[#1a6b3c] text-white'
+                          : 'bg-[#f3f4f6] text-[#4b5563] hover:bg-[#e5e7eb]'
+                      }`}
+                    >
+                      {cat}
+                      <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
+                        selectedCategoryTab === cat ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-3 bg-blue-50 text-blue-800 text-xs rounded-xl border border-blue-200">
+            💡 <strong>Tip:</strong> Go to <strong>Settings → Product Catalog</strong> to group your products into categories!
+          </div>
+        )}
+      </div>
+    )}
+
+    {/* Main Catalog Cards */}
+    {searchedProducts.length > 0 && (
+      <section className="mb-6">
+        <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-3">
+          Tap to add
+        </h2>
+        <div className="grid grid-cols-2 gap-3">
+          {searchedProducts.map((product) => (
+            <CatalogCard
+              key={product.id}
+              product={product}
+              quantity={getItemQty(product.name)}
+              gstRegistered={shop.gst_registered}
+              onTap={() => {
+                if (shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= 0) {
+                  showToast(`⚠️ Warning: "${product.name}" is out of stock. You can still dispatch, but stock will go negative.`, 'warning');
+                }
+                addOrIncrement(
+                  product.name,
+                  Number(product.price),
+                  product.hsn_code,
+                  product.gst_rate
+                );
+              }}
+              onFavoriteToggle={(e) => handleToggleFavorite(product, e)}
+              onPriceUpdate={(newPrice) => handlePriceUpdate(product, newPrice)}
+              inventoryEnabled={shop.inventory_enabled}
+              stockUnitShort={config.stockUnitShort || undefined}
+            />
+          ))}
+        </div>
+      </section>
+    )}
 
         {/* Custom Item */}
         <section className="mb-6">

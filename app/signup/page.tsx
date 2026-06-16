@@ -24,6 +24,7 @@ interface CatalogItemState {
   price: string;
   hsn_code: string;
   gst_rate: number;
+  category?: string;
 }
 
 export default function SignupPage() {
@@ -90,6 +91,7 @@ export default function SignupPage() {
         price: '',
         hsn_code: item.hsn_code,
         gst_rate: item.gst_rate,
+        category: item.category,
       }))
     );
   }, [shopType]);
@@ -290,6 +292,7 @@ export default function SignupPage() {
           price: parseFloat(item.price),
           hsn_code: item.hsn_code || null,
           gst_rate: item.gst_rate || 0,
+          category: item.category || null,
         }));
         const { error: productsError } = await supabase
           .from('products')

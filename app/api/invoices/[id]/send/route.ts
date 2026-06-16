@@ -159,6 +159,76 @@ export async function POST(
       .update({ status: 'sent', uses_payments_table: true })
       .eq('id', id);
 
+    // Step 4.5: Update product stats (recently used & inventory tracking)
+    const warningProducts: string[] = [];
+    if (invoiceItems && Array.isArray(invoiceItems)) {
+      for (const item of invoiceItems) {
+        // Find matching product
+        const { data: dbProd } = await supabase
+          .from('products')
+          .select('id, stock_qty, track_inventory, use_count')
+          .eq('shop_id', typedInvoice.shop_id)
+          .eq('name', item.name)
+          .maybeSingle();
+
+        if (dbProd) {
+          // Increment use_count and set last_used_at
+          await supabase
+            .from('products')
+            .update({
+              last_used_at: new Date().toISOString(),
+              use_count: (dbProd.use_count || 0) + 1,
+            })
+            .eq('id', dbProd.id);
+
+          // If track_inventory is enabled
+          if (dbProd.track_inventory) {
+            const qtyNeeded = Number(item.quantity || 1);
+            const currentStock = Number(dbProd.stock_qty || 0);
+
+            if (currentStock >= qtyNeeded) {
+              const newQty = currentStock - qtyNeeded;
+              await supabase
+                .from('products')
+                .update({ stock_qty: newQty })
+                .eq('id', dbProd.id);
+
+              await supabase
+                .from('inventory_logs')
+                .insert({
+                  shop_id: typedInvoice.shop_id,
+                  product_id: dbProd.id,
+                  invoice_id: typedInvoice.id,
+                  change_qty: -qtyNeeded,
+                  previous_qty: currentStock,
+                  new_qty: newQty,
+                  reason: 'invoice'
+                });
+            } else {
+              // Insufficient stock - warn and set stock to 0
+              warningProducts.push(item.name);
+              await supabase
+                .from('products')
+                .update({ stock_qty: 0 })
+                .eq('id', dbProd.id);
+
+              await supabase
+                .from('inventory_logs')
+                .insert({
+                  shop_id: typedInvoice.shop_id,
+                  product_id: dbProd.id,
+                  invoice_id: typedInvoice.id,
+                  change_qty: -qtyNeeded,
+                  previous_qty: currentStock,
+                  new_qty: 0,
+                  reason: 'invoice'
+                });
+            }
+          }
+        }
+      }
+    }
+
     // Step 5: Auto-save/update customer record (silent — never affects response)
     try {
       const customerPhone = typedInvoice.customer_phone;
@@ -208,6 +278,15 @@ export async function POST(
       await syncCustomerOutstanding(typedInvoice.shop_id, customerPhone);
     } catch (customerErr) {
       console.error('Auto-save customer error (non-fatal):', customerErr);
+    }
+
+    if (warningProducts.length > 0) {
+      return NextResponse.json({
+        success: true,
+        message: 'Invoice sent successfully',
+        warning: 'low_stock',
+        products: warningProducts,
+      });
     }
 
     return NextResponse.json({

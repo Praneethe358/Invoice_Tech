@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type ToastType = 'success' | 'error' | 'info';
+type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 interface Toast {
   id: string;
@@ -33,12 +33,14 @@ const typeStyles: Record<ToastType, string> = {
   success: 'bg-[#16a34a] text-white',
   error: 'bg-[#dc2626] text-white',
   info: 'bg-[#111827] text-white',
+  warning: 'bg-[#d97706] text-white',
 };
 
 const typeIcons: Record<ToastType, string> = {
   success: '✓',
   error: '✕',
   info: 'ℹ',
+  warning: '⚠️',
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {

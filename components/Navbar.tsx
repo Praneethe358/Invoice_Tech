@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -68,6 +68,44 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  const [shopInfo, setShopInfo] = useState<{ name: string; shop_type: string; gst_registered: boolean; inventory_enabled: boolean } | null>(null);
+  const [lowStockCount, setLowStockCount] = useState(0);
+
+  useEffect(() => {
+    const fetchNavbarData = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: shop } = await supabase
+          .from('shops')
+          .select('id, name, shop_type, gst_registered, inventory_enabled')
+          .eq('auth_user_id', user.id)
+          .single();
+
+        if (shop) {
+          setShopInfo(shop);
+          
+          if (shop.inventory_enabled) {
+            const { data: products } = await supabase
+              .from('products')
+              .select('stock_qty, low_stock_threshold, track_inventory')
+              .eq('shop_id', shop.id);
+
+            if (products) {
+              const typedProducts = products as Array<{ stock_qty: number | null; low_stock_threshold: number | null; track_inventory: boolean }>;
+              const low = typedProducts.filter(p => p.track_inventory && (p.stock_qty || 0) <= (p.low_stock_threshold || 5)).length;
+              setLowStockCount(low);
+            }
+          }
+        }
+      } catch { /* ignore */ }
+    };
+
+    fetchNavbarData();
+  }, []);
+
   const handleLogout = async () => {
     try {
       const supabase = createClient();
@@ -120,11 +158,12 @@ export default function Navbar() {
             .filter((item) => !item.isMain)
             .map((item) => {
               const isActive = pathname === item.href;
+              const isSettings = item.href === '/settings';
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all relative ${
                     isActive
                       ? 'bg-[#1a6b3c]/10 text-[#1a6b3c]'
                       : 'text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#1a1d26]'
@@ -134,6 +173,11 @@ export default function Navbar() {
                     {item.icon}
                   </span>
                   {item.label}
+                  {isSettings && lowStockCount > 0 && (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 bg-amber-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full animate-pulse">
+                      {lowStockCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -142,15 +186,17 @@ export default function Navbar() {
         {/* Sidebar Footer with Logout */}
         <div className="border-t border-[#e8eaed] pt-4 mt-auto">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-full bg-[#1a6b3c]/10 flex items-center justify-center text-[#1a6b3c]">
+            <div className="w-9 h-9 rounded-full bg-[#1a6b3c]/10 flex items-center justify-center text-[#1a6b3c] shrink-0">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
             </div>
             <div className="truncate flex-1">
-              <p className="text-xs font-bold text-[#1a1d26] truncate">Active Shop</p>
-              <p className="text-[10px] text-[#9ca3af] font-semibold uppercase tracking-wider">Tamil Nadu, IN</p>
+              <p className="text-xs font-bold text-[#1a1d26] truncate">{shopInfo?.name || 'Active Shop'}</p>
+              <p className="text-[10px] text-[#9ca3af] font-semibold uppercase tracking-wider truncate">
+                {shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Tamil Nadu, IN'}
+              </p>
             </div>
           </div>
           <button
