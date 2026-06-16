@@ -489,6 +489,191 @@ export default function LandingPage() {
             {/* Left Content (Centered on mobile, left-aligned on desktop) */}
             <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-5 sm:space-y-6">
 
+              {/* MOBILE MOCKUP: Small, premium smartphone frame + switcher above the heading (visible only on mobile) */}
+              <div className="block lg:hidden w-full flex flex-col items-center mb-2">
+                {/* Smaller interactive smartphone frame */}
+                <div className="relative w-full max-w-[150px] aspect-[9/18.3] mx-auto select-none mb-4">
+                  {/* Background glow behind phone mockup */}
+                  <div className="absolute inset-[-10px] bg-emerald-500/10 blur-xl rounded-[36px] -z-10" />
+                  
+                  {/* Internal Smartphone frame */}
+                  <div className="w-full h-full bg-[#0b0f19] rounded-[36px] p-2 shadow-[0_20px_40px_rgba(0,0,0,0.25)] border-[2.5px] border-slate-800 relative overflow-hidden flex flex-col">
+                    {/* Smartphone Notch */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-3.5 bg-[#0b0f19] rounded-b-xl z-20 flex items-center justify-center">
+                      <div className="w-5 h-0.5 bg-slate-800 rounded-full mb-0.5" />
+                    </div>
+                    
+                    {/* Internal Screen Content */}
+                    <div className="bg-[#f8fafc] h-full rounded-[26px] overflow-hidden flex flex-col border border-slate-950/5 relative">
+                      {/* App Header */}
+                      <div className="bg-[#1a6b3c] text-white p-2 pt-4 pb-2 flex justify-between items-center shadow-xs shrink-0">
+                        <div className="flex items-center gap-1">
+                          <div className="w-3.5 h-3.5 rounded bg-white/15 flex items-center justify-center">
+                            <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            </svg>
+                          </div>
+                          <span className="font-extrabold text-[9px] tracking-tight">Varavu</span>
+                        </div>
+                        <span className="text-[5.5px] bg-white/20 px-1.5 py-0.5 rounded-full font-bold">TN</span>
+                      </div>
+
+                      {/* Simulated Screen Body Content */}
+                      <div className="flex-1 px-2 pb-2 flex flex-col overflow-hidden pt-1.5">
+                        <AnimatePresence mode="wait">
+                          {simulatorStep === 0 && (
+                            <motion.div
+                              key="mob_step0"
+                              initial={{ opacity: 0, x: 5 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -5 }}
+                              transition={{ duration: 0.2 }}
+                              className="flex-1 flex flex-col justify-between overflow-hidden"
+                            >
+                              <div className="space-y-2">
+                                <div className="flex justify-between items-center pb-1 border-b border-slate-100">
+                                  <span className="text-[7px] font-bold text-slate-850 uppercase">New Invoice</span>
+                                  <span className="text-[5px] text-slate-400 font-semibold">1 of 3</span>
+                                </div>
+
+                                <div className="space-y-0.5">
+                                  <label className="text-[5.5px] text-slate-400 font-extrabold uppercase">Bill To</label>
+                                  <div className="bg-white p-1.5 rounded-md border border-slate-200/75 shadow-3xs text-[7px] font-extrabold text-slate-850">
+                                    Ramesh Kumar
+                                  </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <label className="text-[5.5px] text-slate-400 font-extrabold uppercase">Items</label>
+                                  <div className="bg-white p-1.5 rounded-md border border-slate-200/75 shadow-3xs flex justify-between items-center text-[6.5px]">
+                                    <div>
+                                      <h6 className="font-extrabold text-slate-850">Ponni Rice</h6>
+                                      <p className="text-[5px] text-slate-450">Qty: 2</p>
+                                    </div>
+                                    <span className="font-extrabold text-slate-850">₹2,400</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <button
+                                onClick={() => setSimulatorStep(1)}
+                                className="w-full bg-[#1a6b3c] text-white py-1 rounded-md text-[7px] font-extrabold shadow-sm mt-1.5 flex items-center justify-center"
+                              >
+                                Preview →
+                              </button>
+                            </motion.div>
+                          )}
+
+                          {simulatorStep === 1 && (
+                            <motion.div
+                              key="mob_step1"
+                              initial={{ opacity: 0, x: 5 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -5 }}
+                              transition={{ duration: 0.2 }}
+                              className="flex-1 flex flex-col justify-between overflow-hidden"
+                            >
+                              <div className="flex-1 flex flex-col overflow-hidden">
+                                <div className="flex justify-between items-center pb-1 border-b border-slate-100 shrink-0">
+                                  <span className="text-[7px] font-bold text-slate-850 uppercase">Tax Invoice</span>
+                                  <span className="text-[5px] text-slate-400 font-semibold">2 of 3</span>
+                                </div>
+
+                                <div className="flex-1 bg-white border border-slate-200/70 rounded-lg p-1.5 shadow-3xs mt-1 overflow-y-auto space-y-1 text-[5px] text-slate-650">
+                                  <div className="flex justify-between items-start border-b border-slate-100 pb-1">
+                                    <div>
+                                      <h5 className="font-extrabold text-[#1a6b3c] text-[6.5px]">VARAVU STORE</h5>
+                                      <p className="text-[4px] text-slate-400">GSTIN: 33AAAAA0000A1Z1</p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="font-extrabold text-slate-850">TAX INVOICE</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-between font-bold text-slate-850">
+                                    <span>Ramesh Kumar</span>
+                                    <span>₹4,042.50</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <button
+                                onClick={() => setSimulatorStep(2)}
+                                className="w-full bg-[#16a34a] text-white py-1 rounded-md text-[7px] font-extrabold shadow-sm mt-1.5 flex items-center justify-center"
+                              >
+                                Send via WhatsApp 💬
+                              </button>
+                            </motion.div>
+                          )}
+
+                          {simulatorStep === 2 && (
+                            <motion.div
+                              key="mob_step2"
+                              initial={{ opacity: 0, x: 5 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -5 }}
+                              transition={{ duration: 0.2 }}
+                              className="flex-1 flex flex-col justify-between overflow-hidden"
+                            >
+                              <div className="flex-1 flex flex-col overflow-hidden">
+                                <div className="flex items-center gap-1 pb-1 border-b border-slate-100 shrink-0">
+                                  <div className="w-4 h-4 rounded-full bg-emerald-600 flex items-center justify-center text-[6px] text-white font-bold">RK</div>
+                                  <h6 className="text-[6.5px] font-bold text-slate-850">Ramesh Kumar</h6>
+                                </div>
+
+                                <div className="flex-1 py-1 space-y-1.5 overflow-y-auto flex flex-col justify-end text-[5.5px]">
+                                  <div className="bg-[#dcf8c6] p-1.5 rounded-md max-w-[95%] self-end border border-emerald-200/50 shadow-3xs">
+                                    <p className="font-bold text-slate-850 text-[6px] mb-0.5">INV_Ramesh.pdf</p>
+                                    <p className="text-slate-700 leading-tight">Invoice of **₹4,042.50** from Varavu Store.</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="bg-emerald-50 border border-emerald-150 p-1 rounded-md text-center shrink-0 flex items-center justify-center gap-1 mt-1">
+                                <span className="text-[7px] text-[#1a6b3c] font-extrabold">Invoice Sent &amp; Paid! ✓</span>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Compact Premium Pill Switcher */}
+                <div className="flex gap-1 p-0.5 bg-slate-200/60 backdrop-blur-md rounded-lg w-full max-w-[210px] text-[9.5px] font-extrabold shadow-2xs border border-slate-200/60">
+                  <button
+                    onClick={() => setSimulatorStep(0)}
+                    className={`flex-1 py-1.5 rounded-md transition-all text-center flex items-center justify-center gap-0.5 ${
+                      simulatorStep === 0 
+                        ? 'bg-[#1a6b3c] text-white shadow-sm' 
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                    }`}
+                  >
+                    <span>1. Entry</span>
+                  </button>
+                  <button
+                    onClick={() => setSimulatorStep(1)}
+                    className={`flex-1 py-1.5 rounded-md transition-all text-center flex items-center justify-center gap-0.5 ${
+                      simulatorStep === 1 
+                        ? 'bg-[#1a6b3c] text-white shadow-sm' 
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                    }`}
+                  >
+                    <span>2. Preview</span>
+                  </button>
+                  <button
+                    onClick={() => setSimulatorStep(2)}
+                    className={`flex-1 py-1.5 rounded-md transition-all text-center flex items-center justify-center gap-0.5 ${
+                      simulatorStep === 2 
+                        ? 'bg-[#1a6b3c] text-white shadow-sm' 
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                    }`}
+                  >
+                    <span>3. Send</span>
+                  </button>
+                </div>
+              </div>
+
               <h1 className="text-[1.8rem] sm:text-[2.25rem] md:text-5xl lg:text-6xl font-black text-[#1a1d26] tracking-tight leading-[1.2] max-w-2xl lg:max-w-none">
                 Best <span className="bg-gradient-to-r from-emerald-600 to-[#1a6b3c] bg-clip-text text-transparent">WhatsApp Billing</span> Software for Small Business
               </h1>
@@ -518,8 +703,8 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Right Content - Responsive Mockup (Phone on Mobile, Laptop on Desktop) */}
-            <div className="lg:col-span-5 flex flex-col items-center justify-center w-full">
+            {/* Right Content - Responsive Mockup (Desktop only) */}
+            <div className="hidden lg:flex lg:col-span-5 flex-col items-center justify-center w-full">
               
               {/* Premium Pill Switcher */}
               <div className="flex gap-1.5 p-1 bg-slate-200/60 backdrop-blur-md rounded-xl w-full max-w-[280px] sm:max-w-[300px] text-[10.5px] font-extrabold mb-5 sm:mb-6 shadow-2xs border border-slate-200/60">
@@ -556,197 +741,6 @@ export default function LandingPage() {
                   <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] ${simulatorStep === 2 ? 'bg-white/25 text-white' : 'bg-slate-300/80 text-slate-700'}`}>3</span>
                   <span>Send</span>
                 </button>
-              </div>
-
-              {/* MOBILE MOCKUP: Larger, premium smartphone frame (visible only on mobile) */}
-              <div className="relative block lg:hidden w-full max-w-[260px] sm:max-w-[290px] aspect-[9/18.3] mx-auto select-none mt-2">
-                {/* Background glow behind phone mockup */}
-                <div className="absolute inset-[-12px] bg-emerald-500/15 blur-2xl rounded-[48px] -z-10" />
-                
-                {/* Internal Smartphone frame */}
-                <div className="w-full h-full bg-[#0b0f19] rounded-[42px] p-2.5 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.3)] border-[3.5px] border-slate-800 relative overflow-hidden flex flex-col">
-                  {/* Smartphone Notch */}
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-5 bg-[#0b0f19] rounded-b-2xl z-20 flex items-center justify-center">
-                    <div className="w-8 h-1 bg-slate-800 rounded-full mb-1" />
-                  </div>
-                  
-                  {/* Internal Screen Content */}
-                  <div className="bg-[#f8fafc] h-full rounded-[32px] overflow-hidden flex flex-col border border-slate-950/5 relative">
-                    {/* App Header */}
-                    <div className="bg-[#1a6b3c] text-white p-3 pt-6 pb-3 flex justify-between items-center shadow-xs shrink-0">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-4.5 h-4.5 rounded bg-white/15 flex items-center justify-center">
-                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                          </svg>
-                        </div>
-                        <span className="font-extrabold text-[11.5px] tracking-tight">Varavu Invoice</span>
-                      </div>
-                      <span className="text-[6.5px] bg-white/20 px-2 py-0.5 rounded-full font-bold">Tamil Nadu</span>
-                    </div>
-
-                    {/* Simulated Screen Body Content with smooth animations */}
-                    <div className="flex-1 px-3 pb-3 flex flex-col overflow-hidden pt-2.5">
-                      <AnimatePresence mode="wait">
-                        {simulatorStep === 0 && (
-                          <motion.div
-                            key="step0"
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            transition={{ duration: 0.25 }}
-                            className="flex-1 flex flex-col justify-between overflow-hidden"
-                          >
-                            <div className="space-y-3">
-                              <div className="flex justify-between items-center pb-1.5 border-b border-slate-100">
-                                <span className="text-[8.5px] font-bold text-slate-850 uppercase">New Invoice</span>
-                                <span className="text-[6px] text-slate-400 font-semibold">Step 1 of 3</span>
-                              </div>
-
-                              <div className="space-y-0.5">
-                                <label className="text-[6.5px] text-slate-400 font-extrabold uppercase">Bill To (Customer)</label>
-                                <div className="flex items-center justify-between bg-white p-2.5 rounded-lg border border-slate-200/70 shadow-2xs">
-                                  <span className="text-[8.5px] font-extrabold text-slate-850">Ramesh Kumar</span>
-                                  <span className="text-[6.5px] text-slate-450 font-medium">+91 98765 43210</span>
-                                </div>
-                              </div>
-
-                              <div className="space-y-1.5">
-                                <label className="text-[6.5px] text-slate-400 font-extrabold uppercase">Items &amp; Quantities</label>
-                                <div className="bg-white p-2.5 rounded-lg border border-slate-200/70 shadow-2xs flex justify-between items-center text-[7.5px]">
-                                  <div>
-                                    <h6 className="font-extrabold text-slate-850">Ponni Rice (25kg Bag)</h6>
-                                    <p className="text-[6px] text-slate-400">Qty: 2 &times; ₹1,200.00</p>
-                                  </div>
-                                  <span className="font-extrabold text-slate-850">₹2,400.00</span>
-                                </div>
-                                <div className="bg-white p-2.5 rounded-lg border border-slate-200/70 shadow-2xs flex justify-between items-center text-[7.5px]">
-                                  <div>
-                                    <h6 className="font-extrabold text-slate-850">Toor Dal (10kg Bag)</h6>
-                                    <p className="text-[6px] text-slate-400">Qty: 1 &times; ₹1,450.00</p>
-                                  </div>
-                                  <span className="font-extrabold text-slate-850">₹1,450.00</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <button
-                              onClick={() => setSimulatorStep(1)}
-                              className="w-full bg-[#1a6b3c] text-white py-2 rounded-lg text-[8.5px] font-extrabold shadow-sm mt-2 flex items-center justify-center gap-1 active:scale-[0.98] transition-transform"
-                            >
-                              Generate Invoice Preview →
-                            </button>
-                          </motion.div>
-                        )}
-
-                        {simulatorStep === 1 && (
-                          <motion.div
-                            key="step1"
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            transition={{ duration: 0.25 }}
-                            className="flex-1 flex flex-col justify-between overflow-hidden"
-                          >
-                            <div className="flex-1 flex flex-col overflow-hidden">
-                              <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 shrink-0">
-                                <span className="text-[8.5px] font-bold text-slate-850 uppercase">Tax Invoice</span>
-                                <span className="text-[6px] text-slate-400 font-semibold">Step 2 of 3</span>
-                              </div>
-
-                              <div className="flex-1 bg-white border border-slate-200/70 rounded-xl p-2.5 shadow-2xs mt-2 overflow-y-auto space-y-2.5 text-[6px] text-slate-650">
-                                <div className="flex justify-between items-start border-b border-slate-100 pb-1.5">
-                                  <div>
-                                    <h5 className="font-extrabold text-[#1a6b3c] text-[7.5px]">VARAVU STORE</h5>
-                                    <p className="text-[5px] text-slate-400">GSTIN: 33AAAAA0000A1Z1</p>
-                                  </div>
-                                  <div className="text-right">
-                                    <p className="font-extrabold text-slate-850">TAX INVOICE</p>
-                                    <p className="text-[5px] text-slate-400 font-semibold">#INV-2026-08</p>
-                                  </div>
-                                </div>
-                                <div className="flex justify-between">
-                                  <div>
-                                    <p className="font-bold text-slate-850">Bill To: Ramesh Kumar</p>
-                                    <p className="text-[5px] text-slate-400">Chennai, TN</p>
-                                  </div>
-                                </div>
-                                <div className="space-y-0.5">
-                                  <div className="flex justify-between font-bold text-slate-850 border-b border-slate-100 pb-0.5">
-                                    <span>Items</span>
-                                    <span>Amt</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span>Ponni Rice &times; 2</span>
-                                    <span>₹2,400.00</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span>Toor Dal &times; 1</span>
-                                    <span>₹1,450.00</span>
-                                  </div>
-                                </div>
-                                <div className="border-t border-slate-100 pt-1.5 text-right font-bold text-[7.5px] text-[#1a6b3c] flex justify-between">
-                                  <span>Grand Total:</span>
-                                  <span>₹4,042.50</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <button
-                              onClick={() => setSimulatorStep(2)}
-                              className="w-full bg-[#16a34a] text-white py-2 rounded-lg text-[8.5px] font-extrabold shadow-sm mt-2 flex items-center justify-center gap-1 active:scale-[0.98] transition-transform"
-                            >
-                              Send via WhatsApp 💬
-                            </button>
-                          </motion.div>
-                        )}
-
-                        {simulatorStep === 2 && (
-                          <motion.div
-                            key="step2"
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            transition={{ duration: 0.25 }}
-                            className="flex-1 flex flex-col justify-between overflow-hidden"
-                          >
-                            <div className="flex-1 flex flex-col overflow-hidden">
-                              <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100 shrink-0">
-                                <div className="w-5.5 h-5.5 rounded-full bg-emerald-600 flex items-center justify-center text-[7.5px] text-white font-bold">RK</div>
-                                <div>
-                                  <h6 className="text-[7.5px] font-bold text-slate-850 leading-tight">Ramesh Kumar</h6>
-                                  <p className="text-[4px] text-emerald-600 font-extrabold uppercase tracking-wide">online</p>
-                                </div>
-                              </div>
-
-                              <div className="flex-1 py-2 space-y-2 overflow-y-auto flex flex-col justify-end text-[6.5px]">
-                                <div className="bg-[#dcf8c6] p-2 rounded-lg max-w-[90%] self-end border border-emerald-200/50 shadow-2xs space-y-1">
-                                  <p className="text-[7px] font-bold text-slate-850 flex items-center gap-1">
-                                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="red" strokeWidth="2.5">
-                                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                    </svg>
-                                    <span>INV_Ramesh.pdf</span>
-                                  </p>
-                                  <p className="text-[6.5px] text-slate-700 leading-normal">
-                                    Dear Ramesh, here is your invoice of **₹4,042.50** from Varavu Store. Pay online: *upi.varavu.in/pay*
-                                  </p>
-                                </div>
-                                <div className="bg-white p-2 rounded-lg max-w-[85%] self-start border border-slate-200/50 shadow-2xs">
-                                  <p className="text-[6.5px] text-slate-850 font-bold">Perfect! Done payment via GPay.</p>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="bg-emerald-50 border border-emerald-150 p-2 rounded-xl text-center shrink-0 flex items-center justify-center gap-1.5 mt-2">
-                              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[5.5px] font-bold">✓</span>
-                              <span className="text-[8px] text-[#1a6b3c] font-extrabold">Invoice Sent &amp; Paid!</span>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-                </div>
               </div>
 
               {/* DESKTOP MOCKUP: 3D laptop on white background (visible only on desktop) */}
