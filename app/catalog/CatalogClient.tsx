@@ -361,30 +361,18 @@ export default function CatalogClient({
     <div className="min-h-screen bg-[#f5f6fa]">
       <Navbar />
       <PageTransition className="max-w-lg md:max-w-[1400px] mx-auto px-4 md:px-8 py-6 pb-12">
-        {/* Header with greeting */}
-        <div className="bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 -mt-6.5 shadow-xs flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
-              {shop.logo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full bg-[#1a6b3c] flex items-center justify-center text-white">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                  </svg>
-                </div>
-              )}
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900 leading-tight">
-                {shop.name}
-              </h1>
-              <p className="text-[#6b7280] text-[10px] mt-0.5 font-medium">
-                Product Catalog & Inventory · {products.length} item{products.length !== 1 ? 's' : ''}
-              </p>
-            </div>
+        {/* Page Title Header */}
+        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight font-heading uppercase">
+              Product Catalog
+            </h1>
+            <p className="text-xs text-gray-500 font-semibold mt-1">
+              Manage items, track stock levels, and configure pricing.
+            </p>
+          </div>
+          <div className="bg-[#1a6b3c]/10 text-[#1a6b3c] font-bold text-xs px-3.5 py-2 rounded-xl self-start md:self-auto border border-[#1a6b3c]/20">
+            {products.length} Item{products.length !== 1 ? 's' : ''} total
           </div>
         </div>
 
@@ -689,61 +677,89 @@ export default function CatalogClient({
                           const isOutOfStock = inventoryEnabledGlobal && product.track_inventory && (product.stock_qty || 0) === 0;
 
                           return (
-                            <tr key={product.id} className="hover:bg-gray-50/50 transition-colors group">
-                              <td className="py-3.5 px-4">
-                                <button
-                                  onClick={() => handleToggleFavorite(product)}
-                                  className={`transition-colors hover:scale-110 cursor-pointer ${
-                                    product.is_favorite ? 'text-amber-500' : 'text-gray-300 hover:text-gray-400'
-                                  }`}
-                                >
-                                  <svg width="15" height="15" viewBox="0 0 24 24" fill={product.is_favorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2.5">
-                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                                  </svg>
-                                </button>
-                              </td>
-                              <td className="py-3.5 px-4">
-                                <div className="font-medium text-gray-800 text-sm uppercase tracking-wider">{product.name}</div>
-                                {gstRegistered && ((product.gst_rate !== undefined && product.gst_rate > 0) || product.hsn_code) && (
-                                  <div className="flex gap-1.5 mt-1">
-                                    {product.gst_rate !== undefined && product.gst_rate > 0 && (
-                                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-50 text-[#1a6b3c] border border-green-100">
-                                        {product.gst_rate}% GST
-                                      </span>
-                                    )}
-                                    {product.hsn_code && (
-                                      <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">
-                                        HSN: {product.hsn_code}
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
-                              </td>
-                              <td className="py-3.5 px-4 text-xs font-semibold text-gray-500">
-                                {product.category || 'Others'}
-                              </td>
-                              <td className="py-3.5 px-4 text-right text-sm font-semibold text-gray-900 tabular-nums">
-                                ₹{Number(product.price).toLocaleString('en-IN')}
-                              </td>
-                              {inventoryEnabledGlobal && (
-                                <td className="py-3.5 px-4">
-                                  {product.track_inventory ? (
-                                    <div className="text-center font-bold text-xs">
-                                      <span className={
-                                        isOutOfStock 
-                                          ? 'text-red-600' 
-                                          : isLowStock 
-                                          ? 'text-amber-600' 
-                                          : 'text-gray-700'
-                                      }>
-                                        {product.stock_qty || 0}
-                                      </span>
-                                    </div>
-                                  ) : (
-                                    <div className="text-center text-xs text-gray-400 font-medium">—</div>
-                                  )}
-                                </td>
-                              )}
+                             <tr 
+                               key={product.id} 
+                               className={`hover:bg-gray-50/50 transition-colors group ${
+                                 isOutOfStock 
+                                   ? 'bg-red-50/20' 
+                                   : isLowStock 
+                                   ? 'bg-amber-50/25' 
+                                   : ''
+                               }`}
+                             >
+                               <td className="py-3.5 px-4">
+                                 <button
+                                   onClick={() => handleToggleFavorite(product)}
+                                   className={`transition-colors hover:scale-110 cursor-pointer ${
+                                     product.is_favorite ? 'text-amber-500' : 'text-gray-300 hover:text-gray-400'
+                                   }`}
+                                 >
+                                   <svg width="15" height="15" viewBox="0 0 24 24" fill={product.is_favorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2.5">
+                                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                   </svg>
+                                 </button>
+                               </td>
+                               <td className="py-3.5 px-4">
+                                 <div className="flex items-center gap-2">
+                                   <div className="font-medium text-gray-800 text-sm uppercase tracking-wider">{product.name}</div>
+                                   {isOutOfStock && (
+                                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-red-100 text-red-700 border border-red-200 uppercase tracking-wider">
+                                       Out of Stock
+                                     </span>
+                                   )}
+                                   {!isOutOfStock && isLowStock && (
+                                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 uppercase tracking-wider animate-pulse">
+                                       Low Stock
+                                     </span>
+                                   )}
+                                 </div>
+                                 {gstRegistered && ((product.gst_rate !== undefined && product.gst_rate > 0) || product.hsn_code) && (
+                                   <div className="flex gap-1.5 mt-1">
+                                     {product.gst_rate !== undefined && product.gst_rate > 0 && (
+                                       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-50 text-[#1a6b3c] border border-green-100">
+                                         {product.gst_rate}% GST
+                                       </span>
+                                     )}
+                                     {product.hsn_code && (
+                                       <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">
+                                         HSN: {product.hsn_code}
+                                       </span>
+                                     )}
+                                   </div>
+                                 )}
+                               </td>
+                               <td className="py-3.5 px-4 text-xs font-semibold text-gray-500">
+                                 {product.category || 'Others'}
+                               </td>
+                               <td className="py-3.5 px-4 text-right text-sm font-semibold text-gray-900 tabular-nums">
+                                 ₹{Number(product.price).toLocaleString('en-IN')}
+                               </td>
+                               {inventoryEnabledGlobal && (
+                                 <td className="py-3.5 px-4">
+                                   {product.track_inventory ? (
+                                     <div className="flex justify-center">
+                                       {isOutOfStock ? (
+                                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-100">
+                                           <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                           0 Left
+                                         </span>
+                                       ) : isLowStock ? (
+                                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-100">
+                                           <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                           {product.stock_qty} Left
+                                         </span>
+                                       ) : (
+                                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-50 text-slate-700 border border-slate-200">
+                                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                           {product.stock_qty} In Stock
+                                         </span>
+                                       )}
+                                     </div>
+                                   ) : (
+                                     <div className="text-center text-xs text-gray-400 font-medium">—</div>
+                                   )}
+                                 </td>
+                               )}
                               <td className="py-3.5 px-4 text-right pr-6">
                                 <div className="flex items-center justify-end gap-2">
                                   {inventoryEnabledGlobal && product.track_inventory && (
@@ -794,7 +810,16 @@ export default function CatalogClient({
                       const isOutOfStock = inventoryEnabledGlobal && product.track_inventory && (product.stock_qty || 0) === 0;
 
                       return (
-                        <div key={product.id} className="p-4 flex flex-col gap-3 active:bg-gray-50/50 transition-colors">
+                        <div 
+                          key={product.id} 
+                          className={`p-4 flex flex-col gap-3 active:bg-gray-50/50 transition-colors ${
+                            isOutOfStock 
+                              ? 'bg-red-50/15' 
+                              : isLowStock 
+                              ? 'bg-amber-50/20' 
+                              : ''
+                          }`}
+                        >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex gap-2">
                               <button
@@ -808,9 +833,21 @@ export default function CatalogClient({
                                 </svg>
                               </button>
                               <div>
-                                <h3 className="text-sm font-medium text-gray-800 leading-tight uppercase tracking-wider">
-                                  {product.name}
-                                </h3>
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <h3 className="text-sm font-medium text-gray-800 leading-tight uppercase tracking-wider">
+                                    {product.name}
+                                  </h3>
+                                  {isOutOfStock && (
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-red-100 text-red-700 border border-red-200 uppercase tracking-wider">
+                                      Out of Stock
+                                    </span>
+                                  )}
+                                  {!isOutOfStock && isLowStock && (
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 uppercase tracking-wider">
+                                      Low Stock
+                                    </span>
+                                  )}
+                                </div>
                                 <div className="text-[10px] text-gray-400 font-medium mt-0.5 uppercase tracking-wider">
                                   {product.category || 'Others'}
                                 </div>
@@ -823,15 +860,19 @@ export default function CatalogClient({
                               </div>
                               {inventoryEnabledGlobal && product.track_inventory && (
                                 <div className="mt-1">
-                                  <span className={`text-[11px] font-bold ${
-                                    isOutOfStock 
-                                      ? 'text-red-600' 
-                                      : isLowStock 
-                                      ? 'text-amber-600' 
-                                      : 'text-gray-500'
-                                  }`}>
-                                    Stock: {product.stock_qty || 0}
-                                  </span>
+                                  {isOutOfStock ? (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-50 text-[10px] font-bold text-red-700 border border-red-100">
+                                      0 Left
+                                    </span>
+                                  ) : isLowStock ? (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 text-[10px] font-bold text-amber-800 border border-amber-100">
+                                      {product.stock_qty} Left
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-50 text-[10px] font-semibold text-slate-700 border border-slate-200">
+                                      {product.stock_qty} In Stock
+                                    </span>
+                                  )}
                                 </div>
                               )}
                             </div>

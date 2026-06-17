@@ -98,31 +98,14 @@ export default function DashboardClient({
       <Navbar />
 
       <PageTransition className="max-w-lg md:max-w-[1400px] mx-auto px-4 md:px-8 py-6 pb-24">
-        {/* Header with greeting */}
-        <div className="bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 -mt-6.5 shadow-xs flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
-              {shop.logo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full bg-[#1a6b3c] flex items-center justify-center text-white">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                  </svg>
-                </div>
-              )}
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900 leading-tight">
-                {shop.name}
-              </h1>
-              <p className="text-[#6b7280] text-[10px] mt-0.5 font-medium">
-                Billing & Accounting Dashboard · Good {mounted ? (new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening') : 'day'}
-              </p>
-            </div>
-          </div>
+        {/* Page Title Header */}
+        <div className="mb-6">
+          <h1 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight font-heading uppercase">
+            Billing & Invoices
+          </h1>
+          <p className="text-xs text-gray-500 font-semibold mt-1">
+            Good {mounted ? (new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening') : 'day'}! Track outstanding balances, payments, and sales.
+          </p>
         </div>
 
         {/* Stat cards row */}

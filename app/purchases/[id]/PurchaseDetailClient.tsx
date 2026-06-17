@@ -62,35 +62,29 @@ export default function PurchaseDetailClient({ shop, purchase, items }: Props) {
       <Navbar />
 
       <PageTransition className="max-w-lg md:max-w-[1400px] mx-auto px-4 md:px-8 py-6 pb-24">
-        {/* Header matched with profile logo format */}
-        <div className="bg-white border border-[#e2e8f0] -mx-4 md:-mx-8 px-6 md:px-10 py-5 -mt-6.5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1a6b3c] to-[#2e7d32] flex items-center justify-center overflow-hidden shadow-md">
-              {shop.logo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-white font-extrabold text-lg">
-                  {shop.name.charAt(0).toUpperCase()}
-                </span>
-              )}
-            </div>
+        {/* Page Title Header */}
+        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.back()}
+              className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors mr-1 cursor-pointer"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 leading-tight">
-                {shop.name}
+              <h1 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight font-heading uppercase">
+                Purchase Invoice
               </h1>
-              <p className="text-slate-500 text-xs mt-0.5 font-medium flex items-center gap-1.5">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
+              <p className="text-xs text-gray-500 font-semibold mt-1">
                 Inward Purchase Invoice details · #{purchase.purchase_invoice_number}
               </p>
             </div>
           </div>
           <button
             onClick={() => router.push('/purchases')}
-            className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors"
+            className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="19" y1="12" x2="5" y2="12" />

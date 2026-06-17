@@ -16,7 +16,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 
 const navItems = [
@@ -88,10 +88,11 @@ const navItems = [
 
 export default function Navbar() {
   const [showProfile, setShowProfile] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
-  const [shopInfo, setShopInfo] = useState<{ name: string; shop_type: string; gst_registered: boolean; inventory_enabled: boolean } | null>(null);
+  const [shopInfo, setShopInfo] = useState<{ name: string; shop_type: string; gst_registered: boolean; inventory_enabled: boolean; logo_url?: string | null } | null>(null);
   const [lowStockCount, setLowStockCount] = useState(0);
 
   const purchasesItem = {
@@ -156,7 +157,7 @@ export default function Navbar() {
 
         const { data: shop } = await supabase
           .from('shops')
-          .select('id, name, shop_type, gst_registered, inventory_enabled')
+          .select('id, name, shop_type, gst_registered, inventory_enabled, logo_url')
           .eq('auth_user_id', user.id)
           .single();
 
@@ -182,6 +183,10 @@ export default function Navbar() {
     fetchNavbarData();
   }, []);
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   const handleLogout = async () => {
     try {
       const supabase = createClient();
@@ -203,17 +208,24 @@ export default function Navbar() {
 
       {/* ─── DESKTOP LEFT SIDEBAR (>= 768px) ─── */}
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-[#e8eaed] fixed left-0 top-0 bottom-0 z-40 p-6 shadow-sm">
-        {/* Brand Logo */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-[#1a6b3c] flex items-center justify-center shadow-md shadow-[#1a6b3c]/20">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-            </svg>
+        {/* Brand / Active Shop Header */}
+        <div className="flex items-center gap-3 mb-8 border-b border-[#f3f4f6] pb-5">
+          <div className="w-10 h-10 rounded-xl bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e8eaed] shrink-0 shadow-sm">
+            {shopInfo?.logo_url ? (
+              <img src={shopInfo.logo_url} alt="Shop Logo" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-sm font-bold text-[#1a6b3c]">
+                {(shopInfo?.name || 'TB').slice(0, 2).toUpperCase()}
+              </span>
+            )}
           </div>
-          <div>
-            <span className="font-heading font-black text-[#1a1d26] text-base leading-none block">TruBill</span>
-            <span className="text-[10px] font-bold text-[#1a6b3c] uppercase tracking-wider mt-0.5 block">Invoice</span>
+          <div className="truncate flex-1">
+            <span className="font-heading font-extrabold text-[#1a1d26] text-sm tracking-tight block truncate uppercase">
+              {shopInfo?.name || 'TruBill'}
+            </span>
+            <span className="text-[10px] font-bold text-[#1a6b3c] uppercase tracking-wider mt-0.5 block truncate">
+              {shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Invoice Admin'}
+            </span>
           </div>
         </div>
 
@@ -228,13 +240,12 @@ export default function Navbar() {
           </button>
         </Link>
 
-        {/* Sidebar Navigation Items */}
         <nav className="flex-1 space-y-1.5">
           {activeNavItems
             .filter((item) => !item.isMain)
             .map((item) => {
-              const isActive = pathname === item.href;
-              const isSettings = item.href === '/settings';
+              const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+              const isCatalog = item.href === '/catalog';
               return (
                 <Link
                   key={item.href}
@@ -249,7 +260,7 @@ export default function Navbar() {
                     {item.icon}
                   </span>
                   {item.label}
-                  {isSettings && lowStockCount > 0 && (
+                  {isCatalog && lowStockCount > 0 && (
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 bg-amber-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full animate-pulse">
                       {lowStockCount}
                     </span>
@@ -292,49 +303,177 @@ export default function Navbar() {
       {/* ─── MOBILE HEADER (Visible only on < 768px) ─── */}
       <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-[#e8eaed] md:hidden">
         <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#1a6b3c] flex items-center justify-center">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
-            </div>
-            <span className="font-heading font-black text-[#1a1d26] text-sm">TruBill</span>
-          </Link>
-
-          <button
-            onClick={() => setShowProfile(!showProfile)}
-            className="w-9 h-9 rounded-full bg-[#1a6b3c]/10 flex items-center justify-center text-[#1a6b3c] font-semibold text-sm hover:bg-[#1a6b3c]/15 transition-colors"
-            aria-label="Profile"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Profile dropdown */}
-        {showProfile && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="absolute right-4 top-14 w-48 bg-white rounded-xl shadow-lg border border-[#e8eaed] p-2 z-50"
-          >
+          <div className="flex items-center gap-3">
+            {/* Hamburger Button */}
             <button
-              onClick={handleLogout}
-              className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 text-[#4b5563] hover:text-[#1a1d26] rounded-xl hover:bg-[#f3f4f6] transition-all cursor-pointer"
+              aria-label="Toggle navigation menu"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                {mobileMenuOpen ? (
+                  <>
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </>
+                ) : (
+                  <>
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                  </>
+                )}
               </svg>
-              Sign Out
             </button>
-          </motion.div>
-        )}
+
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-[#1a6b3c] flex items-center justify-center shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+              </div>
+              <span className="font-heading font-black text-[#1a1d26] text-sm">TruBill</span>
+            </Link>
+          </div>
+
+          <div className="text-[11px] font-bold text-gray-500 bg-[#f3f4f6] px-2.5 py-1.5 rounded-lg max-w-[150px] truncate">
+            {shopInfo?.name || 'Active Shop'}
+          </div>
+        </div>
       </nav>
+
+      {/* Mobile Drawer Sidebar Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            {/* Backdrop overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs md:hidden"
+            />
+
+            {/* Slide-out Sidebar Drawer */}
+            <motion.aside
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 bottom-0 left-0 z-50 w-72 bg-white shadow-2xl flex flex-col p-6 border-r border-[#e8eaed] md:hidden"
+            >
+              {/* Brand / Active Shop Header */}
+              <div className="flex items-center justify-between mb-6 border-b border-[#f3f4f6] pb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e8eaed] shrink-0">
+                    {shopInfo?.logo_url ? (
+                      <img src={shopInfo.logo_url} alt="Shop Logo" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-sm font-bold text-[#1a6b3c]">
+                        {(shopInfo?.name || 'TB').slice(0, 2).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="truncate">
+                    <span className="font-heading font-extrabold text-[#1a1d26] text-xs leading-none block truncate uppercase">
+                      {shopInfo?.name || 'TruBill'}
+                    </span>
+                    <span className="text-[9px] font-bold text-[#1a6b3c] uppercase tracking-wider mt-0.5 block truncate">
+                      {shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Invoice'}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-1.5 text-gray-450 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Quick Action: New Invoice */}
+              <Link href="/invoice/new" className="mb-6 block" onClick={() => setMobileMenuOpen(false)}>
+                <button className="w-full bg-[#1a6b3c] hover:bg-[#155630] text-white rounded-xl py-3 px-4 flex items-center justify-center gap-2.5 font-bold text-sm shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  New Invoice
+                </button>
+              </Link>
+
+              {/* Sidebar Navigation Items */}
+              <nav className="flex-1 space-y-1.5 overflow-y-auto">
+                {activeNavItems
+                  .map((item) => {
+                    const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+                    const isCatalog = item.href === '/catalog';
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all relative ${
+                          isActive
+                            ? 'bg-[#1a6b3c]/10 text-[#1a6b3c]'
+                            : 'text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#1a1d26]'
+                        }`}
+                      >
+                        <span className={isActive ? 'text-[#1a6b3c]' : 'text-[#9ca3af]'}>
+                          {item.icon}
+                        </span>
+                        {item.label}
+                        {isCatalog && lowStockCount > 0 && (
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 bg-amber-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full animate-pulse">
+                            {lowStockCount}
+                          </span>
+                        )}
+                      </Link>
+                    );
+                  })}
+              </nav>
+
+              {/* Sidebar Footer with Logout */}
+              <div className="border-t border-[#e8eaed] pt-4 mt-auto">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-9 h-9 rounded-full bg-[#1a6b3c]/10 flex items-center justify-center text-[#1a6b3c] shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </div>
+                  <div className="truncate flex-1">
+                    <p className="text-xs font-bold text-[#1a1d26] truncate">{shopInfo?.name || 'Active Shop'}</p>
+                    <p className="text-[10px] text-[#9ca3af] font-semibold uppercase tracking-wider truncate">
+                      {shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Tamil Nadu, IN'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  Sign Out
+                </button>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* ─── MOBILE BOTTOM NAVIGATION (Visible only on < 768px) ─── */}
       {pathname !== '/invoice/new' && (
@@ -343,14 +482,14 @@ export default function Navbar() {
             {activeNavItems
               .filter((item) => !item.desktopOnly)
               .map((item) => {
-                const isActive = pathname === item.href;
+                const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
 
                 if (item.isMain) {
                 return (
                   <Link key={item.href} href={item.href}>
                     <motion.div
                       whileTap={{ scale: 0.9 }}
-                      className="w-12 h-12 -mt-5 rounded-2xl bg-[#1a6b3c] text-white shadow-lg shadow-[#1a6b3c]/25 flex items-center justify-center"
+                      className="w-12 h-12 -mt-5 rounded-2xl bg-[#1a6b3c] text-white shadow-lg shadow-[#1a6b3c]/25 flex items-center justify-center cursor-pointer"
                     >
                       {item.icon}
                     </motion.div>
