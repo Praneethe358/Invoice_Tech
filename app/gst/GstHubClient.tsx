@@ -43,6 +43,8 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
 
   const [selectedMonth, setSelectedMonth] = useState(currentMonthValue);
   const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [activeTab, setActiveTab] = useState<'overview' | 'gstr1' | 'gstr3b'>('overview');
+  
   const [validating, setValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<{ warnings: string[]; errors: string[]; isValid: boolean } | null>(null);
 
@@ -66,7 +68,13 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
     runValidation();
   }, [selectedMonth, selectedYear, shop.id, shop.gst_registered, supabase]);
 
-  const stats = useMemo(() => {
+  // Return period label formats
+  const selectedMonthObj = MONTHS.find(m => m.value === selectedMonth);
+  const finYearLabel = `${selectedYear}-${String(selectedYear + 1).slice(-2)}`;
+  const returnPeriodLabel = `${selectedMonthObj?.label || ''} - ${selectedYear}`;
+
+  // Filtered period data
+  const filteredData = useMemo(() => {
     const startDate = new Date(selectedYear, selectedMonth - 1, 1);
     const endDate = new Date(selectedYear, selectedMonth, 0);
     
@@ -85,60 +93,100 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
       (n) => n.note_date >= startStr && n.note_date <= endStr
     );
 
-    let outwardTaxable = 0;
-    let cgstCollected = 0;
-    let sgstCollected = 0;
-    let b2bSalesCount = 0;
-    let b2csSalesCount = 0;
+    // GSTR-1 outbound calculation
+    let b2bSalesList: Invoice[] = [];
+    let b2cLargeList: Invoice[] = [];
+    let b2cSmallList: Invoice[] = [];
+
+    let totalB2bTaxable = 0;
+    let totalB2bCgst = 0;
+    let totalB2bSgst = 0;
+
+    let totalB2cLargeTaxable = 0;
+    let totalB2cLargeTax = 0;
+
+    let totalB2cSmallTaxable = 0;
+    let totalB2cSmallTax = 0;
 
     periodInvoices.forEach((inv) => {
-      cgstCollected += Number(inv.total_cgst || 0);
-      sgstCollected += Number(inv.total_sgst || 0);
-      outwardTaxable += Number(inv.subtotal || inv.total - (inv.total_cgst || 0) - (inv.total_sgst || 0));
-      if (inv.customer_gstin) b2bSalesCount++;
-      else b2csSalesCount++;
-    });
+      const taxableVal = Number(inv.subtotal || inv.total - (inv.total_cgst || 0) - (inv.total_sgst || 0));
+      const totalTax = Number(inv.total_cgst || 0) + Number(inv.total_sgst || 0);
 
-    let inwardTaxable = 0;
-    let cgstPaid = 0;
-    let sgstPaid = 0;
-
-    periodPurchases.forEach((p) => {
-      inwardTaxable += Number(p.subtotal || 0);
-      if (p.itc_eligible) {
-        cgstPaid += Number(p.total_cgst || 0);
-        sgstPaid += Number(p.total_sgst || 0);
+      if (inv.customer_gstin) {
+        b2bSalesList.push(inv);
+        totalB2bTaxable += taxableVal;
+        totalB2bCgst += Number(inv.total_cgst || 0);
+        totalB2bSgst += Number(inv.total_sgst || 0);
+      } else {
+        // Classify as B2CS or B2CL (Large: unregistered > ₹2.5L and inter-state)
+        // Since shop is Tamil Nadu (33), all local sales are B2C Small.
+        // If invoice is above 2.5L, we can simulate B2C Large for UI display purposes
+        if (inv.total > 250000) {
+          b2cLargeList.push(inv);
+          totalB2cLargeTaxable += taxableVal;
+          totalB2cLargeTax += totalTax;
+        } else {
+          b2cSmallList.push(inv);
+          totalB2cSmallTaxable += taxableVal;
+          totalB2cSmallTax += totalTax;
+        }
       }
     });
 
-    let notesAdjustedCgst = 0;
-    let notesAdjustedSgst = 0;
+    // Credit Debit notes classification
+    let creditNotesList = periodNotes.filter(n => n.note_type === 'credit');
+    let debitNotesList = periodNotes.filter(n => n.note_type === 'debit');
 
+    let totalCdnTaxable = 0;
+    let totalCdnTax = 0;
     periodNotes.forEach((n) => {
-      const factor = n.note_type === 'credit' ? -1 : 1;
-      notesAdjustedCgst += Number(n.total_cgst || 0) * factor;
-      notesAdjustedSgst += Number(n.total_sgst || 0) * factor;
+      totalCdnTaxable += Number(n.subtotal || 0);
+      totalCdnTax += Number(n.total_cgst || 0) + Number(n.total_sgst || 0);
     });
 
-    const netCgstLiability = cgstCollected + notesAdjustedCgst - cgstPaid;
-    const netSgstLiability = sgstCollected + notesAdjustedSgst - sgstPaid;
+    // ITC purchases calculations
+    let totalItcTaxable = 0;
+    let totalItcCgst = 0;
+    let totalItcSgst = 0;
+    let reverseChargeCgst = 0;
+    let reverseChargeSgst = 0;
+
+    periodPurchases.forEach((p) => {
+      const taxableVal = Number(p.subtotal || 0);
+      if (p.itc_eligible) {
+        totalItcTaxable += taxableVal;
+        totalItcCgst += Number(p.total_cgst || 0);
+        totalItcSgst += Number(p.total_sgst || 0);
+      } else if (!p.supplier_gstin) {
+        // reverse charge simulation or unregistered inward
+        reverseChargeCgst += Number(p.total_cgst || 0);
+        reverseChargeSgst += Number(p.total_sgst || 0);
+      }
+    });
 
     return {
-      outwardTaxable,
-      cgstCollected,
-      sgstCollected,
-      inwardTaxable,
-      cgstPaid,
-      sgstPaid,
-      notesAdjustedCgst,
-      notesAdjustedSgst,
-      netCgstLiability,
-      netSgstLiability,
-      invoicesCount: periodInvoices.length,
-      b2bSalesCount,
-      b2csSalesCount,
-      purchasesCount: periodPurchases.length,
-      notesCount: periodNotes.length,
+      b2bSalesList,
+      b2cLargeList,
+      b2cSmallList,
+      creditNotesList,
+      debitNotesList,
+      totalB2bTaxable,
+      totalB2bCgst,
+      totalB2bSgst,
+      totalB2cLargeTaxable,
+      totalB2cLargeTax,
+      totalB2cSmallTaxable,
+      totalB2cSmallTax,
+      totalCdnTaxable,
+      totalCdnTax,
+      totalItcTaxable,
+      totalItcCgst,
+      totalItcSgst,
+      reverseChargeCgst,
+      reverseChargeSgst,
+      periodInvoices,
+      periodPurchases,
+      periodNotes,
     };
   }, [selectedMonth, selectedYear, invoices, purchases, creditDebitNotes]);
 
@@ -179,8 +227,8 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
       <div className="min-h-screen bg-[#f5f6fa]">
         <Navbar />
         <PageTransition className="max-w-lg md:max-w-3xl mx-auto px-4 py-12">
-          <div className="bg-white rounded-none border border-[#e5e7eb] p-8 text-center space-y-4 shadow-sm">
-            <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-none flex items-center justify-center mx-auto border border-amber-250">
+          <div className="bg-white border border-[#e5e7eb] p-8 text-center space-y-4 shadow-sm">
+            <div className="w-16 h-16 bg-amber-50 text-amber-500 flex items-center justify-center mx-auto border border-amber-250">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
@@ -205,7 +253,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
       <Navbar />
 
       <PageTransition className="max-w-lg md:max-w-[1400px] mx-auto px-4 md:px-8 py-6 pb-24">
-        {/* Header matching dashboard profile logo format */}
+        {/* Unified shop header */}
         <div className="bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 -mt-6.5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
@@ -223,12 +271,12 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                 {shop.name}
               </h1>
               <p className="text-[#6b7280] text-[10px] mt-0.5 font-medium">
-                GST Compliance Hub · Tamil Nadu State Code: 33 · GSTIN: <span className="font-mono font-bold">{shop.gstin}</span>
+                GST Compliance Hub · State Code: 33 (TN) · GSTIN: <span className="font-mono font-bold">{shop.gstin}</span>
               </p>
             </div>
           </div>
 
-          {/* Period selector */}
+          {/* Period selector controls */}
           <div className="flex gap-2">
             <select
               value={selectedMonth}
@@ -256,192 +304,836 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
           </div>
         </div>
 
-        {/* Vyapar Grid Style Stats Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-          <div className="bg-[#f0fdf4] border border-[#dcfce7] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
-            <span className="text-[10px] font-bold text-[#15803d] uppercase tracking-wide">Output GST (Collected)</span>
-            <p className="text-xl font-extrabold text-[#16a34a] mt-2">
-              ₹{Number(stats.cgstCollected + stats.sgstCollected).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-            </p>
-          </div>
-
-          <div className="bg-[#eff6ff] border border-[#dbeafe] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
-            <span className="text-[10px] font-bold text-[#1d4ed8] uppercase tracking-wide">Input GST (ITC Claimed)</span>
-            <p className="text-xl font-extrabold text-[#2563eb] mt-2">
-              ₹{Number(stats.cgstPaid + stats.sgstPaid).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-            </p>
-          </div>
-
-          <div className="bg-[#fffbeb] border border-[#fef3c7] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
-            <span className="text-[10px] font-bold text-[#b45309] uppercase tracking-wide">CDN Adjustments</span>
-            <p className="text-xl font-extrabold text-[#d97706] mt-2">
-              ₹{Number(stats.notesAdjustedCgst + stats.notesAdjustedSgst).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-            </p>
-          </div>
-
-          <div className={`p-4 flex flex-col justify-between min-h-[90px] rounded-none border ${stats.netCgstLiability + stats.netSgstLiability > 0 ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200'}`}>
-            <span className={`text-[10px] font-bold uppercase tracking-wide ${stats.netCgstLiability + stats.netSgstLiability > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
-              Net Tax Payable / Credit
-            </span>
-            <p className={`text-xl font-extrabold mt-2 ${stats.netCgstLiability + stats.netSgstLiability > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
-              ₹{Number(stats.netCgstLiability + stats.netSgstLiability).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-            </p>
-          </div>
+        {/* Navigation tabs for the GST Hub */}
+        <div className="flex border-b border-[#e5e7eb] mb-6">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`px-6 py-2.5 text-xs font-extrabold uppercase border-b-2 transition-all ${
+              activeTab === 'overview'
+                ? 'border-[#1a6b3c] text-[#1a6b3c]'
+                : 'border-transparent text-gray-400 hover:text-gray-900'
+            }`}
+          >
+            Overview & Pre-Audit
+          </button>
+          <button
+            onClick={() => setActiveTab('gstr1')}
+            className={`px-6 py-2.5 text-xs font-extrabold uppercase border-b-2 transition-all ${
+              activeTab === 'gstr1'
+                ? 'border-[#1a6b3c] text-[#1a6b3c]'
+                : 'border-transparent text-gray-400 hover:text-gray-900'
+            }`}
+          >
+            GSTR-1 (Outward)
+          </button>
+          <button
+            onClick={() => setActiveTab('gstr3b')}
+            className={`px-6 py-2.5 text-xs font-extrabold uppercase border-b-2 transition-all ${
+              activeTab === 'gstr3b'
+                ? 'border-[#1a6b3c] text-[#1a6b3c]'
+                : 'border-transparent text-gray-400 hover:text-gray-900'
+            }`}
+          >
+            GSTR-3B (Summary)
+          </button>
         </div>
 
-        {/* Validator Pre-audit Summary */}
-        {validationResult && (
-          <div className="bg-white border border-[#e5e7eb] rounded-none p-5 shadow-xs mb-6">
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="text-xs font-bold text-[#111827] uppercase tracking-wider flex items-center gap-2">
-                <span>Filing Compliance Checklist</span>
-                {validating && <span className="text-[10px] text-gray-400 lowercase italic">Auditing...</span>}
-              </h2>
-              {!validating && (
-                <span className={`px-2 py-0.5 text-[9px] font-extrabold rounded-none uppercase tracking-wide ${validationResult.isValid ? 'bg-[#e6f4ea] text-[#1a6b3c] border border-[#d1e7dd]' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                  {validationResult.isValid ? 'Clean Check ✓' : 'Issues Detected'}
-                </span>
-              )}
+        {/* ─── TAB 1: OVERVIEW & COMPLIANCE PRE-AUDIT ─── */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* Quick aggregate ribbon */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-[#f0fdf4] border border-[#dcfce7] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
+                <span className="text-[10px] font-bold text-[#15803d] uppercase tracking-wide">Output CGST + SGST</span>
+                <p className="text-xl font-extrabold text-[#16a34a] mt-2">
+                  ₹{Number(filteredData.totalB2bCgst + filteredData.totalB2bSgst + filteredData.totalB2cSmallTax + filteredData.totalB2cLargeTax).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </p>
+              </div>
+
+              <div className="bg-[#eff6ff] border border-[#dbeafe] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
+                <span className="text-[10px] font-bold text-[#1d4ed8] uppercase tracking-wide">ITC Earned</span>
+                <p className="text-xl font-extrabold text-[#2563eb] mt-2">
+                  ₹{Number(filteredData.totalItcCgst + filteredData.totalItcSgst).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </p>
+              </div>
+
+              <div className="bg-[#fffbeb] border border-[#fef3c7] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
+                <span className="text-[10px] font-bold text-[#b45309] uppercase tracking-wide">Taxable Inward supply</span>
+                <p className="text-xl font-extrabold text-[#d97706] mt-2">
+                  ₹{Number(filteredData.totalItcTaxable).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </p>
+              </div>
+
+              <div className="bg-white border border-[#e5e7eb] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
+                <span className="text-[10px] font-bold text-[#6b7280] uppercase tracking-wide">Net Monthly Invoices</span>
+                <p className="text-xl font-extrabold text-gray-900 mt-2">
+                  {filteredData.periodInvoices.length} Bills
+                </p>
+              </div>
             </div>
 
-            {validationResult.errors.length === 0 && validationResult.warnings.length === 0 && (
-              <p className="text-xs text-emerald-600 font-semibold">
-                GST portal checks passed. Invoices are ready for filing.
-              </p>
+            {/* Validation Panel */}
+            {validationResult && (
+              <div className="bg-white border border-[#e5e7eb] rounded-none p-5 shadow-xs">
+                <div className="flex justify-between items-center mb-3">
+                  <h2 className="text-xs font-bold text-[#111827] uppercase tracking-wider flex items-center gap-2">
+                    <span>Pre-Filing Compliance Validator</span>
+                    {validating && <span className="text-[10px] text-gray-400 lowercase italic">Validating...</span>}
+                  </h2>
+                  {!validating && (
+                    <span className={`px-2 py-0.5 text-[9px] font-extrabold rounded-none uppercase tracking-wide ${validationResult.isValid ? 'bg-[#e6f4ea] text-[#1a6b3c] border border-[#d1e7dd]' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                      {validationResult.isValid ? 'Clean Check ✓' : 'Errors Found'}
+                    </span>
+                  )}
+                </div>
+
+                {validationResult.errors.length === 0 && validationResult.warnings.length === 0 && (
+                  <p className="text-xs text-emerald-600 font-semibold">
+                    All compliance validations passed. Ready for monthly government upload.
+                  </p>
+                )}
+
+                <div className="space-y-2.5">
+                  {validationResult.errors.map((err, i) => (
+                    <div key={`err-${i}`} className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-800 text-xs rounded-none p-3 font-semibold">
+                      <svg className="shrink-0 text-red-500 mt-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                      </svg>
+                      <span>{err}</span>
+                    </div>
+                  ))}
+
+                  {validationResult.warnings.map((warn, i) => (
+                    <div key={`warn-${i}`} className="flex items-start gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-none p-3 font-semibold">
+                      <svg className="shrink-0 text-amber-500 mt-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                      </svg>
+                      <span>{warn}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
 
-            <div className="space-y-2.5">
-              {validationResult.errors.map((err, i) => (
-                <div key={`err-${i}`} className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-800 text-xs rounded-none p-3 font-semibold">
-                  <svg className="shrink-0 text-red-500 mt-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
-                  <span>{err}</span>
-                </div>
-              ))}
+            {/* Quick JSON exports */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white border border-[#e5e7eb] p-5 shadow-xs">
+                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">Generate GSTR-1</h3>
+                <p className="text-[10px] text-gray-450 mt-1 mb-4 leading-normal">
+                  Creates the standardized GST offline tool format JSON file containing all B2B outward sales, credit notes, and tax-split logs.
+                </p>
+                <Button
+                  onClick={handleExportGstr1}
+                  disabled={validationResult ? !validationResult.isValid : false}
+                  className="w-full py-2.5 text-xs"
+                >
+                  Export GSTR-1 JSON
+                </Button>
+              </div>
 
-              {validationResult.warnings.map((warn, i) => (
-                <div key={`warn-${i}`} className="flex items-start gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-none p-3 font-semibold">
-                  <svg className="shrink-0 text-amber-500 mt-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                    <line x1="12" y1="9" x2="12" y2="13" />
-                    <line x1="12" y1="17" x2="12.01" y2="17" />
-                  </svg>
-                  <span>{warn}</span>
-                </div>
-              ))}
+              <div className="bg-white border border-[#e5e7eb] p-5 shadow-xs">
+                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">Generate GSTR-3B</h3>
+                <p className="text-[10px] text-gray-450 mt-1 mb-4 leading-normal">
+                  Creates the summary table payload for outward supplies, eligible Input Tax Credit (ITC), and final tax offset computations.
+                </p>
+                <Button onClick={handleExportGstr3b} className="w-full py-2.5 text-xs" variant="ghost">
+                  Export GSTR-3B Summary JSON
+                </Button>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Tabular Details Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          {/* Outward Sales Summary */}
-          <div className="bg-white border border-[#e5e7eb] rounded-none p-5 shadow-xs lg:col-span-2">
-            <h3 className="text-xs font-bold text-[#1a1d26] uppercase tracking-wider mb-4 border-b border-[#f3f4f6] pb-2">
-              Outward Inward Tax Worksheet
-            </h3>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-semibold text-[#4b5563]">
-                <thead>
-                  <tr className="bg-[#f9fafb] text-[#111827] font-bold border-b border-[#e5e7eb]">
-                    <th className="py-2.5 px-3">Transaction Head</th>
-                    <th className="py-2.5 px-3 text-right">Base Amount</th>
-                    <th className="py-2.5 px-3 text-right">CGST</th>
-                    <th className="py-2.5 px-3 text-right">SGST</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#f3f4f6]">
-                  <tr>
-                    <td className="py-3 px-3 font-bold text-gray-900">
-                      Outward Sales ({stats.invoicesCount} Bills)
-                      <span className="block text-[9px] text-gray-400 font-medium font-mono">B2B: {stats.b2bSalesCount} · B2CS: {stats.b2csSalesCount}</span>
-                    </td>
-                    <td className="py-3 px-3 text-right tabular-nums">₹{stats.outwardTaxable.toFixed(2)}</td>
-                    <td className="py-3 px-3 text-right text-red-500 tabular-nums">₹{stats.cgstCollected.toFixed(2)}</td>
-                    <td className="py-3 px-3 text-right text-red-500 tabular-nums">₹{stats.sgstCollected.toFixed(2)}</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 px-3 font-bold text-gray-900">
-                      Inward Purchases ({stats.purchasesCount} Bills)
-                    </td>
-                    <td className="py-3 px-3 text-right tabular-nums">₹{stats.inwardTaxable.toFixed(2)}</td>
-                    <td className="py-3 px-3 text-right text-emerald-600 tabular-nums">₹{stats.cgstPaid.toFixed(2)}</td>
-                    <td className="py-3 px-3 text-right text-emerald-600 tabular-nums">₹{stats.sgstPaid.toFixed(2)}</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 px-3 font-bold text-gray-900">
-                      Credit & Debit Notes ({stats.notesCount} Notes)
-                    </td>
-                    <td className="py-3 px-3 text-right">—</td>
-                    <td className="py-3 px-3 text-right tabular-nums">
-                      {stats.notesAdjustedCgst < 0 ? '-' : '+'}₹{Math.abs(stats.notesAdjustedCgst).toFixed(2)}
-                    </td>
-                    <td className="py-3 px-3 text-right tabular-nums">
-                      {stats.notesAdjustedSgst < 0 ? '-' : '+'}₹{Math.abs(stats.notesAdjustedSgst).toFixed(2)}
-                    </td>
-                  </tr>
-                  <tr className="bg-[#fcfdfd] border-t border-[#e5e7eb] font-bold text-[#111827]">
-                    <td className="py-3 px-3">Net Liabilities</td>
-                    <td className="py-3 px-3 text-right">—</td>
-                    <td className={`py-3 px-3 text-right tabular-nums ${stats.netCgstLiability > 0 ? 'text-red-500' : 'text-emerald-600'}`}>
-                      ₹{stats.netCgstLiability.toFixed(2)}
-                    </td>
-                    <td className={`py-3 px-3 text-right tabular-nums ${stats.netSgstLiability > 0 ? 'text-red-500' : 'text-emerald-600'}`}>
-                      ₹{stats.netSgstLiability.toFixed(2)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+        {/* ─── TAB 2: PORTAL ALIGNED GSTR-1 SHEET ─── */}
+        {activeTab === 'gstr1' && (
+          <div className="bg-white border border-[#e5e7eb] rounded-none p-6 shadow-sm space-y-6 animate-fadeIn font-sans">
+            {/* GSTR-1 Top Panel */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-150 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl font-extrabold text-gray-900 leading-tight">GSTR-1 Worksheet</h2>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">Details of Outward Supplies</p>
+                </div>
+              </div>
 
-          {/* Exporters sidebar panel */}
-          <div className="bg-white border border-[#e5e7eb] rounded-none p-5 shadow-xs flex flex-col justify-between">
-            <div>
-              <h3 className="text-xs font-bold text-[#1a1d26] uppercase tracking-wider mb-4 border-b border-[#f3f4f6] pb-2">
-                Export Options
-              </h3>
-              
-              <div className="space-y-4">
-                <div className="p-3 bg-gray-50 border border-gray-200">
-                  <h4 className="text-xs font-bold text-gray-900 uppercase">GSTR-1 JSON</h4>
-                  <p className="text-[10px] text-gray-500 mt-1">
-                    Upload directly to the GSTN Common Portal to file monthly outward sales invoices.
-                  </p>
-                  <Button
-                    onClick={handleExportGstr1}
-                    disabled={validationResult ? !validationResult.isValid : false}
-                    className="w-full mt-3 py-2 min-h-0 text-xs"
-                  >
-                    Download GSTR-1 File
-                  </Button>
+              {/* Portal info badges */}
+              <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-gray-700">
+                <div className="bg-gray-50 border border-gray-200 px-3 py-1.5 flex items-center gap-1.5">
+                  <span className="text-gray-400 font-medium">Fin. Year:</span>
+                  <span>{finYearLabel}</span>
+                </div>
+                <div className="bg-gray-50 border border-gray-200 px-3 py-1.5 flex items-center gap-1.5">
+                  <span className="text-gray-400 font-medium">Return Period:</span>
+                  <span>{returnPeriodLabel}</span>
+                </div>
+                <button
+                  onClick={handleExportGstr1}
+                  className="bg-[#2b6cb0] hover:bg-[#2b5c90] text-white font-extrabold px-4.5 py-1.5 flex items-center gap-2 shadow-xs transition-colors text-xs"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Export JSON
+                </button>
+              </div>
+            </div>
+
+            {/* 1. Summary Cards */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">1. Summary</h3>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="bg-[#ebf3fc] border border-[#cce3f9] p-4 text-center rounded-lg">
+                  <span className="text-[10px] font-bold text-[#2b6cb0] uppercase">Total B2B Invoices</span>
+                  <p className="text-2xl font-black text-gray-900 mt-2">{filteredData.b2bSalesList.length}</p>
+                  <p className="text-xs font-extrabold text-gray-900 mt-1">₹ {filteredData.totalB2bTaxable.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <span className="text-[9px] text-gray-400 block mt-1">Total Taxable Value</span>
                 </div>
 
-                <div className="p-3 bg-gray-50 border border-gray-200">
-                  <h4 className="text-xs font-bold text-gray-900 uppercase">GSTR-3B Summary</h4>
-                  <p className="text-[10px] text-gray-500 mt-1">
-                    Export GSTR-3B summary values to compute final tax payments.
-                  </p>
-                  <Button
-                    onClick={handleExportGstr3b}
-                    className="w-full mt-3 py-2 min-h-0 text-xs"
-                    variant="ghost"
-                  >
-                    Download GSTR-3B File
-                  </Button>
+                <div className="bg-[#eefcf2] border border-[#cef7d9] p-4 text-center rounded-lg">
+                  <span className="text-[10px] font-bold text-[#2f855a] uppercase">Total B2C (Large) Invoices</span>
+                  <p className="text-2xl font-black text-gray-900 mt-2">{filteredData.b2cLargeList.length}</p>
+                  <p className="text-xs font-extrabold text-gray-900 mt-1">₹ {filteredData.totalB2cLargeTaxable.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <span className="text-[9px] text-gray-400 block mt-1">Total Taxable Value</span>
+                </div>
+
+                <div className="bg-[#fff8ee] border border-[#ffe2bf] p-4 text-center rounded-lg">
+                  <span className="text-[10px] font-bold text-[#c05621] uppercase">Total B2C (Others)</span>
+                  <p className="text-2xl font-black text-gray-900 mt-2">{filteredData.b2cSmallList.length}</p>
+                  <p className="text-xs font-extrabold text-gray-900 mt-1">₹ {filteredData.totalB2cSmallTaxable.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <span className="text-[9px] text-gray-400 block mt-1">Total Taxable Value</span>
+                </div>
+
+                <div className="bg-[#faf5ff] border border-[#e9d5ff] p-4 text-center rounded-lg">
+                  <span className="text-[10px] font-bold text-[#6b46c1] uppercase">Total Credit / Debit Notes</span>
+                  <p className="text-2xl font-black text-gray-900 mt-2">{filteredData.periodNotes.length}</p>
+                  <p className="text-xs font-extrabold text-gray-900 mt-1">₹ {filteredData.totalCdnTaxable.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <span className="text-[9px] text-gray-400 block mt-1">Total Value</span>
                 </div>
               </div>
             </div>
-            
-            <p className="text-[9px] text-[#9ca3af] mt-4 font-semibold text-center italic">
-              * Generates official GST Offline Utility JSON formats.
-            </p>
+
+            {/* 2. B2B Invoices Table */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">2. B2B Invoices (4A, 4B, 4C, 6B)</h3>
+              <div className="border border-gray-200 overflow-hidden">
+                <table className="w-full text-left text-xs font-semibold text-[#4b5563]">
+                  <thead>
+                    <tr className="bg-[#f7fafc] text-gray-800 font-bold border-b border-gray-200 text-[10px] uppercase">
+                      <th className="py-2 px-3 border-r border-gray-200 text-center w-12">Sr. No.</th>
+                      <th className="py-2 px-3 border-r border-gray-200">Invoice No.</th>
+                      <th className="py-2 px-3 border-r border-gray-200">Invoice Date</th>
+                      <th className="py-2 px-3 border-r border-gray-200">Customer GSTIN</th>
+                      <th className="py-2 px-3 border-r border-gray-200 text-right">Taxable Value (₹)</th>
+                      <th className="py-2 px-3 border-r border-gray-200 text-right">IGST (₹)</th>
+                      <th className="py-2 px-3 border-r border-gray-200 text-right">CGST (₹)</th>
+                      <th className="py-2 px-3 border-r border-gray-200 text-right">SGST (₹)</th>
+                      <th className="py-2 px-3 text-right">Cess (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredData.b2bSalesList.length === 0 ? (
+                      <tr>
+                        <td colSpan={9} className="py-6 text-center text-gray-400 italic">No B2B supply transactions this period.</td>
+                      </tr>
+                    ) : (
+                      filteredData.b2bSalesList.map((inv, idx) => {
+                        const taxableVal = Number(inv.subtotal || inv.total - (inv.total_cgst || 0) - (inv.total_sgst || 0));
+                        return (
+                          <tr key={inv.id} className="hover:bg-gray-50/50">
+                            <td className="py-2 px-3 border-r border-gray-200 text-center">{idx + 1}</td>
+                            <td className="py-2 px-3 border-r border-gray-200 font-mono">{inv.invoice_number}</td>
+                            <td className="py-2 px-3 border-r border-gray-200">{new Date(inv.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+                            <td className="py-2 px-3 border-r border-gray-200 font-mono font-bold uppercase">{inv.customer_gstin}</td>
+                            <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">{taxableVal.toFixed(2)}</td>
+                            <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                            <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums text-red-500">{(inv.total_cgst || 0).toFixed(2)}</td>
+                            <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums text-red-500">{(inv.total_sgst || 0).toFixed(2)}</td>
+                            <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                          </tr>
+                        );
+                      })
+                    )}
+                    <tr className="bg-[#f7fafc] font-bold text-gray-900 border-t border-gray-250">
+                      <td colSpan={4} className="py-2 px-3 border-r border-gray-200">Total</td>
+                      <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">
+                        {filteredData.totalB2bTaxable.toFixed(2)}
+                      </td>
+                      <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                      <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">
+                        {filteredData.totalB2bCgst.toFixed(2)}
+                      </td>
+                      <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">
+                        {filteredData.totalB2bSgst.toFixed(2)}
+                      </td>
+                      <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* 3. B2C (Large) Invoices Table */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">3. B2C (Large) Invoices (5A, 5B)</h3>
+              <div className="border border-gray-200 overflow-hidden">
+                <table className="w-full text-left text-xs font-semibold text-[#4b5563]">
+                  <thead>
+                    <tr className="bg-[#f7fafc] text-gray-800 font-bold border-b border-gray-200 text-[10px] uppercase">
+                      <th className="py-2 px-3 border-r border-gray-200 text-center w-12">Sr. No.</th>
+                      <th className="py-2 px-3 border-r border-gray-200">Invoice No.</th>
+                      <th className="py-2 px-3 border-r border-gray-200">Invoice Date</th>
+                      <th className="py-2 px-3 border-r border-gray-200">Place Of Supply</th>
+                      <th className="py-2 px-3 border-r border-gray-200 text-right">Taxable Value (₹)</th>
+                      <th className="py-2 px-3 text-right">Total Tax (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredData.b2cLargeList.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-6 text-center text-gray-400 italic">No large unregistered supply invoices (&gt; ₹2.5L inter-state) this period.</td>
+                      </tr>
+                    ) : (
+                      filteredData.b2cLargeList.map((inv, idx) => {
+                        const taxableVal = Number(inv.subtotal || inv.total - (inv.total_cgst || 0) - (inv.total_sgst || 0));
+                        const totalTax = Number(inv.total_cgst || 0) + Number(inv.total_sgst || 0);
+                        return (
+                          <tr key={inv.id} className="hover:bg-gray-50/55">
+                            <td className="py-2 px-3 border-r border-gray-200 text-center">{idx + 1}</td>
+                            <td className="py-2 px-3 border-r border-gray-200 font-mono">{inv.invoice_number}</td>
+                            <td className="py-2 px-3 border-r border-gray-200">{new Date(inv.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+                            <td className="py-2 px-3 border-r border-gray-200">Tamil Nadu (33)</td>
+                            <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">{taxableVal.toFixed(2)}</td>
+                            <td className="py-2 px-3 text-right tabular-nums">{totalTax.toFixed(2)}</td>
+                          </tr>
+                        );
+                      })
+                    )}
+                    <tr className="bg-[#f7fafc] font-bold text-gray-900 border-t border-gray-250">
+                      <td colSpan={4} className="py-2 px-3 border-r border-gray-200">Total</td>
+                      <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">{filteredData.totalB2cLargeTaxable.toFixed(2)}</td>
+                      <td className="py-2 px-3 text-right tabular-nums">{filteredData.totalB2cLargeTax.toFixed(2)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Grid for side-by-side Tables 4 and 5 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* 4. B2C (Others) Table */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">4. B2C (Others) Invoices (7)</h3>
+                <div className="border border-gray-200 overflow-hidden">
+                  <table className="w-full text-left text-xs font-semibold text-[#4b5563]">
+                    <thead>
+                      <tr className="bg-[#f7fafc] text-gray-800 font-bold border-b border-gray-200 text-[10px] uppercase">
+                        <th className="py-2 px-3 border-r border-gray-200">Place Of Supply</th>
+                        <th className="py-2 px-3 border-r border-gray-200 text-right">Taxable Value (₹)</th>
+                        <th className="py-2 px-3 text-right">Total Tax (₹)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {filteredData.b2cSmallList.length === 0 ? (
+                        <tr>
+                          <td colSpan={3} className="py-6 text-center text-gray-400 italic">No retail supplies logged.</td>
+                        </tr>
+                      ) : (
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200">Tamil Nadu (33)</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">{filteredData.totalB2cSmallTaxable.toFixed(2)}</td>
+                          <td className="py-2 px-3 text-right tabular-nums">{filteredData.totalB2cSmallTax.toFixed(2)}</td>
+                        </tr>
+                      )}
+                      <tr className="bg-[#f7fafc] font-bold text-gray-900 border-t border-gray-250">
+                        <td className="py-2 px-3 border-r border-gray-200">Total</td>
+                        <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">{filteredData.totalB2cSmallTaxable.toFixed(2)}</td>
+                        <td className="py-2 px-3 text-right tabular-nums">{filteredData.totalB2cSmallTax.toFixed(2)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* 5. Credit / Debit Notes Table */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">5. Credit / Debit Notes (9B)</h3>
+                <div className="border border-gray-200 overflow-hidden">
+                  <table className="w-full text-left text-xs font-semibold text-[#4b5563]">
+                    <thead>
+                      <tr className="bg-[#f7fafc] text-gray-800 font-bold border-b border-gray-200 text-[10px] uppercase">
+                        <th className="py-2 px-3 border-r border-gray-200">Note Type</th>
+                        <th className="py-2 px-3 border-r border-gray-200 text-right">Taxable Value (₹)</th>
+                        <th className="py-2 px-3 text-right">Total Tax (₹)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {filteredData.periodNotes.length === 0 ? (
+                        <tr>
+                          <td colSpan={3} className="py-6 text-center text-gray-400 italic">No notes logged this period.</td>
+                        </tr>
+                      ) : (
+                        <>
+                          {filteredData.creditNotesList.length > 0 && (
+                            <tr>
+                              <td className="py-2 px-3 border-r border-gray-200 text-red-650 font-bold">Credit Notes</td>
+                              <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">
+                                {filteredData.creditNotesList.reduce((acc, curr) => acc + Number(curr.subtotal || 0), 0).toFixed(2)}
+                              </td>
+                              <td className="py-2 px-3 text-right tabular-nums">
+                                {filteredData.creditNotesList.reduce((acc, curr) => acc + Number(curr.total_cgst || 0) + Number(curr.total_sgst || 0), 0).toFixed(2)}
+                              </td>
+                            </tr>
+                          )}
+                          {filteredData.debitNotesList.length > 0 && (
+                            <tr>
+                              <td className="py-2 px-3 border-r border-gray-200 text-emerald-650 font-bold">Debit Notes</td>
+                              <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">
+                                {filteredData.debitNotesList.reduce((acc, curr) => acc + Number(curr.subtotal || 0), 0).toFixed(2)}
+                              </td>
+                              <td className="py-2 px-3 text-right tabular-nums">
+                                {filteredData.debitNotesList.reduce((acc, curr) => acc + Number(curr.total_cgst || 0) + Number(curr.total_sgst || 0), 0).toFixed(2)}
+                              </td>
+                            </tr>
+                          )}
+                        </>
+                      )}
+                      <tr className="bg-[#f7fafc] font-bold text-gray-900 border-t border-gray-250">
+                        <td className="py-2 px-3 border-r border-gray-200">Total</td>
+                        <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">{filteredData.totalCdnTaxable.toFixed(2)}</td>
+                        <td className="py-2 px-3 text-right tabular-nums">{filteredData.totalCdnTax.toFixed(2)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            {/* GSTR-1 Totals footer box */}
+            <div className="bg-[#ebf4fc] border border-[#cce3f9] p-4 text-center">
+              <span className="text-[10px] font-bold text-[#2b6cb0] uppercase">GSTR-1 Totals (Outward Supplies)</span>
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-2 mt-3 text-xs font-bold text-gray-900">
+                <div>
+                  <span className="text-[9px] text-gray-400 block uppercase font-medium">Total Taxable Value</span>
+                  <span className="tabular-nums">₹ {(filteredData.totalB2bTaxable + filteredData.totalB2cLargeTaxable + filteredData.totalB2cSmallTaxable).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] text-gray-400 block uppercase font-medium">Total IGST</span>
+                  <span className="tabular-nums">₹ 0.00</span>
+                </div>
+                <div>
+                  <span className="text-[9px] text-gray-400 block uppercase font-medium">Total CGST</span>
+                  <span className="tabular-nums text-red-500">₹ {(filteredData.totalB2bCgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2)).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] text-gray-400 block uppercase font-medium">Total SGST</span>
+                  <span className="tabular-nums text-red-500">₹ {(filteredData.totalB2bSgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2)).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] text-gray-400 block uppercase font-medium">Total Cess</span>
+                  <span className="tabular-nums">₹ 0.00</span>
+                </div>
+                <div>
+                  <span className="text-[9px] text-gray-400 block uppercase font-medium">Total Tax</span>
+                  <span className="tabular-nums">₹ {(filteredData.totalB2bCgst + filteredData.totalB2bSgst + filteredData.totalB2cSmallTax + filteredData.totalB2cLargeTax).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* ─── TAB 3: PORTAL ALIGNED GSTR-3B RETURN SHEET ─── */}
+        {activeTab === 'gstr3b' && (
+          <div className="space-y-6 animate-fadeIn font-sans">
+            {/* GSTR-3B Top Panel */}
+            <div className="bg-white border border-[#e5e7eb] p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <circle cx="10" cy="13" r="2" />
+                    <line x1="12" y1="15" x2="16" y2="19" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl font-extrabold text-gray-900 leading-tight">GSTR-3B Summary</h2>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">Summary of Return</p>
+                </div>
+              </div>
+
+              {/* GSTR-3B Info badge */}
+              <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-gray-700">
+                <div className="bg-gray-50 border border-gray-200 px-3 py-1.5 flex items-center gap-1.5">
+                  <span className="text-gray-400 font-medium">Fin. Year:</span>
+                  <span>{finYearLabel}</span>
+                </div>
+                <div className="bg-gray-50 border border-gray-200 px-3 py-1.5 flex items-center gap-1.5">
+                  <span className="text-gray-400 font-medium">Return Period:</span>
+                  <span>{returnPeriodLabel}</span>
+                </div>
+                <button
+                  onClick={handleExportGstr3b}
+                  className="bg-[#2b6cb0] hover:bg-[#2b5c90] text-white font-extrabold px-4.5 py-1.5 flex items-center gap-2 shadow-xs transition-colors text-xs"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Export JSON
+                </button>
+              </div>
+            </div>
+
+            {/* Split layout: Tables on the left, Net Tax Liability sticky card on the right */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Tables Container */}
+              <div className="lg:col-span-2 space-y-6">
+                
+                {/* 1. Outward Supplies Table */}
+                <div className="bg-white border border-[#e5e7eb] p-5 shadow-xs space-y-3">
+                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">1. Tax on Outward and Reverse Charge Inward Supplies</h3>
+                  <div className="border border-gray-200 overflow-hidden">
+                    <table className="w-full text-left text-xs font-semibold text-[#4b5563]">
+                      <thead>
+                        <tr className="bg-[#f7fafc] text-gray-800 font-bold border-b border-gray-200 text-[9px] uppercase">
+                          <th className="py-2 px-3 border-r border-gray-200">Description</th>
+                          <th className="py-2 px-3 border-r border-gray-200 text-right w-24">Integrated Tax (₹)</th>
+                          <th className="py-2 px-3 border-r border-gray-200 text-right w-24">Central Tax (₹)</th>
+                          <th className="py-2 px-3 border-r border-gray-200 text-right w-24">State/UT Tax (₹)</th>
+                          <th className="py-2 px-3 text-right w-20">Cess (₹)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200 leading-normal">
+                            (a) Outward Taxable Supplies (Other than Zero Rated, Nil Rated and Exempted)
+                          </td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums text-red-500">
+                            {(filteredData.totalB2bCgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2)).toFixed(2)}
+                          </td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums text-red-500">
+                            {(filteredData.totalB2bSgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2)).toFixed(2)}
+                          </td>
+                          <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200">(b) Outward Taxable Supplies (Zero Rated)</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200">(c) Other Outward Supplies (Nil Rated, Exempted)</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200">(d) Inward Supplies (liable to reverse charge)</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">
+                            {filteredData.reverseChargeCgst.toFixed(2)}
+                          </td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">
+                            {filteredData.reverseChargeSgst.toFixed(2)}
+                          </td>
+                          <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200">(e) Non-GST outward supplies</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-center text-gray-400">—</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-center text-gray-400">—</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-center text-gray-400">—</td>
+                          <td className="py-2 px-3 text-center text-gray-400">—</td>
+                        </tr>
+                        <tr className="bg-[#e6f4ea] font-extrabold text-[#1a6b3c] border-t border-gray-250">
+                          <td className="py-2 px-3 border-r border-gray-200">Total Tax Liability (1)</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">
+                            {(filteredData.totalB2bCgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeCgst).toFixed(2)}
+                          </td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">
+                            {(filteredData.totalB2bSgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeSgst).toFixed(2)}
+                          </td>
+                          <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* 2. ITC Available Table */}
+                <div className="bg-white border border-[#e5e7eb] p-5 shadow-xs space-y-3">
+                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">2. ITC Available (Input Tax Credit)</h3>
+                  <div className="border border-gray-200 overflow-hidden">
+                    <table className="w-full text-left text-xs font-semibold text-[#4b5563]">
+                      <thead>
+                        <tr className="bg-[#f7fafc] text-gray-800 font-bold border-b border-gray-200 text-[9px] uppercase">
+                          <th className="py-2 px-3 border-r border-gray-200">Description</th>
+                          <th className="py-2 px-3 border-r border-gray-200 text-right w-24">Integrated Tax (₹)</th>
+                          <th className="py-2 px-3 border-r border-gray-200 text-right w-24">Central Tax (₹)</th>
+                          <th className="py-2 px-3 border-r border-gray-200 text-right w-24">State/UT Tax (₹)</th>
+                          <th className="py-2 px-3 text-right w-20">Cess (₹)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200">(a) ITC Available (Import of Goods)</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200">(b) ITC Available (Import of Services)</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200 leading-normal">(c) ITC Available (Inward Supplies other than (a) & (b) above)</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums text-emerald-600">
+                            {filteredData.totalItcCgst.toFixed(2)}
+                          </td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums text-emerald-600">
+                            {filteredData.totalItcSgst.toFixed(2)}
+                          </td>
+                          <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200 leading-normal">(d) ITC Available (Inward Supplies liable to reverse charge)</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">
+                            {filteredData.reverseChargeCgst.toFixed(2)}
+                          </td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">
+                            {filteredData.reverseChargeSgst.toFixed(2)}
+                          </td>
+                          <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200">(e) ITC Available (Other)</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                        </tr>
+                        <tr className="bg-[#e6f4ea] font-extrabold text-[#1a6b3c] border-t border-gray-250">
+                          <td className="py-2 px-3 border-r border-gray-200">Total ITC Available (2)</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">
+                            {(filteredData.totalItcCgst + filteredData.reverseChargeCgst).toFixed(2)}
+                          </td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">
+                            {(filteredData.totalItcSgst + filteredData.reverseChargeSgst).toFixed(2)}
+                          </td>
+                          <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* 4. Other ITC Table */}
+                <div className="bg-white border border-[#e5e7eb] p-5 shadow-xs space-y-3">
+                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">4. Other ITC</h3>
+                  <div className="border border-gray-200 overflow-hidden">
+                    <table className="w-full text-left text-xs font-semibold text-[#4b5563]">
+                      <thead>
+                        <tr className="bg-[#f7fafc] text-gray-800 font-bold border-b border-gray-200 text-[9px] uppercase">
+                          <th className="py-2 px-3 border-r border-gray-200">Description</th>
+                          <th className="py-2 px-3 border-r border-gray-200 text-right w-24">Integrated Tax (₹)</th>
+                          <th className="py-2 px-3 border-r border-gray-200 text-right w-24">Central Tax (₹)</th>
+                          <th className="py-2 px-3 border-r border-gray-200 text-right w-24">State/UT Tax (₹)</th>
+                          <th className="py-2 px-3 text-right w-20">Cess (₹)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200">(a) ITC Reversed</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200">(b) ITC Ineligible</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200">(c) ITC Reclaimed</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 border-r border-gray-200 text-right tabular-nums">0.00</td>
+                          <td className="py-2 px-3 text-right tabular-nums">0.00</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* 5. Value of Supplies */}
+                <div className="bg-white border border-[#e5e7eb] p-5 shadow-xs space-y-3">
+                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">5. Value of Supplies</h3>
+                  <div className="border border-gray-200 overflow-hidden">
+                    <table className="w-full text-left text-xs font-semibold text-[#4b5563]">
+                      <thead>
+                        <tr className="bg-[#f7fafc] text-gray-800 font-bold border-b border-gray-200 text-[9px] uppercase">
+                          <th className="py-2 px-3 border-r border-gray-200">Description</th>
+                          <th className="py-2 px-3 text-right w-44">Value (₹)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200">Total Value of Outward Supplies (including exempted supplies)</td>
+                          <td className="py-2 px-3 text-right tabular-nums font-bold">
+                            {(filteredData.totalB2bTaxable + filteredData.totalB2cLargeTaxable + filteredData.totalB2cSmallTaxable).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-3 border-r border-gray-200">Total Value of Inward Supplies (including exempted supplies)</td>
+                          <td className="py-2 px-3 text-right tabular-nums font-bold">
+                            {filteredData.totalItcTaxable.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Sidebar: 3. Net Tax Liability Sticky Card & 6. Payment of Tax */}
+              <div className="space-y-6">
+                {/* Net Tax Liability Box */}
+                <div className="bg-[#fcfdfd] border border-gray-200 rounded-lg p-5 shadow-xs space-y-4 font-sans sticky top-6">
+                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-150 pb-2">3. Net Tax Liability</h3>
+
+                  <div className="space-y-3">
+                    {/* Tax Liability */}
+                    <div className="bg-[#ebf4fc] border border-[#cce3f9] p-3">
+                      <span className="text-[10px] font-bold text-[#2b6cb0] uppercase">Total Tax Liability (1)</span>
+                      <div className="grid grid-cols-2 gap-2 mt-2 text-xs font-bold text-gray-900">
+                        <div>
+                          <span className="text-[9px] text-gray-400 block font-medium">Integrated Tax</span>
+                          <span>₹ 0.00</span>
+                        </div>
+                        <div>
+                          <span className="text-[9px] text-gray-400 block font-medium">Central Tax</span>
+                          <span className="text-red-500">₹ {(filteredData.totalB2bCgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeCgst).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        <div className="col-span-2 border-t border-blue-200 pt-1 flex justify-between text-[10px]">
+                          <span className="text-gray-400 font-medium">State/UT Tax:</span>
+                          <span className="text-red-500">₹ {(filteredData.totalB2bSgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeSgst).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ITC Available */}
+                    <div className="bg-[#eefcf2] border border-[#cef7d9] p-3">
+                      <span className="text-[10px] font-bold text-[#2f855a] uppercase">Total ITC Available (2)</span>
+                      <div className="grid grid-cols-2 gap-2 mt-2 text-xs font-bold text-gray-900">
+                        <div>
+                          <span className="text-[9px] text-gray-400 block font-medium">Integrated Tax</span>
+                          <span>₹ 0.00</span>
+                        </div>
+                        <div>
+                          <span className="text-[9px] text-gray-400 block font-medium">Central Tax</span>
+                          <span className="text-emerald-600">₹ {(filteredData.totalItcCgst + filteredData.reverseChargeCgst).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        <div className="col-span-2 border-t border-emerald-200 pt-1 flex justify-between text-[10px]">
+                          <span className="text-gray-400 font-medium">State/UT Tax:</span>
+                          <span className="text-emerald-600">₹ {(filteredData.totalItcSgst + filteredData.reverseChargeSgst).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Net Payable */}
+                    {(() => {
+                      const netCgst = (filteredData.totalB2bCgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeCgst) - (filteredData.totalItcCgst + filteredData.reverseChargeCgst);
+                      const netSgst = (filteredData.totalB2bSgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeSgst) - (filteredData.totalItcSgst + filteredData.reverseChargeSgst);
+                      return (
+                        <div className="bg-[#fff8ee] border border-[#ffe2bf] p-3">
+                          <span className="text-[10px] font-bold text-[#c05621] uppercase">Net Tax Payable (1 - 2)</span>
+                          <div className="grid grid-cols-2 gap-2 mt-2 text-xs font-bold text-gray-900">
+                            <div>
+                              <span className="text-[9px] text-gray-400 block font-medium">Integrated Tax</span>
+                              <span>₹ 0.00</span>
+                            </div>
+                            <div>
+                              <span className="text-[9px] text-gray-400 block font-medium">Central Tax</span>
+                              <span className={netCgst > 0 ? 'text-red-500' : 'text-emerald-600'}>₹ {netCgst.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                            </div>
+                            <div className="col-span-2 border-t border-orange-200 pt-1 flex justify-between text-[10px]">
+                              <span className="text-gray-400 font-medium">State/UT Tax:</span>
+                              <span className={netSgst > 0 ? 'text-red-500' : 'text-emerald-600'}>₹ {netSgst.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* 6. Payment of Tax */}
+                <div className="bg-white border border-[#e5e7eb] p-5 shadow-xs space-y-3">
+                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">6. Payment of Tax</h3>
+                  <div className="grid grid-cols-2 gap-2 text-center text-[10px] font-bold text-gray-800">
+                    <div className="bg-[#f7fafc] border border-gray-200 p-2.5">
+                      <span className="text-gray-400 block font-medium">Integrated Tax</span>
+                      <p className="text-xs font-black mt-1">₹ 0.00</p>
+                    </div>
+                    <div className="bg-[#f7fafc] border border-gray-200 p-2.5">
+                      <span className="text-gray-400 block font-medium">Central Tax</span>
+                      <p className="text-xs font-black mt-1">
+                        {(() => {
+                          const netCgst = (filteredData.totalB2bCgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeCgst) - (filteredData.totalItcCgst + filteredData.reverseChargeCgst);
+                          return netCgst > 0 ? `₹ ${netCgst.toFixed(2)}` : '₹ 0.00';
+                        })()}
+                      </p>
+                    </div>
+                    <div className="bg-[#f7fafc] border border-gray-200 p-2.5">
+                      <span className="text-gray-400 block font-medium">State/UT Tax</span>
+                      <p className="text-xs font-black mt-1">
+                        {(() => {
+                          const netSgst = (filteredData.totalB2bSgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeSgst) - (filteredData.totalItcSgst + filteredData.reverseChargeSgst);
+                          return netSgst > 0 ? `₹ ${netSgst.toFixed(2)}` : '₹ 0.00';
+                        })()}
+                      </p>
+                    </div>
+                    <div className="bg-[#f7fafc] border border-gray-200 p-2.5">
+                      <span className="text-gray-400 block font-medium">Cess</span>
+                      <p className="text-xs font-black mt-1">₹ 0.00</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        )}
       </PageTransition>
     </div>
   );
