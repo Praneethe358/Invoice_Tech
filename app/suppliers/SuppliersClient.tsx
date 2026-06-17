@@ -116,73 +116,117 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f6fa]">
+    <div className="min-h-screen bg-[#f8fafc]">
       <Navbar />
 
       <PageTransition className="max-w-lg md:max-w-[1400px] mx-auto px-4 md:px-8 py-6 pb-24">
         {/* Header matched with profile logo format */}
-        <div className="bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 -mt-6.5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
+        <div className="bg-white border border-[#e2e8f0] -mx-4 md:-mx-8 px-6 md:px-10 py-5 -mt-6.5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1a6b3c] to-[#2e7d32] flex items-center justify-center overflow-hidden shadow-md">
               {shop.logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-[#1a6b3c] flex items-center justify-center text-white font-extrabold text-sm">
+                <span className="text-white font-extrabold text-lg">
                   {shop.name.charAt(0).toUpperCase()}
-                </div>
+                </span>
               )}
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-xl font-bold text-slate-900 leading-tight">
                 {shop.name}
               </h1>
-              <p className="text-[#6b7280] text-[10px] mt-0.5 font-medium">
-                Suppliers Database · Manage product suppliers, GSTINs, and purchase aggregates
+              <p className="text-slate-500 text-xs mt-0.5 font-medium flex items-center gap-1.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                </svg>
+                Suppliers Database · Track products supplier details & business logs
               </p>
             </div>
           </div>
-          <Button onClick={() => setShowAddModal(true)}>
-            + Add Supplier
-          </Button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-[#1a6b3c] hover:bg-[#155630] text-white rounded-xl py-2.5 px-5 flex items-center gap-2.5 font-bold text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add Supplier
+          </button>
         </div>
 
-        {/* Vyapar style stats ribbon */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-          <div className="bg-[#eff6ff] border border-[#dbeafe] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
-            <span className="text-[10px] font-bold text-[#1d4ed8] uppercase tracking-wide">Total Suppliers</span>
-            <p className="text-xl font-extrabold text-[#2563eb] mt-2">{stats.totalSuppliers}</p>
+        {/* Vyapar style premium stats ribbon */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white border-l-4 border-blue-500 border-y border-r border-slate-200 p-5 flex items-center justify-between shadow-xs hover:shadow-sm transition-all duration-300">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Suppliers</span>
+              <p className="text-2xl font-black text-slate-800 mt-1">{stats.totalSuppliers}</p>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+              </svg>
+            </div>
           </div>
 
-          <div className="bg-[#f0fdf4] border border-[#dcfce7] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
-            <span className="text-[10px] font-bold text-[#15803d] uppercase tracking-wide">Total Outward Purchases</span>
-            <p className="text-xl font-extrabold text-[#16a34a] mt-2">
-              ₹{stats.totalPurchases.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-            </p>
+          <div className="bg-white border-l-4 border-emerald-500 border-y border-r border-slate-200 p-5 flex items-center justify-between shadow-xs hover:shadow-sm transition-all duration-300">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Purchases</span>
+              <p className="text-2xl font-black text-slate-800 mt-1">
+                ₹{stats.totalPurchases.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+              </p>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <line x1="12" y1="4" x2="12" y2="20" />
+              </svg>
+            </div>
           </div>
 
-          <div className="bg-[#fffbeb] border border-[#fef3c7] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
-            <span className="text-[10px] font-bold text-[#b45309] uppercase tracking-wide">B2B Registered</span>
-            <p className="text-xl font-extrabold text-[#d97706] mt-2">{stats.registeredCount} Suppliers</p>
+          <div className="bg-white border-l-4 border-amber-500 border-y border-r border-slate-200 p-5 flex items-center justify-between shadow-xs hover:shadow-sm transition-all duration-300">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">B2B Registered</span>
+              <p className="text-2xl font-black text-slate-800 mt-1">{stats.registeredCount}</p>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+            </div>
           </div>
 
-          <div className="bg-white border border-[#e5e7eb] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
-            <span className="text-[10px] font-bold text-[#6b7280] uppercase tracking-wide">Unregistered B2C</span>
-            <p className="text-xl font-extrabold text-gray-900 mt-2">{stats.unregisteredCount} Suppliers</p>
+          <div className="bg-white border-l-4 border-slate-400 border-y border-r border-slate-200 p-5 flex items-center justify-between shadow-xs hover:shadow-sm transition-all duration-300">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Unregistered B2C</span>
+              <p className="text-2xl font-black text-slate-800 mt-1">{stats.unregisteredCount}</p>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+                <line x1="9" y1="9" x2="15" y2="15" />
+              </svg>
+            </div>
           </div>
         </div>
 
         {/* Search bar row */}
-        <div className="bg-white border border-[#e5e7eb] p-4 mb-6">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-8 shadow-xs">
           <div className="relative w-full max-w-md">
             <input
               type="text"
               placeholder="Search by supplier name, GSTIN, or phone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white border border-[#e5e7eb] py-2 pl-9 pr-3 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#1a6b3c]"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#1a6b3c] focus:ring-1 focus:ring-[#1a6b3c]/20 transition-all"
             />
-            <svg className="absolute left-3 top-2.5 text-gray-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className="absolute left-3.5 top-3 text-slate-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
@@ -195,7 +239,7 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
             title="No suppliers found"
             description="Add your fertilizer or goods suppliers to record purchases and track Input Tax Credit (ITC)."
             icon={
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gray-300">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-slate-350 animate-pulse">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -204,22 +248,22 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
             }
           />
         ) : (
-          <div className="bg-white border border-[#e5e7eb] shadow-xs overflow-hidden">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left text-xs font-semibold text-[#4b5563]">
+              <table className="w-full text-left text-xs font-semibold text-slate-600">
                 <thead>
-                  <tr className="bg-[#f9fafb] text-[#111827] font-bold border-b border-[#e5e7eb]">
-                    <th className="py-3 px-4">Supplier Name</th>
-                    <th className="py-3 px-4">Registration status / GSTIN</th>
-                    <th className="py-3 px-4">Phone Number</th>
-                    <th className="py-3 px-4">Address</th>
-                    <th className="py-3 px-4">Total Purchases outlay</th>
-                    <th className="py-3 px-4">Last Order Date</th>
-                    <th className="py-3 px-4 text-center">Actions</th>
+                  <tr className="bg-slate-50 text-slate-800 font-bold border-b border-slate-200 text-[10px] uppercase tracking-wider">
+                    <th className="py-3.5 px-5">Supplier Name</th>
+                    <th className="py-3.5 px-5">GST Registration Status / GSTIN</th>
+                    <th className="py-3.5 px-5">Phone Number</th>
+                    <th className="py-3.5 px-5">Address</th>
+                    <th className="py-3.5 px-5">Total Purchases Outlay</th>
+                    <th className="py-3.5 px-5">Last Order Date</th>
+                    <th className="py-3.5 px-5 text-center">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#f3f4f6]">
+                <tbody className="divide-y divide-slate-100">
                   {filteredSuppliers.map((sup) => {
                     const dateStr = sup.last_purchase_date
                       ? new Date(sup.last_purchase_date).toLocaleDateString('en-IN', {
@@ -229,31 +273,31 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
                         })
                       : 'No purchase';
                     return (
-                      <tr key={sup.id} className="hover:bg-gray-50/55 transition-colors">
-                        <td className="py-3.5 px-4 font-extrabold text-gray-900 uppercase">{sup.name}</td>
-                        <td className="py-3.5 px-4">
+                      <tr key={sup.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="py-4 px-5 font-bold text-slate-800 uppercase tracking-wide">{sup.name}</td>
+                        <td className="py-4 px-5">
                           {sup.gstin ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#e6f4ea] text-[#1a6b3c] border border-[#d1e7dd] uppercase font-mono">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 uppercase font-mono tracking-wider shadow-2xs">
                               {sup.gstin}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold bg-gray-100 text-gray-500 border border-gray-200">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[9px] font-bold bg-slate-100 text-slate-555 border border-slate-200 uppercase tracking-wider">
                               Unregistered B2C
                             </span>
                           )}
                         </td>
-                        <td className="py-3.5 px-4">{sup.phone ? `+91 ${sup.phone.slice(-10)}` : '—'}</td>
-                        <td className="py-3.5 px-4 text-gray-400 truncate max-w-[200px]">{sup.address || '—'}</td>
-                        <td className="py-3.5 px-4 font-extrabold text-gray-900 tabular-nums">
+                        <td className="py-4 px-5 font-medium">{sup.phone ? `+91 ${sup.phone.slice(-10)}` : '—'}</td>
+                        <td className="py-4 px-5 text-slate-400 truncate max-w-[200px] font-medium">{sup.address || '—'}</td>
+                        <td className="py-4 px-5 font-extrabold text-slate-800 tabular-nums">
                           ₹{Number(sup.total_purchases || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                         </td>
-                        <td className="py-3.5 px-4">{dateStr}</td>
-                        <td className="py-3.5 px-4 text-center">
+                        <td className="py-4 px-5 text-slate-500 font-medium">{dateStr}</td>
+                        <td className="py-4 px-5 text-center">
                           <button
                             onClick={() => router.push(`/suppliers/${sup.id}`)}
-                            className="text-xs font-bold text-[#1a6b3c] hover:underline"
+                            className="bg-[#1a6b3c]/5 hover:bg-[#1a6b3c]/10 text-[#1a6b3c] font-bold text-[11px] px-3.5 py-1.5 rounded-lg transition-colors"
                           >
-                            Ledger
+                            Ledger →
                           </button>
                         </td>
                       </tr>
@@ -264,25 +308,25 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
             </div>
 
             {/* Mobile Responsive Cards View */}
-            <div className="md:hidden divide-y divide-[#f3f4f6]">
+            <div className="md:hidden divide-y divide-slate-100">
               {filteredSuppliers.map((sup) => (
                 <div
                   key={sup.id}
                   onClick={() => router.push(`/suppliers/${sup.id}`)}
-                  className="p-4 active:bg-gray-50 flex items-center justify-between cursor-pointer"
+                  className="p-4 active:bg-slate-50 flex items-center justify-between cursor-pointer"
                 >
                   <div>
-                    <h4 className="text-xs font-bold text-gray-900 uppercase truncate max-w-[180px]">{sup.name}</h4>
-                    <span className="block text-[10px] text-gray-400 font-medium mt-0.5">
+                    <h4 className="text-xs font-bold text-slate-800 uppercase truncate max-w-[180px]">{sup.name}</h4>
+                    <span className="block text-[10px] text-slate-400 font-medium mt-1">
                       {sup.gstin ? `GSTIN: ${sup.gstin}` : 'Unregistered Supplier'}
                     </span>
                   </div>
 
                   <div className="text-right">
-                    <p className="text-xs font-extrabold text-gray-900 tabular-nums">
+                    <p className="text-xs font-extrabold text-slate-800 tabular-nums">
                       ₹{Number(sup.total_purchases || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </p>
-                    <span className="text-[9px] text-[#1a6b3c] font-bold">Ledger →</span>
+                    <span className="text-[10px] text-[#1a6b3c] font-bold block mt-1">Ledger →</span>
                   </div>
                 </div>
               ))}
@@ -292,60 +336,101 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
 
         {/* Add Supplier Modal */}
         {showAddModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-white rounded-none border border-[#e5e7eb] max-w-md w-full p-6 space-y-4 relative shadow-xl">
-              <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide">Add Supplier</h2>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop blur overlay */}
+            <div 
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity duration-300"
+              onClick={() => setShowAddModal(false)}
+            />
+            
+            <div className="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-6 space-y-5 relative shadow-xl z-10 transform scale-100 transition-all duration-300">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#1a6b3c]"></span>
+                  Add New Supplier
+                </h2>
+                <button 
+                  onClick={() => setShowAddModal(false)}
+                  className="text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
               
-              <form onSubmit={handleAddSupplier} className="space-y-4">
-                <Input
-                  label="Supplier Name"
-                  placeholder="e.g. TAMIL NADU FERTILIZERS"
-                  value={name}
-                  onChange={(e) => setName(e.target.value.toUpperCase())}
-                  required
-                />
+              <form onSubmit={handleAddSupplier} className="space-y-4 pt-1">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">
+                    Supplier Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. TAMIL NADU FERTILIZERS"
+                    value={name}
+                    onChange={(e) => setName(e.target.value.toUpperCase())}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#1a6b3c] focus:ring-1 focus:ring-[#1a6b3c]/20 transition-all"
+                    required
+                  />
+                </div>
                 
-                <Input
-                  label="GSTIN (Optional)"
-                  placeholder="15-character GSTIN"
-                  value={gstin}
-                  onChange={(e) => setGstin(e.target.value.toUpperCase())}
-                  maxLength={15}
-                />
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">
+                    GSTIN (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="15-character GSTIN"
+                    value={gstin}
+                    onChange={(e) => setGstin(e.target.value.toUpperCase())}
+                    maxLength={15}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#1a6b3c] focus:ring-1 focus:ring-[#1a6b3c]/20 transition-all font-mono"
+                  />
+                </div>
                 
-                <Input
-                  label="Phone Number (Optional)"
-                  placeholder="10-digit mobile number"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                  maxLength={10}
-                />
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">
+                    Phone Number (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="10-digit mobile number"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                    maxLength={10}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#1a6b3c] focus:ring-1 focus:ring-[#1a6b3c]/20 transition-all"
+                  />
+                </div>
                 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-[#6b7280] uppercase tracking-wide">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">
                     Address (Optional)
                   </label>
                   <textarea
                     placeholder="Enter supplier address"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-none px-3 py-2 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#1a6b3c]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#1a6b3c] focus:ring-1 focus:ring-[#1a6b3c]/20 transition-all"
                     rows={3}
                   />
                 </div>
 
-                <div className="flex gap-3 pt-2">
-                  <Button
+                <div className="flex gap-3 pt-3">
+                  <button
                     type="button"
-                    variant="ghost"
                     onClick={() => setShowAddModal(false)}
-                    className="flex-1 border border-[#e5e7eb]"
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl py-3 text-xs transition-colors"
                   >
                     Cancel
-                  </Button>
-                  <Button type="submit" loading={submitting} className="flex-1">
-                    Save Supplier
-                  </Button>
+                  </button>
+                  <button 
+                    type="submit" 
+                    disabled={submitting} 
+                    className="flex-1 bg-[#1a6b3c] hover:bg-[#155630] text-white font-bold rounded-xl py-3 text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
+                  >
+                    {submitting ? 'Saving...' : 'Save Supplier'}
+                  </button>
                 </div>
               </form>
             </div>

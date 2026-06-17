@@ -1,7 +1,20 @@
 'use client';
 
+// Suppress Next.js React-19/Turbopack performance measurement timing crash
+if (typeof window !== 'undefined' && window.performance && window.performance.measure) {
+  const originalMeasure = window.performance.measure;
+  window.performance.measure = function (measureName: any, startMark: any, endMark: any) {
+    try {
+      return originalMeasure.call(window.performance, measureName, startMark, endMark);
+    } catch (e) {
+      return null as any;
+    }
+  };
+}
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
