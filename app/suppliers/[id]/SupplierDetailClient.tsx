@@ -111,8 +111,46 @@ export default function SupplierDetailClient({
       <Navbar />
 
       <PageTransition className="max-w-lg md:max-w-[1400px] mx-auto px-4 md:px-8 py-6 pb-24">
-        {/* Page Title Header */}
-        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Header matched with profile logo format - Desktop only */}
+        <div className="hidden md:flex bg-white border border-[#e2e8f0] -mx-4 md:-mx-8 px-6 md:px-10 py-5 -mt-6.5 shadow-sm items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1a6b3c] to-[#2e7d32] flex items-center justify-center overflow-hidden shadow-md">
+              {shop.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-white font-extrabold text-lg">
+                  {shop.name.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-slate-900 leading-tight">
+                {shop.name}
+              </h1>
+              <p className="text-slate-500 text-xs mt-0.5 font-medium flex items-center gap-1.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                </svg>
+                Supplier ledger details & inward supply logs for {supplier.name}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => router.push('/suppliers')}
+            className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+            Back to Suppliers
+          </button>
+        </div>
+
+        {/* Page Title Header - Mobile only */}
+        <div className="mb-6 flex flex-col md:hidden justify-between gap-4">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.back()}
@@ -123,17 +161,17 @@ export default function SupplierDetailClient({
               </svg>
             </button>
             <div>
-              <h1 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight font-heading uppercase">
+              <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
                 Supplier Ledger
               </h1>
-              <p className="text-xs text-gray-500 font-semibold mt-1">
+              <p className="text-[10px] text-gray-500 font-semibold mt-1">
                 Supplier ledger details & inward supply logs for {supplier.name}
               </p>
             </div>
           </div>
           <button
             onClick={() => router.push('/suppliers')}
-            className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer self-start md:self-auto"
+            className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer self-start"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="19" y1="12" x2="5" y2="12" />

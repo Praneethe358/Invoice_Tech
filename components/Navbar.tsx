@@ -92,8 +92,24 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const [shopInfo, setShopInfo] = useState<{ name: string; shop_type: string; gst_registered: boolean; inventory_enabled: boolean; logo_url?: string | null } | null>(null);
-  const [lowStockCount, setLowStockCount] = useState(0);
+  const [shopInfo, setShopInfo] = useState<{ id: string; name: string; shop_type: string; gst_registered: boolean; inventory_enabled: boolean; logo_url?: string | null } | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('trubill_navbar_shop_info');
+        if (stored) return JSON.parse(stored);
+      } catch {}
+    }
+    return null;
+  });
+  const [lowStockCount, setLowStockCount] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('trubill_navbar_low_stock');
+        if (stored) return parseInt(stored, 10) || 0;
+      } catch {}
+    }
+    return 0;
+  });
 
   const purchasesItem = {
     href: '/purchases',
@@ -163,6 +179,9 @@ export default function Navbar() {
 
         if (shop) {
           setShopInfo(shop);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('trubill_navbar_shop_info', JSON.stringify(shop));
+          }
           
           if (shop.inventory_enabled) {
             const { data: products } = await supabase
@@ -174,6 +193,9 @@ export default function Navbar() {
               const typedProducts = products as Array<{ stock_qty: number | null; low_stock_threshold: number | null; track_inventory: boolean }>;
               const low = typedProducts.filter(p => p.track_inventory && (p.stock_qty || 0) <= (p.low_stock_threshold || 5)).length;
               setLowStockCount(low);
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('trubill_navbar_low_stock', low.toString());
+              }
             }
           }
         }
@@ -189,6 +211,10 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('trubill_navbar_shop_info');
+        localStorage.removeItem('trubill_navbar_low_stock');
+      }
       const supabase = createClient();
       await supabase.auth.signOut();
     } catch { /* ignore */ }
