@@ -108,6 +108,17 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
               </p>
             </div>
           </div>
+          
+          <button
+            onClick={() => router.push('/customers/ledger')}
+            className="flex items-center gap-1.5 bg-[#1a6b3c]/10 hover:bg-[#1a6b3c]/20 text-[#1a6b3c] font-bold py-2 px-3.5 rounded-xl text-xs transition-all"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            Ledger Book
+          </button>
         </div>
 
         {/* Search */}

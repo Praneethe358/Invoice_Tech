@@ -251,3 +251,47 @@ export interface CDNItem {
   created_at: string;
 }
 
+// ─── Customer Ledger Module Types ─────────────────────────────
+
+export interface PaymentTransaction {
+  id: string;
+  shop_id: string;
+  customer_id: string;
+  invoice_id: string | null;
+  amount: number;
+  payment_method: string;
+  reference_number: string | null;
+  transaction_date: string;
+  note: string | null;
+  created_at: string;
+}
+
+export interface CustomerLedgerEntry {
+  id: string;
+  shop_id: string;
+  customer_id: string;
+  entry_type: 'debit' | 'credit';
+  entry_date: string;
+  reference_id: string;
+  reference_type: 'invoice' | 'payment';
+  invoice_number: string | null;
+  particulars: string;
+  debit_amount: number;
+  credit_amount: number;
+  running_balance?: number;
+  created_at: string;
+}
+
+export interface CustomerStatementExport {
+  id: string;
+  shop_id: string;
+  customer_id: string;
+  export_type: 'csv' | 'pdf';
+  date_range_start: string | null;
+  date_range_end: string | null;
+  records_count: number;
+  outstanding_amount: number;
+  created_at: string;
+}
+
+
