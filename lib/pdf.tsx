@@ -524,7 +524,7 @@ function InvoicePDF({
 
         {/* Footer Accent */}
         <Text style={styles.footer}>
-          Thank you for shopping! • Powered by Varavu Invoice
+          Thank you for shopping! • Powered by TruBill Invoice
         </Text>
       </Page>
     </Document>

@@ -3,7 +3,7 @@ import { ToastProvider } from '@/components/Toast';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Varavu Invoice — Send Invoices on WhatsApp',
+  title: 'TruBill Invoice — Send Invoices on WhatsApp',
   description:
     'Professional WhatsApp invoice delivery for small shops in Tamil Nadu. Create invoices, generate PDFs, and send them instantly to customers on WhatsApp.',
   keywords: [

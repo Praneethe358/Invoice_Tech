@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════
--- Varavu Invoice — Supabase Schema
+-- TruBill Invoice — Supabase Schema
 -- Run this in your Supabase SQL Editor:
 -- https://supabase.com/dashboard/project/_/sql
 -- ═══════════════════════════════════════════

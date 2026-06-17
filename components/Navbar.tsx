@@ -146,7 +146,7 @@ export default function Navbar() {
             </svg>
           </div>
           <div>
-            <span className="font-heading font-black text-[#1a1d26] text-base leading-none block">Varavu</span>
+            <span className="font-heading font-black text-[#1a1d26] text-base leading-none block">TruBill</span>
             <span className="text-[10px] font-bold text-[#1a6b3c] uppercase tracking-wider mt-0.5 block">Invoice</span>
           </div>
         </div>
@@ -233,7 +233,7 @@ export default function Navbar() {
                 <polyline points="14 2 14 8 20 8" />
               </svg>
             </div>
-            <span className="font-heading font-black text-[#1a1d26] text-sm">Varavu</span>
+            <span className="font-heading font-black text-[#1a1d26] text-sm">TruBill</span>
           </Link>
 
           <button

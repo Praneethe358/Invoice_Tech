@@ -1,7 +1,7 @@
-// Varavu Invoice — Service Worker
+// TruBill Invoice — Service Worker
 // Provides offline caching for PWA installability
 
-const CACHE_NAME = 'varavu-v1';
+const CACHE_NAME = 'trubill-v1';
 const STATIC_ASSETS = [
   '/',
   '/login',

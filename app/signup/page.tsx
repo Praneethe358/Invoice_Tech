@@ -304,7 +304,7 @@ export default function SignupPage() {
         }
       }
 
-      showToast('Welcome to Varavu Invoice!', 'success');
+      showToast('Welcome to TruBill Invoice!', 'success');
       router.push('/dashboard');
       router.refresh();
     } catch (err) {
@@ -351,7 +351,7 @@ export default function SignupPage() {
                 <polyline points="14 2 14 8 20 8" />
               </svg>
             </div>
-            <span className="font-heading font-black text-xl text-white">Varavu</span>
+            <span className="font-heading font-black text-xl text-white">TruBill</span>
           </div>
 
           <h2 className="text-4xl font-black text-white leading-tight mb-4 tracking-tight">
@@ -397,7 +397,7 @@ export default function SignupPage() {
                 <polyline points="14 2 14 8 20 8" />
               </svg>
             </div>
-            <span className="font-heading font-black text-xl text-[#1a1d26] tracking-tight">Varavu</span>
+            <span className="font-heading font-black text-xl text-[#1a1d26] tracking-tight">TruBill</span>
           </div>
 
           <div className="bg-white border border-slate-200/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)] rounded-3xl p-6 sm:p-8">
@@ -817,7 +817,7 @@ export default function SignupPage() {
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0110 0v4" />
             </svg>
-            <span>Secured by Varavu • SSL Encrypted</span>
+            <span>Secured by TruBill • SSL Encrypted</span>
           </div>
         </div>
       </div>

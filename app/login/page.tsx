@@ -76,7 +76,7 @@ export default function LoginPage() {
                 <polyline points="14 2 14 8 20 8" />
               </svg>
             </div>
-            <span className="font-heading font-black text-xl text-white">Varavu</span>
+            <span className="font-heading font-black text-xl text-white">TruBill</span>
           </div>
 
           <h2 className="text-4xl font-black text-white leading-tight mb-4 tracking-tight">
@@ -101,7 +101,7 @@ export default function LoginPage() {
             <div className="flex items-center gap-2 mb-3 border-b border-white/10 pb-3">
               <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] text-white font-bold">V</div>
               <div>
-                <p className="text-[11px] font-bold text-white leading-none">Varavu Store</p>
+                <p className="text-[11px] font-bold text-white leading-none">TruBill Store</p>
                 <p className="text-[8px] text-emerald-400 font-semibold uppercase tracking-wider mt-0.5">invoicing bot</p>
               </div>
             </div>
@@ -115,7 +115,7 @@ export default function LoginPage() {
                 <span>Invoice_Ramesh.pdf</span>
               </div>
               <p className="leading-relaxed">
-                Dear Ramesh, here is your tax invoice of <strong>₹4,042.50</strong> from Varavu Store. Pay instantly: <em>upi.varavu.in/pay</em>
+                Dear Ramesh, here is your tax invoice of <strong>₹4,042.50</strong> from TruBill Store. Pay instantly: <em>upi.trubill.in/pay</em>
               </p>
               <div className="text-right text-[8px] text-slate-400">11:42 AM ✓✓</div>
             </div>
@@ -154,7 +154,7 @@ export default function LoginPage() {
                 <polyline points="14 2 14 8 20 8" />
               </svg>
             </div>
-            <span className="font-heading font-black text-xl text-[#1a1d26] tracking-tight">Varavu</span>
+            <span className="font-heading font-black text-xl text-[#1a1d26] tracking-tight">TruBill</span>
           </div>
 
           <div className="bg-white border border-slate-200/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)] rounded-3xl p-8 sm:p-10">
@@ -162,7 +162,7 @@ export default function LoginPage() {
               Welcome back
             </h1>
             <p className="text-sm text-[#6b7280] mb-8">
-              Sign in to your Varavu account
+              Sign in to your TruBill account
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -222,7 +222,7 @@ export default function LoginPage() {
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0110 0v4" />
             </svg>
-            <span>Secured by Varavu • SSL Encrypted</span>
+            <span>Secured by TruBill • SSL Encrypted</span>
           </div>
         </motion.div>
       </div>
