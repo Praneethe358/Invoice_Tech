@@ -234,24 +234,17 @@ export default function Navbar() {
 
       {/* ─── DESKTOP LEFT SIDEBAR (>= 768px) ─── */}
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-[#e8eaed] fixed left-0 top-0 bottom-0 z-40 p-6 shadow-sm">
-        {/* Brand / Active Shop Header */}
-        <div className="flex items-center gap-3 mb-8 border-b border-[#f3f4f6] pb-5">
-          <div className="w-10 h-10 rounded-xl bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e8eaed] shrink-0 shadow-sm">
-            {shopInfo?.logo_url ? (
-              <img src={shopInfo.logo_url} alt="Shop Logo" className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-sm font-bold text-[#1a6b3c]">
-                {(shopInfo?.name || 'TB').slice(0, 2).toUpperCase()}
-              </span>
-            )}
+        {/* Brand Logo */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 rounded-xl bg-[#1a6b3c] flex items-center justify-center shadow-md shadow-[#1a6b3c]/20">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
           </div>
-          <div className="truncate flex-1">
-            <span className="font-heading font-extrabold text-[#1a1d26] text-sm tracking-tight block truncate uppercase">
-              {shopInfo?.name || 'TruBill'}
-            </span>
-            <span className="text-[10px] font-bold text-[#1a6b3c] uppercase tracking-wider mt-0.5 block truncate">
-              {shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Invoice Admin'}
-            </span>
+          <div>
+            <span className="font-heading font-black text-[#1a1d26] text-base leading-none block">TruBill</span>
+            <span className="text-[10px] font-bold text-[#1a6b3c] uppercase tracking-wider mt-0.5 block">Invoice</span>
           </div>
         </div>
 
