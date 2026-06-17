@@ -36,6 +36,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
   const [phone, setPhone] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [customerName, setCustomerName] = useState('');
+  const [customerGstin, setCustomerGstin] = useState('');
   const [paymentStatus, setPaymentStatus] = useState<'paid' | 'unpaid' | 'partial'>('paid');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'upi' | 'bank_transfer' | 'other'>('cash');
   const [paymentNote, setPaymentNote] = useState('');
@@ -206,6 +207,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
   const selectCustomer = (c: Customer) => {
     setPhone(c.phone.slice(-10));
     setCustomerName(c.name);
+    setCustomerGstin(c.gstin || '');
     setSelectedCustomer(c);
     setShowSuggestions(false);
     setPhoneError('');
@@ -324,6 +326,11 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
   const handleSend = async () => {
     if (!canSend) return;
 
+    if (customerGstin.trim() && customerGstin.trim().length !== 15) {
+      showToast('Customer GSTIN must be exactly 15 characters', 'error');
+      return;
+    }
+
     if (paymentStatus === 'partial') {
       const amt = Number(partialAmount);
       if (isNaN(amt) || amt <= 0 || amt >= total) {
@@ -349,6 +356,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
           })),
           customer_phone: phone.trim(),
           customer_name: customerName.trim().toUpperCase() || undefined,
+          customer_gstin: customerGstin.trim().toUpperCase() || undefined,
           payment_status: paymentStatus,
           payment_method: (paymentStatus === 'paid' || paymentStatus === 'partial') ? paymentMethod : undefined,
           payment_note: (paymentStatus === 'paid' || paymentStatus === 'partial') ? (paymentNote.trim() || undefined) : undefined,
@@ -715,6 +723,15 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
           />
+
+          {shop.gst_registered && (
+            <Input
+              label="Customer GSTIN (Optional)"
+              placeholder="e.g. 33AAAAA0000A1Z2"
+              value={customerGstin}
+              onChange={(e) => setCustomerGstin(e.target.value.toUpperCase())}
+            />
+          )}
 
           <div className="relative" ref={dropdownRef}>
             <Input

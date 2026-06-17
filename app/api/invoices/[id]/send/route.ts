@@ -259,6 +259,7 @@ export async function POST(
           .update({
             total_invoices: totalInvoices,
             total_spent: totalSpent,
+            gstin: typedInvoice.customer_gstin || null,
           })
           .eq('id', existing.id);
       } else {
@@ -271,6 +272,7 @@ export async function POST(
             tag: 'regular',
             total_invoices: totalInvoices,
             total_spent: totalSpent,
+            gstin: typedInvoice.customer_gstin || null,
           });
       }
 

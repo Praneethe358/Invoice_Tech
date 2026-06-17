@@ -1,0 +1,70 @@
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import SupplierDetailClient from './SupplierDetailClient';
+
+interface Props {
+  params: Promise<{ id: string }>;
+}
+
+export default async function SupplierDetailPage({ params }: Props) {
+  const { id } = await params;
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  const { data: shop } = await supabase
+    .from('shops')
+    .select('*')
+    .eq('auth_user_id', user.id)
+    .single();
+
+  if (!shop) {
+    redirect('/settings');
+  }
+
+  // Fetch supplier
+  const { data: supplier } = await supabase
+    .from('suppliers')
+    .select('*')
+    .eq('id', id)
+    .eq('shop_id', shop.id)
+    .single();
+
+  if (!supplier) {
+    redirect('/suppliers');
+  }
+
+  // Fetch purchase history
+  const { data: purchases } = await supabase
+    .from('purchases')
+    .select('*')
+    .eq('supplier_id', id)
+    .order('purchase_date', { ascending: false });
+
+  // Calculate aggregates
+  let totalPurchased = 0;
+  let totalItcEligible = 0;
+
+  (purchases || []).forEach((p) => {
+    totalPurchased += parseFloat(p.total as any) || 0;
+    if (p.itc_eligible) {
+      totalItcEligible += parseFloat((p.total_cgst + p.total_sgst) as any) || 0;
+    }
+  });
+
+  return (
+    <SupplierDetailClient
+      shop={shop}
+      initialSupplier={supplier}
+      purchases={purchases || []}
+      totalPurchased={totalPurchased}
+      totalItcEligible={totalItcEligible}
+    />
+  );
+}

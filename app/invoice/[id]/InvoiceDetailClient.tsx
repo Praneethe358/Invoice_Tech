@@ -42,6 +42,18 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
   const [savingPayment, setSavingPayment] = useState(false);
 
+  // Credit & Debit Note states
+  const [notes, setNotes] = useState<any[]>([]);
+  const [loadingNotes, setLoadingNotes] = useState(true);
+  const [showNoteForm, setShowNoteForm] = useState(false);
+  const [noteType, setNoteType] = useState<'credit' | 'debit'>('credit');
+  const [noteDate, setNoteDate] = useState(new Date().toISOString().split('T')[0]);
+  const [noteReason, setNoteReason] = useState<'sales_return' | 'price_correction' | 'damaged_goods' | 'other' | 'additional_charges'>('sales_return');
+  const [noteRemarks, setNoteRemarks] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
+  const [noteItems, setNoteItems] = useState<any[]>([]);
+
+
   // Watch cooldown
   useEffect(() => {
     const expiryStr = localStorage.getItem(`trubill_cooldown_${inv.id}`);
@@ -72,6 +84,82 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
     }
     fetchPayments();
   }, [inv.id, inv.uses_payments_table, inv.amount_paid]);
+
+  useEffect(() => {
+    if (inv && inv.items) {
+      setNoteItems(
+        inv.items.map(item => ({
+          name: item.name,
+          hsn_code: item.hsn_code || '',
+          qty: item.quantity,
+          price: item.price,
+          gst_rate: item.gst_rate || 0,
+        }))
+      );
+    }
+  }, [inv]);
+
+  useEffect(() => {
+    async function fetchNotes() {
+      if (!shop.gst_registered) {
+        setLoadingNotes(false);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/credit-debit-notes`);
+        if (res.ok) {
+          const json = await res.json();
+          const filtered = json.filter((n: any) => n.invoice_id === inv.id);
+          setNotes(filtered);
+        }
+      } catch (err) {
+        console.error('Failed to load notes:', err);
+      } finally {
+        setLoadingNotes(false);
+      }
+    }
+    fetchNotes();
+  }, [inv.id, shop.gst_registered]);
+
+  const handleIssueNote = async () => {
+    const activeItems = noteItems.filter(item => item.qty > 0);
+    if (activeItems.length === 0) {
+      showToast('Please adjust at least one item to have quantity greater than 0', 'error');
+      return;
+    }
+
+    setSavingNote(true);
+    try {
+      const res = await fetch(`/api/invoices/${inv.id}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          note_type: noteType,
+          note_date: noteDate,
+          reason: noteReason,
+          reason_note: noteRemarks,
+          items: activeItems,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to issue note');
+      }
+
+      const newNote = await res.json();
+      showToast(`${noteType === 'credit' ? 'Credit' : 'Debit'} note issued successfully!`, 'success');
+      setNotes(prev => [newNote, ...prev]);
+      setShowNoteForm(false);
+      setNoteRemarks('');
+      router.refresh();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    } finally {
+      setSavingNote(false);
+    }
+  };
+
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -326,6 +414,11 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
               <p className="text-base font-bold text-[#111827] mb-1 uppercase">{inv.customer_name}</p>
             )}
             <p className="text-sm text-[#4b5563]">+91 {inv.customer_phone}</p>
+            {inv.customer_gstin && (
+              <p className="text-xs font-semibold text-[#4b5563] mt-1">
+                GSTIN: <span className="font-mono">{inv.customer_gstin}</span>
+              </p>
+            )}
           </div>
 
           <div className="mb-8">
@@ -593,6 +686,177 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
                 </div>
               )}
             </div>
+
+            {/* Credit & Debit Notes Section */}
+            {shop.gst_registered && (
+              <div className="pt-4 border-t border-[#f3f4f6] mt-4">
+                <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-3">
+                  Credit & Debit Notes
+                </h2>
+
+                {loadingNotes ? (
+                  <p className="text-xs text-[#9ca3af] italic">Loading notes...</p>
+                ) : notes.length === 0 ? (
+                  <p className="text-xs text-[#9ca3af] italic mb-4">No credit or debit notes issued for this invoice.</p>
+                ) : (
+                  <div className="space-y-2 mb-4">
+                    {notes.map((n) => (
+                      <div key={n.id} className="flex items-center justify-between bg-white border border-[#e5e7eb] rounded-xl p-3 text-xs">
+                        <div className="space-y-0.5">
+                          <p className="font-extrabold text-[#111827]">
+                            {n.note_number} · <span className="capitalize font-bold text-[#1a6b3c]">{n.note_type} Note</span>
+                          </p>
+                          <p className="font-extrabold text-[#111827]">
+                            Amount: ₹{Number(n.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          </p>
+                          <p className="text-[#9ca3af] font-medium">
+                            Date: {new Date(n.note_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            {n.reason && ` · Reason: ${n.reason.replace('_', ' ')}`}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {!showNoteForm ? (
+                  <button
+                    onClick={() => setShowNoteForm(true)}
+                    className="w-full bg-[#1a6b3c]/10 hover:bg-[#1a6b3c]/15 text-[#1a6b3c] text-xs font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    Issue Credit/Debit Note
+                  </button>
+                ) : (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    className="overflow-hidden border border-[#e5e7eb] rounded-2xl p-4 bg-white space-y-4"
+                  >
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-xs font-bold text-[#111827] uppercase tracking-wide">Issue Credit/Debit Note</h4>
+                      <button
+                        onClick={() => setShowNoteForm(false)}
+                        className="text-xs text-[#9ca3af] hover:text-[#111827] font-semibold"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wide mb-1">
+                          Note Type
+                        </label>
+                        <select
+                          value={noteType}
+                          onChange={(e) => setNoteType(e.target.value as 'credit' | 'debit')}
+                          className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2 text-xs font-medium text-[#111827] focus:outline-none"
+                        >
+                          <option value="credit">Credit Note (Sales Return / Refund)</option>
+                          <option value="debit">Debit Note (Additional Charges)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wide mb-1">
+                          Date
+                        </label>
+                        <input
+                          type="date"
+                          value={noteDate}
+                          onChange={(e) => setNoteDate(e.target.value)}
+                          className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2 text-xs font-medium text-[#111827] focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wide mb-1">
+                          Reason
+                        </label>
+                        <select
+                          value={noteReason}
+                          onChange={(e) => setNoteReason(e.target.value as any)}
+                          className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2 text-xs font-medium text-[#111827] focus:outline-none"
+                        >
+                          <option value="sales_return">Sales Return</option>
+                          <option value="price_correction">Price Correction</option>
+                          <option value="damaged_goods">Damaged Goods</option>
+                          <option value="additional_charges">Additional Charges</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wide mb-1">
+                          Remarks / Note
+                        </label>
+                        <input
+                          type="text"
+                          value={noteRemarks}
+                          onChange={(e) => setNoteRemarks(e.target.value)}
+                          placeholder="e.g. Return of 2 bags Urea"
+                          className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2 text-xs font-medium text-[#111827] focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wide mb-2">
+                          Items to Adjust (Qty / Price)
+                        </label>
+                        <div className="space-y-3">
+                          {noteItems.map((item, idx) => (
+                            <div key={idx} className="border border-[#f3f4f6] rounded-xl p-2.5 space-y-2 bg-[#f9fafb]">
+                              <p className="text-xs font-bold text-[#111827] uppercase">{item.name}</p>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                  <label className="block text-[9px] font-bold text-[#6b7280] uppercase">Qty</label>
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    max={inv.items[idx]?.quantity || 1000}
+                                    value={item.qty}
+                                    onChange={(e) => {
+                                      const val = Math.max(0, parseInt(e.target.value) || 0);
+                                      setNoteItems(prev => prev.map((itm, i) => i === idx ? { ...itm, qty: val } : itm));
+                                    }}
+                                    className="w-full bg-white border border-[#e5e7eb] rounded-lg px-2 py-1 text-xs font-medium"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[9px] font-bold text-[#6b7280] uppercase">Price (₹)</label>
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    value={item.price}
+                                    onChange={(e) => {
+                                      const val = Math.max(0, parseFloat(e.target.value) || 0);
+                                      setNoteItems(prev => prev.map((itm, i) => i === idx ? { ...itm, price: val } : itm));
+                                    }}
+                                    className="w-full bg-white border border-[#e5e7eb] rounded-lg px-2 py-1 text-xs font-medium"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <Button
+                        onClick={handleIssueNote}
+                        loading={savingNote}
+                        className="w-full mt-2"
+                      >
+                        Issue Credit/Debit Note
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

@@ -119,6 +119,7 @@ export async function POST(request: NextRequest) {
         invoice_number: invoiceNumber,
         customer_phone: body.customer_phone.trim(),
         customer_name: body.customer_name?.trim().toUpperCase() || null,
+        customer_gstin: body.customer_gstin?.trim().toUpperCase() || null,
         payment_status,
         amount_paid,
         paid_at,

@@ -243,3 +243,170 @@ create policy "own inventory logs" on inventory_logs for all
     )
   );
 
+-- ═══════════════════════════════════════════
+-- Phase 8 Database Changes
+-- ═══════════════════════════════════════════
+
+-- Suppliers table
+create table if not exists suppliers (
+  id uuid primary key default gen_random_uuid(),
+  shop_id uuid not null references shops(id) on delete cascade,
+  name text not null,
+  gstin text,
+  -- null if unregistered supplier
+  phone text,
+  address text,
+  created_at timestamptz not null default now()
+);
+
+alter table suppliers enable row level security;
+
+create policy "own suppliers" on suppliers for all
+  using (
+    shop_id in (
+      select id from shops where auth_user_id = auth.uid()
+    )
+  );
+
+-- Purchase invoices (buying goods from suppliers)
+create table if not exists purchases (
+  id uuid primary key default gen_random_uuid(),
+  shop_id uuid not null references shops(id) on delete cascade,
+  supplier_id uuid references suppliers(id) on delete set null,
+  supplier_name text not null,
+  -- denormalized for display if supplier deleted
+  supplier_gstin text,
+  purchase_invoice_number text not null,
+  -- supplier's invoice number (not our invoice number)
+  purchase_date date not null,
+  subtotal numeric(10,2) not null default 0,
+  total_cgst numeric(10,2) not null default 0,
+  total_sgst numeric(10,2) not null default 0,
+  total_igst numeric(10,2) not null default 0,
+  -- IGST for inter-state purchases (rare but possible)
+  total_gst numeric(10,2) not null default 0,
+  total numeric(10,2) not null,
+  itc_eligible boolean not null default true,
+  -- false if supplier is unregistered (no ITC)
+  notes text,
+  created_at timestamptz not null default now()
+);
+
+alter table purchases enable row level security;
+
+create policy "own purchases" on purchases for all
+  using (
+    shop_id in (
+      select id from shops where auth_user_id = auth.uid()
+    )
+  );
+
+-- Purchase line items
+create table if not exists purchase_items (
+  id uuid primary key default gen_random_uuid(),
+  purchase_id uuid not null references purchases(id) on delete cascade,
+  name text not null,
+  hsn_code text,
+  qty numeric(10,3) not null,
+  -- numeric not integer (e.g. 2.5 kg)
+  unit text not null default 'pcs',
+  -- 'pcs' | 'kg' | 'bags' | 'litres' | 'metres' | 'units'
+  price numeric(10,2) not null,
+  gst_rate numeric(5,2) not null default 0,
+  cgst numeric(10,2) not null default 0,
+  sgst numeric(10,2) not null default 0,
+  igst numeric(10,2) not null default 0,
+  line_total numeric(10,2) not null,
+  created_at timestamptz not null default now()
+);
+
+alter table purchase_items enable row level security;
+
+create policy "own purchase items" on purchase_items for all
+  using (
+    purchase_id in (
+      select id from purchases where shop_id in (
+        select id from shops where auth_user_id = auth.uid()
+      )
+    )
+  );
+
+-- Credit/Debit notes
+create table if not exists credit_debit_notes (
+  id uuid primary key default gen_random_uuid(),
+  shop_id uuid not null references shops(id) on delete cascade,
+  invoice_id uuid references invoices(id) on delete set null,
+  -- original invoice this note is against
+  note_type text not null,
+  -- 'credit' | 'debit'
+  note_number text not null,
+  -- e.g. CN-001, DN-001
+  note_date date not null,
+  customer_phone text not null,
+  customer_gstin text,
+  -- if B2B transaction
+  reason text not null,
+  -- 'sales_return' | 'price_correction' | 'damaged_goods' | 'other'
+  reason_note text,
+  subtotal numeric(10,2) not null default 0,
+  total_cgst numeric(10,2) not null default 0,
+  total_sgst numeric(10,2) not null default 0,
+  total_gst numeric(10,2) not null default 0,
+  total numeric(10,2) not null,
+  status text not null default 'created',
+  -- 'created' | 'sent'
+  created_at timestamptz not null default now()
+);
+
+alter table credit_debit_notes enable row level security;
+
+create policy "own credit debit notes" on credit_debit_notes for all
+  using (
+    shop_id in (
+      select id from shops where auth_user_id = auth.uid()
+    )
+  );
+
+-- Credit/Debit note line items
+create table if not exists cdn_items (
+  id uuid primary key default gen_random_uuid(),
+  cdn_id uuid not null references credit_debit_notes(id) 
+    on delete cascade,
+  name text not null,
+  hsn_code text,
+  qty integer not null default 1,
+  price numeric(10,2) not null,
+  gst_rate numeric(5,2) not null default 0,
+  cgst numeric(10,2) not null default 0,
+  sgst numeric(10,2) not null default 0,
+  line_total numeric(10,2) not null,
+  created_at timestamptz not null default now()
+);
+
+alter table cdn_items enable row level security;
+
+create policy "own cdn items" on cdn_items for all
+  using (
+    cdn_id in (
+      select id from credit_debit_notes where shop_id in (
+        select id from shops where auth_user_id = auth.uid()
+      )
+    )
+  );
+
+-- Add customer_gstin to invoices for B2B classification
+alter table invoices
+  add column if not exists customer_gstin text;
+
+-- Add gstin to customers
+alter table customers
+  add column if not exists gstin text;
+
+-- Add next CDN numbers to shops
+alter table shops
+  add column if not exists next_credit_note_number integer not null default 1,
+  add column if not exists next_debit_note_number integer not null default 1,
+  add column if not exists credit_note_prefix text not null default 'CN',
+  add column if not exists debit_note_prefix text not null default 'DN';
+
+

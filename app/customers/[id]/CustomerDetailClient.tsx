@@ -30,6 +30,12 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
   const [confirmDelete, setConfirmDelete] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
+  // GSTIN states
+  const [editingGstin, setEditingGstin] = useState(false);
+  const [gstinValue, setGstinValue] = useState(initial.gstin || '');
+  const [savingGstin, setSavingGstin] = useState(false);
+
+
   // Bulk sending state
   const [bulkSending, setBulkSending] = useState(false);
   const [bulkProgress, setBulkProgress] = useState('');
@@ -89,6 +95,37 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
     setSavingName(false);
     setEditingName(false);
   };
+
+  const handleSaveGstin = async () => {
+    const trimmed = gstinValue.trim().toUpperCase();
+    if (trimmed === (customer.gstin || '')) {
+      setEditingGstin(false);
+      return;
+    }
+
+    if (trimmed && trimmed.length !== 15) {
+      showToast('GSTIN must be exactly 15 characters', 'error');
+      return;
+    }
+
+    setSavingGstin(true);
+    const { error } = await supabase
+      .from('customers')
+      .update({ gstin: trimmed || null })
+      .eq('id', customer.id);
+
+    if (error) {
+      showToast('Failed to update GSTIN', 'error');
+      setGstinValue(customer.gstin || '');
+    } else {
+      setCustomer(prev => ({ ...prev, gstin: trimmed || null }));
+      setGstinValue(trimmed);
+      showToast('GSTIN updated', 'success');
+    }
+    setSavingGstin(false);
+    setEditingGstin(false);
+  };
+
 
   const handleToggleTag = async () => {
     const newTag: CustomerTag = customer.tag === 'vip' ? 'regular' : 'vip';
@@ -230,6 +267,27 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
                 </h1>
               )}
               <p className="text-sm text-[#6b7280] mt-1">+91 {customer.phone.slice(-10)}</p>
+              {editingGstin ? (
+                <input
+                  type="text"
+                  value={gstinValue}
+                  onChange={(e) => setGstinValue(e.target.value.toUpperCase())}
+                  onBlur={handleSaveGstin}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveGstin()}
+                  disabled={savingGstin}
+                  placeholder="ENTER GSTIN (15 CHARS)"
+                  autoFocus
+                  className="text-xs font-semibold text-[#111827] bg-transparent border-b-2 border-[#1a6b3c] outline-none pb-0.5 mt-1.5 w-full max-w-[200px]"
+                />
+              ) : (
+                <p
+                  onClick={() => setEditingGstin(true)}
+                  className="text-xs font-semibold text-[#6b7280] mt-1.5 cursor-pointer hover:text-[#1a6b3c]"
+                >
+                  GSTIN: <span className="font-mono text-xs text-[#111827] underline decoration-dotted">{customer.gstin || 'None (Click to add)'}</span>
+                </p>
+              )}
+
             </div>
           </div>
 
