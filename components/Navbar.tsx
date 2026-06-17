@@ -92,24 +92,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const [shopInfo, setShopInfo] = useState<{ id: string; name: string; shop_type: string; gst_registered: boolean; inventory_enabled: boolean; logo_url?: string | null } | null>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem('trubill_navbar_shop_info');
-        if (stored) return JSON.parse(stored);
-      } catch {}
-    }
-    return null;
-  });
-  const [lowStockCount, setLowStockCount] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem('trubill_navbar_low_stock');
-        if (stored) return parseInt(stored, 10) || 0;
-      } catch {}
-    }
-    return 0;
-  });
+  const [shopInfo, setShopInfo] = useState<{ id: string; name: string; shop_type: string; gst_registered: boolean; inventory_enabled: boolean; logo_url?: string | null } | null>(null);
+  const [lowStockCount, setLowStockCount] = useState<number>(0);
 
   const purchasesItem = {
     href: '/purchases',
@@ -165,6 +149,20 @@ export default function Navbar() {
 
 
   useEffect(() => {
+    // Hydrate state from localStorage immediately on mount (client-side only)
+    if (typeof window !== 'undefined') {
+      try {
+        const storedShop = localStorage.getItem('trubill_navbar_shop_info');
+        if (storedShop) {
+          setShopInfo(JSON.parse(storedShop));
+        }
+        const storedLowStock = localStorage.getItem('trubill_navbar_low_stock');
+        if (storedLowStock) {
+          setLowStockCount(parseInt(storedLowStock, 10) || 0);
+        }
+      } catch {}
+    }
+
     const fetchNavbarData = async () => {
       try {
         const supabase = createClient();
