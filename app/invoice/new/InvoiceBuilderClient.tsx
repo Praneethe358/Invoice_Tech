@@ -50,6 +50,8 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
   const [successInvoice, setSuccessInvoice] = useState('');
   const router = useRouter();
   const { showToast } = useToast();
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [tempPrice, setTempPrice] = useState('');
 
   const [localProducts, setLocalProducts] = useState<Product[]>(products);
 
@@ -401,7 +403,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
   return (
     <div className="min-h-screen bg-[#f9fafb]">
       <Navbar />
-      <PageTransition className="max-w-lg md:max-w-5xl mx-auto px-4 md:px-8 py-6 pb-36">
+      <PageTransition className="max-w-lg lg:max-w-[1400px] mx-auto px-4 lg:px-8 py-6 pb-36">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <button
@@ -416,105 +418,53 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
           </h1>
         </div>
 
-        {/* Search Bar */}
-        {localProducts.length > 0 && (
-          <div className="mb-6">
-            <Input
-              placeholder="🔍 Search items by name, category, or HSN..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        )}
-
-        {/* Favourites Section */}
-        {favoriteProducts.length > 0 && (
-          <section className="mb-6">
-            <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-3 flex items-center gap-1">
-              ⭐ Favourites
-            </h2>
-            <div className="grid grid-cols-2 gap-3">
-              {favoriteProducts.map((product) => (
-                <CatalogCard
-                  key={`fav-${product.id}`}
-                  product={product}
-                  quantity={getItemQty(product.name)}
-                  gstRegistered={shop.gst_registered}
-                  onTap={() => {
-                    if (shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= 0) {
-                      showToast(`⚠️ Warning: "${product.name}" is out of stock. You can still dispatch, but stock will go negative.`, 'warning');
-                    }
-                    addOrIncrement(
-                      product.name,
-                      Number(product.price),
-                      product.hsn_code,
-                      product.gst_rate
-                    );
-                  }}
-                  onFavoriteToggle={(e) => handleToggleFavorite(product, e)}
-                  onPriceUpdate={(newPrice) => handlePriceUpdate(product, newPrice)}
-                  inventoryEnabled={shop.inventory_enabled}
-                  stockUnitShort={config.stockUnitShort || undefined}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Recently Used Section */}
-        {recentlyUsedProducts.length > 0 && (
-          <section className="mb-6">
-            <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-3 flex items-center gap-1">
-              🕐 Recently Used
-            </h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
-              {recentlyUsedProducts.map((product) => (
-                <div key={`recent-${product.id}`} className="min-w-[150px] max-w-[180px] shrink-0">
-                  <CatalogCard
-                    product={product}
-                    quantity={getItemQty(product.name)}
-                    gstRegistered={shop.gst_registered}
-                    onTap={() => {
-                      if (shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= 0) {
-                        showToast(`⚠️ Warning: "${product.name}" is out of stock. You can still dispatch, but stock will go negative.`, 'warning');
-                      }
-                      addOrIncrement(
-                        product.name,
-                        Number(product.price),
-                        product.hsn_code,
-                        product.gst_rate
-                      );
-                    }}
-                    onFavoriteToggle={(e) => handleToggleFavorite(product, e)}
-                    onPriceUpdate={(newPrice) => handlePriceUpdate(product, newPrice)}
-                    inventoryEnabled={shop.inventory_enabled}
-                    stockUnitShort={config.stockUnitShort || undefined}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* LEFT COLUMN: Catalog / Item Selector */}
+          <div className="lg:col-span-6 xl:col-span-7 space-y-6">
+            {/* Products Header & Search */}
+            <div className="space-y-4">
+              <h2 className="text-xs font-black text-slate-500 uppercase tracking-wider">
+                Products
+              </h2>
+              {localProducts.length > 0 && (
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8" />
+                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Search products by name or HSN..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-8 py-2.5 bg-white border border-[#e5e7eb] rounded-xl text-sm font-semibold focus:outline-none focus:border-[#1a6b3c] focus:ring-0 transition-all placeholder-slate-400 min-h-[44px]"
                   />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
-              ))}
+              )}
             </div>
-          </section>
-        )}
 
-        {/* Categories Tab Strip / Tip Banner */}
-        {localProducts.length > 0 && (
-          <div className="mb-4">
-            {categoriesExist ? (
-              <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-none">
+            {/* Category Tabs */}
+            {localProducts.length > 0 && categoriesExist && (
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
                 <button
                   onClick={() => setSelectedCategoryTab('All')}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+                  className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors border ${
                     selectedCategoryTab === 'All'
-                      ? 'bg-[#1a6b3c] text-white'
-                      : 'bg-[#f3f4f6] text-[#4b5563] hover:bg-[#e5e7eb]'
+                      ? 'bg-[#1a6b3c]/8 text-[#1a6b3c] border-[#1a6b3c]'
+                      : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
                   }`}
                 >
-                  All
-                  <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
-                    selectedCategoryTab === 'All' ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'
-                  }`}>
-                    {localProducts.length}
-                  </span>
+                  All ({localProducts.length})
                 </button>
                 {activeCategories.map(cat => {
                   const count = localProducts.filter(p => p.category === cat || (cat === 'Others' && !p.category)).length;
@@ -522,399 +472,570 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
                     <button
                       key={cat}
                       onClick={() => setSelectedCategoryTab(cat)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+                      className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors border ${
                         selectedCategoryTab === cat
-                          ? 'bg-[#1a6b3c] text-white'
-                          : 'bg-[#f3f4f6] text-[#4b5563] hover:bg-[#e5e7eb]'
+                          ? 'bg-[#1a6b3c]/8 text-[#1a6b3c] border-[#1a6b3c]'
+                          : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
                       }`}
                     >
-                      {cat}
-                      <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
-                        selectedCategoryTab === cat ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'
-                  }`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        ) : null}
-      </div>
-    )}
-
-    {/* Main Catalog Cards */}
-    {searchedProducts.length > 0 && (
-      <section className="mb-6">
-        <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-3">
-          Tap to add
-        </h2>
-        <div className="grid grid-cols-2 gap-3">
-          {searchedProducts.map((product) => (
-            <CatalogCard
-              key={product.id}
-              product={product}
-              quantity={getItemQty(product.name)}
-              gstRegistered={shop.gst_registered}
-              onTap={() => {
-                if (shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= 0) {
-                  showToast(`⚠️ Warning: "${product.name}" is out of stock. You can still dispatch, but stock will go negative.`, 'warning');
-                }
-                addOrIncrement(
-                  product.name,
-                  Number(product.price),
-                  product.hsn_code,
-                  product.gst_rate
-                );
-              }}
-              onFavoriteToggle={(e) => handleToggleFavorite(product, e)}
-              onPriceUpdate={(newPrice) => handlePriceUpdate(product, newPrice)}
-              inventoryEnabled={shop.inventory_enabled}
-              stockUnitShort={config.stockUnitShort || undefined}
-            />
-          ))}
-        </div>
-      </section>
-    )}
-
-        {/* Custom Item */}
-        <section className="mb-6">
-          <AnimatePresence>
-            {showCustom ? (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden"
-              >
-                <div className="bg-white rounded-2xl border border-[#e5e7eb] p-4 space-y-3">
-                  <div className="flex gap-3">
-                    <div className="flex-1">
-                      <Input
-                        placeholder="Item name"
-                        value={customName}
-                        onChange={(e) =>
-                          setCustomName(e.target.value)
-                        }
-                      />
-                    </div>
-                    <div className="w-28">
-                      <Input
-                        placeholder="Price"
-                        type="number"
-                        prefix="₹"
-                        value={customPrice}
-                        onChange={(e) =>
-                          setCustomPrice(e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-                  {shop.gst_registered && (
-                    <div className="flex gap-3">
-                      <div className="flex-1">
-                        <Input
-                          placeholder="HSN Code (optional)"
-                          value={customHsn}
-                          onChange={(e) => setCustomHsn(e.target.value)}
-                        />
-                      </div>
-                      <div className="w-28">
-                        <select
-                          value={customGst}
-                          onChange={(e) => setCustomGst(e.target.value)}
-                          className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none min-h-[44px]"
-                        >
-                          <option value="0">0% GST</option>
-                          <option value="5">5% GST</option>
-                          <option value="12">12% GST</option>
-                          <option value="18">18% GST</option>
-                          <option value="28">28% GST</option>
-                        </select>
-                      </div>
-                    </div>
-                  )}
-                  <div className="flex gap-2">
-                    <Button
-                      variant="primary"
-                      onClick={handleAddCustom}
-                      className="flex-1"
-                    >
-                      Add
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => setShowCustom(false)}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            ) : (
-              <Button
-                variant="secondary"
-                fullWidth
-                onClick={() => setShowCustom(true)}
-              >
-                + Add custom item
-              </Button>
-            )}
-          </AnimatePresence>
-        </section>
-
-        {/* Line Items */}
-        {items.length > 0 && (
-          <section className="mb-6">
-            <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-3">
-              Invoice Items
-            </h2>
-            <div className="bg-white rounded-2xl border border-[#e5e7eb] px-4">
-              <AnimatePresence>
-                {items.map((item) => (
-                  <LineItem
-                    key={item.name}
-                    item={item}
-                    onQtyChange={(qty) =>
-                      updateQty(item.name, qty)
-                    }
-                    gstRegistered={shop.gst_registered}
-                  />
-                ))}
-              </AnimatePresence>
-            </div>
-          </section>
-        )}
-
-        {/* Tax Breakdown Summary (only if gst_registered) */}
-        {shop.gst_registered && items.length > 0 && (
-          <section className="bg-white rounded-2xl border border-[#e5e7eb] p-4 space-y-2 mb-6 text-sm">
-            <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-2">
-              Tax Summary
-            </h2>
-            <div className="flex justify-between text-[#6b7280]">
-              <span>Subtotal (Base Value)</span>
-              <span className="tabular-nums">₹{calculations.subtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-[#6b7280]">
-              <span>CGST (2.5% / 6% / 9% / 14%)</span>
-              <span className="tabular-nums">₹{calculations.cgst.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-[#6b7280]">
-              <span>SGST (2.5% / 6% / 9% / 14%)</span>
-              <span className="tabular-nums">₹{calculations.sgst.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between font-bold text-[#111827] border-t border-[#f3f4f6] pt-2 mt-1">
-              <span>Total (GST Inclusive)</span>
-              <span className="tabular-nums">₹{calculations.total.toFixed(2)}</span>
-            </div>
-          </section>
-        )}
-
-        {/* Customer Details Form */}
-        <section className="bg-white rounded-2xl border border-[#e5e7eb] p-4 space-y-4 mb-6">
-          <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide">
-            Customer details
-          </h2>
-
-          <Input
-            label="Customer Name"
-            placeholder="e.g. PRANEETH"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-          />
-
-          {shop.gst_registered && (
-            <Input
-              label="Customer GSTIN (Optional)"
-              placeholder="e.g. 33AAAAA0000A1Z2"
-              value={customerGstin}
-              onChange={(e) => setCustomerGstin(e.target.value.toUpperCase())}
-            />
-          )}
-
-          <div className="relative" ref={dropdownRef}>
-            <Input
-              label="Customer WhatsApp Number"
-              placeholder="9876543210"
-              prefix="+91"
-              type="tel"
-              inputMode="numeric"
-              maxLength={10}
-              value={phone}
-              onChange={(e) => {
-                const val = e.target.value.replace(/\D/g, '');
-                setPhone(val);
-                setSelectedCustomer(null);
-                if (phoneError) setPhoneError('');
-              }}
-              onFocus={() => {
-                if (suggestions.length > 0) setShowSuggestions(true);
-              }}
-              onBlur={handlePhoneBlur}
-              error={phoneError}
-            />
-
-            {/* Autocomplete Dropdown */}
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white rounded-xl border border-[#e5e7eb] shadow-lg overflow-hidden">
-                {suggestions.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => selectCustomer(c)}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#f9fafb] transition-colors min-h-[44px]"
-                  >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
-                      c.tag === 'vip' ? 'bg-[#fef3c7] text-[#b45309]' : 'bg-[#f3f4f6] text-[#6b7280]'
-                    }`}>
-                      {c.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-[#111827] truncate">{c.name}</p>
-                      <p className="text-xs text-[#6b7280]">+91 {c.phone.slice(-10)}</p>
-                    </div>
-                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase shrink-0 ${
-                      c.tag === 'vip' ? 'bg-[#fef3c7] text-[#b45309]' : 'bg-[#f3f4f6] text-[#6b7280]'
-                    }`}>
-                      {c.tag}
-                    </span>
-                  </button>
-                ))}
+                      {cat} ({count})
+                    </button>
+                  );
+                })}
               </div>
             )}
 
-            {/* Selected customer indicator */}
-            {selectedCustomer && (
-              <p className="text-xs text-[#1a6b3c] font-semibold mt-1.5">
-                Sending to: {selectedCustomer.name} ({selectedCustomer.tag === 'vip' ? 'VIP' : 'Regular'})
-              </p>
-            )}
+            {/* Products Table Listing */}
+            {searchedProducts.length > 0 ? (
+              <div className="overflow-x-auto border border-slate-200 rounded-xl bg-white shadow-2xs">
+                <table className="w-full border-collapse text-left text-xs">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      <th className="py-3 px-4 w-10 text-center"></th>
+                      <th className="py-3 px-4 font-bold">Item Name</th>
+                      <th className="py-3 px-4 font-bold">Category</th>
+                      <th className="py-3 px-4 text-right font-bold">Sale Price</th>
+                      <th className="py-3 px-4 text-right font-bold">Stock Qty</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {searchedProducts.map((product) => {
+                      const qty = getItemQty(product.name);
+                      const isOutOfStock = shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= 0;
+                      const isLowStock = shop.inventory_enabled && product.track_inventory && !isOutOfStock && (product.stock_qty || 0) <= (product.low_stock_threshold || 5);
 
-            {/* New customer hint */}
-            {!selectedCustomer && phone.length === 10 && suggestions.length === 0 && !showSuggestions && (
-              <p className="text-xs text-[#6b7280] font-medium mt-1.5">
-                New customer — will be saved after sending
-              </p>
-            )}
-          </div>
-
-          {/* Payment Status Segmented Control */}
-          <div>
-            <label className="block text-xs font-semibold text-[#4b5563] uppercase tracking-wide mb-2">
-              Payment Status
-            </label>
-            <div className="grid grid-cols-3 gap-2 bg-[#f3f4f6] p-1 rounded-xl">
-              <button
-                type="button"
-                onClick={() => setPaymentStatus('paid')}
-                className={`py-2 text-xs font-bold rounded-lg transition-all ${
-                  paymentStatus === 'paid'
-                    ? 'bg-[#1a6b3c] text-white shadow-sm'
-                    : 'text-[#4b5563] hover:text-[#111827]'
-                }`}
-              >
-                Paid
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaymentStatus('partial')}
-                className={`py-2 text-xs font-bold rounded-lg transition-all ${
-                  paymentStatus === 'partial'
-                    ? 'bg-[#d97706] text-white shadow-sm'
-                    : 'text-[#4b5563] hover:text-[#111827]'
-                }`}
-              >
-                Partial
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaymentStatus('unpaid')}
-                className={`py-2 text-xs font-bold rounded-lg transition-all ${
-                  paymentStatus === 'unpaid'
-                    ? 'bg-red-600 text-white shadow-sm'
-                    : 'text-[#4b5563] hover:text-[#111827]'
-                }`}
-              >
-                Unpaid
-              </button>
-            </div>
-
-            <AnimatePresence>
-              {(paymentStatus === 'paid' || paymentStatus === 'partial') && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                  animate={{ opacity: 1, height: 'auto', marginTop: 12 }}
-                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                  className="overflow-hidden space-y-3"
-                >
-                  {paymentStatus === 'partial' && (
-                    <div>
-                      <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
-                        Amount Paid Upfront
-                      </label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-3 text-sm font-semibold text-gray-400">₹</span>
-                        <Input
-                          type="number"
-                          placeholder="e.g. 500"
-                          value={partialAmount}
-                          onChange={(e) => setPartialAmount(e.target.value)}
-                          className="pl-7"
-                          max={total}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
-                      Payment Method
-                    </label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {(
-                        [
-                          { value: 'cash', label: '💵 Cash' },
-                          { value: 'upi', label: '📱 UPI' },
-                          { value: 'bank_transfer', label: '🏦 Bank' },
-                          { value: 'other', label: '⚙️ Other' },
-                        ] as const
-                      ).map((method) => (
-                        <button
-                          key={method.value}
-                          type="button"
-                          onClick={() => setPaymentMethod(method.value)}
-                          className={`py-2 px-1 text-[11px] font-bold rounded-xl border transition-all text-center ${
-                            paymentMethod === method.value
-                              ? 'bg-[#1a6b3c]/10 text-[#1a6b3c] border-[#1a6b3c]'
-                              : 'bg-[#f9fafb] text-[#4b5563] border-[#e5e7eb] hover:bg-[#f3f4f6]'
+                      return (
+                        <tr
+                          key={product.id}
+                          onClick={() => {
+                            if (shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= 0) {
+                              showToast(`⚠️ Warning: "${product.name}" is out of stock. You can still dispatch, but stock will go negative.`, 'warning');
+                            }
+                            addOrIncrement(
+                              product.name,
+                              Number(product.price),
+                              product.hsn_code,
+                              product.gst_rate
+                            );
+                          }}
+                          className={`group cursor-pointer hover:bg-slate-50/70 transition-colors ${
+                            qty > 0 ? 'bg-[#1a6b3c]/5 hover:bg-[#1a6b3c]/8' : ''
                           }`}
                         >
-                          {method.label}
-                        </button>
-                      ))}
+                          {/* Favorite Star */}
+                          <td className="py-4 px-4 w-10 text-center" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={(e) => handleToggleFavorite(product, e)}
+                              className={`transition-colors hover:scale-110 ${
+                                product.is_favorite ? 'text-amber-500' : 'text-slate-300 hover:text-slate-400'
+                              }`}
+                            >
+                              {product.is_favorite ? (
+                                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                                </svg>
+                              ) : (
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.969 0 1.371 1.24.588 1.81l-3.97 2.883a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.971-2.883a1 1 0 00-1.175 0l-3.97 2.883c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118l-3.97-2.883c-.783-.57-.38-1.81.588-1.81h4.906a1 1 0 00.951-.69l1.519-4.674z" />
+                                </svg>
+                              )}
+                            </button>
+                          </td>
+
+                          {/* Item Name & Badges */}
+                          <td className="py-4 px-4">
+                            <div className="flex flex-col gap-1.5">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-bold text-slate-800 uppercase tracking-wide">
+                                  {product.name}
+                                </span>
+                                {qty > 0 && (
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black bg-[#1a6b3c] text-white">
+                                    {qty} Added
+                                  </span>
+                                )}
+                                {isLowStock && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[8px] font-extrabold bg-amber-50 text-amber-700 border border-amber-100 uppercase tracking-wide">
+                                    Low Stock
+                                  </span>
+                                )}
+                                {isOutOfStock && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[8px] font-extrabold bg-rose-50 text-rose-600 border border-rose-100 uppercase tracking-wide">
+                                    Out of Stock
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                {shop.gst_registered && product.gst_rate !== undefined && product.gst_rate > 0 && (
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#e6f4ea] text-[#1a6b3c] border border-[#d1e7dd]">
+                                    {product.gst_rate}% GST
+                                  </span>
+                                )}
+                                {product.hsn_code && (
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-50 text-slate-500 border border-slate-200">
+                                    HSN: {product.hsn_code}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Category */}
+                          <td className="py-4 px-4 text-slate-500 font-semibold">
+                            {product.category || 'Others'}
+                          </td>
+
+                          {/* Sale Price */}
+                          <td className="py-4 px-4 text-right">
+                            {editingProductId === product.id ? (
+                              <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                                <span className="text-[11px] font-bold text-slate-500">₹</span>
+                                <input
+                                  type="number"
+                                  value={tempPrice}
+                                  onChange={(e) => setTempPrice(e.target.value)}
+                                  className="w-16 bg-white border border-slate-300 rounded px-1.5 py-0.5 text-xs font-semibold focus:outline-none"
+                                  autoFocus
+                                />
+                                <button
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    const priceVal = parseFloat(tempPrice);
+                                    if (!isNaN(priceVal) && priceVal > 0) {
+                                      await handlePriceUpdate(product, priceVal);
+                                    }
+                                    setEditingProductId(null);
+                                  }}
+                                  className="px-2 py-0.5 bg-[#1a6b3c] text-white rounded text-[10px] font-bold hover:bg-[#1a6b3c]/90"
+                                >
+                                  Save
+                                </button>
+                              </div>
+                            ) : (
+                              <div
+                                className="font-extrabold text-slate-900 tabular-nums hover:text-[#1a6b3c] transition-colors"
+                                onDoubleClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingProductId(product.id);
+                                  setTempPrice(String(product.price));
+                                }}
+                                title="Double click to edit price"
+                              >
+                                ₹{Number(product.price).toLocaleString('en-IN')}
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Stock Qty */}
+                          <td className="py-4 px-4 text-right">
+                            {shop.inventory_enabled && product.track_inventory ? (
+                              <div className="inline-flex justify-end">
+                                {isOutOfStock ? (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-100 uppercase tracking-wide">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                    0 Left
+                                  </span>
+                                ) : isLowStock ? (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-100 uppercase tracking-wide">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    {product.stock_qty} Left
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-50 text-slate-600 border border-slate-200 uppercase tracking-wide">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                    {product.stock_qty} Left
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 font-semibold">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-white border border-slate-200 rounded-xl p-6">
+                <span className="text-2xl block mb-2">🔍</span>
+                <p className="text-sm font-semibold text-slate-800 mb-1">No products found</p>
+                <p className="text-xs text-slate-400">Try adjusting your search query or selected category filter.</p>
+              </div>
+            )}
+
+            {/* Custom Item */}
+            <section>
+              <AnimatePresence>
+                {showCustom ? (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="bg-white rounded-2xl border border-[#e5e7eb] p-4 space-y-3">
+                      <div className="flex gap-3">
+                        <div className="flex-1">
+                          <Input
+                            placeholder="Item name"
+                            value={customName}
+                            onChange={(e) =>
+                              setCustomName(e.target.value)
+                            }
+                          />
+                        </div>
+                        <div className="w-28">
+                          <Input
+                            placeholder="Price"
+                            type="number"
+                            prefix="₹"
+                            value={customPrice}
+                            onChange={(e) =>
+                              setCustomPrice(e.target.value)
+                            }
+                          />
+                        </div>
+                      </div>
+                      {shop.gst_registered && (
+                        <div className="flex gap-3">
+                          <div className="flex-1">
+                            <Input
+                              placeholder="HSN Code (optional)"
+                              value={customHsn}
+                              onChange={(e) => setCustomHsn(e.target.value)}
+                            />
+                          </div>
+                          <div className="w-28">
+                            <select
+                              value={customGst}
+                              onChange={(e) => setCustomGst(e.target.value)}
+                              className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none min-h-[44px]"
+                            >
+                              <option value="0">0% GST</option>
+                              <option value="5">5% GST</option>
+                              <option value="12">12% GST</option>
+                              <option value="18">18% GST</option>
+                              <option value="28">28% GST</option>
+                            </select>
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <Button
+                          variant="primary"
+                          onClick={handleAddCustom}
+                          className="flex-1"
+                        >
+                          Add
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => setShowCustom(false)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
-                      Payment Note (Optional)
-                    </label>
-                    <Input
-                      placeholder="e.g. Received via GPay / Advance payment"
-                      value={paymentNote}
-                      onChange={(e) => setPaymentNote(e.target.value)}
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  </motion.div>
+                ) : (
+                  <Button
+                    variant="secondary"
+                    fullWidth
+                    onClick={() => setShowCustom(true)}
+                  >
+                    + Add custom item
+                  </Button>
+                )}
+              </AnimatePresence>
+            </section>
           </div>
-        </section>
+
+          {/* RIGHT COLUMN: Invoice Builder Panel */}
+          <div className="lg:col-span-6 xl:col-span-5 space-y-6">
+            {/* Customer Details Form */}
+            <section className="bg-white rounded-2xl border border-[#e5e7eb] p-4 space-y-4 shadow-2xs">
+              <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide">
+                Customer details
+              </h2>
+
+              <Input
+                label="Customer Name"
+                placeholder="e.g. PRANEETH"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+              />
+
+              {shop.gst_registered && (
+                <Input
+                  label="Customer GSTIN (Optional)"
+                  placeholder="e.g. 33AAAAA0000A1Z2"
+                  value={customerGstin}
+                  onChange={(e) => setCustomerGstin(e.target.value.toUpperCase())}
+                />
+              )}
+
+              <div className="relative" ref={dropdownRef}>
+                <Input
+                  label="Customer WhatsApp Number"
+                  placeholder="9876543210"
+                  prefix="+91"
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={10}
+                  value={phone}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    setPhone(val);
+                    setSelectedCustomer(null);
+                    if (phoneError) setPhoneError('');
+                  }}
+                  onFocus={() => {
+                    if (suggestions.length > 0) setShowSuggestions(true);
+                  }}
+                  onBlur={handlePhoneBlur}
+                  error={phoneError}
+                />
+
+                {/* Autocomplete Dropdown */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white rounded-xl border border-[#e5e7eb] shadow-lg overflow-hidden">
+                    {suggestions.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => selectCustomer(c)}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#f9fafb] transition-colors min-h-[44px]"
+                      >
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
+                          c.tag === 'vip' ? 'bg-[#fef3c7] text-[#b45309]' : 'bg-[#f3f4f6] text-[#6b7280]'
+                        }`}>
+                          {c.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-[#111827] truncate">{c.name}</p>
+                          <p className="text-xs text-[#6b7280]">+91 {c.phone.slice(-10)}</p>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase shrink-0 ${
+                          c.tag === 'vip' ? 'bg-[#fef3c7] text-[#b45309]' : 'bg-[#f3f4f6] text-[#6b7280]'
+                        }`}>
+                          {c.tag}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Selected customer indicator */}
+                {selectedCustomer && (
+                  <p className="text-xs text-[#1a6b3c] font-semibold mt-1.5">
+                    Sending to: {selectedCustomer.name} ({selectedCustomer.tag === 'vip' ? 'VIP' : 'Regular'})
+                  </p>
+                )}
+
+                {/* New customer hint */}
+                {!selectedCustomer && phone.length === 10 && suggestions.length === 0 && !showSuggestions && (
+                  <p className="text-xs text-[#6b7280] font-medium mt-1.5">
+                    New customer — will be saved after sending
+                  </p>
+                )}
+              </div>
+            </section>
+
+            {/* Invoice Items */}
+            <section className="bg-white rounded-2xl border border-[#e5e7eb] p-4 shadow-2xs">
+              <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-3">
+                Invoice Items
+              </h2>
+              {items.length > 0 ? (
+                <div className="bg-white rounded-xl border border-[#e5e7eb] px-4 py-2">
+                  <AnimatePresence>
+                    {items.map((item) => (
+                      <LineItem
+                        key={item.name}
+                        item={item}
+                        onQtyChange={(qty) =>
+                          updateQty(item.name, qty)
+                        }
+                        gstRegistered={shop.gst_registered}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <div className="text-center py-10 text-slate-400 border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                  <p className="text-xs font-semibold text-slate-500">No items added yet</p>
+                  <p className="text-[10px] mt-1 text-slate-400">Select items from the catalog on the left</p>
+                </div>
+              )}
+            </section>
+
+            {/* Tax Breakdown Summary (only if gst_registered) */}
+            {shop.gst_registered && items.length > 0 && (
+              <section className="bg-white rounded-2xl border border-[#e5e7eb] p-4 space-y-2 text-sm shadow-2xs">
+                <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-2">
+                  Tax Summary
+                </h2>
+                <div className="flex justify-between text-[#6b7280]">
+                  <span>Subtotal (Base Value)</span>
+                  <span className="tabular-nums">₹{calculations.subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-[#6b7280]">
+                  <span>CGST</span>
+                  <span className="tabular-nums">₹{calculations.cgst.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-[#6b7280]">
+                  <span>SGST</span>
+                  <span className="tabular-nums">₹{calculations.sgst.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between font-bold text-[#111827] border-t border-[#f3f4f6] pt-2 mt-1">
+                  <span>Total (GST Inclusive)</span>
+                  <span className="tabular-nums">₹{calculations.total.toFixed(2)}</span>
+                </div>
+              </section>
+            )}
+
+            {/* Payment Details Form */}
+            <section className="bg-white rounded-2xl border border-[#e5e7eb] p-4 space-y-4 shadow-2xs">
+              <div>
+                <label className="block text-xs font-semibold text-[#4b5563] uppercase tracking-wide mb-2">
+                  Payment Status
+                </label>
+                <div className="grid grid-cols-3 gap-2 bg-[#f3f4f6] p-1 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentStatus('paid')}
+                    className={`py-2 text-xs font-bold rounded-lg transition-all ${
+                      paymentStatus === 'paid'
+                        ? 'bg-[#1a6b3c] text-white shadow-sm'
+                        : 'text-[#4b5563] hover:text-[#111827]'
+                    }`}
+                  >
+                    Paid
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentStatus('partial')}
+                    className={`py-2 text-xs font-bold rounded-lg transition-all ${
+                      paymentStatus === 'partial'
+                        ? 'bg-[#d97706] text-white shadow-sm'
+                        : 'text-[#4b5563] hover:text-[#111827]'
+                    }`}
+                  >
+                    Partial
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentStatus('unpaid')}
+                    className={`py-2 text-xs font-bold rounded-lg transition-all ${
+                      paymentStatus === 'unpaid'
+                        ? 'bg-red-600 text-white shadow-sm'
+                        : 'text-[#4b5563] hover:text-[#111827]'
+                    }`}
+                  >
+                    Unpaid
+                  </button>
+                </div>
+
+                <AnimatePresence>
+                  {(paymentStatus === 'paid' || paymentStatus === 'partial') && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                      animate={{ opacity: 1, height: 'auto', marginTop: 12 }}
+                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                      className="overflow-hidden space-y-3"
+                    >
+                      {paymentStatus === 'partial' && (
+                        <div>
+                          <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
+                            Amount Paid Upfront
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-3 text-sm font-semibold text-gray-400">₹</span>
+                            <Input
+                              type="number"
+                              placeholder="e.g. 500"
+                              value={partialAmount}
+                              onChange={(e) => setPartialAmount(e.target.value)}
+                              className="pl-7"
+                              max={total}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
+                          Payment Method
+                        </label>
+                        <div className="grid grid-cols-4 gap-2">
+                          {(
+                            [
+                              { value: 'cash', label: '💵 Cash' },
+                              { value: 'upi', label: '📱 UPI' },
+                              { value: 'bank_transfer', label: '🏦 Bank' },
+                              { value: 'other', label: '⚙️ Other' },
+                            ] as const
+                          ).map((method) => (
+                            <button
+                              key={method.value}
+                              type="button"
+                              onClick={() => setPaymentMethod(method.value)}
+                              className={`py-2 px-1 text-[11px] font-bold rounded-xl border transition-all text-center ${
+                                paymentMethod === method.value
+                                  ? 'bg-[#1a6b3c]/10 text-[#1a6b3c] border-[#1a6b3c]'
+                                  : 'bg-[#f9fafb] text-[#4b5563] border-[#e5e7eb] hover:bg-[#f3f4f6]'
+                              }`}
+                            >
+                              {method.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
+                          Payment Note (Optional)
+                        </label>
+                        <Input
+                          placeholder="e.g. Received via GPay / Advance payment"
+                          value={paymentNote}
+                          onChange={(e) => setPaymentNote(e.target.value)}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </section>
+
+            {/* Desktop Action Box (hidden on mobile, uses sticky footer instead) */}
+            <div className="hidden lg:block bg-white border border-[#e5e7eb] rounded-2xl p-5 shadow-xs space-y-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-xs text-[#6b7280] font-bold uppercase tracking-wider">Total Amount</p>
+                  <p className="text-2xl font-black text-[#111827] mt-1 tabular-nums">
+                    ₹{total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                </div>
+                <Button
+                  onClick={handleSend}
+                  disabled={!canSend}
+                  loading={loading}
+                  className="px-8"
+                >
+                  Send Invoice
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       </PageTransition>
 
       {/* Sticky Footer */}
-      <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-white/90 backdrop-blur-lg border-t border-[#e5e7eb] z-30">
+      <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-white/90 backdrop-blur-lg border-t border-[#e5e7eb] z-30 lg:hidden">
         <div className="max-w-lg md:max-w-5xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
           <div>
             <p className="text-xs text-[#6b7280] font-medium">
