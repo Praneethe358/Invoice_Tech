@@ -1,0 +1,68 @@
+import { NextResponse } from 'next/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { verifyAdmin } from '@/lib/admin';
+
+export async function GET() {
+  const { isAdmin } = await verifyAdmin();
+  if (!isAdmin) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  const admin = createAdminClient();
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
+
+  // All shops
+  const { data: allShops } = await admin
+    .from('shops')
+    .select('id, name, shop_type, phone, subscription_status, subscription_ends_at, trial_ends_at, created_at');
+
+  const shops = allShops || [];
+
+  // Active subscriptions
+  const active = shops.filter(s => s.subscription_status === 'active');
+  const trial = shops.filter(s => s.subscription_status === 'trial');
+
+  // Trials ending this week (within 7 days)
+  const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const trialsEndingSoon = trial.filter(s => {
+    if (!s.trial_ends_at) return false;
+    const end = new Date(s.trial_ends_at);
+    return end <= weekFromNow && end >= now;
+  });
+
+  // Renewals due within 30 days
+  const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const renewalsDue = active
+    .filter(s => {
+      if (!s.subscription_ends_at) return false;
+      const end = new Date(s.subscription_ends_at);
+      return end <= thirtyDaysFromNow;
+    })
+    .map(s => ({
+      ...s,
+      days_left: Math.ceil(
+        (new Date(s.subscription_ends_at!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+      ),
+    }))
+    .sort((a, b) => a.days_left - b.days_left);
+
+  // Expired this month
+  const expiredThisMonth = shops.filter(s =>
+    s.subscription_status === 'expired'
+  );
+
+  return NextResponse.json({
+    summary: {
+      active_subscriptions: active.length,
+      mrr: active.length * 299,
+      trials_ending_soon: trialsEndingSoon.length,
+      renewals_due: renewalsDue.length,
+    },
+    renewals_due: renewalsDue,
+    expired_this_month: expiredThisMonth,
+    trials_ending_soon: trialsEndingSoon,
+    all_shops: shops,
+  });
+}

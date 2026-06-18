@@ -16,6 +16,11 @@ export interface Shop {
   business_type: string;
   inventory_enabled: boolean;
   onboarding_completed: boolean;
+  subscription_status?: string;
+  trial_ends_at?: string | null;
+  subscription_ends_at?: string | null;
+  subscription_started_at?: string | null;
+  subscription_notes?: string | null;
   next_credit_note_number?: number;
   next_debit_note_number?: number;
   credit_note_prefix?: string;

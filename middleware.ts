@@ -38,7 +38,40 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Protected routes — redirect to login if not authenticated
+  // ─── Admin Route Protection (Level 1) ───────────────────────
+  // Block /admin routes for non-admins. Check admins table via 
+  // service role. Redirect silently to /dashboard.
+  if (pathname.startsWith('/admin')) {
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    // Check admins table via service role (bypasses RLS)
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceRoleKey) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+
+    const { createClient: createSupabaseClient } = await import('@supabase/supabase-js');
+    const adminClient = createSupabaseClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    const { data: adminRecord } = await adminClient
+      .from('admins')
+      .select('id')
+      .eq('auth_user_id', user.id)
+      .single();
+
+    if (!adminRecord) {
+      // Not an admin — redirect silently to dashboard
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+
+    return response;
+  }
+
+  // ─── Protected routes — redirect to login if not authenticated
   const protectedPaths = ['/dashboard', '/invoice', '/settings'];
   const isProtected = protectedPaths.some((p) =>
     pathname.startsWith(p)
