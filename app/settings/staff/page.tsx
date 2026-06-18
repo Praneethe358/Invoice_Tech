@@ -1,36 +1,37 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { Shop } from '@/lib/types';
 import { getCurrentUserContext } from '@/lib/current-user';
 import { hasPermission } from '@/lib/permissions';
-import SettingsClient from './SettingsClient';
+import StaffClient from './StaffClient';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SettingsPage() {
+export default async function StaffPage() {
   const supabase = await createClient();
   const ctx = await getCurrentUserContext(supabase);
 
   if (!ctx) redirect('/login');
-  
-  // If the user's role is not owner and not admin, they don't have settings access
-  if (ctx.role !== 'owner' && ctx.role !== 'admin') {
-    redirect('/dashboard');
-  }
+  if (!hasPermission(ctx.role, 'staff.invite')) redirect('/dashboard');
 
-  // Fetch shop using the shopId from the context
+  // Fetch staff
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('*')
+    .eq('shop_id', ctx.shopId)
+    .order('created_at', { ascending: true });
+
+  // Fetch shop info
   const { data: shop } = await supabase
     .from('shops')
-    .select('*')
+    .select('name')
     .eq('id', ctx.shopId)
     .single();
 
-  if (!shop) redirect('/signup');
-
   return (
-    <SettingsClient
-      shop={shop as Shop}
-      role={ctx.role}
+    <StaffClient
+      staff={staff ?? []}
+      ownerName={ctx.name}
+      shopName={shop?.name || ''}
     />
   );
 }

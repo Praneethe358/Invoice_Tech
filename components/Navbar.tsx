@@ -18,11 +18,12 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
+import { UserRole } from '@/lib/permissions';
 
 const navItems = [
   {
     href: '/dashboard',
-    label: 'Home',
+    label: 'Dashboard',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -45,7 +46,7 @@ const navItems = [
   },
   {
     href: '/customers',
-    label: 'Customers',
+    label: 'Customer Ledger',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -69,7 +70,7 @@ const navItems = [
   },
   {
     href: '/catalog',
-    label: 'Catalog',
+    label: 'Product Catalog',
     desktopOnly: true,
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -79,7 +80,7 @@ const navItems = [
   },
   {
     href: '/payments',
-    label: 'Payments',
+    label: 'Collections & Payments',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="4" width="20" height="16" rx="2" />
@@ -89,7 +90,7 @@ const navItems = [
   },
   {
     href: '/settings',
-    label: 'Settings',
+    label: 'Business Settings',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="3" r="3" />
@@ -99,6 +100,13 @@ const navItems = [
   },
 ];
 
+const ALLOWED_NAV_BY_ROLE: Record<UserRole, string[]> = {
+  owner: ['/dashboard', '/invoices', '/customers', '/catalog', '/payments', '/purchases', '/suppliers', '/reports', '/gst', '/settings'],
+  admin: ['/dashboard', '/invoices', '/customers', '/catalog', '/payments', '/purchases', '/suppliers', '/reports', '/gst', '/settings'],
+  billing_staff: ['/dashboard', '/invoices', '/customers', '/catalog', '/payments', '/purchases'],
+  view_only: ['/dashboard', '/invoices', '/customers', '/catalog'],
+};
+
 export default function Navbar() {
   const [showProfile, setShowProfile] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -106,11 +114,12 @@ export default function Navbar() {
   const router = useRouter();
 
   const [shopInfo, setShopInfo] = useState<{ id: string; name: string; shop_type: string; gst_registered: boolean; inventory_enabled: boolean; logo_url?: string | null } | null>(null);
+  const [userRole, setUserRole] = useState<UserRole>('owner');
   const [lowStockCount, setLowStockCount] = useState<number>(0);
 
   const purchasesItem = {
     href: '/purchases',
-    label: 'Purchases',
+    label: 'Purchase Management',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
@@ -122,7 +131,7 @@ export default function Navbar() {
 
   const suppliersItem = {
     href: '/suppliers',
-    label: 'Suppliers',
+    label: 'Supplier Ledger',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -135,7 +144,7 @@ export default function Navbar() {
 
   const gstItem = {
     href: '/gst',
-    label: 'GST',
+    label: 'GST Compliance',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -149,7 +158,7 @@ export default function Navbar() {
 
   const reportsItem = {
     href: '/reports',
-    label: 'Reports',
+    label: 'Business Reports',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <line x1="18" y1="20" x2="18" y2="10" />
@@ -175,7 +184,8 @@ export default function Navbar() {
         items.push(reportsItem);
       }
     }
-    return items;
+    const allowed = ALLOWED_NAV_BY_ROLE[userRole] || ALLOWED_NAV_BY_ROLE.view_only;
+    return items.filter((item) => allowed.includes(item.href));
   })();
 
 
@@ -186,6 +196,10 @@ export default function Navbar() {
         const storedShop = localStorage.getItem('trubill_navbar_shop_info');
         if (storedShop) {
           setShopInfo(JSON.parse(storedShop));
+        }
+        const storedRole = localStorage.getItem('trubill_navbar_role');
+        if (storedRole) {
+          setUserRole(storedRole as UserRole);
         }
         const storedLowStock = localStorage.getItem('trubill_navbar_low_stock');
         if (storedLowStock) {
@@ -200,16 +214,48 @@ export default function Navbar() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data: shop } = await supabase
+        // Try owner first
+        let { data: shop } = await supabase
           .from('shops')
           .select('id, name, shop_type, gst_registered, inventory_enabled, logo_url')
           .eq('auth_user_id', user.id)
           .single();
 
+        let resolvedRole: UserRole = 'owner';
+
+        if (shop) {
+          resolvedRole = 'owner';
+        } else {
+          // Check if they are a staff member
+          const { data: staff } = await supabase
+            .from('staff')
+            .select('role, shop_id, shops(id, name, shop_type, gst_registered, inventory_enabled, logo_url)')
+            .eq('auth_user_id', user.id)
+            .eq('status', 'active')
+            .single();
+
+          if (staff) {
+            resolvedRole = staff.role as UserRole;
+            const staffShop = staff.shops as any;
+            if (staffShop) {
+              shop = {
+                id: staffShop.id,
+                name: staffShop.name,
+                shop_type: staffShop.shop_type,
+                gst_registered: staffShop.gst_registered,
+                inventory_enabled: staffShop.inventory_enabled,
+                logo_url: staffShop.logo_url,
+              };
+            }
+          }
+        }
+
         if (shop) {
           setShopInfo(shop);
+          setUserRole(resolvedRole);
           if (typeof window !== 'undefined') {
             localStorage.setItem('trubill_navbar_shop_info', JSON.stringify(shop));
+            localStorage.setItem('trubill_navbar_role', resolvedRole);
           }
           
           if (shop.inventory_enabled) {
@@ -242,6 +288,7 @@ export default function Navbar() {
     try {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('trubill_navbar_shop_info');
+        localStorage.removeItem('trubill_navbar_role');
         localStorage.removeItem('trubill_navbar_low_stock');
       }
       const supabase = createClient();
@@ -256,13 +303,13 @@ export default function Navbar() {
       <style dangerouslySetInnerHTML={{ __html: `
         @media (min-width: 768px) {
           body {
-            padding-left: 16rem !important;
+            padding-left: 18rem !important;
           }
         }
       `}} />
 
       {/* ─── DESKTOP LEFT SIDEBAR (>= 768px) ─── */}
-      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-[#e8eaed] fixed left-0 top-0 bottom-0 z-40 p-6 shadow-sm">
+      <aside className="hidden md:flex flex-col w-72 bg-white border-r border-[#e8eaed] fixed left-0 top-0 bottom-0 z-40 p-6 shadow-sm">
         {/* Brand Logo */}
         <div className="flex items-center gap-3 mb-8">
           <img src="/trubill-logo.png" alt="TruBill logo" className="w-10 h-10 object-contain shrink-0" loading="lazy" />
@@ -325,11 +372,18 @@ export default function Navbar() {
                 <circle cx="12" cy="7" r="4" />
               </svg>
             </div>
-            <div className="truncate flex-1">
+             <div className="truncate flex-1">
               <p className="text-xs font-bold text-[#1a1d26] truncate">{shopInfo?.name || 'Active Shop'}</p>
               <p className="text-[10px] text-[#9ca3af] font-semibold uppercase tracking-wider truncate">
                 {shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Tamil Nadu, IN'}
               </p>
+              {userRole !== 'owner' && (
+                <span className={`inline-block text-[8px] font-bold px-1.5 py-0.5 rounded-none uppercase text-white mt-1 ${
+                  userRole === 'admin' ? 'bg-[#16a34a]' : userRole === 'billing_staff' ? 'bg-[#2563eb]' : 'bg-[#6b7280]'
+                }`}>
+                  {userRole === 'admin' ? 'Admin' : userRole === 'billing_staff' ? 'Billing' : 'View Only'}
+                </span>
+              )}
             </div>
           </div>
           <button
@@ -385,8 +439,17 @@ export default function Navbar() {
               </Link>
             </div>
 
-            <div className="text-[11px] font-bold text-gray-500 bg-[#f3f4f6] px-2.5 py-1.5 rounded-lg max-w-[150px] truncate">
-              {shopInfo?.name || 'Active Shop'}
+            <div className="flex flex-col items-end justify-center">
+              <div className="text-[11px] font-bold text-gray-500 bg-[#f3f4f6] px-2.5 py-1 rounded-lg max-w-[150px] truncate">
+                {shopInfo?.name || 'Active Shop'}
+              </div>
+              {userRole !== 'owner' && (
+                <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-none uppercase text-white mt-0.5 ${
+                  userRole === 'admin' ? 'bg-[#16a34a]' : userRole === 'billing_staff' ? 'bg-[#2563eb]' : 'bg-[#6b7280]'
+                }`}>
+                  {userRole === 'admin' ? 'Admin' : userRole === 'billing_staff' ? 'Billing' : 'View Only'}
+                </span>
+              )}
             </div>
           </div>
         </nav>
@@ -434,6 +497,13 @@ export default function Navbar() {
                     <span className="text-[9px] font-bold text-[#0050e8] uppercase tracking-wider mt-0.5 block truncate">
                       {shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Invoice'}
                     </span>
+                    {userRole !== 'owner' && (
+                      <span className={`inline-block text-[8px] font-bold px-1.5 py-0.5 rounded-none uppercase text-white mt-1 ${
+                        userRole === 'admin' ? 'bg-[#16a34a]' : userRole === 'billing_staff' ? 'bg-[#2563eb]' : 'bg-[#6b7280]'
+                      }`}>
+                        {userRole === 'admin' ? 'Admin' : userRole === 'billing_staff' ? 'Billing' : 'View Only'}
+                      </span>
+                    )}
                   </div>
                 </div>
 

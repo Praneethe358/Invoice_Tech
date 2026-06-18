@@ -2,6 +2,7 @@
 
 import { useState, FormEvent, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import PageTransition from '@/components/PageTransition';
@@ -13,13 +14,16 @@ import { createClient } from '@/lib/supabase/client';
 import { Shop } from '@/lib/types';
 import { SHOP_CONFIG } from '@/lib/shop-config';
 import { ShopType } from '@/lib/starter-catalogs';
+import { hasPermission, UserRole } from '@/lib/permissions';
 
 interface Props {
   shop: Shop;
+  role: UserRole;
 }
 
 export default function SettingsClient({
   shop,
+  role,
 }: Props) {
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
@@ -121,6 +125,8 @@ export default function SettingsClient({
     setSavingShop(false);
   };
 
+  const canEditShop = hasPermission(role, 'settings.shop');
+
   return (
     <div className="min-h-screen bg-[#f5f6fa]">
       <Navbar />
@@ -162,6 +168,63 @@ export default function SettingsClient({
           </p>
         </div>
 
+        {/* Shop Administration - Owner Only */}
+        {role === 'owner' && (
+          <section className="mb-8">
+            <h2 className="text-xs font-extrabold text-[#6b7280] uppercase tracking-wider mb-3 font-heading">
+              Shop Administration
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Link
+                href="/settings/staff"
+                className="flex items-center justify-between p-5 bg-white border border-[#e5e7eb] hover:border-[#0050e8] hover:bg-[#0050e8]/5 transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[#0050e8]/10 text-[#0050e8] flex items-center justify-center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900">Team Members</h3>
+                    <p className="text-[10px] text-gray-500 font-medium mt-0.5">Manage staff roles and access permissions</p>
+                  </div>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-400 group-hover:text-[#0050e8] group-hover:translate-x-0.5 transition-all">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </Link>
+
+              <Link
+                href="/settings/audit"
+                className="flex items-center justify-between p-5 bg-white border border-[#e5e7eb] hover:border-[#0050e8] hover:bg-[#0050e8]/5 transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[#0050e8]/10 text-[#0050e8] flex items-center justify-center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                      <polyline points="10 9 9 9 8 9" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900">Audit Trail</h3>
+                    <p className="text-[10px] text-gray-500 font-medium mt-0.5">Track actions and logs of your business account</p>
+                  </div>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-400 group-hover:text-[#0050e8] group-hover:translate-x-0.5 transition-all">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </Link>
+            </div>
+          </section>
+        )}
+
         {/* Shop Details */}
         <section className="mb-8">
           <h2 className="text-xs font-extrabold text-[#6b7280] uppercase tracking-wider mb-3 font-heading">
@@ -171,6 +234,12 @@ export default function SettingsClient({
             onSubmit={handleSaveShop}
             className="bg-white rounded-none border border-[#e5e7eb] p-6 space-y-4 shadow-xs"
           >
+            {!canEditShop && (
+              <div className="bg-amber-50 border border-amber-200 p-4 mb-4 text-xs font-bold text-amber-800">
+                ⚠️ Only the Shop Owner has permission to edit business profile details.
+              </div>
+            )}
+
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-[#4b5563] uppercase tracking-wide">
                 Business Logo
@@ -193,8 +262,8 @@ export default function SettingsClient({
                     type="file"
                     accept=".jpg,.jpeg,.png,.webp"
                     onChange={handleLogoUpload}
-                    disabled={uploadingLogo}
-                    className="block w-full text-sm text-[#4b5563] file:mr-4 file:py-2 file:px-4 file:rounded-none file:border file:border-[#e5e7eb] file:text-xs file:font-bold file:bg-[#f3f4f6] file:text-[#111827] hover:file:bg-[#e5e7eb] transition-colors cursor-pointer"
+                    disabled={uploadingLogo || !canEditShop}
+                    className="block w-full text-sm text-[#4b5563] file:mr-4 file:py-2 file:px-4 file:rounded-none file:border file:border-[#e5e7eb] file:text-xs file:font-bold file:bg-[#f3f4f6] file:text-[#111827] hover:file:bg-[#e5e7eb] transition-colors cursor-pointer disabled:opacity-50"
                   />
                   <p className="text-[10px] text-[#6b7280] mt-1.5">
                     JPG, PNG, WebP up to 2MB. 
@@ -209,23 +278,27 @@ export default function SettingsClient({
               value={shopName}
               onChange={(e) => setShopName(e.target.value)}
               required
+              disabled={!canEditShop}
             />
             <Input
               label="Invoice Prefix"
               value={invoicePrefix}
               onChange={(e) => setInvoicePrefix(e.target.value)}
               placeholder="e.g. INV, AF"
+              disabled={!canEditShop}
             />
             <Input
               label="Address"
               value={shopAddress}
               onChange={(e) => setShopAddress(e.target.value)}
+              disabled={!canEditShop}
             />
             <Input
               label="Phone"
               value={shopPhone}
               onChange={(e) => setShopPhone(e.target.value)}
               type="tel"
+              disabled={!canEditShop}
             />
 
             {/* GST Compliant Billing details */}
@@ -239,7 +312,8 @@ export default function SettingsClient({
                   type="checkbox"
                   checked={gstRegistered}
                   onChange={(e) => setGstRegistered(e.target.checked)}
-                  className="w-10 h-6 bg-gray-200 checked:bg-[#0050e8] rounded-none appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
+                  disabled={!canEditShop}
+                  className="w-10 h-6 bg-gray-200 checked:bg-[#0050e8] rounded-none appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300 disabled:opacity-50"
                 />
               </div>
 
@@ -250,6 +324,7 @@ export default function SettingsClient({
                   onChange={(e) => setGstin(e.target.value)}
                   placeholder="e.g. 33AAAAA1111A1Z1"
                   required
+                  disabled={!canEditShop}
                 />
               )}
             </div>
@@ -266,15 +341,18 @@ export default function SettingsClient({
                     type="checkbox"
                     checked={inventoryEnabledGlobal}
                     onChange={(e) => setInventoryEnabledGlobal(e.target.checked)}
-                    className="w-10 h-6 bg-gray-200 checked:bg-[#0050e8] rounded-none appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
+                    disabled={!canEditShop}
+                    className="w-10 h-6 bg-gray-200 checked:bg-[#0050e8] rounded-none appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300 disabled:opacity-50"
                   />
                 </div>
               </div>
             )}
 
-            <Button type="submit" loading={savingShop}>
-              Save Changes
-            </Button>
+            {canEditShop && (
+              <Button type="submit" loading={savingShop}>
+                Save Changes
+              </Button>
+            )}
           </form>
         </section>
       </PageTransition>

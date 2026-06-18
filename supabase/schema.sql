@@ -409,4 +409,65 @@ alter table shops
   add column if not exists credit_note_prefix text not null default 'CN',
   add column if not exists debit_note_prefix text not null default 'DN';
 
+-- ═══════════════════════════════════════════
+-- Phase 11 Database Changes
+-- ═══════════════════════════════════════════
+
+-- Staff members table
+create table if not exists staff (
+  id uuid primary key default gen_random_uuid(),
+  shop_id uuid not null references shops(id) on delete cascade,
+  auth_user_id uuid references auth.users(id) on delete set null,
+  email text not null,
+  role text not null check (role in ('admin', 'billing_staff', 'view_only')),
+  status text not null check (status in ('invited', 'active', 'deactivated')),
+  invite_token text,
+  invited_at timestamptz not null default now(),
+  accepted_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (shop_id, email)
+);
+
+alter table staff enable row level security;
+
+create policy "own shop staff" on staff for all
+  using (
+    shop_id in (select id from shops where auth_user_id = auth.uid()) or
+    auth_user_id = auth.uid()
+  );
+
+-- Audit logs table
+create table if not exists audit_logs (
+  id uuid primary key default gen_random_uuid(),
+  shop_id uuid not null references shops(id) on delete cascade,
+  actor_user_id uuid references auth.users(id) on delete set null,
+  actor_name text not null,
+  actor_role text not null,
+  action text not null,
+  entity_type text not null,
+  entity_id text,
+  entity_label text,
+  details jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+alter table audit_logs enable row level security;
+
+create policy "own shop audit logs" on audit_logs for select
+  using (
+    shop_id in (select id from shops where auth_user_id = auth.uid())
+  );
+
+-- Add action attribution to transaction tables
+alter table invoices add column if not exists created_by_staff_id uuid references staff(id) on delete set null;
+alter table payments add column if not exists recorded_by_staff_id uuid references staff(id) on delete set null;
+alter table purchases add column if not exists created_by_staff_id uuid references staff(id) on delete set null;
+
+-- Indices for performance optimization
+create index if not exists idx_audit_logs_shop_created_at on audit_logs(shop_id, created_at desc);
+create index if not exists idx_audit_logs_action on audit_logs(action);
+create index if not exists idx_audit_logs_actor_user_id on audit_logs(actor_user_id);
+
+
 

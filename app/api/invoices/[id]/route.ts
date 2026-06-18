@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { CreateInvoicePayload, ApiError } from '@/lib/types';
 import { validatePhone, validateInvoiceItems } from '@/lib/validators';
+import { getCurrentUserContext } from '@/lib/current-user';
+import { hasPermission } from '@/lib/permissions';
+import { logAudit } from '@/lib/audit';
 
 // PUT: Update a draft invoice
 export async function PUT(
@@ -12,16 +15,18 @@ export async function PUT(
     const { id } = await params;
     const supabase = await createClient();
 
-    // Authenticate
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const ctx = await getCurrentUserContext(supabase);
+    if (!ctx) {
       return NextResponse.json(
         { error: 'Unauthorized' } satisfies ApiError,
         { status: 401 }
+      );
+    }
+
+    if (!hasPermission(ctx.role, 'invoice.create')) {
+      return NextResponse.json(
+        { error: 'Forbidden' } satisfies ApiError,
+        { status: 403 }
       );
     }
 
@@ -29,7 +34,7 @@ export async function PUT(
     const { data: shop, error: shopError } = await supabase
       .from('shops')
       .select('id, gst_registered')
-      .eq('auth_user_id', user.id)
+      .eq('id', ctx.shopId)
       .single();
 
     if (shopError || !shop) {
@@ -42,9 +47,9 @@ export async function PUT(
     // Get existing invoice
     const { data: invoice, error: invoiceError } = await supabase
       .from('invoices')
-      .select('id, status, shop_id')
+      .select('id, status, shop_id, invoice_number')
       .eq('id', id)
-      .eq('shop_id', shop.id)
+      .eq('shop_id', ctx.shopId)
       .single();
 
     if (invoiceError || !invoice) {
@@ -188,6 +193,21 @@ export async function PUT(
       console.error('Insert new invoice items error:', itemsInsertError);
     }
 
+    logAudit({
+      shopId: ctx.shopId,
+      actorUserId: ctx.userId,
+      actorName: `${ctx.name} (${ctx.isOwner ? 'Owner' : ctx.role})`,
+      actorRole: ctx.role,
+      action: 'invoice.edited',
+      entityType: 'invoice',
+      entityId: id,
+      entityLabel: invoice.invoice_number,
+      details: {
+        customer_phone: body.customer_phone,
+        total: Number(total.toFixed(2)),
+      },
+    });
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Unexpected error in PUT /api/invoices/[id]:', err);
@@ -207,39 +227,27 @@ export async function DELETE(
     const { id } = await params;
     const supabase = await createClient();
 
-    // Authenticate
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const ctx = await getCurrentUserContext(supabase);
+    if (!ctx) {
       return NextResponse.json(
         { error: 'Unauthorized' } satisfies ApiError,
         { status: 401 }
       );
     }
 
-    // Get shop
-    const { data: shop, error: shopError } = await supabase
-      .from('shops')
-      .select('id')
-      .eq('auth_user_id', user.id)
-      .single();
-
-    if (shopError || !shop) {
+    if (!hasPermission(ctx.role, 'invoice.delete')) {
       return NextResponse.json(
-        { error: 'Shop not found.' } satisfies ApiError,
-        { status: 404 }
+        { error: 'Forbidden' } satisfies ApiError,
+        { status: 403 }
       );
     }
 
     // Verify draft status before deleting
     const { data: invoice, error: invoiceError } = await supabase
       .from('invoices')
-      .select('id, status')
+      .select('id, status, invoice_number')
       .eq('id', id)
-      .eq('shop_id', shop.id)
+      .eq('shop_id', ctx.shopId)
       .single();
 
     if (invoiceError || !invoice) {
@@ -262,13 +270,19 @@ export async function DELETE(
       .delete()
       .eq('id', id);
 
-    if (deleteError) {
-      console.error('Invoice delete error:', deleteError);
-      return NextResponse.json(
-        { error: 'Failed to delete draft invoice.' } satisfies ApiError,
-        { status: 500 }
-      );
-    }
+    logAudit({
+      shopId: ctx.shopId,
+      actorUserId: ctx.userId,
+      actorName: `${ctx.name} (${ctx.isOwner ? 'Owner' : ctx.role})`,
+      actorRole: ctx.role,
+      action: 'invoice.deleted',
+      entityType: 'invoice',
+      entityId: id,
+      entityLabel: invoice.invoice_number,
+      details: {
+        status: invoice.status,
+      },
+    });
 
     return NextResponse.json({ success: true });
   } catch (err) {

@@ -305,4 +305,33 @@ export interface CustomerStatementExport {
   created_at: string;
 }
 
+// ─── Phase 11 — Staff & Audit Types ──────────────────────────
 
+export interface Staff {
+  id: string;
+  shop_id: string;
+  auth_user_id: string | null;
+  name: string;
+  email: string;
+  role: 'admin' | 'billing_staff' | 'view_only';
+  status: 'invited' | 'active' | 'deactivated';
+  invite_token: string | null;
+  invite_sent_at: string | null;
+  joined_at: string | null;
+  created_at: string;
+}
+
+export interface AuditLog {
+  id: string;
+  shop_id: string;
+  actor_user_id: string;
+  actor_name: string;
+  actor_role: string;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  entity_label: string | null;
+  details: Record<string, any> | null;
+  ip_address: string | null;
+  created_at: string;
+}

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { CreateInvoicePayload, ApiError } from '@/lib/types';
 import { validatePhone, validateInvoiceItems } from '@/lib/validators';
+import { logAudit } from '@/lib/audit';
+import { getCurrentUserContext } from '@/lib/current-user';
 
 export async function POST(request: NextRequest) {
   try {
@@ -140,6 +142,29 @@ export async function POST(request: NextRequest) {
         { error: rpcError.message || 'Failed to create invoice.' } satisfies ApiError,
         { status: 500 }
       );
+    }
+
+    // Audit log (fire-and-forget)
+    const ctx = await getCurrentUserContext(supabase);
+    if (ctx) {
+      logAudit({
+        shopId: shop.id,
+        actorUserId: ctx.userId,
+        actorName: `${ctx.name} (${ctx.isOwner ? 'Owner' : ctx.role})`,
+        actorRole: ctx.role,
+        action: 'invoice.created',
+        entityType: 'invoice',
+        entityId: rpcData.id,
+        entityLabel: rpcData.invoice_number,
+        details: {
+          customer_phone: body.customer_phone,
+          customer_name: body.customer_name || null,
+          total: Number(total.toFixed(2)),
+          items_count: body.items.length,
+          payment_status,
+          status,
+        },
+      });
     }
 
     return NextResponse.json({

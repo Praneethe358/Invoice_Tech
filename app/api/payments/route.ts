@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getInvoicePaid, syncInvoicePaymentStatus, syncCustomerOutstanding } from '@/lib/payments';
+import { logAudit } from '@/lib/audit';
+import { getCurrentUserContext } from '@/lib/current-user';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -115,6 +117,28 @@ export async function POST(request: NextRequest) {
       .select('payment_status')
       .eq('id', invoice_id)
       .single();
+
+    // Audit log (fire-and-forget)
+    const ctx = await getCurrentUserContext(supabase);
+    if (ctx) {
+      logAudit({
+        shopId: invoice.shop_id,
+        actorUserId: ctx.userId,
+        actorName: `${ctx.name} (${ctx.isOwner ? 'Owner' : ctx.role})`,
+        actorRole: ctx.role,
+        action: 'payment.recorded',
+        entityType: 'payment',
+        entityId: newPayment.id,
+        entityLabel: invoice.invoice_number || invoice_id,
+        details: {
+          amount,
+          payment_method: payment_method || 'cash',
+          total_paid: updatedPaid,
+          balance_due: updatedBalance,
+          payment_status: updatedInvoice?.payment_status || 'unpaid',
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,
