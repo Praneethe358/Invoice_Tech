@@ -235,7 +235,7 @@ export default function SupplierDetailClient({
     <div className="min-h-screen bg-[#f8fafc]">
       <Navbar />
 
-      <PageTransition className="max-w-lg md:max-w-[1400px] mx-auto px-4 md:px-8 py-6 pb-24">
+      <PageTransition className="w-full px-4 md:px-8 py-6 pb-24">
         {/* Header matched with profile logo format - Desktop only */}
         <div className="hidden md:flex bg-white border border-[#e2e8f0] -mx-4 md:-mx-8 px-6 md:px-10 py-5 -mt-6.5 shadow-sm items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">

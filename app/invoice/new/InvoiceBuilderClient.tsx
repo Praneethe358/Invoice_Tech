@@ -449,7 +449,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
   return (
     <div className="min-h-screen bg-[#f9fafb]">
       <Navbar />
-      <PageTransition className="max-w-lg lg:max-w-[1400px] mx-auto px-4 lg:px-8 py-6 pb-36">
+      <PageTransition className="w-full px-4 lg:px-8 py-6 pb-36">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <button
@@ -1111,7 +1111,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
 
       {/* Sticky Footer */}
       <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-white/90 backdrop-blur-lg border-t border-[#e5e7eb] z-30 lg:hidden">
-        <div className="max-w-lg md:max-w-5xl mx-auto px-4 md:px-8 py-3 flex flex-col gap-2">
+        <div className="w-full px-4 md:px-8 py-3 flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <p className="text-xs text-[#6b7280] font-bold uppercase">Total</p>
             <p className="text-xl font-extrabold text-[#111827] tabular-nums">

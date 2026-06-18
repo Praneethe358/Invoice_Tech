@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
@@ -116,14 +116,53 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
     <div className="min-h-screen bg-[#f8fafc]">
       <Navbar />
 
-      <PageTransition className="max-w-lg md:max-w-[1400px] mx-auto px-4 md:px-8 py-6 pb-24">
-        {/* Header Ribbon */}
+      <PageTransition className="w-full px-4 md:px-8 py-6 pb-24">
+        {/* Header with greeting - Desktop only */}
+        <div className="hidden md:flex bg-white border-b border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 -mt-6 shadow-xs items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
+              {shop.logo_url ? (
+                <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
+              ) : (
+                <div className="w-full h-full bg-[#1a6b3c] flex items-center justify-center text-white font-heading font-black text-sm">
+                  {(shop.name || 'TB').slice(0, 2).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 leading-tight">
+                {shop.name}
+              </h1>
+              <p className="text-[#6b7280] text-[10px] mt-0.5 font-medium">
+                Business Reports & GST Compliance · Tamil Nadu IN
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-[10px] font-bold text-[#6b7280] uppercase tracking-wider block">Logged In As</span>
+            <p className="text-xs font-bold text-slate-800 mt-1">
+              Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}!
+            </p>
+          </div>
+        </div>
+
+        {/* Page Title Header - Mobile only */}
+        <div className="mb-6 md:hidden">
+          <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
+            Business Reports
+          </h1>
+          <p className="text-[10px] text-gray-500 font-semibold mt-1">
+            Monthly Business Summary
+          </p>
+        </div>
+
+        {/* Header Ribbon for controls & title on desktop */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight font-heading">
-              Business Reports
-            </h1>
-            <p className="text-xs text-slate-500 font-semibold mt-1 flex items-center gap-2">
+          <div className="hidden md:block">
+            <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight font-heading">
+              Reports Overview
+            </h2>
+            <p className="text-xs text-slate-500 font-semibold mt-0.5 flex items-center gap-2">
               <span>Monthly Business Summary</span>
               <span className="bg-[#1a6b3c]/10 text-[#1a6b3c] px-2 py-0.5 rounded text-[10px] font-bold">
                 {getFYContext(month, year)}
@@ -136,7 +175,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
             <button
               onClick={() => handleExport('pdf')}
               disabled={exportingPdf || loading}
-              className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold rounded-xl py-2.5 px-4 text-xs transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-1.5"
+              className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold rounded-xl py-2.5 px-4 text-xs transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
             >
               {exportingPdf ? (
                 <>
@@ -153,7 +192,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
             <button
               onClick={() => handleExport('excel')}
               disabled={exportingExcel || loading}
-              className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-250 font-bold rounded-xl py-2.5 px-4 text-xs transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-1.5"
+              className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-250 font-bold rounded-xl py-2.5 px-4 text-xs transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
             >
               {exportingExcel ? (
                 <>
@@ -276,62 +315,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
               </div>
             )}
 
-            {/* SECTION 5 — Daily Sales Chart */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-              <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
-                Section 5 — Daily Sales Chart
-              </h2>
-              <div className="h-64 mt-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data.dailySales} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <XAxis
-                      dataKey="day"
-                      tickFormatter={(val) => {
-                        // show every 5th label on mobile, all on desktop
-                        if (typeof window !== 'undefined' && window.innerWidth < 640) {
-                          return val % 5 === 0 || val === 1 ? String(val) : '';
-                        }
-                        return String(val);
-                      }}
-                      tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <Tooltip
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const item = payload[0].payload;
-                          return (
-                            <div className="bg-white border border-slate-200 p-2.5 rounded-xl shadow-md text-xs font-semibold">
-                              <p className="font-extrabold text-slate-800">{item.dateLabel}</p>
-                              <p className="text-slate-500 mt-1">Invoices: {item.count}</p>
-                              <p className="text-[#1a6b3c] font-bold">Total: ₹{Number(item.total).toLocaleString('en-IN')}</p>
-                              {item.hasFailed && <p className="text-red-500 mt-0.5 text-[9px] font-black">⚠️ Contains Failed Invoices</p>}
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Bar
-                      dataKey="total"
-                      radius={[4, 4, 0, 0]}
-                    >
-                      {data.dailySales.map((entry: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={entry.hasFailed ? '#e53e3e' : '#1a6b3c'} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Double grid columns */}
+            {/* Double grid columns for 3 & 4 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* SECTION 3 — Top Products by Revenue */}
               <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
@@ -411,8 +395,73 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
               </div>
             </div>
 
-            {/* Row for Pie chart & comparisons */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* SECTION 5 — Daily Sales Chart */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+              <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
+                Section 5 — Daily Sales Chart
+              </h2>
+              <div className="h-64 mt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={data.dailySales} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <XAxis
+                      dataKey="day"
+                      tickFormatter={(val) => {
+                        // show every 5th label on mobile, all on desktop
+                        if (typeof window !== 'undefined' && window.innerWidth < 640) {
+                          return val % 5 === 0 || val === 1 ? String(val) : '';
+                        }
+                        return String(val);
+                      }}
+                      tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const item = payload[0].payload;
+                          return (
+                            <div className="bg-white border border-slate-200 p-2.5 rounded-xl shadow-md text-xs font-semibold">
+                              <p className="font-extrabold text-slate-800">{item.dateLabel}</p>
+                              <p className="text-slate-500 mt-1">Invoices: {item.count}</p>
+                              <p className="text-[#1a6b3c] font-bold">Total: ₹{Number(item.total).toLocaleString('en-IN')}</p>
+                              {item.hasFailed && <p className="text-red-500 mt-0.5 text-[9px] font-black">⚠️ Contains Failed Invoices</p>}
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="total"
+                      stroke="#1a6b3c"
+                      strokeWidth={3}
+                      dot={({ cx, cy, payload }) => (
+                        <circle
+                          key={`dot-${payload.day}`}
+                          cx={cx}
+                          cy={cy}
+                          r={payload.total > 0 ? 4 : 0}
+                          fill={payload.hasFailed ? '#e53e3e' : '#1a6b3c'}
+                          stroke="white"
+                          strokeWidth={1.5}
+                        />
+                      )}
+                      activeDot={{ r: 6, fill: '#1a6b3c', stroke: 'white', strokeWidth: 2 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Grid for 6 & 7 */}
+            <div className={shop.gst_registered ? "grid grid-cols-1 lg:grid-cols-2 gap-6" : "w-full"}>
               {/* SECTION 6 — Payment Method Breakdown */}
               <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
                 <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
@@ -464,114 +513,114 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                 </div>
               </div>
 
-              {/* SECTION 8 — Comparison with Last Month */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-                <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
-                  Section 8 — Comparison with Last Month
-                </h2>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs font-semibold text-slate-650">
-                    <thead>
-                      <tr className="bg-slate-50 text-slate-805 font-black uppercase text-[9px] border-b border-slate-200">
-                        <th className="py-2 px-3">Metric</th>
-                        <th className="py-2 px-3 text-right">This Month</th>
-                        <th className="py-2 px-3 text-right">Last Month</th>
-                        <th className="py-2 px-3 text-right">Change (%)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-bold">
-                      {[
-                        { key: 'billed', label: 'Total Billed', isPrice: true, inverse: false },
-                        { key: 'collected', label: 'Collected', isPrice: true, inverse: false },
-                        { key: 'outstanding', label: 'Outstanding', isPrice: true, inverse: true },
-                        { key: 'sent', label: 'Invoices Sent', isPrice: false, inverse: false },
-                      ].map((row) => {
-                        const item = data.comparison[row.key];
-                        const changeVal = item.change;
-                        const isIncrease = changeVal > 0;
-                        const isNeutral = changeVal === 0;
+              {/* SECTION 7 — Purchases Summary (only if gst_registered) */}
+              {shop.gst_registered && data.purchasesSummary && (
+                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+                  <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
+                    Section 7 — Purchases Summary
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Purchases</span>
+                      <p className="text-lg font-black text-slate-900 mt-1">₹{data.purchasesSummary.totalPurchases.toLocaleString('en-IN')}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total ITC Claimed</span>
+                      <p className="text-lg font-black text-[#1a6b3c] mt-1">₹{data.purchasesSummary.totalItcEarned.toLocaleString('en-IN')}</p>
+                    </div>
+                  </div>
 
-                        // determine color: positive is green for billing/collected/sent, but red for outstanding
-                        let colorClass = 'text-slate-600';
-                        if (!isNeutral) {
-                          if (row.inverse) {
-                            colorClass = isIncrease ? 'text-red-650' : 'text-emerald-700';
-                          } else {
-                            colorClass = isIncrease ? 'text-emerald-700' : 'text-red-650';
-                          }
-                        }
-
-                        return (
-                          <tr key={row.key} className="hover:bg-slate-50/50">
-                            <td className="py-3 px-3 text-slate-900">{row.label}</td>
-                            <td className="py-3 px-3 text-right tabular-nums">
-                              {row.isPrice ? `₹${item.curr.toLocaleString('en-IN')}` : item.curr}
-                            </td>
-                            <td className="py-3 px-3 text-right tabular-nums text-slate-400">
-                              {row.isPrice ? `₹${item.prev.toLocaleString('en-IN')}` : item.prev}
-                            </td>
-                            <td className={`py-3 px-3 text-right tabular-nums ${colorClass} font-extrabold flex items-center justify-end gap-1`}>
-                              {!isNeutral && (
-                                <span className="text-xs">
-                                  {isIncrease ? '↑' : '↓'}
-                                </span>
-                              )}
-                              <span>{Math.abs(changeVal).toFixed(1)}%</span>
-                            </td>
+                  <div className="border border-slate-100 rounded-xl overflow-hidden mt-4">
+                    <table className="w-full text-left text-xs font-semibold text-slate-650">
+                      <thead>
+                        <tr className="bg-slate-50 text-slate-805 font-black uppercase text-[9px] border-b border-slate-200">
+                          <th className="py-2 px-3">Supplier Name</th>
+                          <th className="py-2 px-3 text-right">Purchases</th>
+                          <th className="py-2 px-3 text-right">ITC Earned</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {data.purchasesSummary.topSuppliers.length === 0 ? (
+                          <tr>
+                            <td colSpan={3} className="py-4 text-center text-slate-400 italic">No purchases this month</td>
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                        ) : (
+                          data.purchasesSummary.topSuppliers.map((s: any) => (
+                            <tr key={s.name} className="hover:bg-slate-50/50">
+                              <td className="py-2.5 px-3 text-slate-900 font-extrabold uppercase">{s.name}</td>
+                              <td className="py-2.5 px-3 text-right font-extrabold text-slate-900">₹{s.purchases.toLocaleString('en-IN')}</td>
+                              <td className="py-2.5 px-3 text-right text-emerald-700">₹{s.itc.toLocaleString('en-IN')}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
-            {/* SECTION 7 — Purchases Summary (only if gst_registered) */}
-            {shop.gst_registered && data.purchasesSummary && (
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-                <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
-                  Section 7 — Purchases Summary
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Purchases</span>
-                    <p className="text-lg font-black text-slate-900 mt-1">₹{data.purchasesSummary.totalPurchases.toLocaleString('en-IN')}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total ITC Claimed</span>
-                    <p className="text-lg font-black text-[#1a6b3c] mt-1">₹{data.purchasesSummary.totalItcEarned.toLocaleString('en-IN')}</p>
-                  </div>
-                </div>
+            {/* SECTION 8 — Comparison with Last Month */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+              <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
+                Section 8 — Comparison with Last Month
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-semibold text-slate-650">
+                  <thead>
+                    <tr className="bg-slate-50 text-slate-805 font-black uppercase text-[9px] border-b border-slate-200">
+                      <th className="py-2 px-3">Metric</th>
+                      <th className="py-2 px-3 text-right">This Month</th>
+                      <th className="py-2 px-3 text-right">Last Month</th>
+                      <th className="py-2 px-3 text-right">Change (%)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-bold">
+                    {[
+                      { key: 'billed', label: 'Total Billed', isPrice: true, inverse: false },
+                      { key: 'collected', label: 'Collected', isPrice: true, inverse: false },
+                      { key: 'outstanding', label: 'Outstanding', isPrice: true, inverse: true },
+                      { key: 'sent', label: 'Invoices Sent', isPrice: false, inverse: false },
+                    ].map((row) => {
+                      const item = data.comparison[row.key];
+                      const changeVal = item.change;
+                      const isIncrease = changeVal > 0;
+                      const isNeutral = changeVal === 0;
 
-                <div className="border border-slate-100 rounded-xl overflow-hidden mt-4">
-                  <table className="w-full text-left text-xs font-semibold text-slate-650">
-                    <thead>
-                      <tr className="bg-slate-50 text-slate-805 font-black uppercase text-[9px] border-b border-slate-200">
-                        <th className="py-2 px-3">Supplier Name</th>
-                        <th className="py-2 px-3 text-right">Purchases Amount</th>
-                        <th className="py-2 px-3 text-right">ITC Earned</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {data.purchasesSummary.topSuppliers.length === 0 ? (
-                        <tr>
-                          <td colSpan={3} className="py-4 text-center text-slate-400 italic">No purchases from suppliers this month</td>
+                      // determine color: positive is green for billing/collected/sent, but red for outstanding
+                      let colorClass = 'text-slate-600';
+                      if (!isNeutral) {
+                        if (row.inverse) {
+                          colorClass = isIncrease ? 'text-red-650' : 'text-emerald-700';
+                        } else {
+                          colorClass = isIncrease ? 'text-emerald-700' : 'text-red-650';
+                        }
+                      }
+
+                      return (
+                        <tr key={row.key} className="hover:bg-slate-50/50">
+                          <td className="py-3 px-3 text-slate-900">{row.label}</td>
+                          <td className="py-3 px-3 text-right tabular-nums">
+                            {row.isPrice ? `₹${item.curr.toLocaleString('en-IN')}` : item.curr}
+                          </td>
+                          <td className="py-3 px-3 text-right tabular-nums text-slate-400">
+                            {row.isPrice ? `₹${item.prev.toLocaleString('en-IN')}` : item.prev}
+                          </td>
+                          <td className={`py-3 px-3 text-right tabular-nums ${colorClass} font-extrabold flex items-center justify-end gap-1`}>
+                            {!isNeutral && (
+                              <span className="text-xs">
+                                {isIncrease ? '↑' : '↓'}
+                              </span>
+                            )}
+                            <span>{Math.abs(changeVal).toFixed(1)}%</span>
+                          </td>
                         </tr>
-                      ) : (
-                        data.purchasesSummary.topSuppliers.map((s: any) => (
-                          <tr key={s.name} className="hover:bg-slate-50/50">
-                            <td className="py-2.5 px-3 text-slate-900 font-extrabold uppercase">{s.name}</td>
-                            <td className="py-2.5 px-3 text-right font-extrabold text-slate-900">₹{s.purchases.toLocaleString('en-IN')}</td>
-                            <td className="py-2.5 px-3 text-right text-emerald-700">₹{s.itc.toLocaleString('en-IN')}</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-            )}
+            </div>
           </div>
         )}
 
