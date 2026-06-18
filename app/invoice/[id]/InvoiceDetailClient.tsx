@@ -509,7 +509,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <p className="text-sm font-bold text-[#111827] uppercase">{item.name}</p>
                       {shop.gst_registered && item.gst_rate !== undefined && item.gst_rate > 0 && (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-[#e6f4ea] text-[#1a6b3c] border border-[#d1e7dd]">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-[#e6efff] text-[#0050e8] border border-[#cce0ff]">
                           {item.gst_rate}% GST
                         </span>
                       )}
@@ -653,7 +653,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
                   {!showForm ? (
                     <button
                       onClick={() => setShowForm(true)}
-                      className="w-full bg-[#1a6b3c]/10 hover:bg-[#1a6b3c]/15 text-[#1a6b3c] text-xs font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5"
+                      className="w-full bg-[#0050e8]/10 hover:bg-[#0050e8]/15 text-[#0050e8] text-xs font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <line x1="12" y1="5" x2="12" y2="19" />
@@ -681,7 +681,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
                       <button
                         type="button"
                         onClick={() => setPaymentAmount(balanceDue.toString())}
-                        className="w-full bg-[#1a6b3c]/5 hover:bg-[#1a6b3c]/10 text-[#1a6b3c] text-xs font-extrabold py-2 rounded-lg border border-dashed border-[#1a6b3c]/20 transition-all"
+                        className="w-full bg-[#0050e8]/5 hover:bg-[#0050e8]/10 text-[#0050e8] text-xs font-extrabold py-2 rounded-lg border border-dashed border-[#0050e8]/20 transition-all"
                       >
                         Pay in Full (₹{balanceDue.toLocaleString('en-IN')})
                       </button>
@@ -699,7 +699,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
                             max={balanceDue}
                             min={0.01}
                             placeholder="Enter amount"
-                            className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#1a6b3c]"
+                            className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#0050e8]"
                           />
                         </div>
 
@@ -715,7 +715,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
                                 onClick={() => setPaymentMethod(method)}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap capitalize transition-all border ${
                                   paymentMethod === method
-                                    ? 'bg-[#1a6b3c] text-white border-[#1a6b3c] shadow-sm'
+                                    ? 'bg-[#0050e8] text-white border-[#0050e8] shadow-sm'
                                     : 'bg-white text-[#4b5563] border-[#e5e7eb] hover:bg-gray-50'
                                 }`}
                               >
@@ -733,7 +733,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
                             type="date"
                             value={paymentDate}
                             onChange={(e) => setPaymentDate(e.target.value)}
-                            className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#1a6b3c]"
+                            className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#0050e8]"
                           />
                         </div>
 
@@ -746,7 +746,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
                             placeholder="e.g. GPay reference number, collected cash"
                             value={paymentNote}
                             onChange={(e) => setPaymentNote(e.target.value)}
-                            className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#1a6b3c]"
+                            className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#0050e8]"
                           />
                         </div>
 
@@ -781,7 +781,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
                       <div key={n.id} className="flex items-center justify-between bg-white border border-[#e5e7eb] rounded-xl p-3 text-xs">
                         <div className="space-y-0.5">
                           <p className="font-extrabold text-[#111827]">
-                            {n.note_number} · <span className="capitalize font-bold text-[#1a6b3c]">{n.note_type} Note</span>
+                            {n.note_number} · <span className="capitalize font-bold text-[#0050e8]">{n.note_type} Note</span>
                           </p>
                           <p className="font-extrabold text-[#111827]">
                             Amount: ₹{Number(n.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
@@ -799,7 +799,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
                 {!showNoteForm ? (
                   <button
                     onClick={() => setShowNoteForm(true)}
-                    className="w-full bg-[#1a6b3c]/10 hover:bg-[#1a6b3c]/15 text-[#1a6b3c] text-xs font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5"
+                    className="w-full bg-[#0050e8]/10 hover:bg-[#0050e8]/15 text-[#0050e8] text-xs font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <line x1="12" y1="5" x2="12" y2="19" />
@@ -943,7 +943,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
               <Button
                 onClick={() => window.location.href = `/invoice/new?draftId=${inv.id}`}
                 variant="primary"
-                className="w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white"
+                className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white"
               >
                 Edit Draft
               </Button>
@@ -985,7 +985,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
                 onClick={handleResend}
                 loading={resending}
                 variant="primary"
-                className="w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white"
+                className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white"
               >
                 Send Invoice (WhatsApp)
               </Button>
@@ -1057,7 +1057,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
                 onClick={handleResend}
                 loading={resending}
                 variant="primary"
-                className="w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white"
+                className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white"
               >
                 Resend Invoice
               </Button>

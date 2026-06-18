@@ -485,7 +485,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
                     placeholder="Search products by name or HSN..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-8 py-2.5 bg-white border border-[#e5e7eb] rounded-xl text-sm font-semibold focus:outline-none focus:border-[#1a6b3c] focus:ring-0 transition-all placeholder-slate-400 min-h-[44px]"
+                    className="w-full pl-10 pr-8 py-2.5 bg-white border border-[#e5e7eb] rounded-xl text-sm font-semibold focus:outline-none focus:border-[#0050e8] focus:ring-0 transition-all placeholder-slate-400 min-h-[44px]"
                   />
                   {searchQuery && (
                     <button
@@ -506,7 +506,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
                   onClick={() => setSelectedCategoryTab('All')}
                   className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors border ${
                     selectedCategoryTab === 'All'
-                      ? 'bg-[#1a6b3c]/8 text-[#1a6b3c] border-[#1a6b3c]'
+                      ? 'bg-[#0050e8]/8 text-[#0050e8] border-[#0050e8]'
                       : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
                   }`}
                 >
@@ -520,7 +520,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
                       onClick={() => setSelectedCategoryTab(cat)}
                       className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors border ${
                         selectedCategoryTab === cat
-                          ? 'bg-[#1a6b3c]/8 text-[#1a6b3c] border-[#1a6b3c]'
+                          ? 'bg-[#0050e8]/8 text-[#0050e8] border-[#0050e8]'
                           : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
                       }`}
                     >
@@ -565,7 +565,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
                             );
                           }}
                           className={`group cursor-pointer hover:bg-slate-50/70 transition-colors ${
-                            qty > 0 ? 'bg-[#1a6b3c]/5 hover:bg-[#1a6b3c]/8' : ''
+                            qty > 0 ? 'bg-[#0050e8]/5 hover:bg-[#0050e8]/8' : ''
                           }`}
                         >
                           {/* Favorite Star */}
@@ -596,7 +596,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
                                   {product.name}
                                 </span>
                                 {qty > 0 && (
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black bg-[#1a6b3c] text-white">
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black bg-[#0050e8] text-white">
                                     {qty} Added
                                   </span>
                                 )}
@@ -613,7 +613,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
                               </div>
                               <div className="flex items-center gap-1.5">
                                 {shop.gst_registered && product.gst_rate !== undefined && product.gst_rate > 0 && (
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#e6f4ea] text-[#1a6b3c] border border-[#d1e7dd]">
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#e6efff] text-[#0050e8] border border-[#cce0ff]">
                                     {product.gst_rate}% GST
                                   </span>
                                 )}
@@ -652,14 +652,14 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
                                     }
                                     setEditingProductId(null);
                                   }}
-                                  className="px-2 py-0.5 bg-[#1a6b3c] text-white rounded text-[10px] font-bold hover:bg-[#1a6b3c]/90"
+                                  className="px-2 py-0.5 bg-[#0050e8] text-white rounded text-[10px] font-bold hover:bg-[#0050e8]/90"
                                 >
                                   Save
                                 </button>
                               </div>
                             ) : (
                               <div
-                                className="font-extrabold text-slate-900 tabular-nums hover:text-[#1a6b3c] transition-colors"
+                                className="font-extrabold text-slate-900 tabular-nums hover:text-[#0050e8] transition-colors"
                                 onDoubleClick={(e) => {
                                   e.stopPropagation();
                                   setEditingProductId(product.id);
@@ -888,7 +888,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
 
                 {/* Selected customer indicator */}
                 {selectedCustomer && (
-                  <p className="text-xs text-[#1a6b3c] font-semibold mt-1.5">
+                  <p className="text-xs text-[#0050e8] font-semibold mt-1.5">
                     Sending to: {selectedCustomer.name} ({selectedCustomer.tag === 'vip' ? 'VIP' : 'Regular'})
                   </p>
                 )}
@@ -967,7 +967,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
                     onClick={() => setPaymentStatus('paid')}
                     className={`py-2 text-xs font-bold rounded-lg transition-all ${
                       paymentStatus === 'paid'
-                        ? 'bg-[#1a6b3c] text-white shadow-sm'
+                        ? 'bg-[#0050e8] text-white shadow-sm'
                         : 'text-[#4b5563] hover:text-[#111827]'
                     }`}
                   >
@@ -1043,7 +1043,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
                               onClick={() => setPaymentMethod(method.value)}
                               className={`py-2 px-1 text-[11px] font-bold rounded-xl border transition-all text-center ${
                                 paymentMethod === method.value
-                                  ? 'bg-[#1a6b3c]/10 text-[#1a6b3c] border-[#1a6b3c]'
+                                  ? 'bg-[#0050e8]/10 text-[#0050e8] border-[#0050e8]'
                                   : 'bg-[#f9fafb] text-[#4b5563] border-[#e5e7eb] hover:bg-[#f3f4f6]'
                               }`}
                             >
@@ -1098,7 +1098,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
                     type="button"
                     onClick={() => handleSubmit('sent')}
                     disabled={!isValid || loading}
-                    className="px-5 py-2.5 bg-[#1a6b3c] hover:bg-[#155d33] text-white text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
+                    className="px-5 py-2.5 bg-[#0050e8] hover:bg-[#0043c4] text-white text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
                   >
                     Save & Send
                   </button>
@@ -1139,7 +1139,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
               type="button"
               onClick={() => handleSubmit('sent')}
               disabled={!isValid || loading}
-              className="py-3 px-1 bg-[#1a6b3c] hover:bg-[#155d33] text-white text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
+              className="py-3 px-1 bg-[#0050e8] hover:bg-[#0043c4] text-white text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
             >
               Save & Send
             </button>

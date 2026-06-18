@@ -61,7 +61,7 @@ export default function AdminLayoutShell({
             {/* Left — Brand + Nav */}
             <div className="flex items-center gap-8">
               <Link href="/admin" className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1a6b3c] to-[#22875a] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0050e8] to-[#0058e8] flex items-center justify-center">
                   <span className="text-white font-black text-xs">TB</span>
                 </div>
                 <span className="text-sm font-black text-slate-900 tracking-tight">
@@ -76,7 +76,7 @@ export default function AdminLayoutShell({
                     href={link.href}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                       isActive(link.href)
-                        ? 'bg-[#1a6b3c]/10 text-[#1a6b3c]'
+                        ? 'bg-[#0050e8]/10 text-[#0050e8]'
                         : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
                     }`}
                   >
@@ -113,7 +113,7 @@ export default function AdminLayoutShell({
               href={link.href}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap ${
                 isActive(link.href)
-                  ? 'bg-[#1a6b3c]/10 text-[#1a6b3c]'
+                  ? 'bg-[#0050e8]/10 text-[#0050e8]'
                   : 'text-slate-500 hover:bg-slate-50'
               }`}
             >

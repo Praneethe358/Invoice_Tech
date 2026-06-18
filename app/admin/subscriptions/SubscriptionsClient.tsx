@@ -108,7 +108,7 @@ export default function SubscriptionsClient() {
             <tbody className="divide-y divide-slate-100">
               {data.renewals_due.map(shop => (
                 <tr key={shop.id} className="hover:bg-slate-50/70">
-                  <td className="py-3 px-4 font-bold text-slate-800 cursor-pointer hover:text-[#1a6b3c]" onClick={() => router.push(`/admin/shops/${shop.id}`)}>{shop.name}</td>
+                  <td className="py-3 px-4 font-bold text-slate-800 cursor-pointer hover:text-[#0050e8]" onClick={() => router.push(`/admin/shops/${shop.id}`)}>{shop.name}</td>
                   <td className="py-3 px-4 text-slate-600 font-semibold">{formatDate(shop.subscription_ends_at)}</td>
                   <td className="py-3 px-4">
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold ${
@@ -143,7 +143,7 @@ export default function SubscriptionsClient() {
                   <td className="py-3 px-4 text-red-600 font-semibold">{formatDate(shop.trial_ends_at)}</td>
                   <td className="py-3 px-4">
                     <button onClick={() => setActivatingId(activatingId === shop.id ? null : shop.id)}
-                      className="px-3 py-1 rounded-lg text-[10px] font-bold bg-[#1a6b3c] text-white hover:bg-[#155d33]">Activate</button>
+                      className="px-3 py-1 rounded-lg text-[10px] font-bold bg-[#0050e8] text-white hover:bg-[#0043c4]">Activate</button>
                   </td>
                 </tr>
               ))}
@@ -169,7 +169,7 @@ export default function SubscriptionsClient() {
                   <td className="py-3 px-4"><span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold border capitalize ${STATUS_COLORS[shop.subscription_status]}`}>{shop.subscription_status}</span></td>
                   <td className="py-3 px-4">
                     <button onClick={() => setActivatingId(activatingId === shop.id ? null : shop.id)}
-                      className="px-3 py-1 rounded-lg text-[10px] font-bold bg-[#1a6b3c] text-white hover:bg-[#155d33]">Reactivate</button>
+                      className="px-3 py-1 rounded-lg text-[10px] font-bold bg-[#0050e8] text-white hover:bg-[#0043c4]">Reactivate</button>
                   </td>
                 </tr>
               ))}
@@ -181,19 +181,19 @@ export default function SubscriptionsClient() {
       {/* Inline Activate Panel (shared) */}
       {activatingId && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-          className="bg-white border border-slate-200 rounded-xl p-5 shadow-md border-l-4 border-l-[#1a6b3c]">
+          className="bg-white border border-slate-200 rounded-xl p-5 shadow-md border-l-4 border-l-[#0050e8]">
           <p className="text-xs font-bold text-slate-800 mb-3">Select duration:</p>
           <div className="flex flex-wrap gap-2 mb-3">
             {[{ m: 1, l: '1 Month', p: '₹299' }, { m: 3, l: '3 Months', p: '₹897' }, { m: 6, l: '6 Months', p: '₹1,794' }, { m: 12, l: '1 Year', p: '₹3,588' }].map(o => (
               <button key={o.m} onClick={() => setDuration(o.m)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold border ${duration === o.m ? 'bg-[#1a6b3c] text-white border-[#1a6b3c]' : 'bg-white text-slate-600 border-slate-200'}`}>{o.l} ({o.p})</button>
+                className={`px-4 py-2 rounded-xl text-xs font-bold border ${duration === o.m ? 'bg-[#0050e8] text-white border-[#0050e8]' : 'bg-white text-slate-600 border-slate-200'}`}>{o.l} ({o.p})</button>
             ))}
           </div>
           <div className="flex items-end gap-3">
             <input type="text" placeholder="Payment reference" value={paymentRef} onChange={e => setPaymentRef(e.target.value)}
-              className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#1a6b3c]" />
+              className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0050e8]" />
             <button onClick={() => handleActivate(activatingId)} disabled={activateLoading}
-              className="px-5 py-2 rounded-xl text-xs font-bold bg-[#1a6b3c] text-white disabled:opacity-50">{activateLoading ? 'Processing...' : 'Confirm'}</button>
+              className="px-5 py-2 rounded-xl text-xs font-bold bg-[#0050e8] text-white disabled:opacity-50">{activateLoading ? 'Processing...' : 'Confirm'}</button>
             <button onClick={() => { setActivatingId(null); setPaymentRef(''); }}
               className="px-4 py-2 text-xs font-semibold text-slate-500">Cancel</button>
           </div>

@@ -73,10 +73,10 @@ export default function CatalogCard({
           isEditingPrice 
             ? 'border-blue-500 bg-blue-50/10 shadow-xs' 
             : quantity > 0
-            ? 'border-[#1a6b3c] bg-[#1a6b3c]/5 shadow-2xs'
+            ? 'border-[#0050e8] bg-[#0050e8]/5 shadow-2xs'
             : isOutOfStock
             ? 'border-slate-200 bg-slate-50/50 opacity-70 hover:opacity-100 hover:border-slate-300'
-            : 'border-slate-200 bg-white hover:border-[#1a6b3c]/40 hover:shadow-2xs'
+            : 'border-slate-200 bg-white hover:border-[#0050e8]/40 hover:shadow-2xs'
         }
       `}
     >
@@ -112,7 +112,7 @@ export default function CatalogCard({
                 key={quantity}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="w-5 h-5 rounded-full bg-[#1a6b3c] text-white text-[10px] font-extrabold flex items-center justify-center shadow-xs shrink-0"
+                className="w-5 h-5 rounded-full bg-[#0050e8] text-white text-[10px] font-extrabold flex items-center justify-center shadow-xs shrink-0"
               >
                 {quantity}
               </motion.span>
@@ -149,7 +149,7 @@ export default function CatalogCard({
                 }
                 setIsEditingPrice(false);
               }}
-              className="px-2 py-0.5 bg-[#1a6b3c] text-white rounded text-[10px] font-bold hover:bg-[#1a6b3c]/90 transition-colors"
+              className="px-2 py-0.5 bg-[#0050e8] text-white rounded text-[10px] font-bold hover:bg-[#0050e8]/90 transition-colors"
             >
               Save
             </button>

@@ -27,7 +27,7 @@ export default function QtyStepper({
       <motion.button
         whileTap={{ scale: 0.9 }}
         onClick={() => onChange(quantity + 1)}
-        className="w-8 h-8 rounded-lg bg-[#1a6b3c] text-white font-bold text-sm flex items-center justify-center hover:bg-[#155d33] transition-colors"
+        className="w-8 h-8 rounded-lg bg-[#0050e8] text-white font-bold text-sm flex items-center justify-center hover:bg-[#0043c4] transition-colors"
         aria-label="Increase quantity"
       >
         +

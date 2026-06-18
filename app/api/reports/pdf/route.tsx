@@ -3,8 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import React from 'react';
 import { Document, Page, Text, View, Image, StyleSheet, renderToBuffer } from '@react-pdf/renderer';
 
-const GREEN = '#1a6b3c';
-const LIGHT_GREEN = '#e6f4ea';
+const GREEN = '#0050e8';
+const LIGHT_GREEN = '#e6efff';
 const TEXT_DARK = '#1f2937';
 const TEXT_MUTED = '#4b5563';
 const BORDER = '#e5e7eb';
@@ -107,9 +107,9 @@ const ReportPDFDocument = ({ shop, month, year, data }: PDFReportProps) => {
             <Text style={s.cardLabel}>Outstanding Balance</Text>
             <Text style={[s.cardValue, { color: '#e53e3e' }]}>₹{data.salesSummary.outstanding.toLocaleString('en-IN')}</Text>
           </View>
-          <View style={[s.card, { borderLeftColor: '#1a6b3c' }]}>
+          <View style={[s.card, { borderLeftColor: '#0050e8' }]}>
             <Text style={s.cardLabel}>Collection Rate</Text>
-            <Text style={[s.cardValue, { color: '#1a6b3c' }]}>{data.salesSummary.collectionRate}%</Text>
+            <Text style={[s.cardValue, { color: '#0050e8' }]}>{data.salesSummary.collectionRate}%</Text>
           </View>
         </View>
 

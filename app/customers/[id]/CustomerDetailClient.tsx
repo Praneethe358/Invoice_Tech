@@ -316,11 +316,11 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
         {/* Header with greeting - Desktop only */}
         <div className="hidden md:flex bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-xs items-center justify-between mb-6 md:sticky md:top-0 md:z-30">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
+            <div className="w-10 h-10 rounded-none bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
               {shop.logo_url ? (
                 <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
               ) : (
-                <div className="w-full h-full bg-[#1a6b3c] flex items-center justify-center text-white">
+                <div className="w-full h-full bg-[#0050e8] flex items-center justify-center text-white">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" />
@@ -339,7 +339,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
           </div>
           <button
             onClick={() => router.push('/customers/ledger')}
-            className="flex items-center gap-1.5 bg-[#1a6b3c]/10 hover:bg-[#1a6b3c]/20 text-[#1a6b3c] font-bold py-2 px-3.5 rounded-xl text-xs transition-all cursor-pointer"
+            className="flex items-center gap-1.5 bg-[#0050e8]/10 hover:bg-[#0050e8]/20 text-[#0050e8] font-bold py-2 px-3.5 rounded-xl text-xs transition-all cursor-pointer"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -399,7 +399,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
             <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-extrabold ${
               customer.tag === 'vip'
                 ? 'bg-[#fef3c7] text-[#b45309]'
-                : 'bg-[#1a6b3c]/10 text-[#1a6b3c]'
+                : 'bg-[#0050e8]/10 text-[#0050e8]'
             }`}>
               {customer.name.charAt(0).toUpperCase()}
             </div>
@@ -414,7 +414,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
                   onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
                   disabled={savingName}
                   autoFocus
-                  className="text-xl font-extrabold text-[#111827] bg-transparent border-b-2 border-[#1a6b3c] outline-none w-full pb-1"
+                  className="text-xl font-extrabold text-[#111827] bg-transparent border-b-2 border-[#0050e8] outline-none w-full pb-1"
                 />
               ) : (
                 <h1
@@ -422,7 +422,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
                     setEditingName(true);
                     setTimeout(() => nameInputRef.current?.focus(), 50);
                   }}
-                  className="text-xl font-extrabold text-[#111827] cursor-text hover:text-[#1a6b3c] transition-colors uppercase"
+                  className="text-xl font-extrabold text-[#111827] cursor-text hover:text-[#0050e8] transition-colors uppercase"
                   title="Click to edit"
                 >
                   {customer.name}
@@ -439,12 +439,12 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
                   disabled={savingGstin}
                   placeholder="ENTER GSTIN (15 CHARS)"
                   autoFocus
-                  className="text-xs font-semibold text-[#111827] bg-transparent border-b-2 border-[#1a6b3c] outline-none pb-0.5 mt-1.5 w-full max-w-[200px]"
+                  className="text-xs font-semibold text-[#111827] bg-transparent border-b-2 border-[#0050e8] outline-none pb-0.5 mt-1.5 w-full max-w-[200px]"
                 />
               ) : (
                 <p
                   onClick={() => setEditingGstin(true)}
-                  className="text-xs font-semibold text-[#6b7280] mt-1.5 cursor-pointer hover:text-[#1a6b3c]"
+                  className="text-xs font-semibold text-[#6b7280] mt-1.5 cursor-pointer hover:text-[#0050e8]"
                 >
                   GSTIN: <span className="font-mono text-xs text-[#111827] underline decoration-dotted">{customer.gstin || 'None (Click to add)'}</span>
                 </p>
@@ -474,7 +474,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
               onClick={() => setActiveTab(tab)}
               className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all capitalize ${
                 activeTab === tab
-                  ? 'bg-[#1a6b3c] text-white shadow-sm'
+                  ? 'bg-[#0050e8] text-white shadow-sm'
                   : 'text-[#6b7280] hover:text-[#111827]'
               }`}
             >
@@ -591,7 +591,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
                         setLedgerPeriod(e.target.value as any);
                         setLedgerPage(1); // reset to page 1
                       }}
-                      className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:border-[#1a6b3c]"
+                      className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:border-[#0050e8]"
                     >
                       <option value="all">All Time</option>
                       <option value="this_month">This Month</option>
@@ -644,7 +644,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
                   </button>
                   <button
                     onClick={handleExportPDF}
-                    className="flex items-center gap-1.5 bg-[#1a6b3c] hover:bg-[#155630] text-white font-bold rounded-xl py-2 px-3.5 text-xs shadow-xs hover:shadow-md transition-all active:scale-[0.98]"
+                    className="flex items-center gap-1.5 bg-[#0050e8] hover:bg-[#0043c4] text-white font-bold rounded-xl py-2 px-3.5 text-xs shadow-xs hover:shadow-md transition-all active:scale-[0.98]"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -697,7 +697,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
             {/* Running Ledger Format Table */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
               <h3 className="text-xs font-bold text-slate-805 uppercase tracking-wide mb-4 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#1a6b3c]"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-[#0050e8]"></span>
                 Statement Transaction Log
               </h3>
 
@@ -768,7 +768,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
                               {isExpanded && entry.reference_type === 'invoice' && (
                                 <tr className="bg-slate-50/70">
                                   <td colSpan={4} className="py-3 px-4 border-t border-slate-100">
-                                    <div className="space-y-3 pl-4 border-l-2 border-[#1a6b3c] my-1">
+                                    <div className="space-y-3 pl-4 border-l-2 border-[#0050e8] my-1">
                                       {/* Invoice Details row */}
                                       <div className="flex flex-wrap items-center justify-between gap-4 text-[11px] bg-white border border-slate-150 rounded-xl p-3 shadow-3xs">
                                         <div>
@@ -801,7 +801,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
                                         </div>
                                         <button
                                           onClick={() => router.push(`/invoice/${entry.reference_id}`)}
-                                          className="bg-[#1a6b3c]/10 hover:bg-[#1a6b3c]/20 text-[#1a6b3c] font-bold py-1 px-3 rounded-lg text-[10px]"
+                                          className="bg-[#0050e8]/10 hover:bg-[#0050e8]/20 text-[#0050e8] font-bold py-1 px-3 rounded-lg text-[10px]"
                                         >
                                           Go to Invoice Page
                                         </button>
@@ -914,7 +914,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
                     <div className="space-y-3">
                       <div>
                         <span className="text-[10px] text-slate-400 block font-bold">FAVORITE PRODUCT</span>
-                        <span className="text-xs font-black text-[#1a6b3c]">{productSummary[0]?.name || '—'}</span>
+                        <span className="text-xs font-black text-[#0050e8]">{productSummary[0]?.name || '—'}</span>
                       </div>
                       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/50">
                         <div>

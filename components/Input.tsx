@@ -37,7 +37,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               transition-all duration-150
               outline-none
               border-[#e5e7eb]
-              focus:border-[#1a6b3c] focus:ring-2 focus:ring-[#1a6b3c]/20
+              focus:border-[#0050e8] focus:ring-2 focus:ring-[#0050e8]/20
               disabled:bg-[#f9fafb] disabled:cursor-not-allowed
               ${prefix ? 'pl-10' : ''}
               ${error ? 'border-[#dc2626] focus:border-[#dc2626] focus:ring-[#dc2626]/20' : ''}

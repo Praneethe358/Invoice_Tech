@@ -103,12 +103,12 @@ export default function DashboardClient({
         {/* Header with greeting - Desktop only */}
         <div className="hidden md:flex bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-xs items-center justify-between mb-6 md:sticky md:top-0 md:z-30">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
+            <div className="w-10 h-10 rounded-none bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
               {shop.logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
               ) : (
-                <div className="w-full h-full bg-[#1a6b3c] flex items-center justify-center text-white">
+                <div className="w-full h-full bg-[#0050e8] flex items-center justify-center text-white">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" />
@@ -157,7 +157,7 @@ export default function DashboardClient({
             <p className="text-xl font-extrabold text-gray-400 mt-2">₹0.00</p>
           </div>
           <div className="bg-[#f0fdf4] border border-[#dcfce7] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
-            <span className="text-[10px] font-bold text-[#15803d] uppercase tracking-wide">Sales (This Month)</span>
+            <span className="text-[10px] font-bold text-[#0050e8] uppercase tracking-wide">Sales (This Month)</span>
             <p className="text-xl font-extrabold text-[#16a34a] mt-2">₹{Number(stats.thisMonth || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </div>
           <div className="bg-white border border-[#e5e7eb] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
@@ -206,7 +206,7 @@ export default function DashboardClient({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
           <a
             href="/invoice/new"
-            className="bg-[#1a6b3c] hover:bg-[#155d33] text-white p-4 flex flex-col justify-between h-24 transition-colors shadow-sm rounded-none border border-[#1a6b3c]"
+            className="bg-[#0050e8] hover:bg-[#0043c4] text-white p-4 flex flex-col justify-between h-24 transition-colors shadow-sm rounded-none border border-[#0050e8]"
           >
             <div className="w-8 h-8 rounded-none bg-white/20 flex items-center justify-center">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -223,7 +223,7 @@ export default function DashboardClient({
             href="/catalog"
             className="bg-white hover:bg-gray-50 border border-[#e5e7eb] p-4 flex flex-col justify-between h-24 transition-colors shadow-sm rounded-none"
           >
-            <div className="w-8 h-8 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center text-[#1a6b3c]">
+            <div className="w-8 h-8 rounded-none bg-[#0050e8]/10 flex items-center justify-center text-[#0050e8]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
@@ -237,7 +237,7 @@ export default function DashboardClient({
             href="/customers"
             className="bg-white hover:bg-gray-50 border border-[#e5e7eb] p-4 flex flex-col justify-between h-24 transition-colors shadow-sm rounded-none"
           >
-            <div className="w-8 h-8 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center text-[#1a6b3c]">
+            <div className="w-8 h-8 rounded-none bg-[#0050e8]/10 flex items-center justify-center text-[#0050e8]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
@@ -254,7 +254,7 @@ export default function DashboardClient({
             href="/payments"
             className="bg-white hover:bg-gray-50 border border-[#e5e7eb] p-4 flex flex-col justify-between h-24 transition-colors shadow-sm rounded-none"
           >
-            <div className="w-8 h-8 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center text-[#1a6b3c]">
+            <div className="w-8 h-8 rounded-none bg-[#0050e8]/10 flex items-center justify-center text-[#0050e8]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="2" y="4" width="20" height="16" rx="2" ry="2" />
                 <line x1="12" y1="4" x2="12" y2="20" />
@@ -276,7 +276,7 @@ export default function DashboardClient({
               placeholder="Search by invoice or phone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white rounded-none border border-[#e5e7eb] py-3 pl-10 pr-4 text-sm font-medium text-[#111827] focus:outline-none focus:border-[#1a6b3c] focus:ring-0 transition-all"
+              className="w-full bg-white rounded-none border border-[#e5e7eb] py-3 pl-10 pr-4 text-sm font-medium text-[#111827] focus:outline-none focus:border-[#0050e8] focus:ring-0 transition-all"
             />
             <svg className="absolute left-3.5 top-3.5 text-[#9ca3af]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="8" />
@@ -300,7 +300,7 @@ export default function DashboardClient({
                 onClick={() => setStatusFilter(item.key)}
                 className={`px-4 py-1.5 rounded-none text-xs font-bold capitalize transition-all shrink-0 ${
                   statusFilter === item.key
-                    ? 'bg-[#1a6b3c] text-white shadow-xs'
+                    ? 'bg-[#0050e8] text-white shadow-xs'
                     : 'bg-white text-[#6b7280] border border-[#e5e7eb] hover:bg-[#f9fafb]'
                 }`}
               >
@@ -455,7 +455,7 @@ export default function DashboardClient({
                                     window.location.href = `/invoice/${invoice.id}`;
                                   }
                                 }}
-                                className="text-xs font-bold text-[#1a6b3c] hover:underline"
+                                className="text-xs font-bold text-[#0050e8] hover:underline"
                               >
                                 {isDraft ? 'Edit' : 'Details'}
                               </button>

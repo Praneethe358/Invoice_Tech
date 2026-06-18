@@ -257,13 +257,13 @@ export default function Navbar() {
           </div>
           <div>
             <span className="font-heading font-black text-[#1a1d26] text-base leading-none block">TruBill</span>
-            <span className="text-[10px] font-bold text-[#1a6b3c] uppercase tracking-wider mt-0.5 block">Invoice</span>
+            <span className="text-[10px] font-bold text-[#0050e8] uppercase tracking-wider mt-0.5 block">Invoice</span>
           </div>
         </div>
 
         {/* Quick Action: New Invoice */}
         <Link href="/invoice/new" className="mb-6 block">
-          <button className="w-full bg-[#1a6b3c] hover:bg-[#155630] text-white rounded-xl py-3 px-4 flex items-center justify-center gap-2.5 font-bold text-sm shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
+          <button className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white rounded-xl py-3 px-4 flex items-center justify-center gap-2.5 font-bold text-sm shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
@@ -284,11 +284,11 @@ export default function Navbar() {
                   href={item.href}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all relative ${
                     isActive
-                      ? 'bg-[#1a6b3c]/10 text-[#1a6b3c]'
+                      ? 'bg-[#0050e8]/10 text-[#0050e8]'
                       : 'text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#1a1d26]'
                   }`}
                 >
-                  <span className={isActive ? 'text-[#1a6b3c]' : 'text-[#9ca3af]'}>
+                  <span className={isActive ? 'text-[#0050e8]' : 'text-[#9ca3af]'}>
                     {item.icon}
                   </span>
                   {item.label}
@@ -305,7 +305,7 @@ export default function Navbar() {
         {/* Sidebar Footer with Logout */}
         <div className="border-t border-[#e8eaed] pt-4 mt-auto">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-full bg-[#1a6b3c]/10 flex items-center justify-center text-[#1a6b3c] shrink-0">
+            <div className="w-9 h-9 rounded-full bg-[#0050e8]/10 flex items-center justify-center text-[#0050e8] shrink-0">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
@@ -396,11 +396,11 @@ export default function Navbar() {
               {/* Brand / Active Shop Header */}
               <div className="flex items-center justify-between mb-6 border-b border-[#f3f4f6] pb-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e8eaed] shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e8eaed] shrink-0">
                     {shopInfo?.logo_url ? (
                       <img src={shopInfo.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
                     ) : (
-                      <span className="text-sm font-bold text-[#1a6b3c]">
+                      <span className="text-sm font-bold text-[#0050e8]">
                         {(shopInfo?.name || 'TB').slice(0, 2).toUpperCase()}
                       </span>
                     )}
@@ -409,7 +409,7 @@ export default function Navbar() {
                     <span className="font-heading font-extrabold text-[#1a1d26] text-xs leading-none block truncate uppercase">
                       {shopInfo?.name || 'TruBill'}
                     </span>
-                    <span className="text-[9px] font-bold text-[#1a6b3c] uppercase tracking-wider mt-0.5 block truncate">
+                    <span className="text-[9px] font-bold text-[#0050e8] uppercase tracking-wider mt-0.5 block truncate">
                       {shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Invoice'}
                     </span>
                   </div>
@@ -428,7 +428,7 @@ export default function Navbar() {
 
               {/* Quick Action: New Invoice */}
               <Link href="/invoice/new" className="mb-6 block" onClick={() => setMobileMenuOpen(false)}>
-                <button className="w-full bg-[#1a6b3c] hover:bg-[#155630] text-white rounded-xl py-3 px-4 flex items-center justify-center gap-2.5 font-bold text-sm shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer">
+                <button className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white rounded-xl py-3 px-4 flex items-center justify-center gap-2.5 font-bold text-sm shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <line x1="5" y1="12" x2="19" y2="12" />
@@ -450,11 +450,11 @@ export default function Navbar() {
                         onClick={() => setMobileMenuOpen(false)}
                         className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all relative ${
                           isActive
-                            ? 'bg-[#1a6b3c]/10 text-[#1a6b3c]'
+                            ? 'bg-[#0050e8]/10 text-[#0050e8]'
                             : 'text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#1a1d26]'
                         }`}
                       >
-                        <span className={isActive ? 'text-[#1a6b3c]' : 'text-[#9ca3af]'}>
+                        <span className={isActive ? 'text-[#0050e8]' : 'text-[#9ca3af]'}>
                           {item.icon}
                         </span>
                         {item.label}
@@ -471,7 +471,7 @@ export default function Navbar() {
               {/* Sidebar Footer with Logout */}
               <div className="border-t border-[#e8eaed] pt-4 mt-auto">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-9 h-9 rounded-full bg-[#1a6b3c]/10 flex items-center justify-center text-[#1a6b3c] shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-[#0050e8]/10 flex items-center justify-center text-[#0050e8] shrink-0">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
@@ -521,7 +521,7 @@ export default function Navbar() {
                   <Link key={item.href} href={item.href}>
                     <motion.div
                       whileTap={{ scale: 0.9 }}
-                      className="w-12 h-12 -mt-5 rounded-2xl bg-[#1a6b3c] text-white shadow-lg shadow-[#1a6b3c]/25 flex items-center justify-center cursor-pointer"
+                      className="w-12 h-12 -mt-5 rounded-2xl bg-[#0050e8] text-white shadow-lg shadow-[#0050e8]/25 flex items-center justify-center cursor-pointer"
                     >
                       {item.icon}
                     </motion.div>
@@ -535,7 +535,7 @@ export default function Navbar() {
                   href={item.href}
                   className={`flex flex-col items-center gap-1 min-w-[64px] py-2 transition-colors relative ${
                     isActive
-                      ? 'text-[#1a6b3c] bottom-nav-active'
+                      ? 'text-[#0050e8] bottom-nav-active'
                       : 'text-[#9ca3af]'
                   }`}
                 >

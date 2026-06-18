@@ -219,7 +219,7 @@ export default function AdminDashboardClient() {
               onClick={() => { setStatusFilter(tab); setPage(1); }}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize whitespace-nowrap border transition-colors ${
                 statusFilter === tab
-                  ? 'bg-[#1a6b3c]/10 text-[#1a6b3c] border-[#1a6b3c]'
+                  ? 'bg-[#0050e8]/10 text-[#0050e8] border-[#0050e8]'
                   : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
               }`}
             >
@@ -233,7 +233,7 @@ export default function AdminDashboardClient() {
             placeholder="Search shop name or email..."
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#1a6b3c] placeholder-slate-400"
+            className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#0050e8] placeholder-slate-400"
           />
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </div>
@@ -274,10 +274,10 @@ export default function AdminDashboardClient() {
             ) : shops.map((shop, idx) => (
               <Fragment key={shop.id}>
                 <tr
-                  className={`hover:bg-slate-50/70 transition-colors ${idx % 2 === 1 ? 'bg-slate-50/30' : ''} ${activatingId === shop.id ? 'border-l-4 border-l-[#1a6b3c]' : ''}`}
+                  className={`hover:bg-slate-50/70 transition-colors ${idx % 2 === 1 ? 'bg-slate-50/30' : ''} ${activatingId === shop.id ? 'border-l-4 border-l-[#0050e8]' : ''}`}
                 >
                   <td className="py-3.5 px-4">
-                    <button onClick={() => router.push(`/admin/shops/${shop.id}`)} className="font-bold text-slate-900 hover:text-[#1a6b3c] transition-colors text-left">
+                    <button onClick={() => router.push(`/admin/shops/${shop.id}`)} className="font-bold text-slate-900 hover:text-[#0050e8] transition-colors text-left">
                       {shop.name}
                     </button>
                   </td>
@@ -304,7 +304,7 @@ export default function AdminDashboardClient() {
                       {shop.subscription_status !== 'active' ? (
                         <button
                           onClick={() => setActivatingId(activatingId === shop.id ? null : shop.id)}
-                          className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-[#1a6b3c] text-white hover:bg-[#155d33] transition-colors"
+                          className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-[#0050e8] text-white hover:bg-[#0043c4] transition-colors"
                         >Activate</button>
                       ) : (
                         <button
@@ -341,10 +341,10 @@ export default function AdminDashboardClient() {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="border-l-4 border-l-[#1a6b3c] bg-[#f8faf9] px-6 py-5"
+                        className="border-l-4 border-l-[#0050e8] bg-[#f8faf9] px-6 py-5"
                       >
                         <p className="text-xs font-bold text-slate-800 mb-4">
-                          {shop.subscription_status === 'active' ? 'Extend' : 'Activate'} subscription for <span className="text-[#1a6b3c]">{shop.name}</span>
+                          {shop.subscription_status === 'active' ? 'Extend' : 'Activate'} subscription for <span className="text-[#0050e8]">{shop.name}</span>
                         </p>
                         <div className="flex flex-wrap gap-3 mb-4">
                           {[
@@ -358,7 +358,7 @@ export default function AdminDashboardClient() {
                               onClick={() => setDuration(opt.m)}
                               className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-colors ${
                                 duration === opt.m
-                                  ? 'bg-[#1a6b3c] text-white border-[#1a6b3c]'
+                                  ? 'bg-[#0050e8] text-white border-[#0050e8]'
                                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
                               }`}
                             >
@@ -374,13 +374,13 @@ export default function AdminDashboardClient() {
                               placeholder="UPI transaction ID or note"
                               value={paymentRef}
                               onChange={e => setPaymentRef(e.target.value)}
-                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#1a6b3c]"
+                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#0050e8]"
                             />
                           </div>
                           <button
                             onClick={() => handleActivate(shop.id)}
                             disabled={activateLoading}
-                            className="px-5 py-2 rounded-xl text-xs font-bold bg-[#1a6b3c] text-white hover:bg-[#155d33] disabled:opacity-50 transition-colors"
+                            className="px-5 py-2 rounded-xl text-xs font-bold bg-[#0050e8] text-white hover:bg-[#0043c4] disabled:opacity-50 transition-colors"
                           >
                             {activateLoading ? 'Processing...' : 'Confirm Activate'}
                           </button>
@@ -413,7 +413,7 @@ export default function AdminDashboardClient() {
                 key={p}
                 onClick={() => setPage(p)}
                 className={`w-8 h-8 rounded-lg text-xs font-bold ${
-                  p === page ? 'bg-[#1a6b3c] text-white' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+                  p === page ? 'bg-[#0050e8] text-white' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
                 }`}
               >{p}</button>
             ))}

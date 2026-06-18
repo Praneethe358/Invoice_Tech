@@ -85,7 +85,7 @@ export default function PurchasesClient({ shop, initialPurchases }: Props) {
         {/* Header matched with profile logo format - Desktop only */}
         <div className="hidden md:flex bg-white border border-[#e2e8f0] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-sm items-center justify-between gap-4 mb-8 md:sticky md:top-0 md:z-30">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1a6b3c] to-[#2e7d32] flex items-center justify-center overflow-hidden shadow-md">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0050e8] to-[#0058e8] flex items-center justify-center overflow-hidden shadow-md">
               {shop.logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
@@ -111,7 +111,7 @@ export default function PurchasesClient({ shop, initialPurchases }: Props) {
           </div>
           <button
             onClick={() => router.push('/purchases/new')}
-            className="bg-[#1a6b3c] hover:bg-[#155630] text-white rounded-xl py-2.5 px-5 flex items-center gap-2.5 font-bold text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+            className="bg-[#0050e8] hover:bg-[#0043c4] text-white rounded-xl py-2.5 px-5 flex items-center gap-2.5 font-bold text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="12" y1="5" x2="12" y2="19" />
@@ -133,7 +133,7 @@ export default function PurchasesClient({ shop, initialPurchases }: Props) {
           </div>
           <button
             onClick={() => router.push('/purchases/new')}
-            className="bg-[#1a6b3c] hover:bg-[#155630] text-white rounded-xl py-2.5 px-5 flex items-center gap-2.5 font-bold text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+            className="bg-[#0050e8] hover:bg-[#0043c4] text-white rounded-xl py-2.5 px-5 flex items-center gap-2.5 font-bold text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="12" y1="5" x2="12" y2="19" />
@@ -210,7 +210,7 @@ export default function PurchasesClient({ shop, initialPurchases }: Props) {
               placeholder="Search by invoice # or supplier..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-xs font-semibold text-slate-805 focus:outline-none focus:bg-white focus:border-[#1a6b3c]"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-xs font-semibold text-slate-805 focus:outline-none focus:bg-white focus:border-[#0050e8]"
             />
             <svg className="absolute left-3.5 top-2.5 text-slate-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="8" />
@@ -325,7 +325,7 @@ export default function PurchasesClient({ shop, initialPurchases }: Props) {
                         <td className="py-4 px-5 text-center">
                           <button
                             onClick={() => router.push(`/purchases/${p.id}`)}
-                            className="bg-[#1a6b3c]/5 hover:bg-[#1a6b3c]/10 text-[#1a6b3c] font-bold text-[11px] px-3.5 py-1.5 rounded-lg transition-colors"
+                            className="bg-[#0050e8]/5 hover:bg-[#0050e8]/10 text-[#0050e8] font-bold text-[11px] px-3.5 py-1.5 rounded-lg transition-colors"
                           >
                             View
                           </button>

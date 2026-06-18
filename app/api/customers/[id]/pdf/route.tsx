@@ -12,9 +12,9 @@ import {
 import { createClient } from '@/lib/supabase/server';
 
 // ─── Styles matching brand theme ──────────────────────────────
-const GREEN = '#1a6b3c';
+const GREEN = '#0050e8';
 const DARK_GREEN = '#0d3c20';
-const LIGHT_GREEN = '#e6f4ea';
+const LIGHT_GREEN = '#e6efff';
 const TEXT_DARK = '#1f2937';
 const TEXT_MUTED = '#4b5563';
 const BORDER_COLOR = '#e5e7eb';

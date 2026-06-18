@@ -239,7 +239,7 @@ export default function SupplierDetailClient({
         {/* Header matched with profile logo format - Desktop only */}
         <div className="hidden md:flex bg-white border border-[#e2e8f0] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-sm items-center justify-between gap-4 mb-8 md:sticky md:top-0 md:z-30">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1a6b3c] to-[#2e7d32] flex items-center justify-center overflow-hidden shadow-md">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0050e8] to-[#0058e8] flex items-center justify-center overflow-hidden shadow-md">
               {shop.logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
@@ -314,7 +314,7 @@ export default function SupplierDetailClient({
               onClick={() => setActiveTab(tab)}
               className={`flex-1 text-center py-2.5 rounded-lg text-xs font-bold transition-all uppercase tracking-wider ${
                 activeTab === tab
-                  ? 'bg-[#1a6b3c] text-white shadow-xs'
+                  ? 'bg-[#0050e8] text-white shadow-xs'
                   : 'text-slate-500 hover:text-slate-800'
               }`}
             >
@@ -330,7 +330,7 @@ export default function SupplierDetailClient({
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#1a6b3c]/10 text-[#1a6b3c] flex items-center justify-center text-xl font-extrabold border border-[#1a6b3c]/20">
+                  <div className="w-12 h-12 rounded-xl bg-[#0050e8]/10 text-[#0050e8] flex items-center justify-center text-xl font-extrabold border border-[#0050e8]/20">
                     {supplier.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
@@ -339,7 +339,7 @@ export default function SupplierDetailClient({
                     </h2>
                     <div className="mt-1.5">
                       {supplier.gstin ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-[#e6f4ea] text-[#1a6b3c] border border-[#d1e7dd] uppercase tracking-wider font-mono">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-[#e6efff] text-[#0050e8] border border-[#cce0ff] uppercase tracking-wider font-mono">
                           GSTIN: {supplier.gstin}
                         </span>
                       ) : (
@@ -489,7 +489,7 @@ export default function SupplierDetailClient({
                     onClick={() => setDateFilter(f.key)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
                       dateFilter === f.key
-                        ? 'bg-[#1a6b3c]/10 text-[#1a6b3c] border-[#1a6b3c]'
+                        ? 'bg-[#0050e8]/10 text-[#0050e8] border-[#0050e8]'
                         : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
                     }`}
                   >
@@ -506,7 +506,7 @@ export default function SupplierDetailClient({
                       type="date"
                       value={customStartDate}
                       onChange={(e) => setCustomStartDate(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#1a6b3c]"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#0050e8]"
                     />
                   </div>
                   <div>
@@ -515,7 +515,7 @@ export default function SupplierDetailClient({
                       type="date"
                       value={customEndDate}
                       onChange={(e) => setCustomEndDate(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#1a6b3c]"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#0050e8]"
                     />
                   </div>
                 </div>
@@ -619,7 +619,7 @@ export default function SupplierDetailClient({
                           <td className="py-3 px-3 text-center">
                             <button
                               onClick={() => router.push(`/purchases/${p.id}`)}
-                              className="bg-[#1a6b3c]/5 hover:bg-[#1a6b3c]/10 text-[#1a6b3c] font-bold text-[11px] px-3.5 py-1.5 rounded-lg transition-colors"
+                              className="bg-[#0050e8]/5 hover:bg-[#0050e8]/10 text-[#0050e8] font-bold text-[11px] px-3.5 py-1.5 rounded-lg transition-colors"
                             >
                               View
                             </button>
@@ -646,7 +646,7 @@ export default function SupplierDetailClient({
             <div className="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-6 space-y-5 relative shadow-xl z-10">
               <div className="flex justify-between items-center border-b border-slate-100 pb-3">
                 <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#1a6b3c]"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#0050e8]"></span>
                   Edit Supplier
                 </h2>
                 <button
@@ -670,7 +670,7 @@ export default function SupplierDetailClient({
                     placeholder="e.g. TAMIL NADU FERTILIZERS"
                     value={name}
                     onChange={(e) => setName(e.target.value.toUpperCase())}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#1a6b3c] focus:ring-1 focus:ring-[#1a6b3c]/20 transition-all"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#0050e8] focus:ring-1 focus:ring-[#0050e8]/20 transition-all"
                     required
                   />
                 </div>
@@ -685,7 +685,7 @@ export default function SupplierDetailClient({
                     value={gstin}
                     onChange={(e) => setGstin(e.target.value.toUpperCase())}
                     maxLength={15}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#1a6b3c] focus:ring-1 focus:ring-[#1a6b3c]/20 transition-all font-mono"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#0050e8] focus:ring-1 focus:ring-[#0050e8]/20 transition-all font-mono"
                   />
                 </div>
 
@@ -699,7 +699,7 @@ export default function SupplierDetailClient({
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                     maxLength={10}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#1a6b3c] focus:ring-1 focus:ring-[#1a6b3c]/20 transition-all"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#0050e8] focus:ring-1 focus:ring-[#0050e8]/20 transition-all"
                   />
                 </div>
 
@@ -711,7 +711,7 @@ export default function SupplierDetailClient({
                     placeholder="Enter supplier address"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#1a6b3c] focus:ring-1 focus:ring-[#1a6b3c]/20 transition-all"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#0050e8] focus:ring-1 focus:ring-[#0050e8]/20 transition-all"
                     rows={3}
                   />
                 </div>
@@ -727,7 +727,7 @@ export default function SupplierDetailClient({
                   <button
                     type="submit"
                     disabled={updating}
-                    className="flex-1 bg-[#1a6b3c] hover:bg-[#155630] text-white font-bold rounded-xl py-3 text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
+                    className="flex-1 bg-[#0050e8] hover:bg-[#0043c4] text-white font-bold rounded-xl py-3 text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
                   >
                     {updating ? 'Saving...' : 'Save Changes'}
                   </button>

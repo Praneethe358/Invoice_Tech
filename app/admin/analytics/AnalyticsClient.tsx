@@ -104,7 +104,7 @@ export default function AnalyticsClient() {
                 <XAxis type="number" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} allowDecimals={false} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} width={120} />
                 <Tooltip contentStyle={{ fontSize: 11, borderRadius: 12, border: '1px solid #e2e8f0' }} />
-                <Bar dataKey="count" fill="#1a6b3c" radius={[0, 6, 6, 0]} />
+                <Bar dataKey="count" fill="#0050e8" radius={[0, 6, 6, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -119,7 +119,7 @@ export default function AnalyticsClient() {
                 <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} allowDecimals={false} />
                 <Tooltip contentStyle={{ fontSize: 11, borderRadius: 12, border: '1px solid #e2e8f0' }} />
-                <Line type="monotone" dataKey="shops" stroke="#1a6b3c" strokeWidth={2.5} dot={{ fill: '#1a6b3c', r: 4 }} />
+                <Line type="monotone" dataKey="shops" stroke="#0050e8" strokeWidth={2.5} dot={{ fill: '#0050e8', r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -131,7 +131,7 @@ export default function AnalyticsClient() {
         <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-4">GST Adoption</h2>
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <p className="text-2xl font-black text-[#1a6b3c]">{data.gst.registered}</p>
+            <p className="text-2xl font-black text-[#0050e8]">{data.gst.registered}</p>
             <p className="text-[10px] font-semibold text-slate-400 mt-0.5">GST Registered Shops</p>
           </div>
           <div>
@@ -144,7 +144,7 @@ export default function AnalyticsClient() {
           </div>
         </div>
         <div className="mt-3 bg-slate-100 rounded-full h-2 overflow-hidden">
-          <div className="bg-[#1a6b3c] h-full rounded-full transition-all" style={{ width: `${data.gst.percentage}%` }} />
+          <div className="bg-[#0050e8] h-full rounded-full transition-all" style={{ width: `${data.gst.percentage}%` }} />
         </div>
       </div>
     </div>

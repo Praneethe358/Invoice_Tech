@@ -192,7 +192,7 @@ export default function LedgerPageClient({ shop, customers }: Props) {
                 placeholder="Search customer by name or phone number..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-white rounded-xl border border-[#e5e7eb] py-3.5 pl-11 pr-4 text-sm font-medium text-[#111827] focus:outline-none focus:border-[#1a6b3c]"
+                className="w-full bg-white rounded-xl border border-[#e5e7eb] py-3.5 pl-11 pr-4 text-sm font-medium text-[#111827] focus:outline-none focus:border-[#0050e8]"
               />
               <svg className="absolute left-4 top-4 text-[#9ca3af]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <circle cx="11" cy="11" r="8" />
@@ -226,7 +226,7 @@ export default function LedgerPageClient({ shop, customers }: Props) {
                             Outstanding: ₹{balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                           </span>
                           {cust.gstin && (
-                            <span className="text-[10px] text-[#1a6b3c] font-bold block uppercase mt-0.5">
+                            <span className="text-[10px] text-[#0050e8] font-bold block uppercase mt-0.5">
                               GSTIN: {cust.gstin}
                             </span>
                           )}
@@ -244,14 +244,14 @@ export default function LedgerPageClient({ shop, customers }: Props) {
             {/* Active Customer Profile Row */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#1a6b3c]/10 text-[#1a6b3c] flex items-center justify-center text-lg font-black uppercase">
+                <div className="w-12 h-12 rounded-xl bg-[#0050e8]/10 text-[#0050e8] flex items-center justify-center text-lg font-black uppercase">
                   {selectedCustomer?.name.charAt(0)}
                 </div>
                 <div>
                   <h2 className="text-lg font-black text-slate-900 uppercase">{selectedCustomer?.name}</h2>
                   <p className="text-xs text-slate-400 font-bold">+91 {selectedCustomer?.phone.slice(-10)}</p>
                   {selectedCustomer?.gstin && (
-                    <span className="inline-block text-[10px] font-black text-[#1a6b3c] uppercase bg-emerald-50 px-2 py-0.5 rounded-md mt-1">
+                    <span className="inline-block text-[10px] font-black text-[#0050e8] uppercase bg-emerald-50 px-2 py-0.5 rounded-md mt-1">
                       GSTIN: {selectedCustomer.gstin}
                     </span>
                   )}
@@ -271,7 +271,7 @@ export default function LedgerPageClient({ shop, customers }: Props) {
                         setLedgerPeriod(e.target.value as any);
                         setLedgerPage(1);
                       }}
-                      className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:border-[#1a6b3c]"
+                      className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:border-[#0050e8]"
                     >
                       <option value="all">All Time</option>
                       <option value="this_month">This Month</option>
@@ -324,7 +324,7 @@ export default function LedgerPageClient({ shop, customers }: Props) {
                   </button>
                   <button
                     onClick={handleExportPDF}
-                    className="flex items-center gap-1.5 bg-[#1a6b3c] hover:bg-[#155630] text-white font-bold rounded-xl py-2 px-3.5 text-xs shadow-xs hover:shadow-md transition-all active:scale-[0.98]"
+                    className="flex items-center gap-1.5 bg-[#0050e8] hover:bg-[#0043c4] text-white font-bold rounded-xl py-2 px-3.5 text-xs shadow-xs hover:shadow-md transition-all active:scale-[0.98]"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -377,7 +377,7 @@ export default function LedgerPageClient({ shop, customers }: Props) {
             {/* Running Ledger Format Table */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
               <h3 className="text-xs font-bold text-slate-805 uppercase tracking-wide mb-4 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#1a6b3c]"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-[#0050e8]"></span>
                 Statement Transaction Log
               </h3>
 
@@ -448,7 +448,7 @@ export default function LedgerPageClient({ shop, customers }: Props) {
                               {isExpanded && entry.reference_type === 'invoice' && (
                                 <tr className="bg-slate-50/70">
                                   <td colSpan={4} className="py-3 px-4 border-t border-slate-100">
-                                    <div className="space-y-3 pl-4 border-l-2 border-[#1a6b3c] my-1">
+                                    <div className="space-y-3 pl-4 border-l-2 border-[#0050e8] my-1">
                                       {/* Invoice Details row */}
                                       <div className="flex flex-wrap items-center justify-between gap-4 text-[11px] bg-white border border-slate-150 rounded-xl p-3 shadow-3xs">
                                         <div>
@@ -481,7 +481,7 @@ export default function LedgerPageClient({ shop, customers }: Props) {
                                         </div>
                                         <button
                                           onClick={() => router.push(`/invoice/${entry.reference_id}`)}
-                                          className="bg-[#1a6b3c]/10 hover:bg-[#1a6b3c]/20 text-[#1a6b3c] font-bold py-1 px-3 rounded-lg text-[10px]"
+                                          className="bg-[#0050e8]/10 hover:bg-[#0050e8]/20 text-[#0050e8] font-bold py-1 px-3 rounded-lg text-[10px]"
                                         >
                                           Go to Invoice Page
                                         </button>
@@ -594,7 +594,7 @@ export default function LedgerPageClient({ shop, customers }: Props) {
                     <div className="space-y-3">
                       <div>
                         <span className="text-[10px] text-slate-400 block font-bold">FAVORITE PRODUCT</span>
-                        <span className="text-xs font-black text-[#1a6b3c]">{productSummary[0]?.name || '—'}</span>
+                        <span className="text-xs font-black text-[#0050e8]">{productSummary[0]?.name || '—'}</span>
                       </div>
                       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/50">
                         <div>

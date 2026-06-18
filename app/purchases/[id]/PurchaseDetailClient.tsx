@@ -65,7 +65,7 @@ export default function PurchaseDetailClient({ shop, purchase, items }: Props) {
         {/* Header matched with profile logo format - Desktop only */}
         <div className="hidden md:flex bg-white border border-[#e2e8f0] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-sm items-center justify-between gap-4 mb-8 md:sticky md:top-0 md:z-30">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1a6b3c] to-[#2e7d32] flex items-center justify-center overflow-hidden shadow-md">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0050e8] to-[#0058e8] flex items-center justify-center overflow-hidden shadow-md">
               {shop.logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
@@ -136,7 +136,7 @@ export default function PurchaseDetailClient({ shop, purchase, items }: Props) {
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs mb-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-5">
             <div>
-              <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[9px] font-bold bg-[#e6f4ea] text-[#1a6b3c] border border-[#d1e7dd] uppercase tracking-wider font-mono">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[9px] font-bold bg-[#e6efff] text-[#0050e8] border border-[#cce0ff] uppercase tracking-wider font-mono">
                 Inward Supply Log
               </span>
               <h2 className="text-2xl font-black text-slate-900 mt-3 mb-1">
@@ -180,7 +180,7 @@ export default function PurchaseDetailClient({ shop, purchase, items }: Props) {
               <span className="text-[9px] text-slate-400 block uppercase tracking-wider mb-1">Supplier details</span>
               <p className="text-sm font-extrabold text-slate-900 uppercase">{purchase.supplier_name}</p>
               {purchase.supplier_gstin && (
-                <p className="font-mono mt-1 text-xs text-[#1a6b3c] font-bold">GSTIN: {purchase.supplier_gstin}</p>
+                <p className="font-mono mt-1 text-xs text-[#0050e8] font-bold">GSTIN: {purchase.supplier_gstin}</p>
               )}
             </div>
             <div>

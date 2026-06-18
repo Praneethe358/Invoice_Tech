@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-primary: #1a6b3c;
-  --color-primary-hover: #155d33;
-  --color-primary-active: #124a29;
-  --color-primary-light: #e8f5ee;
+  --color-primary: #0050e8;
+  --color-primary-hover: #0043c4;
+  --color-primary-active: #003bb0;
+  --color-primary-light: #e6efff;
   --color-background: #f5f6fa;
   --color-surface: #ffffff;
   --color-border: #e8eaed;
@@ -51,7 +51,7 @@ body {
 /* ─── Selection ───────────────────────────────────────────── */
 
 ::selection {
-  background: rgba(26, 107, 60, 0.15);
+  background: rgba(0, 80, 232, 0.15);
   color: var(--color-text-primary);
 }
 
@@ -80,19 +80,19 @@ input[type="number"] { -moz-appearance: textfield; }
 /* ─── Gradient Backgrounds ────────────────────────────────── */
 
 .gradient-hero {
-  background: linear-gradient(135deg, #0f3d21 0%, #1a6b3c 40%, #22875a 70%, #1a6b3c 100%);
+  background: linear-gradient(135deg, #001048 0%, #0050e8 40%, #0058e8 70%, #0050e8 100%);
 }
 
 .gradient-hero-mesh {
   background-image:
-    radial-gradient(at 20% 80%, rgba(34, 135, 90, 0.3) 0px, transparent 50%),
+    radial-gradient(at 20% 80%, rgba(0, 88, 232, 0.3) 0px, transparent 50%),
     radial-gradient(at 80% 20%, rgba(16, 185, 129, 0.2) 0px, transparent 50%),
     radial-gradient(at 40% 40%, rgba(5, 150, 105, 0.15) 0px, transparent 50%),
-    linear-gradient(135deg, #0f3d21 0%, #1a6b3c 40%, #22875a 70%, #1a6b3c 100%);
+    linear-gradient(135deg, #001048 0%, #0050e8 40%, #0058e8 70%, #0050e8 100%);
 }
 
 .premium-header-gradient {
-  background: linear-gradient(135deg, #0f512c 0%, #1a6b3c 45%, #10b981 80%, #ffffff 120%);
+  background: linear-gradient(135deg, #001858 0%, #0050e8 45%, #0060f0 80%, #ffffff 120%);
 }
 
 .glass-card {
@@ -113,7 +113,7 @@ input[type="number"] { -moz-appearance: textfield; }
 /* ─── Stat Card Gradients ─────────────────────────────────── */
 
 .stat-gradient-1 {
-  background: linear-gradient(135deg, #1a6b3c, #22875a);
+  background: linear-gradient(135deg, #0050e8, #0058e8);
 }
 
 .stat-gradient-2 {
@@ -132,7 +132,7 @@ input[type="number"] { -moz-appearance: textfield; }
 }
 
 .shimmer-border {
-  background: linear-gradient(90deg, transparent, rgba(26, 107, 60, 0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0, 80, 232, 0.1), transparent);
   background-size: 200% 100%;
   animation: shimmer 3s ease-in-out infinite;
 }
@@ -140,7 +140,7 @@ input[type="number"] { -moz-appearance: textfield; }
 /* ─── Bottom Nav ──────────────────────────────────────────── */
 
 .bottom-nav-active {
-  color: #1a6b3c;
+  color: #0050e8;
   position: relative;
 }
 
@@ -152,15 +152,15 @@ input[type="number"] { -moz-appearance: textfield; }
   transform: translateX(-50%);
   width: 20px;
   height: 3px;
-  background: #1a6b3c;
+  background: #0050e8;
   border-radius: 0 0 4px 4px;
 }
 
 /* ─── Trust Badge ─────────────────────────────────────────── */
 
 .trust-badge {
-  background: linear-gradient(135deg, rgba(26, 107, 60, 0.08), rgba(34, 135, 90, 0.04));
-  border: 1px solid rgba(26, 107, 60, 0.12);
+  background: linear-gradient(135deg, rgba(0, 80, 232, 0.08), rgba(0, 88, 232, 0.04));
+  border: 1px solid rgba(0, 80, 232, 0.12);
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */

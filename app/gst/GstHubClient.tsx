@@ -252,12 +252,12 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
         {/* Header with greeting - Desktop only */}
         <div className="hidden md:flex bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-xs items-center justify-between mb-6 md:sticky md:top-0 md:z-30">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
+            <div className="w-10 h-10 rounded-none bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
               {shop.logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
               ) : (
-                <div className="w-full h-full bg-[#1a6b3c] flex items-center justify-center text-white">
+                <div className="w-full h-full bg-[#0050e8] flex items-center justify-center text-white">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" />
@@ -270,7 +270,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                 {shop.name}
               </h1>
               <p className="text-[#6b7280] text-[10px] mt-0.5 font-medium">
-                GST Compliance Hub · GSTIN: <span className="font-mono font-bold text-[#1a6b3c]">{shop.gstin}</span>
+                GST Compliance Hub · GSTIN: <span className="font-mono font-bold text-[#0050e8]">{shop.gstin}</span>
               </p>
             </div>
           </div>
@@ -310,7 +310,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
               GST Hub
             </h1>
             <p className="text-[10px] text-gray-500 font-semibold mt-1">
-              GST Compliance Hub · GSTIN: <span className="font-mono font-bold text-[#1a6b3c]">{shop.gstin}</span>
+              GST Compliance Hub · GSTIN: <span className="font-mono font-bold text-[#0050e8]">{shop.gstin}</span>
             </p>
           </div>
 
@@ -347,7 +347,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
             onClick={() => setActiveTab('overview')}
             className={`px-5 py-2.5 text-xs font-extrabold uppercase rounded-lg transition-all ${
               activeTab === 'overview'
-                ? 'bg-[#1a6b3c]/10 text-[#1a6b3c]'
+                ? 'bg-[#0050e8]/10 text-[#0050e8]'
                 : 'text-slate-400 hover:text-slate-900'
             }`}
           >
@@ -357,7 +357,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
             onClick={() => setActiveTab('gstr1')}
             className={`px-5 py-2.5 text-xs font-extrabold uppercase rounded-lg transition-all ${
               activeTab === 'gstr1'
-                ? 'bg-[#1a6b3c]/10 text-[#1a6b3c]'
+                ? 'bg-[#0050e8]/10 text-[#0050e8]'
                 : 'text-slate-400 hover:text-slate-900'
             }`}
           >
@@ -367,7 +367,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
             onClick={() => setActiveTab('gstr3b')}
             className={`px-5 py-2.5 text-xs font-extrabold uppercase rounded-lg transition-all ${
               activeTab === 'gstr3b'
-                ? 'bg-[#1a6b3c]/10 text-[#1a6b3c]'
+                ? 'bg-[#0050e8]/10 text-[#0050e8]'
                 : 'text-slate-400 hover:text-slate-900'
             }`}
           >
@@ -444,7 +444,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
               <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#1a6b3c]"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#0050e8]"></span>
                     Pre-Filing Compliance Validator
                     {validating && <span className="text-[10px] text-slate-400 lowercase italic">Auditing...</span>}
                   </h2>
@@ -629,7 +629,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                             <td className="py-2.5 px-3 border-r border-slate-200 text-center">{idx + 1}</td>
                             <td className="py-2.5 px-3 border-r border-slate-200 font-mono font-bold text-slate-900">{inv.invoice_number}</td>
                             <td className="py-2.5 px-3 border-r border-slate-200">{new Date(inv.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
-                            <td className="py-2.5 px-3 border-r border-slate-200 font-mono font-bold uppercase text-[#1a6b3c]">{inv.customer_gstin}</td>
+                            <td className="py-2.5 px-3 border-r border-slate-200 font-mono font-bold uppercase text-[#0050e8]">{inv.customer_gstin}</td>
                             <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums">{taxableVal.toFixed(2)}</td>
                             <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums">0.00</td>
                             <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums text-red-500">{(inv.total_cgst || 0).toFixed(2)}</td>
@@ -936,7 +936,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                           <td className="py-3 px-3 border-r border-slate-200 text-center text-slate-400">—</td>
                           <td className="py-3 px-3 text-center text-slate-400">—</td>
                         </tr>
-                        <tr className="bg-[#e6f4ea] font-extrabold text-[#1a6b3c] border-t border-slate-250">
+                        <tr className="bg-[#e6efff] font-extrabold text-[#0050e8] border-t border-slate-250">
                           <td className="py-3 px-3 border-r border-slate-200">Total Tax Liability (1)</td>
                           <td className="py-3 px-3 border-r border-slate-200 text-right tabular-nums">0.00</td>
                           <td className="py-3 px-3 border-r border-slate-200 text-right tabular-nums">
@@ -1010,7 +1010,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                           <td className="py-3 px-3 border-r border-slate-200 text-right tabular-nums">0.00</td>
                           <td className="py-3 px-3 text-right tabular-nums">0.00</td>
                         </tr>
-                        <tr className="bg-[#e6f4ea] font-extrabold text-[#1a6b3c] border-t border-slate-250">
+                        <tr className="bg-[#e6efff] font-extrabold text-[#0050e8] border-t border-slate-250">
                           <td className="py-3 px-3 border-r border-slate-200">Total ITC Available (2)</td>
                           <td className="py-3 px-3 border-r border-slate-200 text-right tabular-nums">0.00</td>
                           <td className="py-3 px-3 border-r border-slate-200 text-right tabular-nums">

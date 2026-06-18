@@ -30,7 +30,7 @@ export default function LineItem({ item, onQtyChange, gstRegistered = false }: L
             {item.name}
           </p>
           {gstRegistered && item.gst_rate !== undefined && item.gst_rate > 0 && (
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-[#e6f4ea] text-[#1a6b3c] border border-[#d1e7dd]">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-[#e6efff] text-[#0050e8] border border-[#cce0ff]">
               {item.gst_rate}% GST
             </span>
           )}

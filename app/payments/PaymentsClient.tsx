@@ -73,12 +73,12 @@ export default function PaymentsClient({ shop, payments: initialPayments }: Prop
         {/* Header with greeting - Desktop only */}
         <div className="hidden md:flex bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-xs items-center justify-between mb-6 md:sticky md:top-0 md:z-30">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
+            <div className="w-10 h-10 rounded-none bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
               {shop.logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
               ) : (
-                <div className="w-full h-full bg-[#1a6b3c] flex items-center justify-center text-white">
+                <div className="w-full h-full bg-[#0050e8] flex items-center justify-center text-white">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" />
@@ -130,7 +130,7 @@ export default function PaymentsClient({ shop, payments: initialPayments }: Prop
             placeholder="Search by customer, phone, invoice, note..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 bg-white border border-[#e5e7eb] rounded-none px-4 py-3 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#1a6b3c] focus:ring-0"
+            className="flex-1 bg-white border border-[#e5e7eb] rounded-none px-4 py-3 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#0050e8] focus:ring-0"
           />
           <div className="flex gap-1 bg-white border border-[#e5e7eb] p-1 rounded-none overflow-x-auto scrollbar-none">
             {(['all', 'cash', 'upi', 'bank_transfer', 'other'] as const).map((method) => (
@@ -139,7 +139,7 @@ export default function PaymentsClient({ shop, payments: initialPayments }: Prop
                 onClick={() => setMethodFilter(method)}
                 className={`px-3 py-1.5 rounded-none text-[10px] font-extrabold capitalize transition-all whitespace-nowrap ${
                   methodFilter === method
-                    ? 'bg-[#1a6b3c] text-white shadow-xs'
+                    ? 'bg-[#0050e8] text-white shadow-xs'
                     : 'text-[#4b5563] hover:text-[#111827]'
                 }`}
               >
@@ -190,7 +190,7 @@ export default function PaymentsClient({ shop, payments: initialPayments }: Prop
                         <td className="py-3.5 px-4">
                           <button
                             onClick={() => router.push(`/invoice/${p.invoice_id}`)}
-                            className="text-xs font-bold text-[#1a6b3c] hover:underline"
+                            className="text-xs font-bold text-[#0050e8] hover:underline"
                           >
                             {p.invoices?.invoice_number}
                           </button>
@@ -265,7 +265,7 @@ export default function PaymentsClient({ shop, payments: initialPayments }: Prop
                       <div className="flex items-center gap-2 text-[11px] text-gray-500">
                         <span
                           onClick={() => router.push(`/invoice/${p.invoice_id}`)}
-                          className="font-bold text-[#1a6b3c] hover:underline cursor-pointer"
+                          className="font-bold text-[#0050e8] hover:underline cursor-pointer"
                         >
                           {p.invoices?.invoice_number}
                         </span>

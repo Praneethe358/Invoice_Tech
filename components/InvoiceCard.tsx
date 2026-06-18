@@ -200,7 +200,7 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-none bg-[#1a6b3c]/8 flex items-center justify-center text-[#1a6b3c]">
+          <div className="w-9 h-9 rounded-none bg-[#0050e8]/8 flex items-center justify-center text-[#0050e8]">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <polyline points="14 2 14 8 20 8" />
@@ -236,7 +236,7 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
                   e.stopPropagation();
                   setShowPaySheet(true);
                 }}
-                className="inline-flex items-center text-[10px] font-extrabold bg-[#1a6b3c]/10 hover:bg-[#1a6b3c]/20 text-[#1a6b3c] px-2 py-0.5 rounded-full transition-colors cursor-pointer border border-[#1a6b3c]/20"
+                className="inline-flex items-center text-[10px] font-extrabold bg-[#0050e8]/10 hover:bg-[#0050e8]/20 text-[#0050e8] px-2 py-0.5 rounded-full transition-colors cursor-pointer border border-[#0050e8]/20"
               >
                 + Pay
               </button>
@@ -355,7 +355,7 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
                   e.stopPropagation();
                   setPaymentAmount(balanceDue.toString());
                 }}
-                className="w-full bg-[#1a6b3c]/5 hover:bg-[#1a6b3c]/10 text-[#1a6b3c] text-xs font-extrabold py-2 rounded-xl border border-dashed border-[#1a6b3c]/20 transition-all text-center"
+                className="w-full bg-[#0050e8]/5 hover:bg-[#0050e8]/10 text-[#0050e8] text-xs font-extrabold py-2 rounded-xl border border-dashed border-[#0050e8]/20 transition-all text-center"
               >
                 Pay in Full (₹{balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })})
               </button>
@@ -373,7 +373,7 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
                     onClick={(e) => e.stopPropagation()}
                     max={balanceDue}
                     min={0.01}
-                    className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#1a6b3c]"
+                    className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#0050e8]"
                   />
                 </div>
 
@@ -392,7 +392,7 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
                         }}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap capitalize transition-all border ${
                           paymentMethod === method
-                            ? 'bg-[#1a6b3c] text-white border-[#1a6b3c] shadow-sm'
+                            ? 'bg-[#0050e8] text-white border-[#0050e8] shadow-sm'
                             : 'bg-white text-[#4b5563] border-[#e5e7eb] hover:bg-gray-50'
                         }`}
                       >
@@ -411,7 +411,7 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
                     value={paymentDate}
                     onChange={(e) => setPaymentDate(e.target.value)}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#1a6b3c]"
+                    className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#0050e8]"
                   />
                 </div>
 
@@ -425,7 +425,7 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
                     value={paymentNote}
                     onChange={(e) => setPaymentNote(e.target.value)}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#1a6b3c]"
+                    className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#0050e8]"
                   />
                 </div>
 
@@ -433,7 +433,7 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
                   type="button"
                   onClick={handleRecordPayment}
                   disabled={savingPayment}
-                  className="w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white text-xs font-bold py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white text-xs font-bold py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
                 >
                   {savingPayment ? 'Saving...' : 'Record Payment'}
                 </button>

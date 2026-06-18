@@ -128,12 +128,12 @@ export default function SettingsClient({
         {/* Header with greeting - Desktop only */}
         <div className="hidden md:flex bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-xs items-center justify-between mb-6 md:sticky md:top-0 md:z-30">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
+            <div className="w-10 h-10 rounded-none bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
               {logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={logoUrl} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
               ) : (
-                <div className="w-full h-full bg-[#1a6b3c] flex items-center justify-center text-white">
+                <div className="w-full h-full bg-[#0050e8] flex items-center justify-center text-white">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" />
@@ -198,7 +198,7 @@ export default function SettingsClient({
                   />
                   <p className="text-[10px] text-[#6b7280] mt-1.5">
                     JPG, PNG, WebP up to 2MB. 
-                    {uploadingLogo && <span className="text-[#1a6b3c] ml-1 font-bold">Uploading logo...</span>}
+                    {uploadingLogo && <span className="text-[#0050e8] ml-1 font-bold">Uploading logo...</span>}
                   </p>
                 </div>
               </div>
@@ -239,7 +239,7 @@ export default function SettingsClient({
                   type="checkbox"
                   checked={gstRegistered}
                   onChange={(e) => setGstRegistered(e.target.checked)}
-                  className="w-10 h-6 bg-gray-200 checked:bg-[#1a6b3c] rounded-none appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
+                  className="w-10 h-6 bg-gray-200 checked:bg-[#0050e8] rounded-none appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
                 />
               </div>
 
@@ -266,7 +266,7 @@ export default function SettingsClient({
                     type="checkbox"
                     checked={inventoryEnabledGlobal}
                     onChange={(e) => setInventoryEnabledGlobal(e.target.checked)}
-                    className="w-10 h-6 bg-gray-200 checked:bg-[#1a6b3c] rounded-none appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
+                    className="w-10 h-6 bg-gray-200 checked:bg-[#0050e8] rounded-none appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
                   />
                 </div>
               </div>

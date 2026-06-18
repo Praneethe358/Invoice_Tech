@@ -13,7 +13,7 @@ const features = [
         <path d="M22 9L23 11M25 14L27 14M24 22L25 24" stroke="#a7f3d0" strokeWidth="2" strokeLinecap="round" />
         <defs>
           <linearGradient id="whatsappGrad" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#10b981" />
+            <stop stopColor="#0060f0" />
             <stop offset="1" stopColor="#059669" />
           </linearGradient>
         </defs>
@@ -181,7 +181,7 @@ const industries = [
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M4 8L6 22C6 24.2091 7.79086 26 10 26H22C24.2091 26 26 24.2091 26 22L28 8H4Z" fill="url(#retailGrad)" />
-        <path d="M8 8V6C8 4.89543 8.89543 4 10 4H22C23.1046 4 24 4.89543 24 6V8" stroke="#10b981" strokeWidth="2" />
+        <path d="M8 8V6C8 4.89543 8.89543 4 10 4H22C23.1046 4 24 4.89543 24 6V8" stroke="#0060f0" strokeWidth="2" />
         <circle cx="16" cy="17" r="3" fill="white" />
         <defs>
           <linearGradient id="retailGrad" x1="4" y1="4" x2="28" y2="26" gradientUnits="userSpaceOnUse">
@@ -303,7 +303,7 @@ export default function LandingPage() {
           
           {/* Desktop Left: Logo */}
           <Link href="/" className="hidden md:flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#1a6b3c] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[#0050e8] flex items-center justify-center">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
@@ -340,7 +340,7 @@ export default function LandingPage() {
 
             {/* Logo next to Hamburger */}
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[#1a6b3c] flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-[#0050e8] flex items-center justify-center shrink-0">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                   <polyline points="14 2 14 8 20 8" />
@@ -382,7 +382,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/signup"
-              className="text-sm font-bold text-white bg-[#1a6b3c] hover:bg-[#155d33] px-5 py-2.5 rounded-xl transition-colors shadow-sm"
+              className="text-sm font-bold text-white bg-[#0050e8] hover:bg-[#0043c4] px-5 py-2.5 rounded-xl transition-colors shadow-sm"
             >
               Start Free
             </Link>
@@ -392,7 +392,7 @@ export default function LandingPage() {
           <div className="flex md:hidden items-center">
             <Link
               href="/login"
-              className="text-xs font-bold text-[#1a6b3c] border border-[#1a6b3c]/20 bg-emerald-50/50 hover:bg-emerald-50 px-3.5 py-1.5 rounded-lg transition-colors"
+              className="text-xs font-bold text-[#0050e8] border border-[#0050e8]/20 bg-emerald-50/50 hover:bg-emerald-50 px-3.5 py-1.5 rounded-lg transition-colors"
             >
               Log in
             </Link>
@@ -466,7 +466,7 @@ export default function LandingPage() {
                 <Link
                   href="/signup"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white text-center font-extrabold text-sm py-3 px-4 rounded-xl transition-colors shadow-sm"
+                  className="block w-full bg-[#0050e8] hover:bg-[#0043c4] text-white text-center font-extrabold text-sm py-3 px-4 rounded-xl transition-colors shadow-sm"
                 >
                   Start Billing Free Now!
                 </Link>
@@ -481,7 +481,7 @@ export default function LandingPage() {
         {/* Modern radial mesh gradient backgrounds for depth */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none overflow-hidden -z-10">
           <div className="absolute top-[-10%] left-[5%] w-[45%] aspect-square rounded-full bg-emerald-100/30 blur-[120px]" />
-          <div className="absolute bottom-[20%] right-[5%] w-[40%] aspect-square rounded-full bg-[#1a6b3c]/5 blur-[120px]" />
+          <div className="absolute bottom-[20%] right-[5%] w-[40%] aspect-square rounded-full bg-[#0050e8]/5 blur-[120px]" />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -506,7 +506,7 @@ export default function LandingPage() {
                     {/* Internal Screen Content */}
                     <div className="bg-[#f8fafc] h-full rounded-[26px] overflow-hidden flex flex-col border border-slate-950/5 relative">
                       {/* App Header */}
-                      <div className="bg-[#1a6b3c] text-white p-2 pt-4 pb-2 flex justify-between items-center shadow-xs shrink-0">
+                      <div className="bg-[#0050e8] text-white p-2 pt-4 pb-2 flex justify-between items-center shadow-xs shrink-0">
                         <div className="flex items-center gap-1">
                           <div className="w-3.5 h-3.5 rounded bg-white/15 flex items-center justify-center">
                             <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
@@ -557,7 +557,7 @@ export default function LandingPage() {
 
                               <button
                                 onClick={() => setSimulatorStep(1)}
-                                className="w-full bg-[#1a6b3c] text-white py-1 rounded-md text-[7px] font-extrabold shadow-sm mt-1.5 flex items-center justify-center"
+                                className="w-full bg-[#0050e8] text-white py-1 rounded-md text-[7px] font-extrabold shadow-sm mt-1.5 flex items-center justify-center"
                               >
                                 Preview →
                               </button>
@@ -582,7 +582,7 @@ export default function LandingPage() {
                                 <div className="flex-1 bg-white border border-slate-200/70 rounded-lg p-1.5 shadow-3xs mt-1 overflow-y-auto space-y-1 text-[5px] text-slate-650">
                                   <div className="flex justify-between items-start border-b border-slate-100 pb-1">
                                     <div>
-                                      <h5 className="font-extrabold text-[#1a6b3c] text-[6.5px]">TRUBILL STORE</h5>
+                                      <h5 className="font-extrabold text-[#0050e8] text-[6.5px]">TRUBILL STORE</h5>
                                       <p className="text-[4px] text-slate-400">GSTIN: 33AAAAA0000A1Z1</p>
                                     </div>
                                     <div className="text-right">
@@ -629,7 +629,7 @@ export default function LandingPage() {
                               </div>
 
                               <div className="bg-emerald-50 border border-emerald-150 p-1 rounded-md text-center shrink-0 flex items-center justify-center gap-1 mt-1">
-                                <span className="text-[7px] text-[#1a6b3c] font-extrabold">Invoice Sent &amp; Paid! ✓</span>
+                                <span className="text-[7px] text-[#0050e8] font-extrabold">Invoice Sent &amp; Paid! ✓</span>
                               </div>
                             </motion.div>
                           )}
@@ -645,7 +645,7 @@ export default function LandingPage() {
                     onClick={() => setSimulatorStep(0)}
                     className={`flex-1 py-1.5 rounded-md transition-all text-center flex items-center justify-center gap-0.5 ${
                       simulatorStep === 0 
-                        ? 'bg-[#1a6b3c] text-white shadow-sm' 
+                        ? 'bg-[#0050e8] text-white shadow-sm' 
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                     }`}
                   >
@@ -655,7 +655,7 @@ export default function LandingPage() {
                     onClick={() => setSimulatorStep(1)}
                     className={`flex-1 py-1.5 rounded-md transition-all text-center flex items-center justify-center gap-0.5 ${
                       simulatorStep === 1 
-                        ? 'bg-[#1a6b3c] text-white shadow-sm' 
+                        ? 'bg-[#0050e8] text-white shadow-sm' 
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                     }`}
                   >
@@ -665,7 +665,7 @@ export default function LandingPage() {
                     onClick={() => setSimulatorStep(2)}
                     className={`flex-1 py-1.5 rounded-md transition-all text-center flex items-center justify-center gap-0.5 ${
                       simulatorStep === 2 
-                        ? 'bg-[#1a6b3c] text-white shadow-sm' 
+                        ? 'bg-[#0050e8] text-white shadow-sm' 
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                     }`}
                   >
@@ -675,7 +675,7 @@ export default function LandingPage() {
               </div>
 
               <h1 className="text-[1.8rem] sm:text-[2.25rem] md:text-5xl lg:text-6xl font-black text-[#1a1d26] tracking-tight leading-[1.2] max-w-2xl lg:max-w-none">
-                Best <span className="bg-gradient-to-r from-emerald-600 to-[#1a6b3c] bg-clip-text text-transparent">WhatsApp Billing</span> Software for Small Business
+                Best <span className="bg-gradient-to-r from-emerald-600 to-[#0050e8] bg-clip-text text-transparent">WhatsApp Billing</span> Software for Small Business
               </h1>
 
               <p className="text-[13px] sm:text-base md:text-lg text-[#525f7a] leading-relaxed max-w-xl">
@@ -686,7 +686,7 @@ export default function LandingPage() {
               <div className="pt-2 w-full sm:w-auto flex flex-col items-center lg:items-start gap-3">
                 <Link
                   href="/signup"
-                  className="w-full sm:w-auto text-center bg-[#1a6b3c] hover:bg-[#155d33] text-white font-extrabold text-base sm:text-lg px-10 py-4 rounded-xl transition-all shadow-md hover:shadow-lg shadow-[#1a6b3c]/15 hover:-translate-y-0.5 flex items-center justify-center gap-2 group"
+                  className="w-full sm:w-auto text-center bg-[#0050e8] hover:bg-[#0043c4] text-white font-extrabold text-base sm:text-lg px-10 py-4 rounded-xl transition-all shadow-md hover:shadow-lg shadow-[#0050e8]/15 hover:-translate-y-0.5 flex items-center justify-center gap-2 group"
                 >
                   <span>Start Invoicing Free</span>
                   <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -712,7 +712,7 @@ export default function LandingPage() {
                   onClick={() => setSimulatorStep(0)}
                   className={`flex-1 py-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 ${
                     simulatorStep === 0 
-                      ? 'bg-[#1a6b3c] text-white shadow-sm' 
+                      ? 'bg-[#0050e8] text-white shadow-sm' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                   }`}
                 >
@@ -723,7 +723,7 @@ export default function LandingPage() {
                   onClick={() => setSimulatorStep(1)}
                   className={`flex-1 py-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 ${
                     simulatorStep === 1 
-                      ? 'bg-[#1a6b3c] text-white shadow-sm' 
+                      ? 'bg-[#0050e8] text-white shadow-sm' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                   }`}
                 >
@@ -734,7 +734,7 @@ export default function LandingPage() {
                   onClick={() => setSimulatorStep(2)}
                   className={`flex-1 py-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 ${
                     simulatorStep === 2 
-                      ? 'bg-[#1a6b3c] text-white shadow-sm' 
+                      ? 'bg-[#0050e8] text-white shadow-sm' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                   }`}
                 >
@@ -765,7 +765,7 @@ export default function LandingPage() {
                           className="hero-laptop-float absolute -right-6 xl:-right-10 top-[18%] z-30 w-[118px] bg-white rounded-lg border border-slate-200/80 p-2.5 pointer-events-none"
                           style={{ transform: 'translateZ(48px) rotateY(-12deg) rotateX(4deg)' }}
                         >
-                          <p className="text-[9px] font-extrabold text-[#1a6b3c] tracking-wide">INVOICE</p>
+                          <p className="text-[9px] font-extrabold text-[#0050e8] tracking-wide">INVOICE</p>
                           <div className="mt-1.5 space-y-1 text-[5.5px] text-slate-500">
                             <div className="flex justify-between font-bold text-slate-700 border-b border-slate-100 pb-0.5">
                               <span>Item</span>
@@ -779,7 +779,7 @@ export default function LandingPage() {
                               <span>Toor Dal</span>
                               <span>₹1,450</span>
                             </div>
-                            <div className="flex justify-between font-extrabold text-[#1a6b3c] border-t border-slate-100 pt-0.5 text-[6px]">
+                            <div className="flex justify-between font-extrabold text-[#0050e8] border-t border-slate-100 pt-0.5 text-[6px]">
                               <span>Total</span>
                               <span>₹4,042</span>
                             </div>
@@ -796,7 +796,7 @@ export default function LandingPage() {
                   {/* Screen Content Wrapper */}
                   <div className="flex-1 bg-[#f8fafc] rounded-lg overflow-hidden flex flex-col border border-slate-800">
                     {/* App Web Interface Header */}
-                    <div className="bg-[#1a6b3c] text-white px-3.5 py-2 flex justify-between items-center shadow-xs shrink-0">
+                    <div className="bg-[#0050e8] text-white px-3.5 py-2 flex justify-between items-center shadow-xs shrink-0">
                       <div className="flex items-center gap-2">
                         <div className="w-5 h-5 rounded bg-white/20 flex items-center justify-center">
                           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
@@ -805,7 +805,7 @@ export default function LandingPage() {
                         </div>
                         <span className="font-extrabold text-[12px] tracking-tight">TruBill Invoicing</span>
                       </div>
-                      <div className="flex items-center gap-2.5 text-[8px] font-bold text-emerald-100 bg-[#155d33] px-2 py-0.5 rounded-md">
+                      <div className="flex items-center gap-2.5 text-[8px] font-bold text-emerald-100 bg-[#0043c4] px-2 py-0.5 rounded-md">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                         Live Store Dashboard
                       </div>
@@ -829,7 +829,7 @@ export default function LandingPage() {
                             </div>
                           ))}
                         </div>
-                        <div className="p-1 bg-[#1a6b3c]/20 text-[#22c55e] text-center rounded text-[6.5px]">
+                        <div className="p-1 bg-[#0050e8]/20 text-[#22c55e] text-center rounded text-[6.5px]">
                           Tamil Nadu
                         </div>
                       </aside>
@@ -841,7 +841,7 @@ export default function LandingPage() {
                             <div className="space-y-2">
                               <div className="flex justify-between items-center pb-1 border-b border-slate-200">
                                 <h4 className="text-[10px] font-extrabold text-slate-800">Create Tax Invoice</h4>
-                                <span className="text-[7px] text-[#1a6b3c] font-bold bg-emerald-50 px-1.5 py-0.5 rounded">Quick Entry</span>
+                                <span className="text-[7px] text-[#0050e8] font-bold bg-emerald-50 px-1.5 py-0.5 rounded">Quick Entry</span>
                               </div>
 
                               <div className="grid grid-cols-2 gap-2 text-[7.5px]">
@@ -888,7 +888,7 @@ export default function LandingPage() {
 
                             <button
                               onClick={() => setSimulatorStep(1)}
-                              className="w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white py-1.5 rounded-lg text-[8.5px] font-bold shadow-sm flex items-center justify-center gap-1.5 transition-all mt-2"
+                              className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white py-1.5 rounded-lg text-[8.5px] font-bold shadow-sm flex items-center justify-center gap-1.5 transition-all mt-2"
                             >
                               Generate Tax Invoice &amp; Preview Details →
                             </button>
@@ -902,7 +902,7 @@ export default function LandingPage() {
                               <div className="col-span-4 space-y-2">
                                 <h4 className="text-[9px] font-bold text-slate-800">Invoice Actions</h4>
                                 <div className="space-y-1.5">
-                                  <div className="p-1.5 bg-emerald-50 text-[#1a6b3c] border border-emerald-250 rounded-lg text-[7.5px] font-extrabold flex items-center gap-1">
+                                  <div className="p-1.5 bg-emerald-50 text-[#0050e8] border border-emerald-250 rounded-lg text-[7.5px] font-extrabold flex items-center gap-1">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                                     <span>GST Calculated</span>
                                   </div>
@@ -916,7 +916,7 @@ export default function LandingPage() {
                               <div className="col-span-8 bg-white border border-slate-200 rounded-lg p-2.5 shadow-xs flex flex-col justify-between overflow-y-auto text-[6px] text-slate-600">
                                 <div className="flex justify-between items-start border-b border-slate-100 pb-1.5">
                                   <div>
-                                    <h5 className="font-extrabold text-[#1a6b3c] text-[7.5px]">TRUBILL STORE</h5>
+                                    <h5 className="font-extrabold text-[#0050e8] text-[7.5px]">TRUBILL STORE</h5>
                                     <p className="text-[5px]">GSTIN: 33AAAAA0000A1Z1</p>
                                     <p className="text-[5px]">Chennai, Tamil Nadu</p>
                                   </div>
@@ -928,7 +928,7 @@ export default function LandingPage() {
                                 </div>
                                 <div className="py-1">
                                   <p className="font-bold text-slate-850">Bill To:</p>
-                                  <p className="font-extrabold text-[#1a6b3c]">Ramesh Kumar</p>
+                                  <p className="font-extrabold text-[#0050e8]">Ramesh Kumar</p>
                                   <p>Contact: +91 98765 43210</p>
                                 </div>
                                 <div className="space-y-1">
@@ -954,7 +954,7 @@ export default function LandingPage() {
                                     <span>GST (5%):</span>
                                     <span>₹192.50</span>
                                   </div>
-                                  <div className="flex justify-between font-extrabold border-t border-slate-100 pt-0.5 text-[7px] text-[#1a6b3c]">
+                                  <div className="flex justify-between font-extrabold border-t border-slate-100 pt-0.5 text-[7px] text-[#0050e8]">
                                     <span>Total:</span>
                                     <span>₹4,042.50</span>
                                   </div>
@@ -1022,7 +1022,7 @@ export default function LandingPage() {
 
                             <div className="bg-emerald-50 border border-emerald-100/60 p-2.5 rounded-xl text-center shrink-0 flex items-center justify-center gap-1.5 mt-2">
                               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[6px] font-bold">✓</span>
-                              <span className="text-[9px] text-[#1a6b3c] font-extrabold">Paid successfully via UPI!</span>
+                              <span className="text-[9px] text-[#0050e8] font-extrabold">Paid successfully via UPI!</span>
                             </div>
                           </div>
                         )}
@@ -1049,17 +1049,17 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6 md:gap-8 text-center items-start">
             {/* Quality 1 */}
             <div className="flex flex-col items-center space-y-2 md:space-y-4">
-              <div className="text-[#1a6b3c] flex items-center justify-center">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
+              <div className="text-[#0050e8] flex items-center justify-center">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
                   <circle cx="16" cy="16" r="13" />
                   <path d="M11 14a2 2 0 0 1 4 0" />
                   <path d="M17 14a2 2 0 0 1 4 0" />
-                  <path d="M11 18c0 3 2.5 5 5 5s5-2 5-5H11z" fill="#1a6b3c" />
+                  <path d="M11 18c0 3 2.5 5 5 5s5-2 5-5H11z" fill="#0050e8" />
                 </svg>
               </div>
               <div className="space-y-0.5">
                 <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">
-                  1.5 Lakh<span className="text-[#1a6b3c]">+</span>
+                  1.5 Lakh<span className="text-[#0050e8]">+</span>
                 </h4>
                 <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">Happy Shop Owners</p>
               </div>
@@ -1067,8 +1067,8 @@ export default function LandingPage() {
 
             {/* Quality 2 */}
             <div className="flex flex-col items-center space-y-2 md:space-y-4">
-              <div className="text-[#1a6b3c] flex items-center justify-center">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
+              <div className="text-[#0050e8] flex items-center justify-center">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
                   <rect x="9" y="4" width="14" height="24" rx="3" />
                   <line x1="9" y1="8" x2="23" y2="8" />
                   <line x1="9" y1="24" x2="23" y2="24" />
@@ -1082,8 +1082,8 @@ export default function LandingPage() {
 
             {/* Quality 3 */}
             <div className="flex flex-col items-center space-y-2 md:space-y-4">
-              <div className="text-[#1a6b3c] flex items-center justify-center">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
+              <div className="text-[#0050e8] flex items-center justify-center">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
                   <path d="M8 4L24 16L8 28V4Z" />
                   <path d="M8 4L19 16L8 28" />
                   <path d="M19 16L8 16" />
@@ -1091,7 +1091,7 @@ export default function LandingPage() {
               </div>
               <div className="space-y-0.5">
                 <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">
-                  Rated 4.9<span className="text-[#1a6b3c]">/5</span>
+                  Rated 4.9<span className="text-[#0050e8]">/5</span>
                 </h4>
                 <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">User Satisfaction</p>
               </div>
@@ -1099,8 +1099,8 @@ export default function LandingPage() {
 
             {/* Quality 4 */}
             <div className="flex flex-col items-center space-y-2 md:space-y-4">
-              <div className="text-[#1a6b3c] flex items-center justify-center">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#1a6b3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
+              <div className="text-[#0050e8] flex items-center justify-center">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
                   <rect x="10" y="6" width="18" height="13" rx="2" />
                   <path d="M16 19v4m-3 0h6" />
                   <rect x="4" y="11" width="7" height="12" rx="1" fill="white" />
@@ -1110,7 +1110,7 @@ export default function LandingPage() {
               </div>
               <div className="space-y-0.5">
                 <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">
-                  Multi-<span className="text-[#1a6b3c]">Device</span>
+                  Multi-<span className="text-[#0050e8]">Device</span>
                 </h4>
                 <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">Use on Mobile/Desktop</p>
               </div>
@@ -1194,7 +1194,7 @@ export default function LandingPage() {
 
             {/* Right Content */}
             <div className="lg:col-span-6 space-y-3 sm:space-y-4 md:space-y-6">
-              <span className="inline-block text-[9px] sm:text-[10px] bg-emerald-50 text-[#1a6b3c] font-extrabold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full uppercase tracking-wider border border-emerald-100/50">
+              <span className="inline-block text-[9px] sm:text-[10px] bg-emerald-50 text-[#0050e8] font-extrabold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full uppercase tracking-wider border border-emerald-100/50">
                 WhatsApp-Native Delivery
               </span>
               <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#1a1d26] tracking-tight leading-snug">
@@ -1210,7 +1210,7 @@ export default function LandingPage() {
                   "Completely offline billing - syncs automatically when online"
                 ].map((item, idx) => (
                   <li key={idx} className="flex items-start gap-2.5 sm:gap-3 text-[13px] sm:text-sm text-[#4b5563] font-semibold">
-                    <div className="w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full bg-emerald-50 text-[#1a6b3c] flex items-center justify-center shrink-0 border border-emerald-100/30 mt-0.5">
+                    <div className="w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full bg-emerald-50 text-[#0050e8] flex items-center justify-center shrink-0 border border-emerald-100/30 mt-0.5">
                       <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
@@ -1312,26 +1312,26 @@ export default function LandingPage() {
       <section id="how-it-works" className="py-12 md:py-20 bg-white border-y border-[#e8eaed]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-xl mx-auto mb-8 md:mb-16 space-y-2 sm:space-y-3">
-            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-extrabold tracking-widest uppercase bg-emerald-50 text-[#1a6b3c] border border-emerald-100/80">
+            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-extrabold tracking-widest uppercase bg-emerald-50 text-[#0050e8] border border-emerald-100/80">
               Workflow
             </span>
             <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 leading-tight">
-              Create and share bills in <span className="bg-gradient-to-r from-[#1a6b3c] to-[#2e9354] bg-clip-text text-transparent">three simple steps</span>
+              Create and share bills in <span className="bg-gradient-to-r from-[#0050e8] to-[#2e9354] bg-clip-text text-transparent">three simple steps</span>
             </h3>
           </div>
 
           {/* Mobile Connected Stepper (Visible only on mobile) */}
           <div className="block md:hidden relative pl-3 pr-1 space-y-7">
             {/* Vertical timeline line */}
-            <div className="absolute left-[30px] top-5 bottom-5 w-0.5 border-l-2 border-dashed border-[#1a6b3c]/25" />
+            <div className="absolute left-[30px] top-5 bottom-5 w-0.5 border-l-2 border-dashed border-[#0050e8]/25" />
             
             {steps.map((step, idx) => (
               <div key={idx} className="relative flex gap-4 items-start">
                 {/* Step Circle with Icon */}
-                <div className="relative z-10 shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-white to-slate-50 text-[#1a6b3c] flex items-center justify-center border border-slate-200/80 shadow-md [&>svg]:w-5 [&>svg]:h-5">
+                <div className="relative z-10 shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-white to-slate-50 text-[#0050e8] flex items-center justify-center border border-slate-200/80 shadow-md [&>svg]:w-5 [&>svg]:h-5">
                   {step.icon}
                   {/* Step Number Badge */}
-                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br from-[#1a6b3c] to-[#22875a] text-white text-[9px] font-extrabold flex items-center justify-center shadow-md border-2 border-white">
+                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br from-[#0050e8] to-[#0058e8] text-white text-[9px] font-extrabold flex items-center justify-center shadow-md border-2 border-white">
                     {step.num}
                   </span>
                 </div>
@@ -1353,9 +1353,9 @@ export default function LandingPage() {
                   <div className="hidden md:block absolute top-10 left-[65%] w-[70%] border-t-2 border-dashed border-[#e2e8f0] -z-0" />
                 )}
 
-                <div className="relative inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[#1a6b3c]/8 text-[#1a6b3c] z-10 shadow-inner">
+                <div className="relative inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[#0050e8]/8 text-[#0050e8] z-10 shadow-inner">
                   {step.icon}
-                  <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-[#1a6b3c] text-white text-xs font-extrabold flex items-center justify-center shadow-md border-2 border-white">
+                  <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-[#0050e8] text-white text-xs font-extrabold flex items-center justify-center shadow-md border-2 border-white">
                     {step.num}
                   </span>
                 </div>
@@ -1371,11 +1371,11 @@ export default function LandingPage() {
       <section className="py-12 md:py-20 bg-[#f8fafc] border-b border-[#e8eaed]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-xl mx-auto mb-8 md:mb-16 space-y-2 sm:space-y-3">
-            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-extrabold tracking-widest uppercase bg-emerald-50 text-[#1a6b3c] border border-emerald-100/80">
+            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-extrabold tracking-widest uppercase bg-emerald-50 text-[#0050e8] border border-emerald-100/80">
               Sectors
             </span>
             <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 leading-tight">
-              Tailored for businesses across <span className="bg-gradient-to-r from-[#1a6b3c] to-[#2e9354] bg-clip-text text-transparent">Tamil Nadu</span>
+              Tailored for businesses across <span className="bg-gradient-to-r from-[#0050e8] to-[#2e9354] bg-clip-text text-transparent">Tamil Nadu</span>
             </h3>
           </div>
 
@@ -1392,7 +1392,7 @@ export default function LandingPage() {
                     onClick={() => setActiveSector(idx)}
                     className={`snap-center shrink-0 px-3 py-2 rounded-lg text-[11px] font-bold transition-all border flex items-center gap-1.5 ${
                       isActive
-                        ? 'bg-gradient-to-r from-[#1a6b3c] to-[#22875a] text-white border-[#1a6b3c] shadow-md shadow-[#1a6b3c]/15'
+                        ? 'bg-gradient-to-r from-[#0050e8] to-[#0058e8] text-white border-[#0050e8] shadow-md shadow-[#0050e8]/15'
                         : 'bg-white text-slate-600 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
                     }`}
                   >
@@ -1408,7 +1408,7 @@ export default function LandingPage() {
             {/* Display Card for Active Sector */}
             <div className="bg-white p-5 pt-6 rounded-2xl border border-slate-200/85 shadow-lg shadow-slate-100/50 relative overflow-hidden transition-all duration-300">
               {/* Green gradient top accent bar */}
-              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#1a6b3c] to-[#22875a]" />
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#0050e8] to-[#0058e8]" />
 
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-slate-50 to-emerald-50/30 flex items-center justify-center shrink-0 shadow-xs border border-slate-100 [&>svg]:w-6 [&>svg]:h-6">
@@ -1418,8 +1418,8 @@ export default function LandingPage() {
                   <h4 className="text-sm font-extrabold text-[#1a1d26]">
                     {industries[activeSector].name}
                   </h4>
-                  <span className="inline-flex items-center gap-1.5 text-[9px] font-extrabold text-[#1a6b3c] bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100/50">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#1a6b3c] animate-pulse" />
+                  <span className="inline-flex items-center gap-1.5 text-[9px] font-extrabold text-[#0050e8] bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100/50">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0050e8] animate-pulse" />
                     Custom Solution
                   </span>
                 </div>
@@ -1435,7 +1435,7 @@ export default function LandingPage() {
                 <div className="grid grid-cols-1 gap-2">
                   {industries[activeSector].highlights?.map((hl, hlIdx) => (
                     <div key={hlIdx} className="flex items-center gap-2.5 bg-slate-50/60 border border-slate-100 p-2.5 rounded-xl transition-all hover:bg-emerald-50/20 hover:border-emerald-100/50">
-                      <div className="w-5 h-5 rounded-full bg-emerald-50 text-[#1a6b3c] flex items-center justify-center shrink-0 border border-emerald-100/30">
+                      <div className="w-5 h-5 rounded-full bg-emerald-50 text-[#0050e8] flex items-center justify-center shrink-0 border border-emerald-100/30">
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
@@ -1450,7 +1450,7 @@ export default function LandingPage() {
               <div className="mt-4">
                 <Link
                   href="/signup"
-                  className="block w-full text-center bg-gradient-to-r from-[#1a6b3c] to-[#22875a] hover:from-[#155d33] hover:to-[#1a6b3c] text-white py-3 rounded-xl text-[11px] font-extrabold transition-all shadow-md shadow-[#1a6b3c]/15 hover:shadow-lg hover:shadow-[#1a6b3c]/20"
+                  className="block w-full text-center bg-gradient-to-r from-[#0050e8] to-[#0058e8] hover:from-[#0043c4] hover:to-[#0050e8] text-white py-3 rounded-xl text-[11px] font-extrabold transition-all shadow-md shadow-[#0050e8]/15 hover:shadow-lg hover:shadow-[#0050e8]/20"
                 >
                   Start {industries[activeSector].name} Billing Free →
                 </Link>
@@ -1463,13 +1463,13 @@ export default function LandingPage() {
             {industries.map((ind, idx) => (
               <div
                 key={idx}
-                className="bg-white p-6 rounded-2xl border border-[#e8eaed] flex gap-5 hover:shadow-md hover:border-[#1a6b3c]/20 transition-all group"
+                className="bg-white p-6 rounded-2xl border border-[#e8eaed] flex gap-5 hover:shadow-md hover:border-[#0050e8]/20 transition-all group"
               >
                 <div className="w-14 h-14 rounded-xl bg-[#fafafa] flex items-center justify-center shrink-0 shadow-sm border border-neutral-100 group-hover:scale-105 transition-transform">
                   {ind.icon}
                 </div>
                 <div className="space-y-1.5">
-                  <h4 className="text-base font-bold text-[#1a1d26] group-hover:text-[#1a6b3c] transition-colors">{ind.name}</h4>
+                  <h4 className="text-base font-bold text-[#1a1d26] group-hover:text-[#0050e8] transition-colors">{ind.name}</h4>
                   <p className="text-sm text-[#4b5563] leading-relaxed">{ind.desc}</p>
                 </div>
               </div>
@@ -1482,7 +1482,7 @@ export default function LandingPage() {
       <section id="faq" className="py-12 md:py-20 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-8 md:mb-16">
-            <h2 className="text-[10px] sm:text-xs font-bold text-[#1a6b3c] uppercase tracking-widest mb-2 sm:mb-3">FAQ</h2>
+            <h2 className="text-[10px] sm:text-xs font-bold text-[#0050e8] uppercase tracking-widest mb-2 sm:mb-3">FAQ</h2>
             <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#1a1d26] tracking-tight">
               Frequently Asked Questions
             </h3>
@@ -1541,7 +1541,7 @@ export default function LandingPage() {
           <div className="pt-1">
             <Link
               href="/signup"
-              className="inline-flex items-center gap-2 bg-[#1a6b3c] hover:bg-[#155d33] text-white font-bold text-sm sm:text-base px-8 sm:px-10 py-3.5 sm:py-4 rounded-xl transition-all shadow-md hover:shadow-lg shadow-[#1a6b3c]/10"
+              className="inline-flex items-center gap-2 bg-[#0050e8] hover:bg-[#0043c4] text-white font-bold text-sm sm:text-base px-8 sm:px-10 py-3.5 sm:py-4 rounded-xl transition-all shadow-md hover:shadow-lg shadow-[#0050e8]/10"
             >
               Get Started Free
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -1559,7 +1559,7 @@ export default function LandingPage() {
             {/* Logo/Info column */}
             <div className="col-span-2 md:col-span-1 space-y-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-[#1a6b3c] flex items-center justify-center">
+                <div className="w-7 h-7 rounded-lg bg-[#0050e8] flex items-center justify-center">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" />

@@ -377,12 +377,12 @@ export default function CatalogClient({
         {/* Header with greeting - Desktop only */}
         <div className="hidden md:flex bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-xs items-center justify-between mb-6 md:sticky md:top-0 md:z-30">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
+            <div className="w-10 h-10 rounded-none bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
               {shop.logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
               ) : (
-                <div className="w-full h-full bg-[#1a6b3c] flex items-center justify-center text-white">
+                <div className="w-full h-full bg-[#0050e8] flex items-center justify-center text-white">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" />
@@ -411,7 +411,7 @@ export default function CatalogClient({
               Manage items, track stock levels, and configure pricing.
             </p>
           </div>
-          <div className="bg-[#1a6b3c]/10 text-[#1a6b3c] font-bold text-[10px] px-3 py-1.5 rounded-lg self-start border border-[#1a6b3c]/20">
+          <div className="bg-[#0050e8]/10 text-[#0050e8] font-bold text-[10px] px-3 py-1.5 rounded-lg self-start border border-[#0050e8]/20">
             {products.length} Item{products.length !== 1 ? 's' : ''} total
           </div>
         </div>
@@ -502,7 +502,7 @@ export default function CatalogClient({
                         }
                         setIsAddingNewCategory(false);
                       }}
-                      className="px-3 py-2 bg-[#1a6b3c] text-white text-xs font-bold rounded-none h-[44px] hover:bg-[#15522e] transition-colors cursor-pointer"
+                      className="px-3 py-2 bg-[#0050e8] text-white text-xs font-bold rounded-none h-[44px] hover:bg-[#0043c4] transition-colors cursor-pointer"
                     >
                       Add
                     </button>
@@ -546,7 +546,7 @@ export default function CatalogClient({
                     type="checkbox"
                     checked={newTrackInventory}
                     onChange={(e) => setNewTrackInventory(e.target.checked)}
-                    className="w-10 h-6 bg-gray-200 checked:bg-[#1a6b3c] rounded-full appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
+                    className="w-10 h-6 bg-gray-200 checked:bg-[#0050e8] rounded-full appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
                   />
                 </div>
                 {newTrackInventory && (
@@ -626,7 +626,7 @@ export default function CatalogClient({
                       placeholder="Search products by name or HSN..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-8 py-2.5 bg-white border border-[#e5e7eb] rounded-none text-sm font-bold focus:outline-none focus:border-[#1a6b3c] focus:ring-0 transition-all placeholder-gray-400 min-h-[44px]"
+                      className="w-full pl-10 pr-8 py-2.5 bg-white border border-[#e5e7eb] rounded-none text-sm font-bold focus:outline-none focus:border-[#0050e8] focus:ring-0 transition-all placeholder-gray-400 min-h-[44px]"
                     />
                     {searchQuery && (
                       <button
@@ -641,7 +641,7 @@ export default function CatalogClient({
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="w-full bg-white border border-[#e5e7eb] rounded-none px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-[#1a6b3c] focus:ring-0 transition-all min-h-[44px]"
+                      className="w-full bg-white border border-[#e5e7eb] rounded-none px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-[#0050e8] focus:ring-0 transition-all min-h-[44px]"
                     >
                       <option value="name-asc">Sort: A to Z</option>
                       <option value="name-desc">Sort: Z to A</option>
@@ -663,7 +663,7 @@ export default function CatalogClient({
                     onClick={() => setSelectedCategoryFilter('All')}
                     className={`px-4 py-2 rounded-none text-xs font-extrabold whitespace-nowrap transition-all border cursor-pointer ${
                       selectedCategoryFilter === 'All'
-                        ? 'bg-[#1a6b3c]/10 text-[#1a6b3c] border-[#1a6b3c]'
+                        ? 'bg-[#0050e8]/10 text-[#0050e8] border-[#0050e8]'
                         : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:text-gray-700'
                     }`}
                   >
@@ -677,7 +677,7 @@ export default function CatalogClient({
                         onClick={() => setSelectedCategoryFilter(cat)}
                         className={`px-4 py-2 rounded-none text-xs font-extrabold whitespace-nowrap transition-all border cursor-pointer ${
                           selectedCategoryFilter === cat
-                            ? 'bg-[#1a6b3c]/10 text-[#1a6b3c] border-[#1a6b3c]'
+                            ? 'bg-[#0050e8]/10 text-[#0050e8] border-[#0050e8]'
                             : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:text-gray-700'
                         }`}
                       >
@@ -695,7 +695,7 @@ export default function CatalogClient({
                       onClick={() => setStockFilter('all')}
                       className={`px-3 py-1 rounded-full text-xs font-bold transition-all border cursor-pointer ${
                         stockFilter === 'all'
-                          ? 'bg-[#1a6b3c]/10 text-[#1a6b3c] border-[#1a6b3c]'
+                          ? 'bg-[#0050e8]/10 text-[#0050e8] border-[#0050e8]'
                           : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:text-gray-700'
                       }`}
                     >
@@ -795,7 +795,7 @@ export default function CatalogClient({
                                  {gstRegistered && ((product.gst_rate !== undefined && product.gst_rate > 0) || product.hsn_code) && (
                                    <div className="flex gap-1.5 mt-1">
                                      {product.gst_rate !== undefined && product.gst_rate > 0 && (
-                                       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-50 text-[#1a6b3c] border border-green-100">
+                                       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-50 text-[#0050e8] border border-green-100">
                                          {product.gst_rate}% GST
                                        </span>
                                      )}
@@ -848,7 +848,7 @@ export default function CatalogClient({
                                         setAdjustQty('');
                                         setAdjustReason('restock');
                                       }}
-                                      className="px-2.5 py-1.5 bg-[#1a6b3c]/10 text-[#1a6b3c] hover:bg-[#1a6b3c]/15 text-[10px] font-bold rounded-lg cursor-pointer"
+                                      className="px-2.5 py-1.5 bg-[#0050e8]/10 text-[#0050e8] hover:bg-[#0050e8]/15 text-[10px] font-bold rounded-lg cursor-pointer"
                                     >
                                       + Add Stock
                                     </button>
@@ -960,7 +960,7 @@ export default function CatalogClient({
                           {gstRegistered && ((product.gst_rate !== undefined && product.gst_rate > 0) || product.hsn_code) && (
                             <div className="flex gap-1.5">
                               {product.gst_rate !== undefined && product.gst_rate > 0 && (
-                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-50 text-[#1a6b3c] border border-green-100">
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-50 text-[#0050e8] border border-green-100">
                                   {product.gst_rate}% GST
                                 </span>
                               )}
@@ -981,7 +981,7 @@ export default function CatalogClient({
                                     setAdjustQty('');
                                     setAdjustReason('restock');
                                   }}
-                                  className="px-2.5 py-1 bg-[#1a6b3c]/10 text-[#1a6b3c] text-[10px] font-bold rounded-lg cursor-pointer"
+                                  className="px-2.5 py-1 bg-[#0050e8]/10 text-[#0050e8] text-[10px] font-bold rounded-lg cursor-pointer"
                                 >
                                   + Add Stock
                                 </button>
@@ -1047,7 +1047,7 @@ export default function CatalogClient({
                   setNewCategoryName('');
                   showToast(`Category "${val}" added`, 'success');
                 }}
-                className="px-4 py-2 bg-[#1a6b3c] hover:bg-[#15522e] text-white text-xs font-bold rounded-xl transition-all h-[44px] flex items-center justify-center gap-1.5 cursor-pointer shadow-sm hover:shadow-md"
+                className="px-4 py-2 bg-[#0050e8] hover:bg-[#0043c4] text-white text-xs font-bold rounded-xl transition-all h-[44px] flex items-center justify-center gap-1.5 cursor-pointer shadow-sm hover:shadow-md"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <line x1="12" y1="5" x2="12" y2="19" />
@@ -1144,7 +1144,7 @@ export default function CatalogClient({
                         <select
                           value={editGst}
                           onChange={(e) => setEditGst(e.target.value)}
-                          className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-[#1a6b3c] focus:ring-2 focus:ring-[#1a6b3c]/20 min-h-[44px]"
+                          className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-[#0050e8] focus:ring-2 focus:ring-[#0050e8]/20 min-h-[44px]"
                         >
                           <option value="0">0% GST</option>
                           <option value="5">5% GST</option>
@@ -1177,7 +1177,7 @@ export default function CatalogClient({
                             }
                             setIsEditAddingNewCategory(false);
                           }}
-                          className="px-3 py-2 bg-[#1a6b3c] text-white text-xs font-bold rounded-xl h-[44px] hover:bg-[#15522e] transition-colors cursor-pointer"
+                          className="px-3 py-2 bg-[#0050e8] text-white text-xs font-bold rounded-xl h-[44px] hover:bg-[#0043c4] transition-colors cursor-pointer"
                         >
                           Add
                         </button>
@@ -1200,7 +1200,7 @@ export default function CatalogClient({
                             setEditCategory(e.target.value);
                           }
                         }}
-                        className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-[#1a6b3c] focus:ring-2 focus:ring-[#1a6b3c]/20 min-h-[44px]"
+                        className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-[#0050e8] focus:ring-2 focus:ring-[#0050e8]/20 min-h-[44px]"
                       >
                         <option value="">Select Category (optional)</option>
                         {allCategories.map(c => (
@@ -1219,7 +1219,7 @@ export default function CatalogClient({
                           type="checkbox"
                           checked={editTrackInventory}
                           onChange={(e) => setEditTrackInventory(e.target.checked)}
-                          className="w-10 h-6 bg-gray-200 checked:bg-[#1a6b3c] rounded-full appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
+                          className="w-10 h-6 bg-gray-200 checked:bg-[#0050e8] rounded-full appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
                         />
                       </div>
                       {editTrackInventory && (
@@ -1310,7 +1310,7 @@ export default function CatalogClient({
                           <select
                             value={adjustReason}
                             onChange={(e: any) => setAdjustReason(e.target.value)}
-                            className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-[#1a6b3c] focus:ring-2 focus:ring-[#1a6b3c]/20 min-h-[44px]"
+                            className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-[#0050e8] focus:ring-2 focus:ring-[#0050e8]/20 min-h-[44px]"
                           >
                             <option value="restock">Restock</option>
                             <option value="return">Customer Return</option>

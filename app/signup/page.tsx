@@ -355,9 +355,9 @@ export default function SignupPage() {
           </div>
 
           <h2 className="text-4xl font-black text-white leading-tight mb-4 tracking-tight">
-            Start invoicing<br />in <span className="bg-gradient-to-r from-emerald-400 to-[#10b981] bg-clip-text text-transparent">2 minutes</span>.
+            Start invoicing<br />in <span className="bg-gradient-to-r from-emerald-400 to-[#0060f0] bg-clip-text text-transparent">2 minutes</span>.
           </h2>
-          <p className="text-[#e6f4ea]/80 text-base leading-relaxed">
+          <p className="text-[#e6efff]/80 text-base leading-relaxed">
             Quick, Professional WhatsApp invoice delivery platform for shops in Tamil Nadu. GST details auto-breakdown, PDF generator, and contact saved catalogs.
           </p>
 
@@ -391,7 +391,7 @@ export default function SignupPage() {
         <div className="w-full max-w-[460px] my-auto">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center gap-2.5 mb-8">
-            <div className="w-9 h-9 rounded-lg bg-[#1a6b3c] flex items-center justify-center shadow-md">
+            <div className="w-9 h-9 rounded-lg bg-[#0050e8] flex items-center justify-center shadow-md">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
@@ -405,11 +405,11 @@ export default function SignupPage() {
             <div className="mb-6">
               <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-2">
                 <div
-                  className="bg-[#1a6b3c] h-full transition-all duration-300"
+                  className="bg-[#0050e8] h-full transition-all duration-300"
                   style={{ width: `${(step / 5) * 100}%` }}
                 />
               </div>
-              <p className="text-[10px] font-bold text-[#1a6b3c] uppercase tracking-wider">
+              <p className="text-[10px] font-bold text-[#0050e8] uppercase tracking-wider">
                 Step {step} of 5 — {stepTitles[step - 1]}
               </p>
             </div>
@@ -478,7 +478,7 @@ export default function SignupPage() {
                       type="button"
                       onClick={nextStep}
                       disabled={!shopName || !ownerName || !phone || !email || !password || !confirmPassword}
-                      className="w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white font-semibold py-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4 min-h-[44px]"
+                      className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white font-semibold py-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4 min-h-[44px]"
                     >
                       <span>Continue</span>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -513,7 +513,7 @@ export default function SignupPage() {
                           onClick={() => setShopType(opt.type)}
                           className={`p-3 rounded-2xl border text-left flex flex-col justify-between h-24 transition-all ${
                             shopType === opt.type
-                              ? 'border-[#1a6b3c] bg-[#1a6b3c]/5 shadow-sm'
+                              ? 'border-[#0050e8] bg-[#0050e8]/5 shadow-sm'
                               : 'border-slate-250 bg-white hover:bg-[#f9fafb]'
                           }`}
                         >
@@ -534,7 +534,7 @@ export default function SignupPage() {
                       <button
                         type="button"
                         onClick={nextStep}
-                        className="flex-1 bg-[#1a6b3c] hover:bg-[#155d33] text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                        className="flex-1 bg-[#0050e8] hover:bg-[#0043c4] text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
                       >
                         <span>Continue</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -560,7 +560,7 @@ export default function SignupPage() {
                         type="button"
                         onClick={() => setGstRegistered(!gstRegistered)}
                         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          gstRegistered ? 'bg-[#1a6b3c]' : 'bg-slate-300'
+                          gstRegistered ? 'bg-[#0050e8]' : 'bg-slate-300'
                         }`}
                       >
                         <span
@@ -604,7 +604,7 @@ export default function SignupPage() {
                         type="button"
                         onClick={nextStep}
                         disabled={gstRegistered && (!gstin || !!gstinError)}
-                        className="flex-1 bg-[#1a6b3c] hover:bg-[#155d33] text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 bg-[#0050e8] hover:bg-[#0043c4] text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <span>Continue</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -630,7 +630,7 @@ export default function SignupPage() {
                         type="button"
                         onClick={() => setInventoryEnabled(!inventoryEnabled)}
                         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          inventoryEnabled ? 'bg-[#1a6b3c]' : 'bg-slate-300'
+                          inventoryEnabled ? 'bg-[#0050e8]' : 'bg-slate-300'
                         }`}
                       >
                         <span
@@ -652,7 +652,7 @@ export default function SignupPage() {
                       <button
                         type="button"
                         onClick={nextStep}
-                        className="flex-1 bg-[#1a6b3c] hover:bg-[#155d33] text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                        className="flex-1 bg-[#0050e8] hover:bg-[#0043c4] text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
                       >
                         <span>Continue</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -715,13 +715,13 @@ export default function SignupPage() {
                       <button
                         type="button"
                         onClick={() => setShowAddForm(true)}
-                        className="text-xs font-bold text-[#1a6b3c] hover:underline"
+                        className="text-xs font-bold text-[#0050e8] hover:underline"
                       >
                         + Add custom product to catalog
                       </button>
                     ) : (
                       <div className="p-4 border border-dashed border-slate-200 rounded-2xl space-y-3 bg-[#fbfcfb]">
-                        <p className="text-[10px] font-bold text-[#1a6b3c] uppercase tracking-wider">New Custom Catalog Item</p>
+                        <p className="text-[10px] font-bold text-[#0050e8] uppercase tracking-wider">New Custom Catalog Item</p>
                         <div className="grid grid-cols-2 gap-2">
                           <Input
                             placeholder="Product Name"
@@ -767,7 +767,7 @@ export default function SignupPage() {
                           <button
                             type="button"
                             onClick={handleAddCatalogItem}
-                            className="px-3 py-1.5 bg-[#1a6b3c] hover:bg-[#155d33] text-white rounded-lg text-xs font-semibold"
+                            className="px-3 py-1.5 bg-[#0050e8] hover:bg-[#0043c4] text-white rounded-lg text-xs font-semibold"
                           >
                             Add Item
                           </button>
@@ -787,7 +787,7 @@ export default function SignupPage() {
                         type="button"
                         onClick={handleSignupSubmit}
                         disabled={loading}
-                        className="flex-1 bg-[#1a6b3c] hover:bg-[#155d33] text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                        className="flex-1 bg-[#0050e8] hover:bg-[#0043c4] text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
                       >
                         {loading ? (
                           <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
@@ -806,7 +806,7 @@ export default function SignupPage() {
 
             <p className="text-center text-sm text-[#6b7280] mt-8">
               Already have an account?{' '}
-              <Link href="/login" className="text-[#1a6b3c] font-bold hover:underline">
+              <Link href="/login" className="text-[#0050e8] font-bold hover:underline">
                 Sign in
               </Link>
             </p>

@@ -24,7 +24,7 @@ export default function SuccessAnimation({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 z-50 bg-[#1a6b3c] flex flex-col items-center justify-center text-white"
+      className="fixed inset-0 z-50 bg-[#0050e8] flex flex-col items-center justify-center text-white"
     >
       {/* Animated Checkmark Circle */}
       <motion.div

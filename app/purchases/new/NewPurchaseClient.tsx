@@ -192,7 +192,7 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
         {/* Header matched with profile logo format - Desktop only */}
         <div className="hidden md:flex bg-white border border-[#e2e8f0] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-sm items-center justify-between gap-4 mb-8 md:sticky md:top-0 md:z-30">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1a6b3c] to-[#2e7d32] flex items-center justify-center overflow-hidden shadow-md">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0050e8] to-[#0058e8] flex items-center justify-center overflow-hidden shadow-md">
               {shop.logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
@@ -262,7 +262,7 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
 
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs mb-6">
           <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider mb-6 flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#1a6b3c]"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#0050e8]"></span>
             Record Supplier Invoice
           </h2>
 
@@ -276,7 +276,7 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
                 <select
                   value={supplierId}
                   onChange={(e) => handleSupplierChange(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#1a6b3c] focus:ring-1 focus:ring-[#1a6b3c]/20 transition-all"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#0050e8] focus:ring-1 focus:ring-[#0050e8]/20 transition-all"
                   required
                 >
                   <option value="">-- Select Supplier --</option>
@@ -297,7 +297,7 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
                   placeholder="e.g. PUR-2026-0091"
                   value={invoiceNumber}
                   onChange={(e) => setInvoiceNumber(e.target.value.toUpperCase())}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#1a6b3c] focus:ring-1 focus:ring-[#1a6b3c]/20 transition-all font-mono"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#0050e8] focus:ring-1 focus:ring-[#0050e8]/20 transition-all font-mono"
                   required
                 />
               </div>
@@ -310,7 +310,7 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
                   type="date"
                   value={purchaseDate}
                   onChange={(e) => setPurchaseDate(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#1a6b3c] focus:ring-1 focus:ring-[#1a6b3c]/20 transition-all"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#0050e8] focus:ring-1 focus:ring-[#0050e8]/20 transition-all"
                   required
                 />
               </div>
@@ -323,7 +323,7 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
                       type="checkbox"
                       checked={itcEligible}
                       onChange={(e) => setItcEligible(e.target.checked)}
-                      className="rounded border-slate-200 text-[#1a6b3c] focus:ring-0 w-4.5 h-4.5 cursor-pointer"
+                      className="rounded border-slate-200 text-[#0050e8] focus:ring-0 w-4.5 h-4.5 cursor-pointer"
                     />
                     Claim Input Tax Credit (ITC) for this invoice
                   </label>
@@ -334,7 +334,7 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
                     type="checkbox"
                     checked={autoUpdateStock}
                     onChange={(e) => setAutoUpdateStock(e.target.checked)}
-                    className="rounded border-slate-200 text-[#1a6b3c] focus:ring-0 w-4.5 h-4.5 cursor-pointer"
+                    className="rounded border-slate-200 text-[#0050e8] focus:ring-0 w-4.5 h-4.5 cursor-pointer"
                   />
                   Auto-update product inventory stock counts
                 </label>
@@ -350,7 +350,7 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
                 <button 
                   type="button" 
                   onClick={handleAddItem}
-                  className="bg-[#1a6b3c]/5 hover:bg-[#1a6b3c]/10 text-[#1a6b3c] font-bold text-[11px] px-3.5 py-1.5 rounded-lg border border-dashed border-[#1a6b3c]/20 transition-colors"
+                  className="bg-[#0050e8]/5 hover:bg-[#0050e8]/10 text-[#0050e8] font-bold text-[11px] px-3.5 py-1.5 rounded-lg border border-dashed border-[#0050e8]/20 transition-colors"
                 >
                   + Add Line Item
                 </button>
@@ -379,7 +379,7 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
                           placeholder="e.g. UREA 50KG"
                           value={item.name}
                           onChange={(e) => handleItemChange(index, 'name', e.target.value.toUpperCase())}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1a6b3c]"
+                          className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0050e8]"
                           required
                         />
                         <datalist id={`products-list-${index}`}>
@@ -398,7 +398,7 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
                           placeholder="e.g. 3102"
                           value={item.hsn_code}
                           onChange={(e) => handleItemChange(index, 'hsn_code', e.target.value.replace(/\D/g, ''))}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1a6b3c] font-mono"
+                          className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0050e8] font-mono"
                           maxLength={8}
                           required={shop.gst_registered}
                         />
@@ -414,7 +414,7 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
                             min={1}
                             value={item.qty}
                             onChange={(e) => handleItemChange(index, 'qty', parseInt(e.target.value) || 0)}
-                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#1a6b3c] text-center"
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0050e8] text-center"
                             required
                           />
                         </div>
@@ -429,7 +429,7 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
                             step="0.01"
                             value={item.price}
                             onChange={(e) => handleItemChange(index, 'price', parseFloat(e.target.value) || 0)}
-                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#1a6b3c] text-right"
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0050e8] text-right"
                             required
                           />
                         </div>
@@ -441,7 +441,7 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
                           <select
                             value={item.gst_rate}
                             onChange={(e) => handleItemChange(index, 'gst_rate', parseInt(e.target.value) || 0)}
-                            className="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-805 focus:outline-none focus:border-[#1a6b3c]"
+                            className="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-805 focus:outline-none focus:border-[#0050e8]"
                           >
                             <option value={0}>0%</option>
                             <option value={5}>5%</option>
@@ -485,7 +485,7 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
               <button 
                 type="submit" 
                 disabled={submitting} 
-                className="w-full md:w-auto bg-[#1a6b3c] hover:bg-[#155630] text-white font-extrabold rounded-xl py-3 px-10 text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
+                className="w-full md:w-auto bg-[#0050e8] hover:bg-[#0043c4] text-white font-extrabold rounded-xl py-3 px-10 text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {submitting ? 'Recording...' : 'Save Purchase Invoice'}
               </button>

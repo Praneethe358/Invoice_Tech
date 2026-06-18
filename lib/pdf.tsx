@@ -11,9 +11,9 @@ import {
 import { InvoiceItem } from './types';
 
 // ─── Styles ───────────────────────────────────────────────────
-const GREEN = '#1a6b3c';
+const GREEN = '#0050e8';
 const DARK_GREEN = '#0d3c20';
-const LIGHT_GREEN = '#e6f4ea';
+const LIGHT_GREEN = '#e6efff';
 const TEXT_DARK = '#1f2937';
 const TEXT_MUTED = '#4b5563';
 const BORDER_COLOR = '#e5e7eb';
@@ -293,7 +293,7 @@ function InvoicePDF({
   let badgeStyle = {};
   let statusText = 'UNPAID';
   if (paymentStatus === 'paid') {
-    badgeStyle = { backgroundColor: '#e6f4ea', color: '#1a6b3c' };
+    badgeStyle = { backgroundColor: '#e6efff', color: '#0050e8' };
     statusText = 'PAID';
   } else if (paymentStatus === 'partial') {
     badgeStyle = { backgroundColor: '#fef3c7', color: '#b45309' };

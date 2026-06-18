@@ -3,8 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from '@react-pdf/renderer';
 
-const GREEN = '#1a6b3c';
-const LIGHT_GREEN = '#e6f4ea';
+const GREEN = '#0050e8';
+const LIGHT_GREEN = '#e6efff';
 const TEXT_DARK = '#1f2937';
 const TEXT_MUTED = '#4b5563';
 const BORDER = '#e5e7eb';

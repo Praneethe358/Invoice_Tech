@@ -110,7 +110,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
     }
   };
 
-  const COLORS = ['#1a6b3c', '#2e7d32', '#4caf50', '#81c784'];
+  const COLORS = ['#0050e8', '#0058e8', '#4caf50', '#81c784'];
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
@@ -120,11 +120,11 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
         {/* Header with greeting - Desktop only */}
         <div className="hidden md:flex bg-white border-b border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-xs items-center justify-between mb-8 md:sticky md:top-0 md:z-30">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
+            <div className="w-10 h-10 rounded-none bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
               {shop.logo_url ? (
                 <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
               ) : (
-                <div className="w-full h-full bg-[#1a6b3c] flex items-center justify-center text-white font-heading font-black text-sm">
+                <div className="w-full h-full bg-[#0050e8] flex items-center justify-center text-white font-heading font-black text-sm">
                   {(shop.name || 'TB').slice(0, 2).toUpperCase()}
                 </div>
               )}
@@ -164,7 +164,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
             </h2>
             <p className="text-xs text-slate-500 font-semibold mt-0.5 flex items-center gap-2">
               <span>Monthly Business Summary</span>
-              <span className="bg-[#1a6b3c]/10 text-[#1a6b3c] px-2 py-0.5 rounded text-[10px] font-bold">
+              <span className="bg-[#0050e8]/10 text-[#0050e8] px-2 py-0.5 rounded text-[10px] font-bold">
                 {getFYContext(month, year)}
               </span>
             </p>
@@ -218,7 +218,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
             <select
               value={month}
               onChange={(e) => setMonth(Number(e.target.value))}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#1a6b3c]"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#0050e8]"
             >
               {MONTHS.map((m) => (
                 <option key={m.val} value={m.val}>
@@ -234,7 +234,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
             <select
               value={year}
               onChange={(e) => setYear(Number(e.target.value))}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#1a6b3c]"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#0050e8]"
             >
               {[currentYear - 2, currentYear - 1, currentYear, currentYear + 1].map((y) => (
                 <option key={y} value={y}>
@@ -276,7 +276,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
               </div>
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Collection Rate</span>
-                <p className="text-2xl font-black text-[#1a6b3c] mt-2">{data.salesSummary.collectionRate}%</p>
+                <p className="text-2xl font-black text-[#0050e8] mt-2">{data.salesSummary.collectionRate}%</p>
               </div>
             </div>
 
@@ -429,7 +429,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                             <div className="bg-white border border-slate-200 p-2.5 rounded-xl shadow-md text-xs font-semibold">
                               <p className="font-extrabold text-slate-800">{item.dateLabel}</p>
                               <p className="text-slate-500 mt-1">Invoices: {item.count}</p>
-                              <p className="text-[#1a6b3c] font-bold">Total: ₹{Number(item.total).toLocaleString('en-IN')}</p>
+                              <p className="text-[#0050e8] font-bold">Total: ₹{Number(item.total).toLocaleString('en-IN')}</p>
                               {item.hasFailed && <p className="text-red-500 mt-0.5 text-[9px] font-black">⚠️ Contains Failed Invoices</p>}
                             </div>
                           );
@@ -440,7 +440,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                     <Line
                       type="monotone"
                       dataKey="total"
-                      stroke="#1a6b3c"
+                      stroke="#0050e8"
                       strokeWidth={3}
                       dot={({ cx, cy, payload }) => (
                         <circle
@@ -448,12 +448,12 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                           cx={cx}
                           cy={cy}
                           r={payload.total > 0 ? 4 : 0}
-                          fill={payload.hasFailed ? '#e53e3e' : '#1a6b3c'}
+                          fill={payload.hasFailed ? '#e53e3e' : '#0050e8'}
                           stroke="white"
                           strokeWidth={1.5}
                         />
                       )}
-                      activeDot={{ r: 6, fill: '#1a6b3c', stroke: 'white', strokeWidth: 2 }}
+                      activeDot={{ r: 6, fill: '#0050e8', stroke: 'white', strokeWidth: 2 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -526,7 +526,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                     </div>
                     <div>
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total ITC Claimed</span>
-                      <p className="text-lg font-black text-[#1a6b3c] mt-1">₹{data.purchasesSummary.totalItcEarned.toLocaleString('en-IN')}</p>
+                      <p className="text-lg font-black text-[#0050e8] mt-1">₹{data.purchasesSummary.totalItcEarned.toLocaleString('en-IN')}</p>
                     </div>
                   </div>
 

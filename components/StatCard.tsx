@@ -28,7 +28,7 @@ export default function StatCard({
       className="bg-white rounded-2xl border border-[#e5e7eb] p-4 shadow-sm"
     >
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-[#1a6b3c]/10 flex items-center justify-center text-lg">
+        <div className="w-10 h-10 rounded-xl bg-[#0050e8]/10 flex items-center justify-center text-lg">
           {icon}
         </div>
         <div>

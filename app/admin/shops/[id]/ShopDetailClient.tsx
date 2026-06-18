@@ -90,7 +90,7 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1a6b3c] to-[#22875a] flex items-center justify-center text-white font-black text-lg overflow-hidden shadow-md">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0050e8] to-[#0058e8] flex items-center justify-center text-white font-black text-lg overflow-hidden shadow-md">
             {shop.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={shop.logo_url} alt="" className="w-full h-full object-cover" loading="lazy" />
@@ -104,7 +104,7 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
             </div>
           </div>
         </div>
-        <Link href="/admin" className="text-xs font-bold text-slate-500 hover:text-[#1a6b3c] transition-colors flex items-center gap-1">
+        <Link href="/admin" className="text-xs font-bold text-slate-500 hover:text-[#0050e8] transition-colors flex items-center gap-1">
           ← Back to Admin
         </Link>
       </div>
@@ -163,7 +163,7 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
               )}
             </div>
             <button onClick={() => setShowActivate(!showActivate)}
-              className="w-full py-2.5 rounded-xl text-xs font-bold bg-[#1a6b3c] text-white hover:bg-[#155d33] transition-colors">
+              className="w-full py-2.5 rounded-xl text-xs font-bold bg-[#0050e8] text-white hover:bg-[#0043c4] transition-colors">
               {status === 'active' ? 'Extend Subscription' : 'Activate Subscription'}
             </button>
 
@@ -172,15 +172,15 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
                 <div className="grid grid-cols-2 gap-2">
                   {[{ m: 1, l: '1 Month', p: '₹299' }, { m: 3, l: '3 Months', p: '₹897' }, { m: 6, l: '6 Months', p: '₹1,794' }, { m: 12, l: '1 Year', p: '₹3,588' }].map(o => (
                     <button key={o.m} onClick={() => setDuration(o.m)}
-                      className={`px-3 py-2 rounded-xl text-[10px] font-bold border ${duration === o.m ? 'bg-[#1a6b3c] text-white border-[#1a6b3c]' : 'bg-white text-slate-600 border-slate-200'}`}>
+                      className={`px-3 py-2 rounded-xl text-[10px] font-bold border ${duration === o.m ? 'bg-[#0050e8] text-white border-[#0050e8]' : 'bg-white text-slate-600 border-slate-200'}`}>
                       {o.l} <span className="opacity-70">{o.p}</span>
                     </button>
                   ))}
                 </div>
                 <input type="text" placeholder="Payment reference" value={paymentRef} onChange={e => setPaymentRef(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#1a6b3c]" />
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0050e8]" />
                 <button onClick={handleActivate} disabled={activateLoading}
-                  className="w-full py-2.5 rounded-xl text-xs font-bold bg-[#1a6b3c] text-white disabled:opacity-50">
+                  className="w-full py-2.5 rounded-xl text-xs font-bold bg-[#0050e8] text-white disabled:opacity-50">
                   {activateLoading ? 'Processing...' : 'Confirm'}
                 </button>
               </motion.div>
@@ -220,7 +220,7 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
                   <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} allowDecimals={false} />
                   <Tooltip contentStyle={{ fontSize: 11, borderRadius: 12, border: '1px solid #e2e8f0' }} />
-                  <Bar dataKey="count" fill="#1a6b3c" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="count" fill="#0050e8" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

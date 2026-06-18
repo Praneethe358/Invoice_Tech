@@ -80,9 +80,9 @@ export default function LoginPage() {
           </div>
 
           <h2 className="text-4xl font-black text-white leading-tight mb-4 tracking-tight">
-            Invoice <span className="bg-gradient-to-r from-emerald-400 to-[#10b981] bg-clip-text text-transparent">smarter</span>,<br />not harder.
+            Invoice <span className="bg-gradient-to-r from-emerald-400 to-[#0060f0] bg-clip-text text-transparent">smarter</span>,<br />not harder.
           </h2>
-          <p className="text-[#e6f4ea]/80 text-base leading-relaxed">
+          <p className="text-[#e6efff]/80 text-base leading-relaxed">
             Professional WhatsApp invoicing built for supermarkets, retail shops, and freelancers.
           </p>
 
@@ -148,7 +148,7 @@ export default function LoginPage() {
         >
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center gap-2.5 mb-8">
-            <div className="w-9 h-9 rounded-lg bg-[#1a6b3c] flex items-center justify-center shadow-md">
+            <div className="w-9 h-9 rounded-lg bg-[#0050e8] flex items-center justify-center shadow-md">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
@@ -189,7 +189,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={!email || !password || loading}
-                className="w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white font-semibold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-emerald-800/10 active:scale-[0.99]"
+                className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white font-semibold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-emerald-800/10 active:scale-[0.99]"
               >
                 {loading ? (
                   <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
@@ -210,7 +210,7 @@ export default function LoginPage() {
 
             <p className="text-center text-sm text-[#6b7280] mt-8">
               Don&apos;t have an account?{' '}
-              <Link href="/signup" className="text-[#1a6b3c] font-bold hover:underline">
+              <Link href="/signup" className="text-[#0050e8] font-bold hover:underline">
                 Create one free
               </Link>
             </p>
