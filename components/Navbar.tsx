@@ -254,7 +254,10 @@ export default function Navbar() {
         <div className="flex items-center gap-3 mb-8">
           <img src="/trubill-logo.png" alt="TruBill logo" className="w-10 h-10 object-contain shrink-0" loading="lazy" />
           <div>
-            <span className="font-heading font-black text-[#1a1d26] text-base leading-none block">TruBill</span>
+            <span className="font-heading font-black text-base leading-none block">
+              <span className="text-[#001048]">Tru</span>
+              <span className="text-[#0050e8]">Bill</span>
+            </span>
             <span className="text-[10px] font-bold text-[#0050e8] uppercase tracking-wider mt-0.5 block">Invoice</span>
           </div>
         </div>
@@ -362,7 +365,10 @@ export default function Navbar() {
 
               <Link href="/dashboard" className="flex items-center gap-2">
                 <img src="/trubill-logo.png" alt="TruBill logo" className="w-8 h-8 object-contain shrink-0" loading="lazy" />
-                <span className="font-heading font-black text-[#1a1d26] text-sm">TruBill</span>
+                <span className="font-heading font-black text-sm">
+                  <span className="text-[#001048]">Tru</span>
+                  <span className="text-[#0050e8]">Bill</span>
+                </span>
               </Link>
             </div>
 

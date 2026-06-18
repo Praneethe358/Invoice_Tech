@@ -303,13 +303,14 @@ export default function LandingPage() {
         <div className="bg-[#001048] h-1 w-full" />
         
         <nav className="bg-white/95 backdrop-blur-xl border-b border-[#e8eaed]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 md:h-16 flex items-center justify-between">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 md:h-24 flex items-center justify-between">
             
             {/* Desktop Left: Logo */}
-            <Link href="/" className="hidden md:flex items-center gap-2.5">
-              <img src="/trubill-logo.png" alt="TruBill Logo" className="w-8 h-8 object-contain shrink-0" />
-              <span className="font-heading font-black text-lg text-[#1a1d26] tracking-tight">
-                TruBill
+            <Link href="/" className="hidden md:flex items-center gap-3">
+              <img src="/trubill-logo.png" alt="TruBill Logo" className="w-14 h-14 object-contain shrink-0" />
+              <span className="font-heading font-black text-2xl tracking-tight">
+                <span className="text-[#001048]">Tru</span>
+                <span className="text-[#0050e8]">Bill</span>
               </span>
             </Link>
 
@@ -339,8 +340,11 @@ export default function LandingPage() {
 
               {/* Logo next to Hamburger */}
               <Link href="/" className="flex items-center gap-2">
-                <img src="/trubill-logo.png" alt="TruBill Logo" className="w-7 h-7 object-contain shrink-0" />
-                <span className="font-heading font-black text-[#1a1d26] text-base sm:text-lg tracking-tight">TruBill</span>
+                <img src="/trubill-logo.png" alt="TruBill Logo" className="w-12 h-12 object-contain shrink-0" />
+                <span className="font-heading font-black text-xl tracking-tight">
+                  <span className="text-[#001048]">Tru</span>
+                  <span className="text-[#0050e8]">Bill</span>
+                </span>
               </Link>
             </div>
 
