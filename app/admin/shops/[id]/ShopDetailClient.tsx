@@ -93,7 +93,7 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1a6b3c] to-[#22875a] flex items-center justify-center text-white font-black text-lg overflow-hidden shadow-md">
             {shop.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={shop.logo_url} alt="" className="w-full h-full object-cover" />
+              <img src={shop.logo_url} alt="" className="w-full h-full object-cover" loading="lazy" />
             ) : shop.name.charAt(0).toUpperCase()}
           </div>
           <div>

@@ -37,7 +37,7 @@ export default async function DashboardPage() {
   // Fetch stats data (single lightweight query)
   const { data: allInvoicesData } = await supabase
     .from('invoices')
-    .select('status, created_at, total, amount_paid, payment_status')
+    .select('status, created_at, total, amount_paid, payment_status, delivery_status')
     .eq('shop_id', shop.id);
 
   let totalInvoices = 0;
@@ -46,15 +46,22 @@ export default async function DashboardPage() {
   let totalOutstanding = 0;
 
   if (allInvoicesData) {
-    totalInvoices = allInvoicesData.length;
+    const activeInvoices = allInvoicesData.filter(
+      (inv) => inv.status === 'saved' || inv.status === 'sent'
+    );
+    totalInvoices = activeInvoices.length;
     
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
 
     allInvoicesData.forEach((inv) => {
-      if (inv.status === 'failed') failedInvoices++;
-      
+      if (inv.status === 'failed' || inv.delivery_status === 'failed') {
+        failedInvoices++;
+      }
+    });
+
+    activeInvoices.forEach((inv) => {
       const invDate = new Date(inv.created_at);
       if (invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear) {
         thisMonth += Number(inv.total || 0);

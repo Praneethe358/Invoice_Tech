@@ -1188,6 +1188,7 @@ export default function LandingPage() {
                 src="/billing_whatsapp.png"
                 alt="GST billing and WhatsApp sharing"
                 className="w-full max-w-[280px] sm:max-w-[380px] md:max-w-[420px] h-auto object-contain drop-shadow-2xl relative z-10"
+                loading="lazy"
               />
             </div>
 
@@ -1299,6 +1300,7 @@ export default function LandingPage() {
                 src="/payments_reminders.png"
                 alt="UPI payment status and reminders"
                 className="w-full max-w-[260px] sm:max-w-[340px] md:max-w-[380px] h-auto object-contain drop-shadow-2xl relative z-10"
+                loading="lazy"
               />
             </div>
           </div>

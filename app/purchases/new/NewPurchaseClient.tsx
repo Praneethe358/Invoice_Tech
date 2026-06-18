@@ -195,7 +195,7 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1a6b3c] to-[#2e7d32] flex items-center justify-center overflow-hidden shadow-md">
               {shop.logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" />
+                <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
               ) : (
                 <span className="text-white font-extrabold text-lg">
                   {shop.name.charAt(0).toUpperCase()}

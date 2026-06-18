@@ -30,7 +30,7 @@ export default function DashboardClient({
   const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'sent' | 'failed' | 'unpaid' | 'partial' | 'paid' | 'unpaid_partial'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'saved' | 'sent' | 'cancelled' | 'failed' | 'unpaid' | 'partial' | 'paid' | 'unpaid_partial'>('all');
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(initialInvoices.length === 20);
   const [mounted, setMounted] = useState(false);
@@ -62,6 +62,8 @@ export default function DashboardClient({
         query = query.eq('payment_status', statusFilter);
       } else if (statusFilter === 'unpaid_partial') {
         query = query.in('payment_status', ['unpaid', 'partial']);
+      } else if (statusFilter === 'failed') {
+        query = query.or('status.eq.failed,delivery_status.eq.failed');
       } else {
         query = query.eq('status', statusFilter);
       }
@@ -104,7 +106,7 @@ export default function DashboardClient({
             <div className="w-10 h-10 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
               {shop.logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" />
+                <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
               ) : (
                 <div className="w-full h-full bg-[#1a6b3c] flex items-center justify-center text-white">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -284,7 +286,10 @@ export default function DashboardClient({
           <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
             {([
               { key: 'all', label: 'All Invoices' },
+              { key: 'draft', label: 'Draft' },
+              { key: 'saved', label: 'Saved' },
               { key: 'sent', label: 'Sent' },
+              { key: 'cancelled', label: 'Cancelled' },
               { key: 'failed', label: 'Failed' },
               { key: 'unpaid', label: 'Unpaid' },
               { key: 'partial', label: 'Partial' },
@@ -357,66 +362,107 @@ export default function DashboardClient({
                       month: 'short',
                       year: 'numeric'
                     });
-                    return (
-                      <tr
-                        key={invoice.id}
-                        onClick={() => window.location.href = `/invoice/${invoice.id}`}
-                        className="hover:bg-gray-50/50 transition-colors cursor-pointer group"
-                      >
-                        <td className="py-3.5 px-4">
-                          <span className="font-semibold text-gray-900 block text-xs">{invoice.invoice_number}</span>
-                          <span className="text-[10px] text-gray-400 font-medium">{dateString}</span>
-                        </td>
-                        <td className="py-3.5 px-4">
-                          {invoice.customer_name && (
-                            <span className="font-semibold text-gray-900 block text-xs uppercase">{invoice.customer_name}</span>
-                          )}
-                          <span className="text-[10px] text-gray-400 font-medium">+91 {invoice.customer_phone}</span>
-                        </td>
-                        <td className="py-3.5 px-4">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            invoice.status === 'sent' ? 'bg-emerald-50 text-emerald-600' :
-                            invoice.status === 'failed' ? 'bg-red-50 text-red-600' :
-                            'bg-amber-50 text-amber-600'
-                          }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${
-                              invoice.status === 'sent' ? 'bg-emerald-500' :
-                              invoice.status === 'failed' ? 'bg-red-500' :
-                              'bg-amber-500'
-                            }`} />
-                            {invoice.status}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-right text-xs font-semibold text-gray-900 tabular-nums">
-                          ₹{Number(invoice.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                        </td>
-                        <td className="py-3.5 px-4 text-right text-xs font-semibold text-emerald-600 tabular-nums">
-                          ₹{Number(invoice.amount_paid || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                        </td>
-                        <td className={`py-3.5 px-4 text-right text-xs font-semibold tabular-nums ${balanceDue > 0 ? 'text-red-600' : 'text-gray-400'}`}>
-                          ₹{balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                        </td>
-                        <td className="py-3.5 px-4 text-center">
-                          <span className={`inline-flex items-center text-[9px] font-bold px-2 py-0.5 rounded-none uppercase ${
-                            invoice.payment_status === 'paid' ? 'bg-green-50 text-green-700 border border-green-200' :
-                            invoice.payment_status === 'partial' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                            'bg-red-50 text-red-700 border border-red-200'
-                          }`}>
-                            {invoice.payment_status || 'unpaid'}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-right pr-6" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-end gap-3">
-                            <button
-                              onClick={() => window.location.href = `/invoice/${invoice.id}`}
-                              className="text-xs font-bold text-[#1a6b3c] hover:underline"
-                            >
-                              Details
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
+                      const deliveryFailed = invoice.delivery_status === 'failed';
+                      const isDraft = invoice.status === 'draft';
+                      const isSaved = invoice.status === 'saved';
+                      const isSent = invoice.status === 'sent';
+                      const isCancelled = invoice.status === 'cancelled';
+                      const isFailed = invoice.status === 'failed';
+
+                      let badgeBg = 'bg-gray-50 text-gray-600';
+                      let badgeDot = 'bg-gray-400';
+                      let badgeLabel: string = invoice.status;
+
+                      if (deliveryFailed || isFailed) {
+                        badgeBg = 'bg-amber-50 text-amber-600';
+                        badgeDot = 'bg-amber-500';
+                        badgeLabel = 'Failed';
+                      } else if (isDraft) {
+                        badgeBg = 'bg-slate-100 text-slate-600';
+                        badgeDot = 'bg-slate-400';
+                        badgeLabel = 'Draft';
+                      } else if (isSaved) {
+                        badgeBg = 'bg-blue-50 text-blue-600';
+                        badgeDot = 'bg-blue-500';
+                        badgeLabel = 'Saved';
+                      } else if (isSent) {
+                        badgeBg = 'bg-emerald-50 text-emerald-600';
+                        badgeDot = 'bg-emerald-500';
+                        badgeLabel = 'Sent';
+                      } else if (isCancelled) {
+                        badgeBg = 'bg-red-50 text-red-600';
+                        badgeDot = 'bg-red-500';
+                        badgeLabel = 'Cancelled';
+                      }
+
+                      return (
+                        <tr
+                          key={invoice.id}
+                          onClick={() => {
+                            if (isDraft) {
+                              window.location.href = `/invoice/new?draftId=${invoice.id}`;
+                            } else {
+                              window.location.href = `/invoice/${invoice.id}`;
+                            }
+                          }}
+                          className="hover:bg-gray-50/50 transition-colors cursor-pointer group"
+                        >
+                          <td className="py-3.5 px-4">
+                            <span className="font-semibold text-gray-900 block text-xs">{invoice.invoice_number}</span>
+                            <span className="text-[10px] text-gray-400 font-medium">{dateString}</span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            {invoice.customer_name && (
+                              <span className="font-semibold text-gray-900 block text-xs uppercase">{invoice.customer_name}</span>
+                            )}
+                            <span className="text-[10px] text-gray-400 font-medium">+91 {invoice.customer_phone}</span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeBg}`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${badgeDot}`} />
+                              {badgeLabel}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-right text-xs font-semibold text-gray-900 tabular-nums">
+                            ₹{Number(invoice.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="py-3.5 px-4 text-right text-xs font-semibold text-emerald-600 tabular-nums">
+                            ₹{Number(invoice.amount_paid || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className={`py-3.5 px-4 text-right text-xs font-semibold tabular-nums ${balanceDue > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+                            ₹{balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            {isDraft || isCancelled ? (
+                              <span className="text-gray-400 text-xs">—</span>
+                            ) : (
+                              <span className={`inline-flex items-center text-[9px] font-bold px-2 py-0.5 rounded-none uppercase ${
+                                invoice.payment_status === 'paid' ? 'bg-green-50 text-green-700 border border-green-200' :
+                                invoice.payment_status === 'partial' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                                'bg-red-50 text-red-700 border border-red-200'
+                              }`}>
+                                {invoice.payment_status || 'unpaid'}
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4 text-right pr-6" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-3">
+                              <button
+                                onClick={() => {
+                                  if (isDraft) {
+                                    window.location.href = `/invoice/new?draftId=${invoice.id}`;
+                                  } else {
+                                    window.location.href = `/invoice/${invoice.id}`;
+                                  }
+                                }}
+                                className="text-xs font-bold text-[#1a6b3c] hover:underline"
+                              >
+                                {isDraft ? 'Edit' : 'Details'}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
                   })}
                 </tbody>
               </table>

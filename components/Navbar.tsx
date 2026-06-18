@@ -223,7 +223,7 @@ export default function Navbar() {
     <>
       {/* Global CSS Injector to offset pages on desktop view */}
       <style dangerouslySetInnerHTML={{ __html: `
-        @media (min-w: 768px) {
+        @media (min-width: 768px) {
           body {
             padding-left: 16rem !important;
           }
@@ -235,7 +235,7 @@ export default function Navbar() {
         {/* Brand Logo */}
         <div className="flex items-center gap-3 mb-8">
           <div className="w-10 h-10 rounded-xl bg-white border border-[#e8eaed] overflow-hidden shadow-sm flex items-center justify-center">
-            <img src="/trubill-logo.png" alt="TruBill logo" className="w-full h-full object-contain" />
+            <img src="/trubill-logo.png" alt="TruBill logo" className="w-full h-full object-contain" loading="lazy" />
           </div>
           <div>
             <span className="font-heading font-black text-[#1a1d26] text-base leading-none block">TruBill</span>
@@ -315,7 +315,7 @@ export default function Navbar() {
       </aside>
 
       {/* ─── MOBILE HEADER (Visible only on < 768px) ─── */}
-      <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-[#e8eaed] md:hidden">
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-[#e8eaed] md:hidden">
         <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Hamburger Button */}
@@ -342,7 +342,7 @@ export default function Navbar() {
 
             <Link href="/dashboard" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-white border border-[#e8eaed] overflow-hidden shadow-sm shrink-0">
-                <img src="/trubill-logo.png" alt="TruBill logo" className="w-full h-full object-contain" />
+                <img src="/trubill-logo.png" alt="TruBill logo" className="w-full h-full object-contain" loading="lazy" />
               </div>
               <span className="font-heading font-black text-[#1a1d26] text-sm">TruBill</span>
             </Link>
@@ -380,7 +380,7 @@ export default function Navbar() {
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e8eaed] shrink-0">
                     {shopInfo?.logo_url ? (
-                      <img src={shopInfo.logo_url} alt="Shop Logo" className="w-full h-full object-cover" />
+                      <img src={shopInfo.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
                     ) : (
                       <span className="text-sm font-bold text-[#1a6b3c]">
                         {(shopInfo?.name || 'TB').slice(0, 2).toUpperCase()}

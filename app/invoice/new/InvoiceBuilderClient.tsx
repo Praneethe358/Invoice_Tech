@@ -28,19 +28,34 @@ interface Props {
     inventory_enabled: boolean;
     shop_type: string;
   };
+  initialDraft?: any;
 }
 
-export default function InvoiceBuilderClient({ products, shopId, shop }: Props) {
+export default function InvoiceBuilderClient({ products, shopId, shop, initialDraft }: Props) {
   const supabase = createClient();
-  const [items, setItems] = useState<InvoiceItem[]>([]);
-  const [phone, setPhone] = useState('');
+  const [items, setItems] = useState<InvoiceItem[]>(() => {
+    if (initialDraft?.invoice_items) {
+      return initialDraft.invoice_items.map((item: any) => ({
+        name: item.name,
+        price: Number(item.price),
+        quantity: Number(item.quantity),
+        hsn_code: item.hsn_code,
+        gst_rate: Number(item.gst_rate || 0),
+        cgst: Number(item.cgst || 0),
+        sgst: Number(item.sgst || 0),
+        line_total: Number(item.line_total || 0),
+      }));
+    }
+    return [];
+  });
+  const [phone, setPhone] = useState(initialDraft?.customer_phone || '');
   const [phoneError, setPhoneError] = useState('');
-  const [customerName, setCustomerName] = useState('');
-  const [customerGstin, setCustomerGstin] = useState('');
-  const [paymentStatus, setPaymentStatus] = useState<'paid' | 'unpaid' | 'partial'>('paid');
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'upi' | 'bank_transfer' | 'other'>('cash');
-  const [paymentNote, setPaymentNote] = useState('');
-  const [partialAmount, setPartialAmount] = useState('');
+  const [customerName, setCustomerName] = useState(initialDraft?.customer_name || '');
+  const [customerGstin, setCustomerGstin] = useState(initialDraft?.customer_gstin || '');
+  const [paymentStatus, setPaymentStatus] = useState<'paid' | 'unpaid' | 'partial'>(initialDraft?.payment_status || 'paid');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'upi' | 'bank_transfer' | 'other'>(initialDraft?.payment_method || 'cash');
+  const [paymentNote, setPaymentNote] = useState(initialDraft?.payment_note || '');
+  const [partialAmount, setPartialAmount] = useState(initialDraft?.amount_paid ? initialDraft.amount_paid.toString() : '');
   const [customName, setCustomName] = useState('');
   const [customPrice, setCustomPrice] = useState('');
   const [customHsn, setCustomHsn] = useState('');
@@ -141,11 +156,16 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
 
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [visibleCount, setVisibleCount] = useState(10);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 350);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  useEffect(() => {
+    setVisibleCount(10);
+  }, [debouncedSearchQuery, selectedCategoryTab]);
 
   const searchedProducts = useMemo(() => {
     const query = debouncedSearchQuery.trim().toLowerCase();
@@ -157,6 +177,10 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
         (p.hsn_code && p.hsn_code.toLowerCase().includes(query))
     );
   }, [filteredProducts, debouncedSearchQuery]);
+
+  const visibleProducts = useMemo(() => {
+    return searchedProducts.slice(0, visibleCount);
+  }, [searchedProducts, visibleCount]);
 
   // ─── Customer autocomplete ─────────────────────────────────
   const [suggestions, setSuggestions] = useState<Customer[]>([]);
@@ -321,19 +345,19 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
 
   const total = calculations.total;
 
-  // ─── Send Invoice ─────────────────────────────────────────
-  const canSend =
+  // ─── Submit Invoice ─────────────────────────────────────────
+  const isValid =
     items.length > 0 && validatePhone(phone) && !loading;
 
-  const handleSend = async () => {
-    if (!canSend) return;
+  const handleSubmit = async (targetStatus: 'draft' | 'saved' | 'sent') => {
+    if (!isValid) return;
 
     if (customerGstin.trim() && customerGstin.trim().length !== 15) {
       showToast('Customer GSTIN must be exactly 15 characters', 'error');
       return;
     }
 
-    if (paymentStatus === 'partial') {
+    if (paymentStatus === 'partial' && targetStatus !== 'draft') {
       const amt = Number(partialAmount);
       if (isNaN(amt) || amt <= 0 || amt >= total) {
         showToast(`Partial amount must be between ₹0.01 and ₹${(total - 0.01).toFixed(2)}`, 'error');
@@ -344,53 +368,75 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
     setLoading(true);
 
     try {
-      // Step 1: Create invoice
-      const createRes = await fetch('/api/invoices', {
-        method: 'POST',
+      const isEditingDraft = !!initialDraft;
+      const url = isEditingDraft ? `/api/invoices/${initialDraft.id}` : '/api/invoices';
+      const method = isEditingDraft ? 'PUT' : 'POST';
+
+      // 'sent' status translates to 'saved' database status initially, then sent via WhatsApp API.
+      const dbStatus = targetStatus === 'sent' ? 'saved' : targetStatus;
+
+      const payload = {
+        items: items.map(item => ({
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          hsn_code: item.hsn_code || null,
+          gst_rate: item.gst_rate || 0,
+        })),
+        customer_phone: phone.trim(),
+        customer_name: customerName.trim().toUpperCase() || undefined,
+        customer_gstin: customerGstin.trim().toUpperCase() || undefined,
+        payment_status: paymentStatus,
+        payment_method: (paymentStatus === 'paid' || paymentStatus === 'partial') ? paymentMethod : undefined,
+        payment_note: (paymentStatus === 'paid' || paymentStatus === 'partial') ? (paymentNote.trim() || undefined) : undefined,
+        amount_paid: paymentStatus === 'partial' ? Number(partialAmount) : undefined,
+        status: isEditingDraft ? 'draft' : dbStatus,
+      };
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: items.map(item => ({
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            hsn_code: item.hsn_code || null,
-            gst_rate: item.gst_rate || 0,
-          })),
-          customer_phone: phone.trim(),
-          customer_name: customerName.trim().toUpperCase() || undefined,
-          customer_gstin: customerGstin.trim().toUpperCase() || undefined,
-          payment_status: paymentStatus,
-          payment_method: (paymentStatus === 'paid' || paymentStatus === 'partial') ? paymentMethod : undefined,
-          payment_note: (paymentStatus === 'paid' || paymentStatus === 'partial') ? (paymentNote.trim() || undefined) : undefined,
-          amount_paid: paymentStatus === 'partial' ? Number(partialAmount) : undefined,
-        }),
+        body: JSON.stringify(payload),
       });
 
-      if (!createRes.ok) {
-        const err = (await createRes.json()) as ApiError;
-        throw new Error(err.error);
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(resData.error || 'Failed to submit invoice');
       }
 
-      const { id, invoice_number } = await createRes.json();
+      const id = isEditingDraft ? initialDraft.id : resData.id;
+      const invoice_number = isEditingDraft ? initialDraft.invoice_number : resData.invoice_number;
 
-      // Step 2: Send via WhatsApp
-      const sendRes = await fetch(`/api/invoices/${id}/send`, {
-        method: 'POST',
-      });
-
-      if (!sendRes.ok) {
-        const err = (await sendRes.json()) as ApiError;
-        throw new Error(err.error);
+      if (isEditingDraft && (targetStatus === 'saved' || targetStatus === 'sent')) {
+        const transitionRes = await fetch(`/api/invoices/${id}/save`, {
+          method: 'POST',
+        });
+        const transData = await transitionRes.json().catch(() => ({}));
+        if (!transitionRes.ok) {
+          throw new Error(transData.error || 'Failed to save invoice.');
+        }
       }
 
-      // Success!
-      setSuccessInvoice(invoice_number);
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : 'Failed to send invoice';
-      showToast(message, 'error');
+      if (targetStatus === 'sent') {
+        // Step 2: Send via WhatsApp
+        const sendRes = await fetch(`/api/invoices/${id}/send`, {
+          method: 'POST',
+        });
+
+        const sendData = await sendRes.json().catch(() => ({}));
+        if (!sendRes.ok) {
+          throw new Error(sendData.error || 'Invoice saved, but failed to send WhatsApp message');
+        }
+
+        // Success!
+        setSuccessInvoice(invoice_number);
+      } else {
+        showToast(targetStatus === 'draft' ? 'Draft saved successfully' : 'Invoice saved successfully', 'success');
+        router.push('/dashboard');
+        router.refresh();
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Failed to process request', 'error');
       setLoading(false);
     }
   };
@@ -499,7 +545,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {searchedProducts.map((product) => {
+                    {visibleProducts.map((product) => {
                       const qty = getItemQty(product.name);
                       const isOutOfStock = shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= 0;
                       const isLowStock = shop.inventory_enabled && product.track_inventory && !isOutOfStock && (product.stock_qty || 0) <= (product.low_stock_threshold || 5);
@@ -656,6 +702,17 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
                     })}
                   </tbody>
                 </table>
+                {searchedProducts.length > visibleCount && (
+                  <div className="p-3 border-t border-slate-200 flex justify-center bg-slate-50/50">
+                    <button
+                      type="button"
+                      onClick={() => setVisibleCount(prev => prev + 10)}
+                      className="px-4 py-2 bg-white border border-slate-200 text-slate-750 text-xs font-bold rounded-lg hover:bg-slate-50 transition-colors shadow-3xs cursor-pointer"
+                    >
+                      Show More Products ({searchedProducts.length - visibleCount} remaining)
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center py-12 bg-white border border-slate-200 rounded-xl p-6">
@@ -1013,21 +1070,39 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
 
             {/* Desktop Action Box (hidden on mobile, uses sticky footer instead) */}
             <div className="hidden lg:block bg-white border border-[#e5e7eb] rounded-2xl p-5 shadow-xs space-y-4">
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-[#6b7280] font-bold uppercase tracking-wider">Total Amount</p>
                   <p className="text-2xl font-black text-[#111827] mt-1 tabular-nums">
                     ₹{total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </div>
-                <Button
-                  onClick={handleSend}
-                  disabled={!canSend}
-                  loading={loading}
-                  className="px-8"
-                >
-                  Send Invoice
-                </Button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleSubmit('draft')}
+                    disabled={!isValid || loading}
+                    className="px-4 py-2.5 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
+                  >
+                    Save as Draft
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSubmit('saved')}
+                    disabled={!isValid || loading}
+                    className="px-4 py-2.5 border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
+                  >
+                    Save Invoice
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSubmit('sent')}
+                    disabled={!isValid || loading}
+                    className="px-5 py-2.5 bg-[#1a6b3c] hover:bg-[#155d33] text-white text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
+                  >
+                    Save & Send
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1036,23 +1111,39 @@ export default function InvoiceBuilderClient({ products, shopId, shop }: Props) 
 
       {/* Sticky Footer */}
       <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-white/90 backdrop-blur-lg border-t border-[#e5e7eb] z-30 lg:hidden">
-        <div className="max-w-lg md:max-w-5xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
-          <div>
-            <p className="text-xs text-[#6b7280] font-medium">
-              Total
-            </p>
-            <p className="text-2xl font-bold text-[#111827] tabular-nums">
+        <div className="max-w-lg md:max-w-5xl mx-auto px-4 md:px-8 py-3 flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-[#6b7280] font-bold uppercase">Total</p>
+            <p className="text-xl font-extrabold text-[#111827] tabular-nums">
               ₹{total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
           </div>
-          <Button
-            onClick={handleSend}
-            disabled={!canSend}
-            loading={loading}
-            className="px-8"
-          >
-            Send Invoice
-          </Button>
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => handleSubmit('draft')}
+              disabled={!isValid || loading}
+              className="py-3 px-1 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
+            >
+              Draft
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSubmit('saved')}
+              disabled={!isValid || loading}
+              className="py-3 px-1 border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSubmit('sent')}
+              disabled={!isValid || loading}
+              className="py-3 px-1 bg-[#1a6b3c] hover:bg-[#155d33] text-white text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
+            >
+              Save & Send
+            </button>
+          </div>
         </div>
       </div>
     </div>

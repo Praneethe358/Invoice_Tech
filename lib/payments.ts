@@ -50,13 +50,13 @@ export async function syncCustomerOutstanding(
 ): Promise<void> {
   const supabase = createAdminClient();
 
-  // Get all sent invoices for this customer
+  // Get all saved or sent invoices for this customer
   const { data: invoices } = await supabase
     .from('invoices')
     .select('id, total')
     .eq('shop_id', shopId)
     .eq('customer_phone', customerPhone)
-    .eq('status', 'sent');
+    .in('status', ['saved', 'sent']);
 
   if (!invoices) return;
 

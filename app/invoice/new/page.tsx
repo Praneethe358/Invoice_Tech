@@ -5,7 +5,14 @@ import InvoiceBuilderClient from './InvoiceBuilderClient';
 
 export const dynamic = 'force-dynamic';
 
-export default async function NewInvoicePage() {
+interface PageProps {
+  searchParams: Promise<{ draftId?: string }>;
+}
+
+export default async function NewInvoicePage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const draftId = params?.draftId;
+
   const supabase = await createClient();
 
   const {
@@ -29,11 +36,25 @@ export default async function NewInvoicePage() {
     .eq('shop_id', shop.id)
     .order('created_at', { ascending: true });
 
+  let initialDraft = null;
+  if (draftId) {
+    const { data: invoice } = await supabase
+      .from('invoices')
+      .select('*, invoice_items(*)')
+      .eq('id', draftId)
+      .eq('shop_id', shop.id)
+      .single();
+    if (invoice && invoice.status === 'draft') {
+      initialDraft = invoice;
+    }
+  }
+
   return (
     <InvoiceBuilderClient
       products={(products ?? []) as Product[]}
       shopId={shop.id}
       shop={shop as { id: string; gst_registered: boolean; gstin: string | null; inventory_enabled: boolean; shop_type: string }}
+      initialDraft={initialDraft}
     />
   );
 }

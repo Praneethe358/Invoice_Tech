@@ -55,7 +55,7 @@ export async function validateGstr1Data(
     .from('invoices')
     .select('*, invoice_items(*)')
     .eq('shop_id', shopId)
-    .eq('status', 'sent')
+    .in('status', ['saved', 'sent'])
     .gte('created_at', `${startDate}T00:00:00Z`)
     .lte('created_at', `${endDate}T23:59:59Z`);
 
@@ -134,7 +134,7 @@ export async function generateGSTR1(
     .from('invoices')
     .select('*, invoice_items(*)')
     .eq('shop_id', shopId)
-    .eq('status', 'sent')
+    .in('status', ['saved', 'sent'])
     .gte('created_at', `${startDate}T00:00:00Z`)
     .lte('created_at', `${endDate}T23:59:59Z`)
     .order('created_at', { ascending: true });

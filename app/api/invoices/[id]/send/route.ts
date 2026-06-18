@@ -84,6 +84,14 @@ export async function POST(
       }
     }
 
+    // Verify status is saved or sent or failed
+    if (typedInvoice.status !== 'saved' && typedInvoice.status !== 'sent' && typedInvoice.status !== 'failed') {
+      return NextResponse.json(
+        { error: 'Only saved invoices can be sent via WhatsApp.' } satisfies ApiError,
+        { status: 400 }
+      );
+    }
+
     // Fetch and convert logo
     let logoBase64 = null;
     if (typedShop.logo_url) {
@@ -153,143 +161,26 @@ export async function POST(
       caption
     );
 
-    // Step 4: Update status to sent and enable payments tracking
+    // Step 4: Update status to sent, record timestamps and delivery status
     await supabase
       .from('invoices')
-      .update({ status: 'sent', uses_payments_table: true })
+      .update({ 
+        status: 'sent', 
+        sent_at: new Date().toISOString(),
+        sent_by: user.id,
+        delivery_status: 'delivered'
+      })
       .eq('id', id);
 
-    // Step 4.5: Update product stats (recently used & inventory tracking)
-    const warningProducts: string[] = [];
-    if (invoiceItems && Array.isArray(invoiceItems)) {
-      for (const item of invoiceItems) {
-        // Find matching product
-        const { data: dbProd } = await supabase
-          .from('products')
-          .select('id, stock_qty, track_inventory, use_count')
-          .eq('shop_id', typedInvoice.shop_id)
-          .eq('name', item.name)
-          .maybeSingle();
-
-        if (dbProd) {
-          // Increment use_count and set last_used_at
-          await supabase
-            .from('products')
-            .update({
-              last_used_at: new Date().toISOString(),
-              use_count: (dbProd.use_count || 0) + 1,
-            })
-            .eq('id', dbProd.id);
-
-          // If track_inventory is enabled
-          if (dbProd.track_inventory) {
-            const qtyNeeded = Number(item.quantity || 1);
-            const currentStock = Number(dbProd.stock_qty || 0);
-
-            if (currentStock >= qtyNeeded) {
-              const newQty = currentStock - qtyNeeded;
-              await supabase
-                .from('products')
-                .update({ stock_qty: newQty })
-                .eq('id', dbProd.id);
-
-              await supabase
-                .from('inventory_logs')
-                .insert({
-                  shop_id: typedInvoice.shop_id,
-                  product_id: dbProd.id,
-                  invoice_id: typedInvoice.id,
-                  change_qty: -qtyNeeded,
-                  previous_qty: currentStock,
-                  new_qty: newQty,
-                  reason: 'invoice'
-                });
-            } else {
-              // Insufficient stock - warn and set stock to 0
-              warningProducts.push(item.name);
-              await supabase
-                .from('products')
-                .update({ stock_qty: 0 })
-                .eq('id', dbProd.id);
-
-              await supabase
-                .from('inventory_logs')
-                .insert({
-                  shop_id: typedInvoice.shop_id,
-                  product_id: dbProd.id,
-                  invoice_id: typedInvoice.id,
-                  change_qty: -qtyNeeded,
-                  previous_qty: currentStock,
-                  new_qty: 0,
-                  reason: 'invoice'
-                });
-            }
-          }
-        }
-      }
-    }
-
-    // Step 5: Auto-save/update customer record (silent — never affects response)
-    try {
-      const customerPhone = typedInvoice.customer_phone;
-
-      // Recalculate customer's total spent and invoices count from database
-      const { data: customerInvoices } = await supabase
-        .from('invoices')
-        .select('amount_paid')
-        .eq('shop_id', typedInvoice.shop_id)
-        .eq('customer_phone', customerPhone);
-
-      const totalSpent = (customerInvoices ?? []).reduce(
-        (sum: number, item: any) => sum + Number(item.amount_paid || 0),
-        0
-      );
-      const totalInvoices = customerInvoices ? customerInvoices.length : 0;
-
-      const { data: existing } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('shop_id', typedInvoice.shop_id)
-        .eq('phone', customerPhone)
-        .single();
-
-      if (existing) {
-        await supabase
-          .from('customers')
-          .update({
-            total_invoices: totalInvoices,
-            total_spent: totalSpent,
-            gstin: typedInvoice.customer_gstin || null,
-          })
-          .eq('id', existing.id);
-      } else {
-        await supabase
-          .from('customers')
-          .insert({
-            shop_id: typedInvoice.shop_id,
-            phone: customerPhone,
-            name: (typedInvoice.customer_name?.trim() || 'Customer').toUpperCase(),
-            tag: 'regular',
-            total_invoices: totalInvoices,
-            total_spent: totalSpent,
-            gstin: typedInvoice.customer_gstin || null,
-          });
-      }
-
-      // Sync customer outstanding balance
-      await syncCustomerOutstanding(typedInvoice.shop_id, customerPhone);
-    } catch (customerErr) {
-      console.error('Auto-save customer error (non-fatal):', customerErr);
-    }
-
-    if (warningProducts.length > 0) {
-      return NextResponse.json({
-        success: true,
-        message: 'Invoice sent successfully',
-        warning: 'low_stock',
-        products: warningProducts,
+    // Record audit log
+    await supabase
+      .from('invoice_audit_logs')
+      .insert({
+        invoice_id: id,
+        shop_id: typedInvoice.shop_id,
+        user_id: user.id,
+        action: 'sent'
       });
-    }
 
     return NextResponse.json({
       success: true,
@@ -298,10 +189,13 @@ export async function POST(
   } catch (err) {
     console.error('Send invoice error:', err);
 
-    // Update status to failed
+    // Update delivery status to failed
     await supabase
       .from('invoices')
-      .update({ status: 'failed' })
+      .update({ 
+        status: 'sent',
+        delivery_status: 'failed' 
+      })
       .eq('id', id);
 
     const message =

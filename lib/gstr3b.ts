@@ -26,7 +26,7 @@ export async function generateGSTR3B(
     .from('invoices')
     .select('*, invoice_items(*)')
     .eq('shop_id', shopId)
-    .eq('status', 'sent')
+    .in('status', ['saved', 'sent'])
     .gte('created_at', `${startDate}T00:00:00Z`)
     .lte('created_at', `${endDate}T23:59:59Z`);
 

@@ -83,6 +83,7 @@ export default function CatalogClient({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('All');
   const [sortBy, setSortBy] = useState('name-asc');
+  const [stockFilter, setStockFilter] = useState<'all' | 'low_stock' | 'out_of_stock'>('all');
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -100,6 +101,18 @@ export default function CatalogClient({
     // Category filter
     if (selectedCategoryFilter !== 'All') {
       result = result.filter((p) => p.category === selectedCategoryFilter);
+    }
+
+    // Stock filter
+    if (stockFilter === 'low_stock') {
+      result = result.filter(
+        (p) =>
+          p.track_inventory &&
+          (p.stock_qty || 0) > 0 &&
+          (p.stock_qty || 0) <= (p.low_stock_threshold || 5)
+      );
+    } else if (stockFilter === 'out_of_stock') {
+      result = result.filter((p) => p.track_inventory && (p.stock_qty || 0) <= 0);
     }
 
     // Sorting
@@ -130,7 +143,7 @@ export default function CatalogClient({
     });
 
     return result;
-  }, [products, searchQuery, selectedCategoryFilter, sortBy]);
+  }, [products, searchQuery, selectedCategoryFilter, sortBy, stockFilter]);
 
   const handleAddProduct = async () => {
     const name = newName.trim().toUpperCase();
@@ -367,7 +380,7 @@ export default function CatalogClient({
             <div className="w-10 h-10 rounded-none bg-[#1a6b3c]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
               {shop.logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" />
+                <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
               ) : (
                 <div className="w-full h-full bg-[#1a6b3c] flex items-center justify-center text-white">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -673,6 +686,45 @@ export default function CatalogClient({
                     );
                   })}
                 </div>
+
+                {inventoryEnabledGlobal && (
+                  <div className="flex gap-2 items-center flex-wrap mt-1">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Stock Status:</span>
+                    <button
+                      type="button"
+                      onClick={() => setStockFilter('all')}
+                      className={`px-3 py-1 rounded-full text-xs font-bold transition-all border cursor-pointer ${
+                        stockFilter === 'all'
+                          ? 'bg-[#1a6b3c]/10 text-[#1a6b3c] border-[#1a6b3c]'
+                          : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:text-gray-700'
+                      }`}
+                    >
+                      All Stock
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStockFilter('low_stock')}
+                      className={`px-3 py-1 rounded-full text-xs font-bold transition-all border cursor-pointer ${
+                        stockFilter === 'low_stock'
+                          ? 'bg-amber-50 text-amber-700 border-amber-300'
+                          : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:text-gray-700'
+                      }`}
+                    >
+                      ⚠️ Low Stock ({products.filter(p => p.track_inventory && (p.stock_qty || 0) > 0 && (p.stock_qty || 0) <= (p.low_stock_threshold || 5)).length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStockFilter('out_of_stock')}
+                      className={`px-3 py-1 rounded-full text-xs font-bold transition-all border cursor-pointer ${
+                        stockFilter === 'out_of_stock'
+                          ? 'bg-red-50 text-red-700 border-red-300'
+                          : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:text-gray-700'
+                      }`}
+                    >
+                      🚫 Out of Stock ({products.filter(p => p.track_inventory && (p.stock_qty || 0) <= 0).length})
+                    </button>
+                  </div>
+                )}
               </div>
 
               {filteredProducts.length === 0 ? (

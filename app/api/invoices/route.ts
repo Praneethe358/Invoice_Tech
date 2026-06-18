@@ -53,9 +53,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate invoice number
-    const invoiceNumber = `${shop.invoice_prefix}-${String(shop.next_invoice_number).padStart(4, '0')}`;
-
     // Process items & calculate taxes
     let subtotal = 0;
     let totalCgst = 0;
@@ -108,95 +105,46 @@ export async function POST(request: NextRequest) {
       ? Number(body.amount_paid)
       : 0;
 
-    const paid_at = payment_status === 'paid' ? new Date().toISOString() : null;
-    const uses_payments_table = payment_status === 'paid' || payment_status === 'partial';
+    const status = body.status || 'saved';
 
-    // Insert invoice
-    const { data: invoice, error: insertError } = await supabase
-      .from('invoices')
-      .insert({
-        shop_id: shop.id,
-        invoice_number: invoiceNumber,
-        customer_phone: body.customer_phone.trim(),
-        customer_name: body.customer_name?.trim().toUpperCase() || null,
-        customer_gstin: body.customer_gstin?.trim().toUpperCase() || null,
-        payment_status,
-        amount_paid,
-        paid_at,
-        items: processedItems, // fallback copy
-        total: Number(total.toFixed(2)),
-        status: 'created',
-        uses_items_table: true,
-        uses_payments_table,
-        subtotal: Number(subtotal.toFixed(2)),
-        total_cgst: Number(totalCgst.toFixed(2)),
-        total_sgst: Number(totalSgst.toFixed(2)),
-        total_gst: Number(totalGst.toFixed(2)),
-      })
-      .select('id, invoice_number')
-      .single();
+    // Call the postgres atomic transaction function
+    const { data: rpcData, error: rpcError } = await supabase.rpc('create_invoice_sec', {
+      p_shop_id: shop.id,
+      p_customer_phone: body.customer_phone.trim(),
+      p_customer_name: body.customer_name?.trim().toUpperCase() || null,
+      p_customer_gstin: body.customer_gstin?.trim().toUpperCase() || null,
+      p_payment_status: payment_status,
+      p_amount_paid: amount_paid,
+      p_payment_method: body.payment_method || 'cash',
+      p_payment_note: body.payment_note?.trim() || null,
+      p_items: processedItems,
+      p_subtotal: Number(subtotal.toFixed(2)),
+      p_total_cgst: Number(totalCgst.toFixed(2)),
+      p_total_sgst: Number(totalSgst.toFixed(2)),
+      p_total_gst: Number(totalGst.toFixed(2)),
+      p_total: Number(total.toFixed(2)),
+      p_status: status,
+      p_user_id: user.id,
+    });
 
-    if (insertError) {
-      console.error('Invoice insert error:', insertError);
+    if (rpcError) {
+      console.error('RPC create_invoice_sec error:', rpcError);
+      if (rpcError.message.includes('INSUFFICIENT_STOCK')) {
+        const prodName = rpcError.message.split('INSUFFICIENT_STOCK: ')[1] || 'Product';
+        return NextResponse.json(
+          { error: `Insufficient stock for ${prodName}. Negative stock not allowed.` } satisfies ApiError,
+          { status: 400 }
+        );
+      }
       return NextResponse.json(
-        { error: 'Failed to create invoice. Please try again.' } satisfies ApiError,
+        { error: rpcError.message || 'Failed to create invoice.' } satisfies ApiError,
         { status: 500 }
       );
     }
 
-    // Insert into payments table if paid or partial
-    if (payment_status === 'paid' || payment_status === 'partial') {
-      const { error: paymentInsertError } = await supabase
-        .from('payments')
-        .insert({
-          invoice_id: invoice.id,
-          shop_id: shop.id,
-          customer_phone: body.customer_phone.trim(),
-          amount: amount_paid,
-          payment_method: body.payment_method || 'cash',
-          note: body.payment_note?.trim() || (payment_status === 'paid' ? 'Paid on invoice creation' : 'Partial payment on invoice creation'),
-          paid_at: paid_at || new Date().toISOString(),
-        });
-
-      if (paymentInsertError) {
-        console.error('Payment record insert error on invoice creation:', paymentInsertError);
-      }
-    }
-
-    // Insert line items into invoice_items table
-    const itemsToInsert = processedItems.map((item) => ({
-      invoice_id: invoice.id,
-      name: item.name,
-      hsn_code: item.hsn_code || null,
-      price: item.price,
-      qty: item.quantity,
-      gst_rate: item.gst_rate || 0,
-      cgst: item.cgst,
-      sgst: item.sgst,
-      line_total: item.line_total,
-    }));
-
-    const { error: itemsInsertError } = await supabase
-      .from('invoice_items')
-      .insert(itemsToInsert);
-
-    if (itemsInsertError) {
-      console.error('Invoice items insert error:', itemsInsertError);
-    }
-
-    // Increment invoice number
-    const { error: updateError } = await supabase
-      .from('shops')
-      .update({ next_invoice_number: shop.next_invoice_number + 1 })
-      .eq('id', shop.id);
-
-    if (updateError) {
-      console.error('Invoice number update error:', updateError);
-    }
-
     return NextResponse.json({
-      id: invoice.id,
-      invoice_number: invoice.invoice_number,
+      id: rpcData.id,
+      invoice_number: rpcData.invoice_number,
     });
   } catch (err) {
     console.error('Unexpected error in POST /api/invoices:', err);

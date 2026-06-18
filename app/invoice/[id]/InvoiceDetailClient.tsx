@@ -53,6 +53,13 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
   const [savingNote, setSavingNote] = useState(false);
   const [noteItems, setNoteItems] = useState<any[]>([]);
 
+  // Cancel and delete states
+  const [cancellingInvoice, setCancellingInvoice] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [deletingDraft, setDeletingDraft] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
 
   // Watch cooldown
   useEffect(() => {
@@ -213,6 +220,49 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
       showToast('Failed to download PDF', 'error');
     }
     setDownloading(false);
+  };
+
+  const handleCancelInvoice = async () => {
+    setCancellingInvoice(true);
+    try {
+      const res = await fetch(`/api/invoices/${inv.id}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: cancelReason }),
+      });
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(resData.error || 'Failed to cancel invoice');
+      }
+      showToast('Invoice cancelled successfully', 'success');
+      setShowCancelConfirm(false);
+      // Update state local status
+      setInv(prev => ({ ...prev, status: 'cancelled' }));
+      router.refresh();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    } finally {
+      setCancellingInvoice(false);
+    }
+  };
+
+  const handleDeleteDraft = async () => {
+    setDeletingDraft(true);
+    try {
+      const res = await fetch(`/api/invoices/${inv.id}`, {
+        method: 'DELETE',
+      });
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(resData.error || 'Failed to delete draft');
+      }
+      showToast('Draft deleted successfully', 'success');
+      router.push('/dashboard');
+      router.refresh();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+      setDeletingDraft(false);
+    }
   };
 
   const handleRecordPayment = async () => {
@@ -391,13 +441,40 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
               <p className="text-sm text-[#6b7280]">{dateStr}</p>
             </div>
             <div className="flex flex-col items-end gap-1.5">
-              <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide
-                ${inv.status === 'sent' ? 'bg-emerald-50 text-emerald-600' : ''}
-                ${inv.status === 'failed' ? 'bg-red-50 text-red-600' : ''}
-                ${inv.status === 'created' ? 'bg-amber-50 text-amber-600' : ''}
-              `}>
-                {inv.status}
-              </div>
+              {(() => {
+                const deliveryFailed = inv.delivery_status === 'failed';
+                const isDraft = inv.status === 'draft';
+                const isSaved = inv.status === 'saved';
+                const isSent = inv.status === 'sent';
+                const isCancelled = inv.status === 'cancelled';
+                const isFailed = inv.status === 'failed';
+
+                let badgeBg = 'bg-gray-100 text-gray-600';
+                let badgeLabel: string = inv.status;
+
+                if (deliveryFailed || isFailed) {
+                  badgeBg = 'bg-amber-50 text-amber-600';
+                  badgeLabel = 'Failed';
+                } else if (isDraft) {
+                  badgeBg = 'bg-slate-100 text-slate-600';
+                  badgeLabel = 'Draft';
+                } else if (isSaved) {
+                  badgeBg = 'bg-blue-50 text-blue-600';
+                  badgeLabel = 'Saved';
+                } else if (isSent) {
+                  badgeBg = 'bg-emerald-50 text-emerald-600';
+                  badgeLabel = 'Sent';
+                } else if (isCancelled) {
+                  badgeBg = 'bg-red-50 text-red-600';
+                  badgeLabel = 'Cancelled';
+                }
+
+                return (
+                  <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${badgeBg}`}>
+                    {badgeLabel}
+                  </div>
+                );
+              })()}
               {inv.sent_reminders && inv.sent_reminders > 0 ? (
                 <span className="text-[10px] text-amber-600 font-semibold">
                   🔔 {inv.sent_reminders} reminder{inv.sent_reminders !== 1 ? 's' : ''} sent
@@ -571,7 +648,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
               )}
 
               {/* Record Payment Form */}
-              {balanceDue > 0 && (
+              {balanceDue > 0 && inv.status !== 'draft' && inv.status !== 'cancelled' && (
                 <div className="mt-4">
                   {!showForm ? (
                     <button
@@ -861,28 +938,173 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
         </div>
 
         <div className="space-y-3">
-          {inv.payment_status !== 'paid' && (
-            <Button
-              onClick={handleSendReminder}
-              loading={sendingReminder}
-              disabled={cooldown > 0}
-              className="w-full bg-[#d97706] hover:bg-[#b45309] text-white flex items-center justify-center gap-2"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              {cooldown > 0 ? `Resend in ${cooldown}s...` : 'Send Payment Reminder'}
-            </Button>
+          {inv.status === 'draft' && (
+            <>
+              <Button
+                onClick={() => window.location.href = `/invoice/new?draftId=${inv.id}`}
+                variant="primary"
+                className="w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white"
+              >
+                Edit Draft
+              </Button>
+
+              {showDeleteConfirm ? (
+                <div className="border border-red-200 rounded-xl p-3 bg-red-50 text-center space-y-2">
+                  <p className="text-xs font-bold text-red-700">Are you sure you want to delete this draft?</p>
+                  <div className="flex gap-2 justify-center">
+                    <button
+                      onClick={handleDeleteDraft}
+                      disabled={deletingDraft}
+                      className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg disabled:opacity-50"
+                    >
+                      {deletingDraft ? 'Deleting...' : 'Yes, Delete'}
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="px-3 py-1 bg-white border border-slate-200 text-slate-700 font-bold text-xs rounded-lg"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  variant="ghost"
+                  className="w-full bg-red-50 border border-red-200 text-red-600 hover:bg-red-100"
+                >
+                  Delete Draft
+                </Button>
+              )}
+            </>
           )}
 
-          <Button onClick={handleDownload} loading={downloading} variant="ghost" className="w-full bg-white border border-[#e5e7eb]">
-            Download PDF
-          </Button>
+          {inv.status === 'saved' && (
+            <>
+              <Button
+                onClick={handleResend}
+                loading={resending}
+                variant="primary"
+                className="w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white"
+              >
+                Send Invoice (WhatsApp)
+              </Button>
 
-          <Button onClick={handleResend} loading={resending} variant="primary" className="w-full">
-            {inv.status === 'failed' ? 'Resend Invoice' : 'Send Again'}
-          </Button>
+              <Button onClick={handleDownload} loading={downloading} variant="ghost" className="w-full bg-white border border-[#e5e7eb]">
+                Download PDF
+              </Button>
+
+              {showCancelConfirm ? (
+                <div className="border border-slate-200 rounded-xl p-3 bg-white space-y-2">
+                  <p className="text-xs font-bold text-[#111827]">Reason for Cancellation</p>
+                  <input
+                    type="text"
+                    placeholder="e.g. Mistake in items / Customer return"
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    className="w-full border border-slate-200 rounded-lg p-2 text-xs"
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={handleCancelInvoice}
+                      disabled={cancellingInvoice}
+                      className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg disabled:opacity-50"
+                    >
+                      {cancellingInvoice ? 'Cancelling...' : 'Confirm Cancel'}
+                    </button>
+                    <button
+                      onClick={() => setShowCancelConfirm(false)}
+                      className="px-3 py-1 bg-white border border-slate-200 text-slate-700 font-bold text-xs rounded-lg"
+                    >
+                      Keep Invoice
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => setShowCancelConfirm(true)}
+                  variant="ghost"
+                  className="w-full bg-red-50 border border-red-100 text-red-600 hover:bg-red-100"
+                >
+                  Cancel Invoice
+                </Button>
+              )}
+            </>
+          )}
+
+          {inv.status === 'sent' && (
+            <>
+              {inv.payment_status !== 'paid' && (
+                <Button
+                  onClick={handleSendReminder}
+                  loading={sendingReminder}
+                  disabled={cooldown > 0}
+                  className="w-full bg-[#d97706] hover:bg-[#b45309] text-white flex items-center justify-center gap-2"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                  {cooldown > 0 ? `Resend in ${cooldown}s...` : 'Send Payment Reminder'}
+                </Button>
+              )}
+
+              <Button onClick={handleDownload} loading={downloading} variant="ghost" className="w-full bg-white border border-[#e5e7eb]">
+                Download PDF
+              </Button>
+
+              <Button
+                onClick={handleResend}
+                loading={resending}
+                variant="primary"
+                className="w-full bg-[#1a6b3c] hover:bg-[#155d33] text-white"
+              >
+                Resend Invoice
+              </Button>
+
+              {showCancelConfirm ? (
+                <div className="border border-slate-200 rounded-xl p-3 bg-white space-y-2">
+                  <p className="text-xs font-bold text-[#111827]">Reason for Cancellation</p>
+                  <input
+                    type="text"
+                    placeholder="e.g. Mistake in items / Customer return"
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    className="w-full border border-slate-200 rounded-lg p-2 text-xs"
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={handleCancelInvoice}
+                      disabled={cancellingInvoice}
+                      className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg disabled:opacity-50"
+                    >
+                      {cancellingInvoice ? 'Cancelling...' : 'Confirm Cancel'}
+                    </button>
+                    <button
+                      onClick={() => setShowCancelConfirm(false)}
+                      className="px-3 py-1 bg-white border border-slate-200 text-slate-700 font-bold text-xs rounded-lg"
+                    >
+                      Keep Invoice
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => setShowCancelConfirm(true)}
+                  variant="ghost"
+                  className="w-full bg-red-50 border border-red-100 text-red-600 hover:bg-red-100"
+                >
+                  Cancel Invoice
+                </Button>
+              )}
+            </>
+          )}
+
+          {inv.status === 'cancelled' && (
+            <Button onClick={handleDownload} loading={downloading} variant="ghost" className="w-full bg-white border border-[#e5e7eb]">
+              Download PDF
+            </Button>
+          )}
         </div>
       </PageTransition>
     </div>

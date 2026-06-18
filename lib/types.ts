@@ -95,9 +95,14 @@ export interface Invoice {
   total_cgst?: number;
   total_sgst?: number;
   total_gst?: number;
+  sent_at?: string | null;
+  sent_by?: string | null;
+  delivery_status?: string | null;
+  cancelled_at?: string | null;
+  cancelled_reason?: string | null;
 }
 
-export type InvoiceStatus = 'created' | 'sent' | 'failed';
+export type InvoiceStatus = 'draft' | 'saved' | 'sent' | 'cancelled' | 'failed';
 
 // ─── Invoice Builder Types ────────────────────────────────────
 
@@ -123,6 +128,7 @@ export interface CreateInvoicePayload {
   payment_method?: string;
   payment_note?: string;
   amount_paid?: number;
+  status?: InvoiceStatus;
 }
 
 export interface CreateInvoiceResponse {
