@@ -509,7 +509,7 @@ export default function Navbar() {
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e8eaed] safe-area-inset-bottom md:hidden">
           <div className="max-w-lg mx-auto flex items-center justify-around h-16">
             {activeNavItems
-              .filter((item) => !item.desktopOnly)
+              .filter((item) => ['/dashboard', '/customers', '/invoice/new'].includes(item.href))
               .map((item) => {
                 const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
 
