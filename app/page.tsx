@@ -253,11 +253,11 @@ const industries = [
 const faqs = [
   {
     q: 'Do I need to install an app or software?',
-    a: 'No. Varavu Invoice is a progressive web app that runs directly in your browser. You can register and start sending invoices from your phone, tablet, or desktop instantly.',
+    a: 'No. TruBill Invoice is a progressive web app that runs directly in your browser. You can register and start sending invoices from your phone, tablet, or desktop instantly.',
   },
   {
     q: 'Does WhatsApp delivery require complex API setups?',
-    a: 'Not at all. Varavu generates a PDF receipt, formats the WhatsApp text, and opens your WhatsApp client pre-loaded. It takes one tap and does not require saving client contacts.',
+    a: 'Not at all. TruBill generates a PDF receipt, formats the WhatsApp text, and opens your WhatsApp client pre-loaded. It takes one tap and does not require saving client contacts.',
   },
   {
     q: 'Can I track outstanding payments and balances?',
@@ -265,7 +265,7 @@ const faqs = [
   },
   {
     q: 'Does it work offline when my store connection is weak?',
-    a: 'Yes. Varavu stores drafted invoices and changes locally. As soon as you get internet coverage back, your data syncs securely with your cloud dashboard.',
+    a: 'Yes. TruBill stores drafted invoices and changes locally. As soon as you get internet coverage back, your data syncs securely with your cloud dashboard.',
   },
 ];
 
@@ -310,7 +310,7 @@ export default function LandingPage() {
               </svg>
             </div>
             <span className="font-heading font-black text-lg text-[#1a1d26] tracking-tight">
-              Varavu
+              TruBill
             </span>
           </Link>
 
@@ -346,7 +346,7 @@ export default function LandingPage() {
                   <polyline points="14 2 14 8 20 8" />
                 </svg>
               </div>
-              <span className="font-heading font-black text-[#1a1d26] text-base sm:text-lg tracking-tight">Varavu</span>
+              <span className="font-heading font-black text-[#1a1d26] text-base sm:text-lg tracking-tight">TruBill</span>
             </Link>
           </div>
 
@@ -457,7 +457,7 @@ export default function LandingPage() {
               {/* Description Text */}
               <div className="px-5 pt-4">
                 <p className="text-[11px] text-[#6b7280] leading-relaxed">
-                  Easy WhatsApp billing, manage customer payments, track outstanding balances, control inventory, and simplify accounting with Varavu - Tamil Nadu&apos;s best lightweight billing software. Start billing free today.
+                  Easy WhatsApp billing, manage customer payments, track outstanding balances, control inventory, and simplify accounting with TruBill - Tamil Nadu&apos;s best lightweight billing software. Start billing free today.
                 </p>
               </div>
 
@@ -513,7 +513,7 @@ export default function LandingPage() {
                               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                             </svg>
                           </div>
-                          <span className="font-extrabold text-[9px] tracking-tight">Varavu</span>
+                          <span className="font-extrabold text-[9px] tracking-tight">TruBill</span>
                         </div>
                         <span className="text-[5.5px] bg-white/20 px-1.5 py-0.5 rounded-full font-bold">TN</span>
                       </div>
@@ -582,7 +582,7 @@ export default function LandingPage() {
                                 <div className="flex-1 bg-white border border-slate-200/70 rounded-lg p-1.5 shadow-3xs mt-1 overflow-y-auto space-y-1 text-[5px] text-slate-650">
                                   <div className="flex justify-between items-start border-b border-slate-100 pb-1">
                                     <div>
-                                      <h5 className="font-extrabold text-[#1a6b3c] text-[6.5px]">VARAVU STORE</h5>
+                                      <h5 className="font-extrabold text-[#1a6b3c] text-[6.5px]">TRUBILL STORE</h5>
                                       <p className="text-[4px] text-slate-400">GSTIN: 33AAAAA0000A1Z1</p>
                                     </div>
                                     <div className="text-right">
@@ -623,7 +623,7 @@ export default function LandingPage() {
                                 <div className="flex-1 py-1 space-y-1.5 overflow-y-auto flex flex-col justify-end text-[5.5px]">
                                   <div className="bg-[#dcf8c6] p-1.5 rounded-md max-w-[95%] self-end border border-emerald-200/50 shadow-3xs">
                                     <p className="font-bold text-slate-850 text-[6px] mb-0.5">INV_Ramesh.pdf</p>
-                                    <p className="text-slate-700 leading-tight">Invoice of **₹4,042.50** from Varavu Store.</p>
+                                    <p className="text-slate-700 leading-tight">Invoice of **₹4,042.50** from TruBill Store.</p>
                                   </div>
                                 </div>
                               </div>
@@ -679,7 +679,7 @@ export default function LandingPage() {
               </h1>
 
               <p className="text-[13px] sm:text-base md:text-lg text-[#525f7a] leading-relaxed max-w-xl">
-                Easy WhatsApp billing, manage customer payments, track outstanding balances, control inventory, and simplify accounting with <strong className="text-slate-800">Varavu</strong> - Tamil Nadu&apos;s best lightweight billing web app. Start billing free today.
+                Easy WhatsApp billing, manage customer payments, track outstanding balances, control inventory, and simplify accounting with <strong className="text-slate-800">TruBill</strong> - Tamil Nadu&apos;s best lightweight billing web app. Start billing free today.
               </p>
 
               {/* Action Buttons & Trust Badges */}
@@ -803,7 +803,7 @@ export default function LandingPage() {
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                           </svg>
                         </div>
-                        <span className="font-extrabold text-[12px] tracking-tight">Varavu Invoicing</span>
+                        <span className="font-extrabold text-[12px] tracking-tight">TruBill Invoicing</span>
                       </div>
                       <div className="flex items-center gap-2.5 text-[8px] font-bold text-emerald-100 bg-[#155d33] px-2 py-0.5 rounded-md">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -916,7 +916,7 @@ export default function LandingPage() {
                               <div className="col-span-8 bg-white border border-slate-200 rounded-lg p-2.5 shadow-xs flex flex-col justify-between overflow-y-auto text-[6px] text-slate-600">
                                 <div className="flex justify-between items-start border-b border-slate-100 pb-1.5">
                                   <div>
-                                    <h5 className="font-extrabold text-[#1a6b3c] text-[7.5px]">VARAVU STORE</h5>
+                                    <h5 className="font-extrabold text-[#1a6b3c] text-[7.5px]">TRUBILL STORE</h5>
                                     <p className="text-[5px]">GSTIN: 33AAAAA0000A1Z1</p>
                                     <p className="text-[5px]">Chennai, Tamil Nadu</p>
                                   </div>
@@ -1006,7 +1006,7 @@ export default function LandingPage() {
                                     </div>
                                   </div>
                                   <p className="text-[6.5px]">
-                                    Dear Ramesh Kumar, your invoice of **₹4,042.50** from Varavu Store is ready. Pay online: *upi.varavu.in/pay*
+                                    Dear Ramesh Kumar, your invoice of **₹4,042.50** from TruBill Store is ready. Pay online: *upi.trubill.in/pay*
                                   </p>
                                   <div className="text-right text-[5px] text-slate-400">
                                     10:16 AM <span className="text-blue-500">✓✓</span>
@@ -1201,7 +1201,7 @@ export default function LandingPage() {
                 Create GST Bills online and share them with customers
               </h3>
               <p className="text-[13px] sm:text-sm md:text-base text-[#4b5563] leading-relaxed font-medium">
-                <strong>What it does:</strong> Varavu&apos;s GST billing software lets you generate fully GST-compliant tax invoices in under 20 seconds. Instead of wasting money on thermal printers and paper rolls, deliver branded PDF receipts directly to your customer&apos;s WhatsApp instantly.
+                <strong>What it does:</strong> TruBill&apos;s GST billing software lets you generate fully GST-compliant tax invoices in under 20 seconds. Instead of wasting money on thermal printers and paper rolls, deliver branded PDF receipts directly to your customer&apos;s WhatsApp instantly.
               </p>
               <ul className="space-y-2 sm:space-y-2.5 pt-1 sm:pt-2">
                 {[
@@ -1536,7 +1536,7 @@ export default function LandingPage() {
             Boost your billing speed and collections today
           </h2>
           <p className="text-sm sm:text-base text-[#4b5563] max-w-lg mx-auto">
-            Join other shop owners in Tamil Nadu saving time and paperwork with Varavu Invoice. Free setup.
+            Join other shop owners in Tamil Nadu saving time and paperwork with TruBill Invoice. Free setup.
           </p>
           <div className="pt-1">
             <Link
@@ -1553,7 +1553,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Footer ───────────────────────────────────────────── */}
       <footer className="bg-white border-t border-[#e8eaed] text-sm text-[#4b5563]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 pb-8 md:pb-12 border-b border-[#e8eaed]">
@@ -1566,7 +1565,7 @@ export default function LandingPage() {
                     <polyline points="14 2 14 8 20 8" />
                   </svg>
                 </div>
-                <span className="font-heading font-black text-base text-[#1a1d26]">Varavu Invoice</span>
+                <span className="font-heading font-black text-base text-[#1a1d26]">TruBill Invoice</span>
               </div>
               <p className="text-xs text-[#6b7280] leading-relaxed">
                 Simple, lightweight billing software designed for small businesses, supermarkets, and freelancers in Tamil Nadu.
@@ -1599,19 +1598,19 @@ export default function LandingPage() {
             <div className="space-y-3">
               <h4 className="font-bold text-[#1a1d26] text-xs uppercase tracking-wider">HQ Address</h4>
               <p className="text-xs text-[#6b7280] leading-relaxed">
-                Varavu Technologies Ltd.<br />
-                Varthur Hobli, Bengaluru,<br />
-                Karnataka 560103
+                TruBill Technologies Ltd.<br />
+                Anna Salai, Chennai,<br />
+                Tamil Nadu 600002
               </p>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between pt-6 md:pt-8 text-[11px] sm:text-xs text-[#6b7280] gap-3">
             <div>
-              © {new Date().getFullYear()} Varavu. All rights reserved.
+              © {new Date().getFullYear()} TruBill. All rights reserved.
             </div>
             <div className="flex gap-4">
-              <span>Made in India 🇮🇳</span>
+              <span>Made for Shopkeepers in Tamil Nadu 🇮🇳</span>
             </div>
           </div>
         </div>

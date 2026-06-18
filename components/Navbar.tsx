@@ -134,18 +134,36 @@ export default function Navbar() {
     ),
   };
 
-  const activeNavItems = shopInfo?.gst_registered
-    ? (() => {
-        const items = [...navItems];
-        const idx = items.findIndex((i) => i.href === '/settings');
-        if (idx !== -1) {
-          items.splice(idx, 0, purchasesItem, suppliersItem, gstItem);
-        } else {
-          items.push(purchasesItem, suppliersItem, gstItem);
-        }
-        return items;
-      })()
-    : navItems;
+  const reportsItem = {
+    href: '/reports',
+    label: 'Reports',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="20" x2="18" y2="10" />
+        <line x1="12" y1="20" x2="12" y2="4" />
+        <line x1="6" y1="20" x2="6" y2="14" />
+      </svg>
+    ),
+  };
+
+  const activeNavItems = (() => {
+    const items = [...navItems];
+    const idx = items.findIndex((i) => i.href === '/settings');
+    if (shopInfo?.gst_registered) {
+      if (idx !== -1) {
+        items.splice(idx, 0, purchasesItem, suppliersItem, reportsItem, gstItem);
+      } else {
+        items.push(purchasesItem, suppliersItem, reportsItem, gstItem);
+      }
+    } else {
+      if (idx !== -1) {
+        items.splice(idx, 0, reportsItem);
+      } else {
+        items.push(reportsItem);
+      }
+    }
+    return items;
+  })();
 
 
   useEffect(() => {

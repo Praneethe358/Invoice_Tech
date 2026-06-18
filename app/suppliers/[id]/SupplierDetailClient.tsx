@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import PageTransition from '@/components/PageTransition';
@@ -17,6 +17,9 @@ interface Props {
   totalItcEligible: number;
 }
 
+type TabType = 'overview' | 'ledger' | 'purchases';
+type DateFilterType = 'this_month' | 'last_month' | 'this_quarter' | 'this_year' | 'custom';
+
 export default function SupplierDetailClient({
   shop,
   initialSupplier,
@@ -28,7 +31,7 @@ export default function SupplierDetailClient({
   const { showToast } = useToast();
 
   const [supplier, setSupplier] = useState<Supplier>(initialSupplier);
-  const [purchases] = useState<Purchase[]>(initialPurchases);
+  const [purchases, setPurchases] = useState<Purchase[]>(initialPurchases);
   const [totalPurchased] = useState<number>(initialTotal);
   const [totalItcEligible] = useState<number>(initialItc);
 
@@ -36,12 +39,24 @@ export default function SupplierDetailClient({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // Tabs state
+  const [activeTab, setActiveTab] = useState<TabType>('overview');
+
+  // Ledger Filter states
+  const [dateFilter, setDateFilter] = useState<DateFilterType>('this_year');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
+
   // Edit fields
   const [name, setName] = useState(supplier.name);
   const [gstin, setGstin] = useState(supplier.gstin || '');
   const [phone, setPhone] = useState(supplier.phone || '');
   const [address, setAddress] = useState(supplier.address || '');
   const [updating, setUpdating] = useState(false);
+
+  // Export loading state
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [exportingExcel, setExportingExcel] = useState(false);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,6 +118,116 @@ export default function SupplierDetailClient({
       showToast(err.message, 'error');
       setDeleting(false);
       setConfirmDelete(false);
+    }
+  };
+
+  // Helper: Date filter logic client-side
+  const dateRange = useMemo(() => {
+    const now = new Date();
+    let start: Date | null = null;
+    let end: Date | null = null;
+
+    if (dateFilter === 'this_month') {
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    } else if (dateFilter === 'last_month') {
+      start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+    } else if (dateFilter === 'this_quarter') {
+      const quarter = Math.floor(now.getMonth() / 3);
+      start = new Date(now.getFullYear(), quarter * 3, 1);
+      end = new Date(now.getFullYear(), (quarter + 1) * 3, 0, 23, 59, 59, 999);
+    } else if (dateFilter === 'this_year') {
+      start = new Date(now.getFullYear(), 0, 1);
+      end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+    } else if (dateFilter === 'custom') {
+      if (customStartDate) start = new Date(customStartDate);
+      if (customEndDate) {
+        const d = new Date(customEndDate);
+        d.setHours(23, 59, 59, 999);
+        end = d;
+      }
+    }
+
+    return { start, end };
+  }, [dateFilter, customStartDate, customEndDate]);
+
+  // Running total calculation chronologically (oldest first)
+  const chronologicalPurchases = useMemo(() => {
+    return [...purchases].sort((a, b) => new Date(a.purchase_date).getTime() - new Date(b.purchase_date).getTime());
+  }, [purchases]);
+
+  const runningTotals = useMemo(() => {
+    let running = 0;
+    const totals: Record<string, number> = {};
+    chronologicalPurchases.forEach((p) => {
+      running += Number(p.total || 0);
+      totals[p.id] = running;
+    });
+    return totals;
+  }, [chronologicalPurchases]);
+
+  // Filtered Purchases for Ledger Tab based on active filters
+  const ledgerPurchases = useMemo(() => {
+    return [...purchases]
+      .filter((p) => {
+        const pDate = new Date(p.purchase_date);
+        if (dateRange.start && pDate < dateRange.start) return false;
+        if (dateRange.end && pDate > dateRange.end) return false;
+        return true;
+      })
+      .sort((a, b) => new Date(b.purchase_date).getTime() - new Date(a.purchase_date).getTime()); // newest first
+  }, [purchases, dateRange]);
+
+  // Ledger totals
+  const ledgerTotals = useMemo(() => {
+    let totalPurchasedVal = 0;
+    let totalItcVal = 0;
+    ledgerPurchases.forEach((p) => {
+      totalPurchasedVal += Number(p.total || 0);
+      if (p.itc_eligible) {
+        totalItcVal += Number(p.total_cgst || 0) + Number(p.total_sgst || 0);
+      }
+    });
+    return {
+      totalPurchased: totalPurchasedVal,
+      totalItc: totalItcVal,
+      count: ledgerPurchases.length,
+    };
+  }, [ledgerPurchases]);
+
+  const handleExport = async (type: 'pdf' | 'excel') => {
+    const isPdf = type === 'pdf';
+    if (isPdf) setExportingPdf(true);
+    else setExportingExcel(true);
+
+    try {
+      const params = new URLSearchParams();
+      if (dateRange.start) params.append('start_date', dateRange.start.toISOString().split('T')[0]);
+      if (dateRange.end) params.append('end_date', dateRange.end.toISOString().split('T')[0]);
+
+      const url = `/api/suppliers/${supplier.id}/ledger/${type}?${params.toString()}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Failed to generate ${type.toUpperCase()}`);
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.setAttribute(
+        'download',
+        `Supplier_Ledger_${supplier.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.${isPdf ? 'pdf' : 'xlsx'}`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+
+      showToast(`Supplier ledger exported ✓`, 'success');
+    } catch (err: any) {
+      showToast(err.message || `Export failed`, 'error');
+    } finally {
+      if (isPdf) setExportingPdf(false);
+      else setExportingExcel(false);
     }
   };
 
@@ -181,191 +306,350 @@ export default function SupplierDetailClient({
           </button>
         </div>
 
-        {/* Supplier Header details */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#1a6b3c]/10 text-[#1a6b3c] flex items-center justify-center text-xl font-extrabold border border-[#1a6b3c]/20">
-                {supplier.name.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <h2 className="text-lg font-black text-slate-905 uppercase leading-tight">
-                  {supplier.name}
-                </h2>
-                <div className="mt-1.5">
-                  {supplier.gstin ? (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-[#e6f4ea] text-[#1a6b3c] border border-[#d1e7dd] uppercase tracking-wider font-mono">
-                      GSTIN: {supplier.gstin}
-                    </span>
+        {/* Vyapar style Tabs */}
+        <div className="flex border-b border-slate-200 mb-6 bg-white p-2 rounded-xl border">
+          {(['overview', 'ledger', 'purchases'] as TabType[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 text-center py-2.5 rounded-lg text-xs font-bold transition-all uppercase tracking-wider ${
+                activeTab === tab
+                  ? 'bg-[#1a6b3c] text-white shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* OVERVIEW TAB CONTENT */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            {/* Supplier Header details */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#1a6b3c]/10 text-[#1a6b3c] flex items-center justify-center text-xl font-extrabold border border-[#1a6b3c]/20">
+                    {supplier.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-black text-slate-905 uppercase leading-tight">
+                      {supplier.name}
+                    </h2>
+                    <div className="mt-1.5">
+                      {supplier.gstin ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-[#e6f4ea] text-[#1a6b3c] border border-[#d1e7dd] uppercase tracking-wider font-mono">
+                          GSTIN: {supplier.gstin}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 uppercase tracking-wider">
+                          Unregistered B2C
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowEditModal(true)}
+                    className="bg-white hover:bg-slate-50 text-slate-700 rounded-xl py-2 px-4 border border-slate-200 font-bold text-xs transition-colors"
+                  >
+                    Edit Details
+                  </button>
+                  {confirmDelete ? (
+                    <div className="flex items-center gap-2 bg-red-50 p-2 rounded-xl border border-red-100">
+                      <span className="text-xs font-extrabold text-red-750 mr-1">Delete supplier?</span>
+                      <button
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        className="bg-red-600 hover:bg-red-750 text-white rounded-lg py-1.5 px-3.5 font-bold text-xs shadow-xs transition-colors"
+                      >
+                        Yes, Delete
+                      </button>
+                      <button
+                        onClick={() => setConfirmDelete(false)}
+                        className="bg-white hover:bg-slate-50 text-slate-700 rounded-lg py-1.5 px-3.5 border border-slate-200 font-bold text-xs transition-colors"
+                      >
+                        No
+                      </button>
+                    </div>
                   ) : (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 uppercase tracking-wider">
-                      Unregistered B2C
-                    </span>
+                    <button
+                      onClick={() => setConfirmDelete(true)}
+                      className="bg-red-50 hover:bg-red-100 text-red-600 rounded-xl py-2 px-4 font-bold text-xs transition-colors"
+                    >
+                      Delete Supplier
+                    </button>
                   )}
                 </div>
               </div>
+
+              <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-slate-500">
+                {supplier.phone && (
+                  <p className="text-xs font-bold">
+                    Phone Number: <span className="text-slate-800 font-black ml-1">+91 {supplier.phone.slice(-10)}</span>
+                  </p>
+                )}
+                {supplier.address && (
+                  <p className="text-xs font-bold">
+                    Billing Address: <span className="text-slate-800 font-extrabold ml-1">{supplier.address}</span>
+                  </p>
+                )}
+              </div>
             </div>
 
-            <div className="flex gap-2">
-              <button 
-                onClick={() => setShowEditModal(true)}
-                className="bg-white hover:bg-slate-50 text-slate-700 rounded-xl py-2 px-4 border border-slate-200 font-bold text-xs transition-colors"
-              >
-                Edit Details
-              </button>
-              {confirmDelete ? (
-                <div className="flex items-center gap-2 bg-red-50 p-2 rounded-xl border border-red-100">
-                  <span className="text-xs font-extrabold text-red-750 mr-1">Delete supplier?</span>
-                  <button 
-                    onClick={handleDelete}
-                    disabled={deleting}
-                    className="bg-red-600 hover:bg-red-750 text-white rounded-lg py-1.5 px-3.5 font-bold text-xs shadow-xs transition-colors"
-                  >
-                    Yes, Delete
-                  </button>
-                  <button 
-                    onClick={() => setConfirmDelete(false)}
-                    className="bg-white hover:bg-slate-50 text-slate-700 rounded-lg py-1.5 px-3.5 border border-slate-200 font-bold text-xs transition-colors"
-                  >
-                    No
-                  </button>
+            {/* Balance Sheet Highlights */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white border-l-4 border-emerald-500 border-y border-r border-slate-200 p-5 flex items-center justify-between shadow-xs">
+                <div>
+                  <span className="text-[10px] text-slate-400 block uppercase tracking-wider font-bold">Total Purchased Value</span>
+                  <span className="text-2xl font-black text-slate-850 mt-1 block">
+                    ₹{totalPurchased.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </span>
                 </div>
-              ) : (
-                <button 
-                  onClick={() => setConfirmDelete(true)}
-                  className="bg-red-50 hover:bg-red-100 text-red-600 rounded-xl py-2 px-4 font-bold text-xs transition-colors"
+                <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-650 flex items-center justify-center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                    <line x1="12" y1="4" x2="12" y2="20" />
+                  </svg>
+                </div>
+              </div>
+
+              <div className="bg-white border-l-4 border-blue-500 border-y border-r border-slate-200 p-5 flex items-center justify-between shadow-xs">
+                <div>
+                  <span className="text-[10px] text-slate-400 block uppercase tracking-wider font-bold">Total Claimed ITC</span>
+                  <span className="text-2xl font-black text-slate-850 mt-1 block">
+                    ₹{totalItcEligible.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* LEDGER TAB CONTENT */}
+        {activeTab === 'ledger' && (
+          <div className="space-y-6">
+            {/* Header Summary block */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-wrap justify-between items-center gap-4">
+              <div className="flex gap-8">
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold block">Total Purchased</span>
+                  <p className="text-base font-extrabold text-slate-850 mt-0.5">₹{ledgerTotals.totalPurchased.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold block">Total ITC Earned</span>
+                  <p className="text-base font-extrabold text-slate-850 mt-0.5">₹{ledgerTotals.totalItc.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold block">Total Purchases</span>
+                  <p className="text-base font-extrabold text-slate-850 mt-0.5">{ledgerTotals.count} invoices</p>
+                </div>
+              </div>
+
+              {/* PDF & Excel exports */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleExport('pdf')}
+                  disabled={exportingPdf}
+                  className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold rounded-xl py-2 px-4 text-xs transition-all active:scale-[0.98] disabled:opacity-50"
                 >
-                  Delete Supplier
+                  {exportingPdf ? 'Exporting...' : 'Export PDF'}
                 </button>
+                <button
+                  onClick={() => handleExport('excel')}
+                  disabled={exportingExcel}
+                  className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-250 font-bold rounded-xl py-2 px-4 text-xs transition-all active:scale-[0.98] disabled:opacity-50"
+                >
+                  {exportingExcel ? 'Exporting...' : 'Export Excel'}
+                </button>
+              </div>
+            </div>
+
+            {/* Date filter Ribbon */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
+              <div className="flex flex-wrap gap-2">
+                {([
+                  { key: 'this_month', label: 'This Month' },
+                  { key: 'last_month', label: 'Last Month' },
+                  { key: 'this_quarter', label: 'This Quarter' },
+                  { key: 'this_year', label: 'This Year' },
+                  { key: 'custom', label: 'Custom Range' },
+                ] as { key: DateFilterType; label: string }[]).map((f) => (
+                  <button
+                    key={f.key}
+                    onClick={() => setDateFilter(f.key)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                      dateFilter === f.key
+                        ? 'bg-[#1a6b3c]/10 text-[#1a6b3c] border-[#1a6b3c]'
+                        : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+
+              {dateFilter === 'custom' && (
+                <div className="grid grid-cols-2 gap-4 max-w-md">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Start Date</label>
+                    <input
+                      type="date"
+                      value={customStartDate}
+                      onChange={(e) => setCustomStartDate(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#1a6b3c]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">End Date</label>
+                    <input
+                      type="date"
+                      value={customEndDate}
+                      onChange={(e) => setCustomEndDate(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#1a6b3c]"
+                    />
+                  </div>
+                </div>
               )}
             </div>
-          </div>
 
-          <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-slate-500">
-            {supplier.phone && (
-              <p className="text-xs font-bold">
-                Phone Number: <span className="text-slate-800 font-black ml-1">+91 {supplier.phone.slice(-10)}</span>
-              </p>
-            )}
-            {supplier.address && (
-              <p className="text-xs font-bold">
-                Billing Address: <span className="text-slate-800 font-extrabold ml-1">{supplier.address}</span>
-              </p>
-            )}
-          </div>
-        </div>
+            {/* Timeline */}
+            {ledgerPurchases.length === 0 ? (
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-400 font-semibold text-xs shadow-xs">
+                No purchases recorded for this supplier yet.
+              </div>
+            ) : (
+              <div className="relative pl-6 border-l-2 border-slate-200 ml-4 space-y-6">
+                {ledgerPurchases.map((p) => {
+                  const runningTotal = runningTotals[p.id] || p.total;
+                  return (
+                    <div
+                      key={p.id}
+                      onClick={() => router.push(`/purchases/${p.id}`)}
+                      className="relative bg-white border-y border-r border-l-4 border-red-500 border-slate-200 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all cursor-pointer flex justify-between items-center"
+                    >
+                      {/* Timeline dot */}
+                      <span className="absolute -left-[31px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-red-500 bg-white z-10" />
 
-        {/* Balance Sheet Highlights */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-white border-l-4 border-emerald-500 border-y border-r border-slate-200 p-5 flex items-center justify-between shadow-xs">
-            <div>
-              <span className="text-[10px] text-slate-400 block uppercase tracking-wider font-bold">Total Purchased Value</span>
-              <span className="text-2xl font-black text-slate-850 mt-1 block">
-                ₹{totalPurchased.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-650 flex items-center justify-center">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="2" y="4" width="20" height="16" rx="2" />
-                <line x1="12" y1="4" x2="12" y2="20" />
-              </svg>
-            </div>
-          </div>
-
-          <div className="bg-white border-l-4 border-blue-500 border-y border-r border-slate-200 p-5 flex items-center justify-between shadow-xs">
-            <div>
-              <span className="text-[10px] text-slate-400 block uppercase tracking-wider font-bold">Total Claimed ITC</span>
-              <span className="text-2xl font-black text-slate-850 mt-1 block">
-                ₹{totalItcEligible.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-            <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        {/* Purchases log log-table */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-          <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide mb-4">
-            Purchase Invoice Ledger
-          </h3>
-
-          {purchases.length === 0 ? (
-            <p className="text-xs text-slate-400 italic py-4">No purchases recorded for this supplier.</p>
-          ) : (
-            <div className="overflow-x-auto border border-slate-100 rounded-xl">
-              <table className="w-full text-left text-xs font-semibold text-slate-650">
-                <thead>
-                  <tr className="bg-slate-50 text-slate-800 font-bold border-b border-slate-200 text-[10px] uppercase">
-                    <th className="py-2.5 px-3">Purchase Date</th>
-                    <th className="py-2.5 px-3">Invoice Number</th>
-                    <th className="py-2.5 px-3 text-right">Base Value</th>
-                    <th className="py-2.5 px-3 text-right">CGST</th>
-                    <th className="py-2.5 px-3 text-right">SGST</th>
-                    <th className="py-2.5 px-3 text-right">Total Outlay</th>
-                    <th className="py-2.5 px-3 text-right">ITC Status</th>
-                    <th className="py-2.5 px-3 text-center">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {purchases.map((p) => {
-                    const dateStr = new Date(p.purchase_date).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    });
-                    return (
-                      <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="py-3 px-3 text-slate-900 font-bold">{dateStr}</td>
-                        <td className="py-3 px-3 font-mono font-bold text-slate-900">#{p.purchase_invoice_number}</td>
-                        <td className="py-3 px-3 text-right tabular-nums">₹{Number(p.subtotal).toFixed(2)}</td>
-                        <td className="py-3 px-3 text-right text-red-500 tabular-nums">₹{Number(p.total_cgst).toFixed(2)}</td>
-                        <td className="py-3 px-3 text-right text-red-500 tabular-nums">₹{Number(p.total_sgst).toFixed(2)}</td>
-                        <td className="py-3 px-3 text-right font-extrabold text-slate-900 tabular-nums">
-                          ₹{Number(p.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                        </td>
-                        <td className="py-3 px-3 text-right">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase ${p.itc_eligible ? 'bg-emerald-50 text-emerald-705 border border-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400 border border-slate-200'}`}>
-                            {p.itc_eligible ? 'Eligible' : 'No ITC'}
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black text-slate-805">
+                            🔴 Purchase · #{p.purchase_invoice_number}
                           </span>
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          <button
-                            onClick={() => router.push(`/purchases/${p.id}`)}
-                            className="bg-[#1a6b3c]/5 hover:bg-[#1a6b3c]/10 text-[#1a6b3c] font-bold text-[11px] px-3.5 py-1.5 rounded-lg transition-colors"
-                          >
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                          <span className="text-[10px] text-slate-400 font-medium">
+                            · {new Date(p.purchase_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 font-semibold">
+                          ITC: ₹{Number(p.total_cgst).toFixed(2)} CGST + ₹{Number(p.total_sgst).toFixed(2)} SGST = ₹{(Number(p.total_cgst) + Number(p.total_sgst)).toFixed(2)}
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="text-xs font-black text-slate-850">
+                          ₹{Number(p.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        </p>
+                        <p className="text-[10px] text-slate-400 font-bold mt-0.5">
+                          Bal: ₹{runningTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* PURCHASES TAB CONTENT */}
+        {activeTab === 'purchases' && (
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide mb-4">
+              Purchase Invoice Ledger
+            </h3>
+
+            {purchases.length === 0 ? (
+              <p className="text-xs text-slate-400 italic py-4">No purchases recorded for this supplier.</p>
+            ) : (
+              <div className="overflow-x-auto border border-slate-100 rounded-xl">
+                <table className="w-full text-left text-xs font-semibold text-slate-650">
+                  <thead>
+                    <tr className="bg-slate-50 text-slate-800 font-bold border-b border-slate-200 text-[10px] uppercase">
+                      <th className="py-2.5 px-3">Purchase Date</th>
+                      <th className="py-2.5 px-3">Invoice Number</th>
+                      <th className="py-2.5 px-3 text-right">Base Value</th>
+                      <th className="py-2.5 px-3 text-right">CGST</th>
+                      <th className="py-2.5 px-3 text-right">SGST</th>
+                      <th className="py-2.5 px-3 text-right">Total Outlay</th>
+                      <th className="py-2.5 px-3 text-right">ITC Status</th>
+                      <th className="py-2.5 px-3 text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {purchases.map((p) => {
+                      const dateStr = new Date(p.purchase_date).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      });
+                      return (
+                        <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="py-3 px-3 text-slate-900 font-bold">{dateStr}</td>
+                          <td className="py-3 px-3 font-mono font-bold text-slate-900">#{p.purchase_invoice_number}</td>
+                          <td className="py-3 px-3 text-right tabular-nums">₹{Number(p.subtotal).toFixed(2)}</td>
+                          <td className="py-3 px-3 text-right text-red-500 tabular-nums">₹{Number(p.total_cgst).toFixed(2)}</td>
+                          <td className="py-3 px-3 text-right text-red-500 tabular-nums">₹{Number(p.total_sgst).toFixed(2)}</td>
+                          <td className="py-3 px-3 text-right font-extrabold text-slate-900 tabular-nums">
+                            ₹{Number(p.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="py-3 px-3 text-right">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase ${p.itc_eligible ? 'bg-emerald-50 text-emerald-705 border border-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400 border border-slate-200'}`}>
+                              {p.itc_eligible ? 'Eligible' : 'No ITC'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <button
+                              onClick={() => router.push(`/purchases/${p.id}`)}
+                              className="bg-[#1a6b3c]/5 hover:bg-[#1a6b3c]/10 text-[#1a6b3c] font-bold text-[11px] px-3.5 py-1.5 rounded-lg transition-colors"
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Edit Modal */}
         {showEditModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             {/* Backdrop blur overlay */}
-            <div 
+            <div
               className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
               onClick={() => setShowEditModal(false)}
             />
-            
+
             <div className="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-6 space-y-5 relative shadow-xl z-10">
               <div className="flex justify-between items-center border-b border-slate-100 pb-3">
                 <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#1a6b3c]"></span>
                   Edit Supplier
                 </h2>
-                <button 
+                <button
                   onClick={() => setShowEditModal(false)}
                   className="text-slate-400 hover:text-slate-600 transition-colors"
                 >
@@ -375,7 +659,7 @@ export default function SupplierDetailClient({
                   </svg>
                 </button>
               </div>
-              
+
               <form onSubmit={handleUpdate} className="space-y-4 pt-1">
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">
@@ -390,7 +674,7 @@ export default function SupplierDetailClient({
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">
                     GSTIN (Optional)
@@ -404,7 +688,7 @@ export default function SupplierDetailClient({
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#1a6b3c] focus:ring-1 focus:ring-[#1a6b3c]/20 transition-all font-mono"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">
                     Phone Number (Optional)
@@ -418,7 +702,7 @@ export default function SupplierDetailClient({
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#1a6b3c] focus:ring-1 focus:ring-[#1a6b3c]/20 transition-all"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">
                     Address (Optional)
@@ -440,9 +724,9 @@ export default function SupplierDetailClient({
                   >
                     Cancel
                   </button>
-                  <button 
-                    type="submit" 
-                    disabled={updating} 
+                  <button
+                    type="submit"
+                    disabled={updating}
                     className="flex-1 bg-[#1a6b3c] hover:bg-[#155630] text-white font-bold rounded-xl py-3 text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
                   >
                     {updating ? 'Saving...' : 'Save Changes'}
