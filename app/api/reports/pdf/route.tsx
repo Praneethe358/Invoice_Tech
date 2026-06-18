@@ -26,18 +26,18 @@ const s = StyleSheet.create({
   coverTitle: { fontSize: 24, fontFamily: 'Helvetica-Bold', color: GREEN, marginBottom: 8, textAlign: 'center' },
   coverSubtitle: { fontSize: 14, color: TEXT_MUTED, marginBottom: 20 },
   coverDate: { fontSize: 10, color: TEXT_DARK, marginBottom: 30 },
-  coverPowered: { fontSize: 8, color: TEXT_MUTED, textTransform: 'uppercase', trackingWidth: 1 },
+  coverPowered: { fontSize: 8, color: TEXT_MUTED, textTransform: 'uppercase', letterSpacing: 1 },
   logo: { maxHeight: 80, maxWidth: 160, marginBottom: 20, objectFit: 'contain' },
 
   // Sections
-  sectionHeader: { fontSize: 12, fontFamily: 'Helvetica-Bold', color: GREEN, borderBottomWidth: 1, borderBottomColor: GREEN, pb: 4, mb: 12, textTransform: 'uppercase' },
-  grid: { flexDirection: 'row', gap: 12, mb: 16 },
+  sectionHeader: { fontSize: 12, fontFamily: 'Helvetica-Bold', color: GREEN, borderBottomWidth: 1, borderBottomColor: GREEN, paddingBottom: 4, marginBottom: 12, textTransform: 'uppercase' },
+  grid: { flexDirection: 'row', gap: 12, marginBottom: 16 },
   card: { flex: 1, backgroundColor: LIGHT_BG, borderLeftWidth: 3, borderLeftColor: GREEN, padding: 10, borderRadius: 4 },
-  cardLabel: { fontSize: 7, color: TEXT_MUTED, fontFamily: 'Helvetica-Bold', textTransform: 'uppercase', mb: 3 },
+  cardLabel: { fontSize: 7, color: TEXT_MUTED, fontFamily: 'Helvetica-Bold', textTransform: 'uppercase', marginBottom: 3 },
   cardValue: { fontSize: 12, fontFamily: 'Helvetica-Bold', color: TEXT_DARK },
 
   // Progress Bar
-  progressTrack: { height: 8, backgroundColor: BORDER, borderRadius: 4, width: '100%', mt: 8, overflow: 'hidden' },
+  progressTrack: { height: 8, backgroundColor: BORDER, borderRadius: 4, width: '100%', marginTop: 8, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: GREEN },
 
   // Tables
@@ -113,12 +113,12 @@ const ReportPDFDocument = ({ shop, month, year, data }: PDFReportProps) => {
           </View>
         </View>
 
-        <View style={{ mt: 15, backgroundColor: LIGHT_BG, padding: 15, borderRadius: 6 }}>
+        <View style={{ marginTop: 15, backgroundColor: LIGHT_BG, padding: 15, borderRadius: 6 }}>
           <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: TEXT_DARK }}>Collection Efficiency</Text>
           <View style={s.progressTrack}>
             <View style={[s.progressFill, { width: `${Math.min(100, data.salesSummary.collectionRate)}%` }]} />
           </View>
-          <Text style={{ fontSize: 8, color: TEXT_MUTED, mt: 4 }}>
+          <Text style={{ fontSize: 8, color: TEXT_MUTED, marginTop: 4 }}>
             {data.salesSummary.collectionRate}% of billed revenue collected this month.
           </Text>
         </View>
@@ -158,17 +158,17 @@ const ReportPDFDocument = ({ shop, month, year, data }: PDFReportProps) => {
             </View>
           </View>
 
-          <View style={{ mt: 10, borderTopWidth: 0.5, borderTopColor: BORDER, pt: 10 }}>
-            <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: TEXT_MUTED, mb: 4 }}>BREAKDOWN OF OUTPUT GST</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', py: 4, borderBottomWidth: 0.5, borderBottomColor: BORDER }}>
+          <View style={{ marginTop: 10, borderTopWidth: 0.5, borderTopColor: BORDER, paddingTop: 10 }}>
+            <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: TEXT_MUTED, marginBottom: 4 }}>BREAKDOWN OF OUTPUT GST</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4, borderBottomWidth: 0.5, borderBottomColor: BORDER }}>
               <Text style={{ color: TEXT_DARK }}>Central GST (CGST)</Text>
               <Text style={{ fontFamily: 'Helvetica-Bold' }}>₹{data.gstSummary.cgstCollected.toLocaleString('en-IN')}</Text>
             </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', py: 4, borderBottomWidth: 0.5, borderBottomColor: BORDER }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4, borderBottomWidth: 0.5, borderBottomColor: BORDER }}>
               <Text style={{ color: TEXT_DARK }}>State GST (SGST)</Text>
               <Text style={{ fontFamily: 'Helvetica-Bold' }}>₹{data.gstSummary.sgstCollected.toLocaleString('en-IN')}</Text>
             </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', py: 4 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 }}>
               <Text style={{ color: TEXT_DARK, fontFamily: 'Helvetica-Bold' }}>Total Output GST</Text>
               <Text style={{ fontFamily: 'Helvetica-Bold', color: GREEN }}>₹{data.gstSummary.gstCollected.toLocaleString('en-IN')}</Text>
             </View>
@@ -187,7 +187,7 @@ const ReportPDFDocument = ({ shop, month, year, data }: PDFReportProps) => {
         <View style={s.topBar} />
         <Text style={s.sectionHeader}>Page 4 — Top Products & Customers</Text>
 
-        <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: GREEN, mb: 6, uppercase: true }}>Top Products by Revenue</Text>
+        <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: GREEN, marginBottom: 6, textTransform: 'uppercase' }}>Top Products by Revenue</Text>
         <View style={[s.tableHeader, { backgroundColor: GREEN }]}>
           <Text style={{ ...s.th, width: '10%' }}>Rank</Text>
           <Text style={{ ...s.th, width: '45%' }}>Product Name</Text>
@@ -205,7 +205,7 @@ const ReportPDFDocument = ({ shop, month, year, data }: PDFReportProps) => {
           </View>
         ))}
 
-        <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: GREEN, mt: 15, mb: 6, uppercase: true }}>Top Customers by Revenue</Text>
+        <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: GREEN, marginTop: 15, marginBottom: 6, textTransform: 'uppercase' }}>Top Customers by Revenue</Text>
         <View style={[s.tableHeader, { backgroundColor: GREEN }]}>
           <Text style={{ ...s.th, width: '10%' }}>Rank</Text>
           <Text style={{ ...s.th, width: '45%' }}>Customer</Text>
@@ -279,7 +279,7 @@ const ReportPDFDocument = ({ shop, month, year, data }: PDFReportProps) => {
             </View>
           </View>
 
-          <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: GREEN, mb: 6, uppercase: true }}>Top Suppliers</Text>
+          <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: GREEN, marginBottom: 6, textTransform: 'uppercase' }}>Top Suppliers</Text>
           <View style={s.tableHeader}>
             <Text style={{ ...s.th, width: '50%' }}>Supplier Name</Text>
             <Text style={{ ...s.th, width: '25%', textAlign: 'right' }}>Purchases Amount (₹)</Text>
@@ -334,7 +334,7 @@ export async function GET(request: NextRequest) {
     );
 
     const monthName = MONTHS[month - 1];
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="TruBill_Report_${shop.name.replace(/\s+/g, '_')}_${monthName}${year}.pdf"`,

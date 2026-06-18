@@ -152,7 +152,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         totals={{ subtotal, cgst, sgst, totalPurchased, totalItc }} />
     );
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="Supplier_Ledger_${supplier.name.replace(/\s+/g, '_')}.pdf"`,
