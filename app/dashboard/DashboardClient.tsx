@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import PageTransition from '@/components/PageTransition';
@@ -32,7 +33,7 @@ export default function DashboardClient({
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'saved' | 'sent' | 'cancelled' | 'failed' | 'unpaid' | 'partial' | 'paid' | 'unpaid_partial'>('all');
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(initialInvoices.length === 20);
+  const [hasMore, setHasMore] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -48,14 +49,13 @@ export default function DashboardClient({
   }, [searchQuery]);
 
   // Fetch invoices on search or filter change
-  const fetchInvoices = useCallback(async (loadMore = false) => {
-    if (loadMore) setLoadingMore(true);
-    
+  const fetchInvoices = useCallback(async () => {
     let query = supabase
       .from('invoices')
       .select('*')
       .eq('shop_id', shop.id)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(12);
 
     if (statusFilter !== 'all') {
       if (['unpaid', 'partial', 'paid'].includes(statusFilter)) {
@@ -73,25 +73,15 @@ export default function DashboardClient({
       query = query.or(`invoice_number.ilike.%${debouncedSearch}%,customer_phone.ilike.%${debouncedSearch}%`);
     }
 
-    const from = loadMore ? invoices.length : 0;
-    const to = from + 19; // 20 items (0-19)
-    query = query.range(from, to);
-
     const { data } = await query;
     const newInvoices = (data ?? []) as Invoice[];
 
-    if (loadMore) {
-      setInvoices(prev => [...prev, ...newInvoices]);
-      setLoadingMore(false);
-    } else {
-      setInvoices(newInvoices);
-    }
-
-    setHasMore(newInvoices.length === 20);
-  }, [debouncedSearch, statusFilter, shop.id, invoices.length, supabase]);
+    setInvoices(newInvoices);
+    setHasMore(false);
+  }, [debouncedSearch, statusFilter, shop.id, supabase]);
 
   useEffect(() => {
-    fetchInvoices(false);
+    fetchInvoices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch, statusFilter]);
 
@@ -313,8 +303,14 @@ export default function DashboardClient({
         {/* Recent Invoices header */}
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold text-gray-900">
-            Recent Invoices
+            Recent Invoices (Last 12)
           </h2>
+          <Link href="/invoices" className="text-xs font-bold text-[#0050e8] hover:underline flex items-center gap-1">
+            <span>View All Invoices</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </Link>
         </div>
 
         {invoices.length === 0 ? (
@@ -479,17 +475,14 @@ export default function DashboardClient({
               ))}
             </div>
 
-            {hasMore && (
-              <div className="p-4 border-t border-[#e5e7eb] flex justify-center bg-gray-50/50">
-                <button
-                  onClick={() => fetchInvoices(true)}
-                  disabled={loadingMore}
-                  className="px-6 py-2 bg-white border border-[#e5e7eb] text-gray-700 text-xs font-bold rounded-none hover:bg-gray-50 transition-colors disabled:opacity-50"
-                >
-                  {loadingMore ? 'Loading...' : 'Load More Bills'}
-                </button>
-              </div>
-            )}
+            <div className="p-4 border-t border-[#e5e7eb] flex justify-center bg-gray-50/50">
+              <Link
+                href="/invoices"
+                className="px-6 py-2 bg-[#0050e8] hover:bg-[#0043c4] text-white text-xs font-bold rounded-none hover:shadow-xs transition-colors"
+              >
+                View All Invoices
+              </Link>
+            </div>
           </div>
         )}
       </PageTransition>

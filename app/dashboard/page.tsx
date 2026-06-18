@@ -29,7 +29,7 @@ export default async function DashboardPage() {
     .select('*')
     .eq('shop_id', shop.id)
     .order('created_at', { ascending: false })
-    .limit(20);
+    .limit(12);
 
   const typedShop = shop as Shop;
   const typedInvoices = (invoices ?? []) as Invoice[];
