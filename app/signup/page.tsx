@@ -340,22 +340,17 @@ export default function SignupPage() {
           Back to Home
         </Link>
 
-        <div className="absolute top-[-10%] right-[-10%] w-72 h-72 rounded-full bg-emerald-400/10 blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-72 h-72 rounded-full bg-emerald-500/15 blur-[120px] pointer-events-none" />
+        <div className="absolute top-[-10%] right-[-10%] w-72 h-72 rounded-full bg-blue-400/10 blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-72 h-72 rounded-full bg-blue-500/15 blur-[120px] pointer-events-none" />
 
         <div className="relative z-10 max-w-md w-full">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
-            </div>
+            <img src="/trubill-logo.png" alt="TruBill Logo" className="w-10 h-10 object-contain brightness-0 invert" />
             <span className="font-heading font-black text-xl text-white">TruBill</span>
           </div>
 
           <h2 className="text-4xl font-black text-white leading-tight mb-4 tracking-tight">
-            Start invoicing<br />in <span className="bg-gradient-to-r from-emerald-400 to-[#0060f0] bg-clip-text text-transparent">2 minutes</span>.
+            Start invoicing<br />in <span className="bg-gradient-to-r from-blue-300 to-[#0050e8] bg-clip-text text-transparent">2 minutes</span>.
           </h2>
           <p className="text-[#e6efff]/80 text-base leading-relaxed">
             Quick, Professional WhatsApp invoice delivery platform for shops in Tamil Nadu. GST details auto-breakdown, PDF generator, and contact saved catalogs.
@@ -371,14 +366,14 @@ export default function SignupPage() {
             }}
             className="mt-10 p-5 rounded-2xl glass-card border border-white/10 shadow-2xl relative max-w-sm mx-auto lg:mx-0 flex items-center gap-4"
           >
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400 shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-400 shrink-0">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
             <div>
               <p className="text-[11.5px] font-bold text-white leading-none">Shop Registered!</p>
-              <p className="text-[9.5px] text-emerald-350 font-semibold mt-1">Free plan activated instantly</p>
+              <p className="text-[9.5px] text-blue-300 font-semibold mt-1">Free plan activated instantly</p>
             </div>
           </motion.div>
         </div>
@@ -391,12 +386,7 @@ export default function SignupPage() {
         <div className="w-full max-w-[460px] my-auto">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center gap-2.5 mb-8">
-            <div className="w-9 h-9 rounded-lg bg-[#0050e8] flex items-center justify-center shadow-md">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
-            </div>
+            <img src="/trubill-logo.png" alt="TruBill Logo" className="w-8 h-8 object-contain shrink-0" />
             <span className="font-heading font-black text-xl text-[#1a1d26] tracking-tight">TruBill</span>
           </div>
 

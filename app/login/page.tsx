@@ -65,22 +65,17 @@ export default function LoginPage() {
         </Link>
 
         {/* Ambient background blur circles */}
-        <div className="absolute top-[-10%] right-[-10%] w-72 h-72 rounded-full bg-emerald-400/10 blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-72 h-72 rounded-full bg-emerald-500/15 blur-[120px] pointer-events-none" />
+        <div className="absolute top-[-10%] right-[-10%] w-72 h-72 rounded-full bg-blue-400/10 blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-72 h-72 rounded-full bg-blue-500/15 blur-[120px] pointer-events-none" />
 
         <div className="relative z-10 max-w-md w-full">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
-            </div>
+            <img src="/trubill-logo.png" alt="TruBill Logo" className="w-10 h-10 object-contain brightness-0 invert" />
             <span className="font-heading font-black text-xl text-white">TruBill</span>
           </div>
 
           <h2 className="text-4xl font-black text-white leading-tight mb-4 tracking-tight">
-            Invoice <span className="bg-gradient-to-r from-emerald-400 to-[#0060f0] bg-clip-text text-transparent">smarter</span>,<br />not harder.
+            Invoice <span className="bg-gradient-to-r from-blue-300 to-[#0050e8] bg-clip-text text-transparent">smarter</span>,<br />not harder.
           </h2>
           <p className="text-[#e6efff]/80 text-base leading-relaxed">
             Professional WhatsApp invoicing built for supermarkets, retail shops, and freelancers.
@@ -99,15 +94,15 @@ export default function LoginPage() {
           >
             {/* WhatsApp Header style */}
             <div className="flex items-center gap-2 mb-3 border-b border-white/10 pb-3">
-              <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] text-white font-bold">V</div>
+              <div className="w-6 h-6 rounded-full bg-[#0050e8] flex items-center justify-center text-[10px] text-white font-bold">V</div>
               <div>
                 <p className="text-[11px] font-bold text-white leading-none">TruBill Store</p>
-                <p className="text-[8px] text-emerald-400 font-semibold uppercase tracking-wider mt-0.5">invoicing bot</p>
+                <p className="text-[8px] text-blue-400 font-semibold uppercase tracking-wider mt-0.5">invoicing bot</p>
               </div>
             </div>
             {/* Message Bubble */}
-            <div className="bg-[#dcf8c6] text-slate-800 p-3.5 rounded-xl text-[11px] space-y-2 relative border border-emerald-200/20 shadow-xs">
-              <div className="flex items-center gap-1.5 font-bold text-slate-900 border-b border-emerald-100/50 pb-1.5">
+            <div className="bg-[#dcf8c6] text-slate-800 p-3.5 rounded-xl text-[11px] space-y-2 relative border border-blue-200/20 shadow-xs">
+              <div className="flex items-center gap-1.5 font-bold text-slate-900 border-b border-blue-100/50 pb-1.5">
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                   <polyline points="14 2 14 8 20 8" />
@@ -128,7 +123,7 @@ export default function LoginPage() {
             ].map((s) => (
               <div key={s.label} className="glass-card rounded-xl p-4 text-center border border-white/5">
                 <p className="text-2xl font-extrabold text-white">{s.val}</p>
-                <p className="text-xs text-emerald-250/60 mt-1">{s.label}</p>
+                <p className="text-xs text-blue-200/65 mt-1">{s.label}</p>
               </div>
             ))}
           </div>
@@ -148,12 +143,7 @@ export default function LoginPage() {
         >
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center gap-2.5 mb-8">
-            <div className="w-9 h-9 rounded-lg bg-[#0050e8] flex items-center justify-center shadow-md">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
-            </div>
+            <img src="/trubill-logo.png" alt="TruBill Logo" className="w-8 h-8 object-contain shrink-0" />
             <span className="font-heading font-black text-xl text-[#1a1d26] tracking-tight">TruBill</span>
           </div>
 
@@ -189,7 +179,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={!email || !password || loading}
-                className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white font-semibold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-emerald-800/10 active:scale-[0.99]"
+                className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white font-semibold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-blue-800/10 active:scale-[0.99]"
               >
                 {loading ? (
                   <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
@@ -198,7 +188,7 @@ export default function LoginPage() {
                   </svg>
                 ) : (
                   <>
-                    <svg className="w-4 h-4 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                    <svg className="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                       <path d="M7 11V7a5 5 0 0110 0v4" />
                     </svg>

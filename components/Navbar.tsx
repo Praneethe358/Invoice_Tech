@@ -252,9 +252,7 @@ export default function Navbar() {
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-[#e8eaed] fixed left-0 top-0 bottom-0 z-40 p-6 shadow-sm">
         {/* Brand Logo */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-white border border-[#e8eaed] overflow-hidden shadow-sm flex items-center justify-center">
-            <img src="/trubill-logo.png" alt="TruBill logo" className="w-full h-full object-contain" loading="lazy" />
-          </div>
+          <img src="/trubill-logo.png" alt="TruBill logo" className="w-10 h-10 object-contain shrink-0" loading="lazy" />
           <div>
             <span className="font-heading font-black text-[#1a1d26] text-base leading-none block">TruBill</span>
             <span className="text-[10px] font-bold text-[#0050e8] uppercase tracking-wider mt-0.5 block">Invoice</span>
@@ -333,44 +331,49 @@ export default function Navbar() {
       </aside>
 
       {/* ─── MOBILE HEADER (Visible only on < 768px) ─── */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-[#e8eaed] md:hidden">
-        <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Hamburger Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-[#4b5563] hover:text-[#1a1d26] rounded-xl hover:bg-[#f3f4f6] transition-all cursor-pointer"
-              aria-label="Toggle navigation menu"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                {mobileMenuOpen ? (
-                  <>
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </>
-                ) : (
-                  <>
-                    <line x1="3" y1="12" x2="21" y2="12" />
-                    <line x1="3" y1="6" x2="21" y2="6" />
-                    <line x1="3" y1="18" x2="21" y2="18" />
-                  </>
-                )}
-              </svg>
-            </button>
+      <div className="sticky top-0 z-50 md:hidden w-full">
+        {/* Dark Top Strip (Navy Blue) */}
+        <div className="bg-[#001048] h-1 w-full" />
+        
+        <nav className="bg-white/95 backdrop-blur-xl border-b border-[#e8eaed]">
+          <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {/* Hamburger Button */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 text-[#4b5563] hover:text-[#1a1d26] rounded-xl hover:bg-[#f3f4f6] transition-all cursor-pointer"
+                aria-label="Toggle navigation menu"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  {mobileMenuOpen ? (
+                    <>
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </>
+                  ) : (
+                    <>
+                      <line x1="3" y1="12" x2="21" y2="12" />
+                      <line x1="3" y1="6" x2="21" y2="6" />
+                      <line x1="3" y1="18" x2="21" y2="18" />
+                    </>
+                  )}
+                </svg>
+              </button>
 
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-white border border-[#e8eaed] overflow-hidden shadow-sm shrink-0">
-                <img src="/trubill-logo.png" alt="TruBill logo" className="w-full h-full object-contain" loading="lazy" />
-              </div>
-              <span className="font-heading font-black text-[#1a1d26] text-sm">TruBill</span>
-            </Link>
-          </div>
+              <Link href="/dashboard" className="flex items-center gap-2">
+                <img src="/trubill-logo.png" alt="TruBill logo" className="w-8 h-8 object-contain shrink-0" loading="lazy" />
+                <span className="font-heading font-black text-[#1a1d26] text-sm">TruBill</span>
+              </Link>
+            </div>
 
-          <div className="text-[11px] font-bold text-gray-500 bg-[#f3f4f6] px-2.5 py-1.5 rounded-lg max-w-[150px] truncate">
-            {shopInfo?.name || 'Active Shop'}
+            <div className="text-[11px] font-bold text-gray-500 bg-[#f3f4f6] px-2.5 py-1.5 rounded-lg max-w-[150px] truncate">
+              {shopInfo?.name || 'Active Shop'}
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+        {/* Bottom Accent Strip (Primary Blue) */}
+        <div className="bg-[#0050e8] h-0.5 w-full" />
+      </div>
 
       {/* Mobile Drawer Sidebar Overlay */}
       <AnimatePresence>

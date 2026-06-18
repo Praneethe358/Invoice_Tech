@@ -298,57 +298,51 @@ export default function LandingPage() {
   return (
     <div className="landing-page min-h-screen bg-[#f5f6fa] text-[#1a1d26]">
       {/* ─── Navbar ───────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-[#e8eaed]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 md:h-16 flex items-center justify-between">
-          
-          {/* Desktop Left: Logo */}
-          <Link href="/" className="hidden md:flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#0050e8] flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
-            </div>
-            <span className="font-heading font-black text-lg text-[#1a1d26] tracking-tight">
-              TruBill
-            </span>
-          </Link>
-
-          {/* Mobile Left: Hamburger + Logo (aligned left) */}
-          <div className="flex md:hidden items-center gap-3">
-            {/* Hamburger Toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-[#4b5563] hover:text-[#1a1d26] rounded-lg hover:bg-[#f3f4f6] transition-all"
-              aria-label="Toggle menu"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                {mobileMenuOpen ? (
-                  <>
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </>
-                ) : (
-                  <>
-                    <line x1="3" y1="12" x2="21" y2="12" />
-                    <line x1="3" y1="6" x2="21" y2="6" />
-                    <line x1="3" y1="18" x2="21" y2="18" />
-                  </>
-                )}
-              </svg>
-            </button>
-
-            {/* Logo next to Hamburger */}
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[#0050e8] flex items-center justify-center shrink-0">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
-              </div>
-              <span className="font-heading font-black text-[#1a1d26] text-base sm:text-lg tracking-tight">TruBill</span>
+      <div className="sticky top-0 z-50 w-full">
+        {/* Dark Top Strip (Navy Blue matching logo) */}
+        <div className="bg-[#001048] h-1 w-full" />
+        
+        <nav className="bg-white/95 backdrop-blur-xl border-b border-[#e8eaed]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 md:h-16 flex items-center justify-between">
+            
+            {/* Desktop Left: Logo */}
+            <Link href="/" className="hidden md:flex items-center gap-2.5">
+              <img src="/trubill-logo.png" alt="TruBill Logo" className="w-8 h-8 object-contain shrink-0" />
+              <span className="font-heading font-black text-lg text-[#1a1d26] tracking-tight">
+                TruBill
+              </span>
             </Link>
-          </div>
+
+            {/* Mobile Left: Hamburger + Logo (aligned left) */}
+            <div className="flex md:hidden items-center gap-3">
+              {/* Hamburger Toggle */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 text-[#4b5563] hover:text-[#1a1d26] rounded-lg hover:bg-[#f3f4f6] transition-all"
+                aria-label="Toggle menu"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  {mobileMenuOpen ? (
+                    <>
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </>
+                  ) : (
+                    <>
+                      <line x1="3" y1="12" x2="21" y2="12" />
+                      <line x1="3" y1="6" x2="21" y2="6" />
+                      <line x1="3" y1="18" x2="21" y2="18" />
+                    </>
+                  )}
+                </svg>
+              </button>
+
+              {/* Logo next to Hamburger */}
+              <Link href="/" className="flex items-center gap-2">
+                <img src="/trubill-logo.png" alt="TruBill Logo" className="w-7 h-7 object-contain shrink-0" />
+                <span className="font-heading font-black text-[#1a1d26] text-base sm:text-lg tracking-tight">TruBill</span>
+              </Link>
+            </div>
 
           {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-8">
@@ -397,9 +391,9 @@ export default function LandingPage() {
               Log in
             </Link>
           </div>
-
         </div>
       </nav>
+    </div>
 
       {/* ─── Mobile Dropdown Overlay (Vyapar Style) ────────────── */}
       <AnimatePresence>
@@ -675,7 +669,7 @@ export default function LandingPage() {
               </div>
 
               <h1 className="text-[1.8rem] sm:text-[2.25rem] md:text-5xl lg:text-6xl font-black text-[#1a1d26] tracking-tight leading-[1.2] max-w-2xl lg:max-w-none">
-                Best <span className="bg-gradient-to-r from-emerald-600 to-[#0050e8] bg-clip-text text-transparent">WhatsApp Billing</span> Software for Small Business
+                Best <span className="bg-gradient-to-r from-[#001048] to-[#0050e8] bg-clip-text text-transparent">WhatsApp Billing</span> Software for Small Business
               </h1>
 
               <p className="text-[13px] sm:text-base md:text-lg text-[#525f7a] leading-relaxed max-w-xl">
