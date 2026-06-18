@@ -243,12 +243,15 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // --- Section 6: Payment Method Breakdown ---
     const paymentMethods: Record<string, number> = { Cash: 0, UPI: 0, 'Bank Transfer': 0, Other: 0 };
     (payments || []).forEach(p => {
-      const method = p.payment_method || 'Other';
-      if (paymentMethods[method] !== undefined) {
-        paymentMethods[method] += Number(p.amount || 0);
+      const method = (p.payment_method || 'other').toLowerCase();
+      if (method === 'cash') {
+        paymentMethods['Cash'] += Number(p.amount || 0);
+      } else if (method === 'upi') {
+        paymentMethods['UPI'] += Number(p.amount || 0);
+      } else if (method === 'bank transfer' || method === 'bank_transfer') {
+        paymentMethods['Bank Transfer'] += Number(p.amount || 0);
       } else {
         paymentMethods['Other'] += Number(p.amount || 0);
       }

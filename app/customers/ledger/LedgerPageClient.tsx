@@ -159,9 +159,9 @@ export default function LedgerPageClient({ shop, customers }: Props) {
     <div className="min-h-screen bg-[#f5f6fa]">
       <Navbar />
 
-      <PageTransition className="w-full px-4 md:px-8 py-6 pb-24">
+      <PageTransition className="w-full px-4 md:px-8 pt-6 md:pt-0 pb-24">
         {/* Header */}
-        <div className="bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 -mt-6.5 shadow-xs flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+        <div className="bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 md:sticky md:top-0 md:z-30">
           <div>
             <h1 className="text-xl font-bold text-gray-900 leading-tight">Customer Ledger Book</h1>
             <p className="text-[#6b7280] text-[10px] mt-0.5 font-medium">

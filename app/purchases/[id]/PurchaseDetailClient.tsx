@@ -61,9 +61,9 @@ export default function PurchaseDetailClient({ shop, purchase, items }: Props) {
     <div className="min-h-screen bg-[#f8fafc]">
       <Navbar />
 
-      <PageTransition className="w-full px-4 md:px-8 py-6 pb-24">
+      <PageTransition className="w-full px-4 md:px-8 pt-6 md:pt-0 pb-24">
         {/* Header matched with profile logo format - Desktop only */}
-        <div className="hidden md:flex bg-white border border-[#e2e8f0] -mx-4 md:-mx-8 px-6 md:px-10 py-5 -mt-6.5 shadow-sm items-center justify-between gap-4 mb-8">
+        <div className="hidden md:flex bg-white border border-[#e2e8f0] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-sm items-center justify-between gap-4 mb-8 md:sticky md:top-0 md:z-30">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1a6b3c] to-[#2e7d32] flex items-center justify-center overflow-hidden shadow-md">
               {shop.logo_url ? (
