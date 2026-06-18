@@ -508,9 +508,12 @@ export default function Navbar() {
       {pathname !== '/invoice/new' && (
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e8eaed] safe-area-inset-bottom md:hidden">
           <div className="max-w-lg mx-auto flex items-center justify-around h-16">
-            {activeNavItems
-              .filter((item) => ['/dashboard', '/customers', '/invoice/new'].includes(item.href))
-              .map((item) => {
+            {(() => {
+              const desiredOrder = ['/dashboard', '/invoice/new', '/customers'];
+              return activeNavItems
+                .filter((item) => desiredOrder.includes(item.href))
+                .sort((a, b) => desiredOrder.indexOf(a.href) - desiredOrder.indexOf(b.href));
+            })().map((item) => {
                 const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
 
                 if (item.isMain) {
