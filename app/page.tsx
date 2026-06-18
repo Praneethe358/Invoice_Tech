@@ -1557,13 +1557,12 @@ export default function LandingPage() {
             {/* Logo/Info column */}
             <div className="col-span-2 md:col-span-1 space-y-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-[#0050e8] flex items-center justify-center">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                  </svg>
-                </div>
-                <span className="font-heading font-black text-base text-[#1a1d26]">TruBill Invoice</span>
+                <img src="/trubill-logo.png" alt="TruBill Logo" className="w-8 h-8 object-contain shrink-0" />
+                <span className="font-heading font-black text-base">
+                  <span className="text-[#001048]">Tru</span>
+                  <span className="text-[#0050e8]">Bill</span>
+                  <span className="text-[#1a1d26]"> Invoice</span>
+                </span>
               </div>
               <p className="text-xs text-[#6b7280] leading-relaxed">
                 Simple, lightweight billing software designed for small businesses, supermarkets, and freelancers in Tamil Nadu.

@@ -346,7 +346,10 @@ export default function SignupPage() {
         <div className="relative z-10 max-w-md w-full">
           <div className="flex items-center gap-3 mb-8">
             <img src="/trubill-logo.png" alt="TruBill Logo" className="w-10 h-10 object-contain brightness-0 invert" />
-            <span className="font-heading font-black text-xl text-white">TruBill</span>
+            <span className="font-heading font-black text-xl">
+              <span className="text-white">Tru</span>
+              <span className="text-[#0050e8]">Bill</span>
+            </span>
           </div>
 
           <h2 className="text-4xl font-black text-white leading-tight mb-4 tracking-tight">
@@ -387,7 +390,10 @@ export default function SignupPage() {
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center gap-2.5 mb-8">
             <img src="/trubill-logo.png" alt="TruBill Logo" className="w-8 h-8 object-contain shrink-0" />
-            <span className="font-heading font-black text-xl text-[#1a1d26] tracking-tight">TruBill</span>
+            <span className="font-heading font-black text-xl tracking-tight">
+              <span className="text-[#001048]">Tru</span>
+              <span className="text-[#0050e8]">Bill</span>
+            </span>
           </div>
 
           <div className="bg-white border border-slate-200/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)] rounded-3xl p-6 sm:p-8">

@@ -71,7 +71,10 @@ export default function LoginPage() {
         <div className="relative z-10 max-w-md w-full">
           <div className="flex items-center gap-3 mb-8">
             <img src="/trubill-logo.png" alt="TruBill Logo" className="w-10 h-10 object-contain brightness-0 invert" />
-            <span className="font-heading font-black text-xl text-white">TruBill</span>
+            <span className="font-heading font-black text-xl">
+              <span className="text-white">Tru</span>
+              <span className="text-[#0050e8]">Bill</span>
+            </span>
           </div>
 
           <h2 className="text-4xl font-black text-white leading-tight mb-4 tracking-tight">
@@ -96,7 +99,11 @@ export default function LoginPage() {
             <div className="flex items-center gap-2 mb-3 border-b border-white/10 pb-3">
               <div className="w-6 h-6 rounded-full bg-[#0050e8] flex items-center justify-center text-[10px] text-white font-bold">V</div>
               <div>
-                <p className="text-[11px] font-bold text-white leading-none">TruBill Store</p>
+                <p className="text-[11px] font-bold leading-none">
+                  <span className="text-white">Tru</span>
+                  <span className="text-[#0050e8]">Bill</span>
+                  <span className="text-white"> Store</span>
+                </p>
                 <p className="text-[8px] text-blue-400 font-semibold uppercase tracking-wider mt-0.5">invoicing bot</p>
               </div>
             </div>
@@ -144,7 +151,10 @@ export default function LoginPage() {
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center gap-2.5 mb-8">
             <img src="/trubill-logo.png" alt="TruBill Logo" className="w-8 h-8 object-contain shrink-0" />
-            <span className="font-heading font-black text-xl text-[#1a1d26] tracking-tight">TruBill</span>
+            <span className="font-heading font-black text-xl tracking-tight">
+              <span className="text-[#001048]">Tru</span>
+              <span className="text-[#0050e8]">Bill</span>
+            </span>
           </div>
 
           <div className="bg-white border border-slate-200/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)] rounded-3xl p-8 sm:p-10">
