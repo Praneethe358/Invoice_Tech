@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     // 2. Previous Month Invoices
     const { data: prevInvoices } = await supabase
       .from('invoices')
-      .select('total, amount_paid, status')
+      .select('total, amount_paid, status, uses_payments_table')
       .eq('shop_id', shop.id)
       .gte('created_at', prevStartDateStr)
       .lte('created_at', prevEndDateStr);
