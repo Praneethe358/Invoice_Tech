@@ -13,9 +13,8 @@ import { STARTER_CATALOGS, ShopType } from '@/lib/starter-catalogs';
 const stepTitles = [
   'Basic Information',
   'Business Category',
-  'Tax Registration',
-  'Inventory Settings',
-  'Starter Catalog'
+  'Tax & Inventory Settings',
+  'Catalog Setup'
 ];
 
 interface CatalogItemState {
@@ -81,19 +80,9 @@ export default function SignupPage() {
   const [newItemHsn, setNewItemHsn] = useState('');
   const [newItemGst, setNewItemGst] = useState('0');
 
-  // Load starter catalog when shopType changes
+  // Clear/initialize starter catalog empty for all shops
   useEffect(() => {
-    const starter = STARTER_CATALOGS[shopType] || [];
-    setCatalogItems(
-      starter.map((item, idx) => ({
-        id: `starter-${idx}`,
-        name: item.name,
-        price: '',
-        hsn_code: item.hsn_code,
-        gst_rate: item.gst_rate,
-        category: item.category,
-      }))
-    );
+    setCatalogItems([]);
   }, [shopType]);
 
   // GSTIN Validator real-time message
@@ -159,25 +148,12 @@ export default function SignupPage() {
           return;
         }
       }
-      if (isServiceOnly) {
-        // Skip inventory for services, directly to Step 5
-        setStep(5);
-      } else {
-        setStep(4);
-      }
-    } else if (step === 4) {
-      setStep(5);
+      setStep(4);
     }
   };
 
   const prevStep = () => {
-    if (step === 5) {
-      if (isServiceOnly) {
-        setStep(3);
-      } else {
-        setStep(4);
-      }
-    } else if (step > 1) {
+    if (step > 1) {
       setStep(step - 1);
     }
   };
@@ -220,7 +196,7 @@ export default function SignupPage() {
 
   const handleSignupSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (step !== 5) return;
+    if (step !== 4) return;
 
     // Validate prices on submit
     const invalidItems = catalogItems.filter(
@@ -386,27 +362,41 @@ export default function SignupPage() {
         {/* Glow backdrop for glassmorphism */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] rounded-full bg-gradient-to-tr from-[#0050e8]/15 to-blue-500/10 blur-[70px] pointer-events-none" />
 
-        <div className="w-full max-w-[460px] my-auto relative z-10">
-          {/* Mobile logo */}
-          <div className="lg:hidden flex items-center justify-center gap-2.5 mb-8">
-            <img src="/trubill-logo.png" alt="TruBill Logo" className="w-8 h-8 object-contain shrink-0" />
-            <span className="font-heading font-black text-xl tracking-tight">
-              <span className="text-[#001048]">Tru</span>
-              <span className="text-[#0050e8]">Bill</span>
-            </span>
-          </div>
+        {/* Mobile Header / Navigation */}
+        <div className="lg:hidden w-full max-w-[460px] flex items-center justify-start mb-4 z-20">
+          <Link 
+            href="/" 
+            className="flex items-center gap-1.5 text-slate-500 hover:text-slate-805 font-extrabold text-xs transition-colors group"
+          >
+            <svg className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+            Home
+          </Link>
+        </div>
 
+        <div className="w-full max-w-[460px] my-auto relative z-10">
           <div className="bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.04)] rounded-[30px] p-6 sm:p-8">
-            {/* Progress Bar */}
+            {/* Logo inside signup section */}
+            <div className="flex items-center justify-start gap-2.5 mb-6">
+              <img src="/trubill-logo.png" alt="TruBill Logo" className="w-7 h-7 object-contain shrink-0" />
+              <span className="font-heading font-black text-lg tracking-tight">
+                <span className="text-[#001048]">Tru</span>
+                <span className="text-[#0050e8]">Bill</span>
+              </span>
+            </div>
+
+             {/* Progress Bar */}
             <div className="mb-6">
               <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-2">
                 <div
                   className="bg-[#0050e8] h-full transition-all duration-300"
-                  style={{ width: `${(step / 5) * 100}%` }}
+                  style={{ width: `${(step / stepTitles.length) * 100}%` }}
                 />
               </div>
               <p className="text-[10px] font-bold text-[#0050e8] uppercase tracking-wider">
-                Step {step} of 5 — {stepTitles[step - 1]}
+                Step {step} of {stepTitles.length} — {stepTitles[step - 1]}
               </p>
             </div>
 
@@ -479,7 +469,7 @@ export default function SignupPage() {
                       <span>Continue</span>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <line x1="5" y1="12" x2="19" y2="12" />
-                        <polyline points="12 5 19 12 12 19" />
+                        <polyline points="12 5 19 12 12 5" />
                       </svg>
                     </button>
                   </div>
@@ -507,14 +497,14 @@ export default function SignupPage() {
                           key={opt.type}
                           type="button"
                           onClick={() => setShopType(opt.type)}
-                          className={`p-3 rounded-2xl border text-left flex flex-col justify-between h-24 transition-all ${
+                          className={`p-2.5 sm:p-3 rounded-2xl border text-left flex flex-col justify-between h-20 sm:h-24 transition-all active:scale-[0.97] ${
                             shopType === opt.type
-                              ? 'border-[#0050e8] bg-[#0050e8]/5 shadow-sm'
-                              : 'border-slate-200 bg-white hover:bg-[#f9fafb]'
+                              ? 'border-[#0050e8] bg-gradient-to-br from-blue-50/70 to-indigo-50/20 shadow-xs ring-1 ring-[#0050e8]/30'
+                              : 'border-slate-150 bg-white hover:bg-[#f9fafb]'
                           }`}
                         >
-                          <span className="text-2xl">{opt.emoji}</span>
-                          <span className="text-xs font-bold text-slate-800 leading-tight">{opt.label}</span>
+                          <span className="text-xl sm:text-2xl">{opt.emoji}</span>
+                          <span className="text-[10px] sm:text-xs font-black text-slate-850 leading-tight">{opt.label}</span>
                         </button>
                       ))}
                     </div>
@@ -535,7 +525,7 @@ export default function SignupPage() {
                         <span>Continue</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                           <line x1="5" y1="12" x2="19" y2="12" />
-                          <polyline points="12 5 19 12 12 19" />
+                          <polyline points="12 5 19 12 12 5" />
                         </svg>
                       </button>
                     </div>
@@ -544,10 +534,10 @@ export default function SignupPage() {
 
                 {step === 3 && (
                   <div className="space-y-4">
-                    <h1 className="text-xl font-black text-[#1a1d26] tracking-tight">Tax settings</h1>
-                    <p className="text-xs text-[#6b7280]">Enable tax handling if your business is registered for GST.</p>
+                    <h1 className="text-xl font-black text-[#1a1d26] tracking-tight">Tax & Inventory settings</h1>
+                    <p className="text-xs text-[#6b7280]">Configure tax handling and stock tracking rules for your shop.</p>
 
-                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/60 flex items-center justify-between">
+                    <div className="p-4 bg-gradient-to-br from-slate-50 to-blue-50/5 rounded-2xl border border-slate-150 flex items-center justify-between shadow-3xs">
                       <div>
                         <p className="text-xs font-bold text-slate-800">GST Registration</p>
                         <p className="text-[10px] text-slate-500 mt-0.5">Handle tax components on invoices</p>
@@ -582,10 +572,32 @@ export default function SignupPage() {
                           error={gstinError}
                           required
                         />
-                        <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
+                        <p className="text-[10px] text-slate-550 font-semibold leading-relaxed">
                           Tamil Nadu state code is 33. Format: State code (2 digits) + PAN (10 chars) + Entity identifier (3 chars).
                         </p>
                       </motion.div>
+                    )}
+
+                    {!isServiceOnly && (
+                      <div className="p-4 bg-gradient-to-br from-slate-50 to-blue-50/5 rounded-2xl border border-slate-150 flex items-center justify-between shadow-3xs">
+                        <div>
+                          <p className="text-xs font-bold text-slate-800">Enable Inventory Tracking</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5">Alerts when items run low</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setInventoryEnabled(!inventoryEnabled)}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                            inventoryEnabled ? 'bg-[#0050e8]' : 'bg-slate-300'
+                          }`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                              inventoryEnabled ? 'translate-x-5' : 'translate-x-0'
+                            }`}
+                          />
+                        </button>
+                      </div>
                     )}
 
                     <div className="flex gap-3 pt-2">
@@ -605,7 +617,7 @@ export default function SignupPage() {
                         <span>Continue</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                           <line x1="5" y1="12" x2="19" y2="12" />
-                          <polyline points="12 5 19 12 12 19" />
+                          <polyline points="12 5 19 12 12 5" />
                         </svg>
                       </button>
                     </div>
@@ -614,95 +626,73 @@ export default function SignupPage() {
 
                 {step === 4 && (
                   <div className="space-y-4">
-                    <h1 className="text-xl font-black text-[#1a1d26] tracking-tight">Inventory settings</h1>
-                    <p className="text-xs text-[#6b7280]">Enable inventory tracking for products to monitor stock quantities.</p>
-
-                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/60 flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-bold text-slate-800">Enable Inventory Tracking</p>
-                        <p className="text-[10px] text-slate-500 mt-0.5">Alerts when items run low</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setInventoryEnabled(!inventoryEnabled)}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          inventoryEnabled ? 'bg-[#0050e8]' : 'bg-slate-300'
-                        }`}
-                      >
-                        <span
-                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                            inventoryEnabled ? 'translate-x-5' : 'translate-x-0'
-                          }`}
-                        />
-                      </button>
-                    </div>
-
-                    <div className="flex gap-3 pt-2">
-                      <button
-                        type="button"
-                        onClick={prevStep}
-                        className="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold py-3 rounded-xl transition-all"
-                      >
-                        Back
-                      </button>
-                      <button
-                        type="button"
-                        onClick={nextStep}
-                        className="flex-1 bg-gradient-to-r from-[#0050e8] to-[#3b82f6] hover:from-[#0043c4] hover:to-[#2563eb] text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
-                      >
-                        <span>Continue</span>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                          <polyline points="12 5 19 12 12 19" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {step === 5 && (
-                  <div className="space-y-4">
                     <h1 className="text-xl font-black text-[#1a1d26] tracking-tight">Set starter catalog prices</h1>
                     <p className="text-xs text-[#6b7280]">
                       Provide default unit prices (₹) for these items. Delete any items you don't sell.
                     </p>
 
-                    <div className="max-h-[260px] overflow-y-auto space-y-2 pr-1">
+                    <div className="max-h-[260px] overflow-y-auto space-y-2 pr-1 scrollbar-thin">
                       {catalogItems.length === 0 ? (
                         <div className="text-center py-6 border border-dashed border-slate-200 rounded-2xl text-slate-400 text-xs">
                           No items in catalog. Add a custom item below.
                         </div>
                       ) : (
-                        catalogItems.map((item) => (
-                          <div
-                            key={item.id}
-                            className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200/60"
-                          >
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-bold text-slate-800 truncate">{item.name}</p>
-                              <p className="text-[10px] text-slate-500 mt-0.5">
-                                HSN: {item.hsn_code || '—'} {item.gst_rate > 0 ? `• GST: ${item.gst_rate}%` : ''}
-                              </p>
-                            </div>
-                            <div className="w-24 shrink-0 flex items-center bg-white border border-slate-200 rounded-xl px-2 min-h-[38px]">
-                              <span className="text-xs text-slate-400 mr-1 font-bold">₹</span>
-                              <input
-                                type="text"
-                                value={item.price}
-                                onChange={(e) => handleUpdatePrice(item.id, e.target.value)}
-                                placeholder="0"
-                                className="w-full text-xs font-bold text-slate-800 focus:outline-none"
-                              />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteItem(item.id)}
-                              className="w-8 h-8 rounded-lg hover:bg-red-50 text-red-500 flex items-center justify-center shrink-0 transition-colors"
+                        catalogItems.map((item, idx) => {
+                          const colors = [
+                            'from-blue-500/10 to-indigo-500/10 text-blue-600',
+                            'from-emerald-500/10 to-teal-500/10 text-emerald-600',
+                            'from-violet-500/10 to-purple-500/10 text-violet-600',
+                            'from-amber-500/10 to-orange-500/10 text-amber-600',
+                            'from-pink-500/10 to-rose-500/10 text-pink-600',
+                          ];
+                          const colorClass = colors[idx % colors.length];
+
+                          return (
+                            <div
+                              key={item.id}
+                              className="group flex items-center gap-3 p-3 bg-white border border-slate-100 hover:border-slate-200 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)] rounded-2xl transition-all duration-200"
                             >
-                              🗑️
-                            </button>
-                          </div>
-                        ))
+                              <div className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${colorClass} flex items-center justify-center shrink-0 font-bold text-sm tracking-wide`}>
+                                {item.name.charAt(0).toUpperCase()}
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-black text-slate-800 truncate">{item.name}</p>
+                                <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                  {item.hsn_code && (
+                                    <span className="bg-slate-100/80 text-slate-500 text-[9px] font-bold px-1.5 py-0.5 rounded-md border border-slate-200/30">
+                                      HSN {item.hsn_code}
+                                    </span>
+                                  )}
+                                  <span className="bg-blue-50/80 text-blue-600 text-[9px] font-bold px-1.5 py-0.5 rounded-md border border-blue-100/30">
+                                    GST {item.gst_rate}%
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="w-24 shrink-0 flex items-center bg-slate-50/50 hover:bg-slate-50 border border-slate-200 focus-within:border-[#0050e8] focus-within:ring-2 focus-within:ring-[#0050e8]/10 rounded-xl px-2.5 transition-all duration-200 min-h-[38px]">
+                                <span className="text-xs text-slate-400 mr-1 font-bold">₹</span>
+                                <input
+                                  type="text"
+                                  value={item.price}
+                                  onChange={(e) => handleUpdatePrice(item.id, e.target.value)}
+                                  placeholder="0"
+                                  className="w-full text-xs font-bold text-slate-800 bg-transparent focus:outline-none"
+                                />
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteItem(item.id)}
+                                className="w-8 h-8 rounded-xl bg-rose-50/50 hover:bg-rose-50 text-rose-500 hover:text-rose-600 flex items-center justify-center shrink-0 transition-colors opacity-80 hover:opacity-100"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
+                          );
+                        })
                       )}
                     </div>
 
@@ -711,13 +701,16 @@ export default function SignupPage() {
                       <button
                         type="button"
                         onClick={() => setShowAddForm(true)}
-                        className="text-xs font-bold text-[#0050e8] hover:underline"
+                        className="w-full py-3 border border-dashed border-slate-200 hover:border-[#0050e8] hover:bg-[#0050e8]/5 rounded-2xl flex items-center justify-center gap-1.5 text-xs font-bold text-[#0050e8] transition-all duration-200"
                       >
-                        + Add custom product to catalog
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        Add custom product to catalog
                       </button>
                     ) : (
-                      <div className="p-4 border border-dashed border-slate-200 rounded-2xl space-y-3 bg-[#fbfcfb]">
-                        <p className="text-[10px] font-bold text-[#0050e8] uppercase tracking-wider">New Custom Catalog Item</p>
+                      <div className="p-4 border border-dashed border-[#0050e8]/30 rounded-2xl space-y-3 bg-gradient-to-br from-blue-50/40 to-indigo-50/5 relative overflow-hidden">
+                        <p className="text-[10px] font-extrabold text-[#0050e8] uppercase tracking-wider">New Custom Catalog Item</p>
                         <div className="grid grid-cols-2 gap-2">
                           <Input
                             placeholder="Product Name"
@@ -742,7 +735,7 @@ export default function SignupPage() {
                             <select
                               value={newItemGst}
                               onChange={(e) => setNewItemGst(e.target.value)}
-                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none"
+                              className="w-full bg-white border border-slate-200 focus:border-[#0050e8] rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none transition-all"
                             >
                               <option value="0">0% GST</option>
                               <option value="5">5% GST</option>
@@ -752,18 +745,18 @@ export default function SignupPage() {
                             </select>
                           </div>
                         </div>
-                        <div className="flex gap-2 justify-end">
+                        <div className="flex gap-2 justify-end pt-1">
                           <button
                             type="button"
                             onClick={() => setShowAddForm(false)}
-                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold"
+                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-250 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
                           >
                             Cancel
                           </button>
                           <button
                             type="button"
                             onClick={handleAddCatalogItem}
-                            className="px-3 py-1.5 bg-gradient-to-r from-[#0050e8] to-[#3b82f6] hover:from-[#0043c4] hover:to-[#2563eb] text-white rounded-lg text-xs font-bold shadow-md shadow-blue-500/10"
+                            className="px-3 py-1.5 bg-gradient-to-r from-[#0050e8] to-[#3b82f6] hover:from-[#0043c4] hover:to-[#2563eb] text-white rounded-lg text-xs font-bold shadow-md shadow-blue-500/10 transition-all active:scale-[0.98]"
                           >
                             Add Item
                           </button>

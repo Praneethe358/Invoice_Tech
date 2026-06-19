@@ -93,23 +93,46 @@ export default function LoginPage() {
         {/* Glow backdrop for glassmorphism */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] rounded-full bg-gradient-to-tr from-[#0050e8]/15 to-blue-500/10 blur-[70px] pointer-events-none" />
 
+        {/* Mobile Header / Navigation */}
+        <div className="lg:hidden w-full max-w-[430px] flex items-center justify-start mb-4 z-20">
+          <Link 
+            href="/" 
+            className="flex items-center gap-1.5 text-slate-500 hover:text-slate-805 font-extrabold text-xs transition-colors group"
+          >
+            <svg className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+            Home
+          </Link>
+        </div>
+
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
           className="w-full max-w-[430px] relative z-10"
         >
-          <div className="bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.04)] rounded-[30px] p-8 sm:p-10">
-            <h1 className="text-3xl font-extrabold text-[#1a1d26] tracking-tight mb-1.5">
+          <div className="bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.04)] rounded-[30px] p-6 sm:p-10">
+            {/* Logo inside login section */}
+            <div className="flex items-center gap-2.5 mb-6">
+              <img src="/trubill-logo.png" alt="TruBill Logo" className="w-8 h-8 object-contain shrink-0" />
+              <span className="font-heading font-black text-xl tracking-tight">
+                <span className="text-[#001048]">Tru</span>
+                <span className="text-[#0050e8]">Bill</span>
+              </span>
+            </div>
+
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1a1d26] tracking-tight mb-1.5">
               Welcome back
             </h1>
-            <p className="text-sm text-[#6b7280] mb-8 font-medium">
+            <p className="text-xs sm:text-sm text-[#6b7280] mb-6 sm:mb-8 font-medium">
               Sign in to your TruBill account
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
               <div>
-                <label className="block text-sm font-bold text-[#1a1d26] mb-2">
+                <label className="block text-xs sm:text-sm font-bold text-[#1a1d26] mb-2">
                   Email address
                 </label>
                 <input
@@ -119,12 +142,12 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoComplete="email"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0050e8] focus:ring-2 focus:ring-[#0050e8]/15"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0050e8] focus:ring-2 focus:ring-[#0050e8]/15"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-[#1a1d26] mb-2">
+                <label className="block text-xs sm:text-sm font-bold text-[#1a1d26] mb-2">
                   Password
                 </label>
                 <input
@@ -134,14 +157,14 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoComplete="current-password"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0050e8] focus:ring-2 focus:ring-[#0050e8]/15"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0050e8] focus:ring-2 focus:ring-[#0050e8]/15"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-[#0050e8] to-[#3b82f6] hover:from-[#0043c4] hover:to-[#2563eb] text-white font-bold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-blue-500/20 active:scale-[0.99] mt-2"
+                className="w-full bg-gradient-to-r from-[#0050e8] to-[#3b82f6] hover:from-[#0043c4] hover:to-[#2563eb] text-white font-bold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-blue-500/20 active:scale-[0.99] mt-2 text-xs sm:text-sm"
               >
                 {loading ? (
                   <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
@@ -160,7 +183,7 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <p className="text-center text-sm text-[#6b7280] mt-8 font-medium">
+            <p className="text-center text-xs sm:text-sm text-[#6b7280] mt-6 sm:mt-8 font-medium">
               Don&apos;t have an account?{' '}
               <Link href="/signup" className="text-[#0050e8] font-bold hover:underline">
                 Create one free
@@ -169,7 +192,7 @@ export default function LoginPage() {
           </div>
 
           {/* Bottom Security Badges */}
-          <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#8a99ad] mt-6 font-bold uppercase tracking-wider">
+          <div className="flex items-center justify-center gap-1.5 text-[9px] sm:text-[10px] text-[#8a99ad] mt-6 font-bold uppercase tracking-wider">
             <svg className="w-3.5 h-3.5 text-[#aebecf]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0110 0v4" />
