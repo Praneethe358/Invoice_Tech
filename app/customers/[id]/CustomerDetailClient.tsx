@@ -362,35 +362,23 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
         </button>
 
         {/* Page Title Header - Mobile only */}
-        <div className="mb-6 flex flex-col md:hidden justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => router.back()}
-              className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors mr-1 cursor-pointer"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-            </button>
-            <div>
-              <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
-                Customer Ledger
-              </h1>
-              <p className="text-[10px] text-gray-500 font-semibold mt-1">
-                Account statements & Transaction logs for {customer.name}
-              </p>
-            </div>
-          </div>
+        <div className="mb-6 flex md:hidden items-center gap-3">
           <button
-            onClick={() => router.push('/customers')}
-            className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer self-start"
+            onClick={() => router.back()}
+            className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors mr-1 cursor-pointer"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="19" y1="12" x2="5" y2="12" />
-              <polyline points="12 19 5 12 12 5" />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polyline points="15 18 9 12 15 6" />
             </svg>
-            Back to Customers
           </button>
+          <div>
+            <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
+              Customer Ledger
+            </h1>
+            <p className="text-[10px] text-gray-500 font-semibold mt-1">
+              Account statements & Transaction logs for {customer.name}
+            </p>
+          </div>
         </div>
 
         {/* Customer Header */}
