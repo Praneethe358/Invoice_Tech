@@ -304,11 +304,23 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Global CSS Injector to offset pages on desktop view */}
+      {/* Global CSS Injector to offset pages on desktop and mobile view */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media (min-width: 768px) {
           body {
             padding-left: 18rem !important;
+          }
+        }
+        @media (max-width: 767px) {
+          body {
+            padding-top: 56px !important;
+          }
+          .mobile-header-fixed {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
           }
         }
       `}} />
@@ -406,7 +418,7 @@ export default function Navbar() {
       </aside>
 
       {/* ─── MOBILE HEADER (Visible only on < 768px) ─── */}
-      <div className="sticky top-0 z-50 md:hidden w-full">
+      <div className="mobile-header-fixed md:hidden w-full">
         {/* Dark Top Strip (Navy Blue) */}
         <div className="bg-[#001048] h-1 w-full" />
         

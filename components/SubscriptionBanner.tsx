@@ -105,8 +105,11 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
           body {
             padding-top: 104px !important;
           }
+          .mobile-header-fixed {
+            top: 48px !important;
+          }
           .sub-banner-position {
-            top: 56px !important;
+            top: 0px !important;
           }
         }
         ${urgency === 'blocked' ? `
