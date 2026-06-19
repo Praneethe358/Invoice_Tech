@@ -100,6 +100,7 @@ export interface Invoice {
   delivery_status?: string | null;
   cancelled_at?: string | null;
   cancelled_reason?: string | null;
+  public_token?: string | null;
 }
 
 export type InvoiceStatus = 'draft' | 'saved' | 'sent' | 'cancelled' | 'failed';

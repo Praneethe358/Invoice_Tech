@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent, useMemo } from 'react';
+import { useState, useEffect, FormEvent, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -47,6 +47,80 @@ export default function SettingsClient({
   const config = SHOP_CONFIG[shop.shop_type as ShopType] || SHOP_CONFIG.other;
   const isInventoryAllowed = config.inventoryEnabled || shop.shop_type === 'other';
   const [inventoryEnabledGlobal, setInventoryEnabledGlobal] = useState(shop.inventory_enabled);
+
+  // Phase 12 export and rate limiting
+  const [exportCount, setExportCount] = useState<number | null>(null);
+  const [checkingLimit, setCheckingLimit] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  useEffect(() => {
+    if (role === 'owner') {
+      const fetchExportCount = async () => {
+        setCheckingLimit(true);
+        try {
+          const startOfToday = new Date();
+          startOfToday.setHours(0, 0, 0, 0);
+          const { count, error } = await supabase
+            .from('data_exports')
+            .select('id', { count: 'exact', head: true })
+            .eq('shop_id', shop.id)
+            .eq('export_type', 'full')
+            .gte('created_at', startOfToday.toISOString());
+          if (!error && count !== null) {
+            setExportCount(count);
+          }
+        } catch (err) {
+          console.error('Error fetching export limit count:', err);
+        } finally {
+          setCheckingLimit(false);
+        }
+      };
+      fetchExportCount();
+    }
+  }, [role, shop.id, supabase]);
+
+  const handleCopyShopId = () => {
+    navigator.clipboard.writeText(shop.id);
+    showToast('Shop ID copied to clipboard ✓', 'success');
+  };
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const response = await fetch('/api/export/full');
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Failed to export data');
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      
+      const contentDisposition = response.headers.get('content-disposition');
+      let filename = `TruBill_FullExport_${shop.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      if (contentDisposition) {
+        const matches = /filename="([^"]+)"/.exec(contentDisposition);
+        if (matches && matches[1]) {
+          filename = matches[1];
+        }
+      }
+      
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      
+      showToast('Data exported successfully ✓', 'success');
+      setExportCount(prev => (prev !== null ? prev + 1 : 1));
+    } catch (err: any) {
+      showToast(err.message || 'Failed to download data', 'error');
+    } finally {
+      setExporting(false);
+    }
+  };
 
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -355,6 +429,90 @@ export default function SettingsClient({
             )}
           </form>
         </section>
+
+        {/* Danger Zone - Owner Only */}
+        {role === 'owner' && (
+          <section className="mb-8 border-l-4 border-red-500 bg-white p-6 shadow-xs">
+            <h2 className="text-sm font-extrabold text-red-600 uppercase tracking-wider mb-6 font-heading">
+              Danger Zone
+            </h2>
+            
+            {/* Sub-section 1 — Export My Data */}
+            <div className="mb-6 pb-6 border-b border-[#f3f4f6]">
+              <h3 className="text-xs font-extrabold text-gray-950 uppercase tracking-wider mb-1">
+                Export Your Data
+              </h3>
+              <p className="text-[11px] text-gray-500 font-medium mb-3">
+                Download a complete copy of all your TruBill data as an Excel workbook.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <button
+                  type="button"
+                  onClick={handleExport}
+                  disabled={exporting || (exportCount !== null && exportCount >= 3)}
+                  className="px-5 py-2.5 text-xs font-bold text-white transition-all bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  {exporting ? 'Preparing export...' : 'Download All Data'}
+                </button>
+                
+                <div className="text-[10px] text-gray-500 font-semibold">
+                  {exportCount !== null && exportCount >= 3 ? (
+                    <span className="text-red-500 font-bold block">
+                      Daily limit reached. Try again tomorrow.
+                    </span>
+                  ) : (
+                    <span>
+                      You can export up to 3 times per day. 
+                      {exportCount !== null && ` (Used today: ${exportCount}/3)`}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Sub-section 2 — Account Information */}
+            <div className="mb-6 pb-6 border-b border-[#f3f4f6]">
+              <h3 className="text-xs font-extrabold text-gray-905 uppercase tracking-wider mb-3">
+                Account Information
+              </h3>
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] text-gray-500 font-semibold">Shop ID:</span>
+                  <code className="text-[11px] text-gray-700 font-mono bg-gray-50 px-2 py-0.5 border border-gray-150">
+                    {shop.id}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={handleCopyShopId}
+                    className="text-[10px] text-[#0050e8] hover:underline font-bold cursor-pointer"
+                  >
+                    [Copy Shop ID]
+                  </button>
+                </div>
+                <div className="text-[11px] text-gray-500 font-semibold">
+                  Member since: <span className="text-gray-700 font-bold">{new Date(shop.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-gray-500 font-semibold">Subscription status:</span>
+                  <span className="inline-flex items-center px-2 py-0.5 text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                    Active (Pro)
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Sub-section 3 — Delete Account (stub only) */}
+            <div className="p-4 bg-gray-50/70 border border-gray-200">
+              <h3 className="text-xs font-bold text-gray-900 mb-1">
+                Delete Account
+              </h3>
+              <p className="text-[11px] text-gray-600 font-medium italic">
+                Want to delete your account? Contact us at <a href="mailto:support@trubill.in" className="text-[#0050e8] underline">support@trubill.in</a> and we will process your request within 24 hours.
+              </p>
+            </div>
+          </section>
+        )}
       </PageTransition>
     </div>
   );

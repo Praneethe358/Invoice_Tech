@@ -91,6 +91,10 @@ export async function middleware(request: NextRequest) {
     );
   }
 
+  if (pathname.startsWith('/status/')) {
+    response.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate');
+  }
+
   return response;
 }
 

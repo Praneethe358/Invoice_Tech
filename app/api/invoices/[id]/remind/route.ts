@@ -3,15 +3,26 @@ import { createClient } from '@/lib/supabase/server';
 import { sendTextMessage } from '@/lib/whatsapp';
 import { Invoice, Shop, ApiError } from '@/lib/types';
 import { getInvoicePaid } from '@/lib/payments';
+import { isRateLimited } from '@/lib/rate-limit';
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
   const supabase = await createClient();
 
   try {
+    // Rate limit check: 5 per 24 hours per invoice
+    const limitKey = `remind:${id}`;
+    const { limited } = isRateLimited(limitKey, 5, 24 * 60 * 60 * 1000);
+    if (limited) {
+      return NextResponse.json(
+        { error: 'Too many reminders. Maximum 5 reminders per 24 hours per invoice.' } satisfies ApiError,
+        { status: 429 }
+      );
+    }
+
     // Authenticate
     const {
       data: { user },
@@ -68,6 +79,10 @@ export async function POST(
       year: 'numeric',
     });
 
+    const reqUrl = new URL(request.url);
+    const origin = reqUrl.origin;
+    const trackingLink = `${origin}/status/${typedInvoice.public_token}`;
+
     let messageBody = '';
 
     if (typedInvoice.payment_status === 'partial') {
@@ -83,6 +98,8 @@ export async function POST(
         '',
         'Please settle the remaining balance at your earliest convenience.',
         '',
+        `Track status & download PDF here: ${trackingLink}`,
+        '',
         'Thank you! 🙏',
       ].join('\n');
     } else {
@@ -97,6 +114,8 @@ export async function POST(
         `Date: ${invoiceDate}`,
         '',
         'Please settle the payment at your earliest convenience.',
+        '',
+        `Track status & download PDF here: ${trackingLink}`,
         '',
         'Thank you! 🙏',
       ].join('\n');

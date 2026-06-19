@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { sanitizeText } from '@/lib/sanitize';
 
 export async function GET(request: NextRequest) {
   try {
@@ -96,11 +97,16 @@ export async function POST(request: NextRequest) {
       items, // Array of items
     } = body;
 
-    if (!supplier_name || !supplier_name.trim()) {
+    const sanitizedSupplierName = sanitizeText(supplier_name, 100);
+    const sanitizedSupplierGstin = sanitizeText(supplier_gstin, 15);
+    const sanitizedInvoiceNumber = sanitizeText(purchase_invoice_number, 50);
+    const sanitizedNotes = sanitizeText(notes, 500);
+
+    if (!sanitizedSupplierName) {
       return NextResponse.json({ error: 'Supplier name is required' }, { status: 400 });
     }
 
-    if (!purchase_invoice_number || !purchase_invoice_number.trim()) {
+    if (!sanitizedInvoiceNumber) {
       return NextResponse.json({ error: 'Purchase invoice number is required' }, { status: 400 });
     }
 
@@ -141,10 +147,10 @@ export async function POST(request: NextRequest) {
       }
 
       return {
-        name: item.name.trim(),
-        hsn_code: item.hsn_code ? item.hsn_code.trim() : null,
+        name: sanitizeText(item.name, 100) || 'Item',
+        hsn_code: sanitizeText(item.hsn_code, 15) || null,
         qty,
-        unit: item.unit || 'pcs',
+        unit: sanitizeText(item.unit, 20) || 'pcs',
         price,
         gst_rate: rate,
         cgst,
@@ -155,7 +161,7 @@ export async function POST(request: NextRequest) {
     });
 
     const total = subtotal + totalGst;
-    const itcEligible = shop.gst_registered && !!supplier_gstin && supplier_gstin.trim().length === 15;
+    const itcEligible = shop.gst_registered && !!sanitizedSupplierGstin && sanitizedSupplierGstin.length === 15;
 
     // 1. Insert Purchase
     const { data: purchase, error: purchaseError } = await supabase
@@ -163,9 +169,9 @@ export async function POST(request: NextRequest) {
       .insert({
         shop_id: shop.id,
         supplier_id: supplier_id || null,
-        supplier_name: supplier_name.trim(),
-        supplier_gstin: supplier_gstin ? supplier_gstin.trim().toUpperCase() : null,
-        purchase_invoice_number: purchase_invoice_number.trim(),
+        supplier_name: sanitizedSupplierName,
+        supplier_gstin: sanitizedSupplierGstin ? sanitizedSupplierGstin.toUpperCase() : null,
+        purchase_invoice_number: sanitizedInvoiceNumber,
         purchase_date,
         subtotal: Number(subtotal.toFixed(2)),
         total_cgst: Number(totalCgst.toFixed(2)),
@@ -174,7 +180,7 @@ export async function POST(request: NextRequest) {
         total_gst: Number(totalGst.toFixed(2)),
         total: Number(total.toFixed(2)),
         itc_eligible: itcEligible,
-        notes: notes ? notes.trim() : null,
+        notes: sanitizedNotes || null,
       })
       .select()
       .single();

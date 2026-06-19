@@ -12,7 +12,7 @@ export async function GET(
 
     const { data: staff, error } = await admin
       .from('staff')
-      .select('id, name, email, role, status, shop_id')
+      .select('id, name, email, role, status, shop_id, invited_at')
       .eq('invite_token', token)
       .single();
 
@@ -26,6 +26,14 @@ export async function GET(
     if (staff.status !== 'invited') {
       return NextResponse.json(
         { error: 'This invite has already been used or expired' },
+        { status: 400 }
+      );
+    }
+
+    const invitedTime = new Date(staff.invited_at).getTime();
+    if (Date.now() - invitedTime > 48 * 60 * 60 * 1000) {
+      return NextResponse.json(
+        { error: 'This invite link has expired. Please request a new invite.' },
         { status: 400 }
       );
     }

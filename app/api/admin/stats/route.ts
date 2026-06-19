@@ -1,8 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { verifyAdmin } from '@/lib/admin';
+import { isRateLimited } from '@/lib/rate-limit';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+  const { limited } = isRateLimited(`admin-limit:${ip}`, 100, 60000);
+  if (limited) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+  }
+
   const { isAdmin } = await verifyAdmin();
   if (!isAdmin) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -34,6 +41,13 @@ export async function GET() {
     .from('invoices')
     .select('*', { count: 'exact', head: true });
 
+  // Total manual full data exports in the last 30 days
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const { count: exports_count } = await admin
+    .from('data_exports')
+    .select('*', { count: 'exact', head: true })
+    .gte('created_at', thirtyDaysAgo);
+
   // MRR = active shops × 299
   const mrr = active * 299;
 
@@ -46,5 +60,6 @@ export async function GET() {
     total_invoices: total_invoices || 0,
     mrr,
     new_this_month,
+    exports_count: exports_count || 0,
   });
 }

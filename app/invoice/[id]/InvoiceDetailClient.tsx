@@ -23,6 +23,13 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
   const [resending, setResending] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [sendingReminder, setSendingReminder] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && inv.public_token) {
+      setShareUrl(`${window.location.origin}/status/${inv.public_token}`);
+    }
+  }, [inv.public_token]);
 
   // Cooldown timer state
   const [cooldown, setCooldown] = useState(0);
@@ -936,6 +943,52 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
             )}
           </div>
         </div>
+
+        {/* Share Invoice Status section */}
+        {inv.status !== 'draft' && inv.public_token && (
+          <div className="bg-white rounded-3xl border border-[#e5e7eb] p-6 shadow-sm mb-6">
+            <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-3">
+              Share Invoice Status
+            </h2>
+            <p className="text-xs text-gray-500 mb-4">
+              Share this secure, read-only link with your customer so they can track the payment and delivery status.
+            </p>
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={shareUrl}
+                  className="flex-1 bg-gray-50 border border-[#e5e7eb] rounded-xl px-3 py-2 text-xs font-mono text-gray-600 focus:outline-none"
+                />
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(shareUrl);
+                    showToast('Link copied to clipboard ✓', 'success');
+                  }}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                >
+                  Copy Link
+                </button>
+              </div>
+              
+              <button
+                onClick={() => {
+                  const message = encodeURIComponent(
+                    `Here is your invoice status from ${shop.name}: ${shareUrl}`
+                  );
+                  window.open(`https://wa.me/91${inv.customer_phone}?text=${message}`, '_blank');
+                }}
+                className="w-full bg-[#25d366] hover:bg-[#20ba5a] text-white text-xs font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.022-.008-1.15-.567-1.321-.63-.173-.063-.3-.093-.427.093-.127.188-.49.613-.6.729-.11.117-.22.13-.427.027-.2-.1-.84-.31-1.597-.984-.589-.525-.987-1.176-1.103-1.372-.116-.196-.012-.302.088-.4.09-.09.2-.23.3-.347.1-.117.13-.197.195-.33.065-.13.033-.245-.017-.347-.05-.1-.425-1.025-.58-1.4-.15-.365-.3-.314-.408-.32-.1-.007-.22-.007-.33-.007s-.29.04-.44.2c-.15.16-.57.558-.57 1.358 0 .8.58 1.57.66 1.68.08.1.1.1 1.58 2.22 1.15 1.57 2.05 2.1 2.9.22.427.203.815.188 1.1-.03.28-.157.943-.228 1.024-.07.08-.13.15-.24.15-.09 0-.61-.06-.82-.12zm0-8.382a9.18 9.18 0 0 0-9.19 9.19c0 1.57.4 3.1 1.17 4.47l-1.25 4.56 4.67-1.22a9.15 9.15 0 0 0 4.6 1.25 9.19 9.19 0 0 0 9.19-9.19 9.18 9.18 0 0 0-9.19-9.19z" />
+                </svg>
+                Share on WhatsApp
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-3">
           {inv.status === 'draft' && (

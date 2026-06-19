@@ -28,6 +28,14 @@ export async function POST(
       );
     }
 
+    const invitedTime = new Date(staff.invited_at).getTime();
+    if (Date.now() - invitedTime > 48 * 60 * 60 * 1000) {
+      return NextResponse.json(
+        { error: 'This invite link has expired. Please request a new invite.' },
+        { status: 400 }
+      );
+    }
+
     if (!password || password.length < 6) {
       return NextResponse.json(
         { error: 'Password must be at least 6 characters' },

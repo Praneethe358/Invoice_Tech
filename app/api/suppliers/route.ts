@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { sanitizeText } from '@/lib/sanitize';
 
 export async function GET(request: NextRequest) {
   try {
@@ -97,11 +98,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, gstin, phone, address } = body;
 
-    if (!name || !name.trim()) {
+    const sanitizedName = sanitizeText(name, 100);
+    const sanitizedGstin = sanitizeText(gstin, 15);
+    const sanitizedPhone = sanitizeText(phone, 15);
+    const sanitizedAddress = sanitizeText(address, 250);
+
+    if (!sanitizedName) {
       return NextResponse.json({ error: 'Supplier name is required' }, { status: 400 });
     }
 
-    if (gstin && gstin.trim().length !== 15) {
+    if (sanitizedGstin && sanitizedGstin.length !== 15) {
       return NextResponse.json({ error: 'GSTIN must be exactly 15 characters' }, { status: 400 });
     }
 
@@ -109,10 +115,10 @@ export async function POST(request: NextRequest) {
       .from('suppliers')
       .insert({
         shop_id: shop.id,
-        name: name.trim(),
-        gstin: gstin ? gstin.trim().toUpperCase() : null,
-        phone: phone ? phone.trim() : null,
-        address: address ? address.trim() : null,
+        name: sanitizedName,
+        gstin: sanitizedGstin ? sanitizedGstin.toUpperCase() : null,
+        phone: sanitizedPhone || null,
+        address: sanitizedAddress || null,
       })
       .select()
       .single();

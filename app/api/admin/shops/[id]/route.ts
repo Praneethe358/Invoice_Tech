@@ -2,10 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { verifyAdmin } from '@/lib/admin';
 
+import { isRateLimited } from '@/lib/rate-limit';
+
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+  const { limited } = isRateLimited(`admin-limit:${ip}`, 100, 60000);
+  if (limited) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+  }
+
   const { isAdmin } = await verifyAdmin();
   if (!isAdmin) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });

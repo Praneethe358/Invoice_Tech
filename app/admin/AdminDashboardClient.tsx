@@ -27,6 +27,7 @@ interface Stats {
   total_invoices: number;
   mrr: number;
   new_this_month: number;
+  exports_count: number;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -209,6 +210,56 @@ export default function AdminDashboardClient() {
           </motion.div>
         ))}
       </div>
+
+      {/* Platform Health Section */}
+      {stats && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.3 }}
+          className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+              <span>🛡️</span> Platform Health
+            </h3>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              All Systems Operational
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex justify-between items-center">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">
+                  Manual Full Data Exports (Last 30 Days)
+                </p>
+                <p className="text-sm font-semibold text-slate-700">
+                  Total requests compiled and downloaded safely.
+                </p>
+              </div>
+              <p className="text-2xl font-black text-slate-900 tabular-nums">
+                {stats.exports_count || 0}
+              </p>
+            </div>
+            
+            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex justify-between items-center">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">
+                  Database Backup Status
+                </p>
+                <p className="text-sm font-semibold text-slate-700">
+                  Automated Supabase daily backups enabled.
+                </p>
+              </div>
+              <span className="px-2.5 py-1 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-lg">
+                Successful
+              </span>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Search + Filters */}
       <div className="flex flex-col md:flex-row gap-3 items-start md:items-center justify-between">

@@ -7,15 +7,26 @@ import {
 } from '@/lib/whatsapp';
 import { Invoice, Shop, ApiError } from '@/lib/types';
 import { syncCustomerOutstanding } from '@/lib/payments';
+import { isRateLimited } from '@/lib/rate-limit';
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
   const supabase = await createClient();
 
   try {
+    // Rate limit check: 10 per hour per invoice
+    const limitKey = `send:${id}`;
+    const { limited } = isRateLimited(limitKey, 10, 60 * 60 * 1000);
+    if (limited) {
+      return NextResponse.json(
+        { error: 'Too many send requests. Maximum 10 per hour per invoice.' } satisfies ApiError,
+        { status: 429 }
+      );
+    }
+
     // Authenticate
     const {
       data: { user },
@@ -139,6 +150,10 @@ export async function POST(
 
     // Step 3: Send document message
     const greetingName = customerName ? ` ${customerName}` : '';
+    const reqUrl = new URL(request.url);
+    const origin = reqUrl.origin;
+    const trackingLink = `${origin}/status/${typedInvoice.public_token}`;
+
     const caption = [
       `Hey${greetingName} ,`,
       '',
@@ -149,6 +164,8 @@ export async function POST(
       `Sales Invoice No: ${typedInvoice.invoice_number}`,
       `Invoice Amount: ₹${Number(typedInvoice.total).toFixed(1)}`,
       `Balance Due: ₹${balanceDue.toFixed(1)}`,
+      '',
+      `Track status & download PDF here: ${trackingLink}`,
       '',
       'Happy to serve you',
       `${typedShop.name.toUpperCase()}.`,

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getInvoicePaid, syncInvoicePaymentStatus, syncCustomerOutstanding } from '@/lib/payments';
 import { logAudit } from '@/lib/audit';
 import { getCurrentUserContext } from '@/lib/current-user';
+import { sanitizeText } from '@/lib/sanitize';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -21,6 +22,9 @@ export async function POST(request: NextRequest) {
     // 2. Parse body
     const body = await request.json();
     const { invoice_id, amount: rawAmount, payment_method, note, paid_at } = body;
+
+    const sanitizedNote = sanitizeText(note, 250);
+    const sanitizedMethod = sanitizeText(payment_method, 50);
 
     if (!invoice_id) {
       return NextResponse.json({ error: 'Missing invoice_id' }, { status: 400 });
@@ -87,8 +91,8 @@ export async function POST(request: NextRequest) {
         shop_id: invoice.shop_id,
         customer_phone: invoice.customer_phone,
         amount,
-        payment_method: payment_method || 'cash',
-        note: note?.trim() || null,
+        payment_method: sanitizedMethod || 'cash',
+        note: sanitizedNote || null,
         paid_at: paid_at ? new Date(paid_at).toISOString() : new Date().toISOString(),
       })
       .select()

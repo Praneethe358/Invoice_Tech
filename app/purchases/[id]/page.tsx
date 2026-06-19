@@ -1,6 +1,30 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import PurchaseDetailClient from './PurchaseDetailClient';
+import { Metadata } from 'next';
+
+export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const supabase = await createClient();
+  const { data: purchase } = await supabase
+    .from('purchases')
+    .select('purchase_invoice_number')
+    .eq('id', id)
+    .single();
+
+  if (!purchase) {
+    return { title: 'Purchase Management — TruBill' };
+  }
+  return {
+    title: `${purchase.purchase_invoice_number} — TruBill`,
+  };
+}
 
 interface Props {
   params: Promise<{ id: string }>;

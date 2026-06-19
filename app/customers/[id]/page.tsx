@@ -2,8 +2,30 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { Customer, Invoice, Shop } from '@/lib/types';
 import CustomerDetailClient from './CustomerDetailClient';
+import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const supabase = await createClient();
+  const { data: customer } = await supabase
+    .from('customers')
+    .select('name')
+    .eq('id', id)
+    .single();
+
+  if (!customer) {
+    return { title: 'Customer Ledger — TruBill' };
+  }
+  return {
+    title: `${customer.name} — TruBill`,
+  };
+}
 
 export default async function CustomerDetailPage({
   params,

@@ -469,5 +469,38 @@ create index if not exists idx_audit_logs_shop_created_at on audit_logs(shop_id,
 create index if not exists idx_audit_logs_action on audit_logs(action);
 create index if not exists idx_audit_logs_actor_user_id on audit_logs(actor_user_id);
 
+-- ═══════════════════════════════════════════
+-- Phase 12 Database Changes
+-- ═══════════════════════════════════════════
+
+-- Public token per invoice for status page
+alter table invoices
+  add column if not exists public_token text unique default gen_random_uuid()::text;
+
+-- Generate tokens for existing invoices
+update invoices 
+set public_token = gen_random_uuid()::text
+where public_token is null;
+
+-- Data export request log
+create table if not exists data_exports (
+  id uuid primary key default gen_random_uuid(),
+  shop_id uuid not null references shops(id) 
+    on delete cascade,
+  exported_by uuid not null,
+  export_type text not null default 'full',
+  created_at timestamptz not null default now()
+);
+
+alter table data_exports enable row level security;
+
+create policy "own exports" on data_exports for all
+  using (
+    shop_id in (
+      select id from shops where auth_user_id = auth.uid()
+    )
+  );
+
+
 
 
