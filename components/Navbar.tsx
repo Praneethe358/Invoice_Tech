@@ -103,9 +103,9 @@ const navItems = [
 ];
 
 const ALLOWED_NAV_BY_ROLE: Record<UserRole, string[]> = {
-  owner: ['/dashboard', '/invoices', '/customers', '/catalog', '/payments', '/purchases', '/suppliers', '/reports', '/gst', '/settings'],
-  admin: ['/dashboard', '/invoices', '/customers', '/catalog', '/payments', '/purchases', '/suppliers', '/reports', '/gst', '/settings'],
-  billing_staff: ['/dashboard', '/invoices', '/customers', '/catalog', '/payments', '/purchases'],
+  owner: ['/dashboard', '/invoices', '/customers', '/catalog', '/payments', '/purchases', '/suppliers', '/reports', '/gst', '/settings', '/invoice/new'],
+  admin: ['/dashboard', '/invoices', '/customers', '/catalog', '/payments', '/purchases', '/suppliers', '/reports', '/gst', '/settings', '/invoice/new'],
+  billing_staff: ['/dashboard', '/invoices', '/customers', '/catalog', '/payments', '/purchases', '/invoice/new'],
   view_only: ['/dashboard', '/invoices', '/customers', '/catalog'],
 };
 
