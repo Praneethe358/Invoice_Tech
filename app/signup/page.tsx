@@ -261,6 +261,7 @@ export default function SignupPage() {
 
       // Step 2: Create Shop row
       const bType = getBusinessType(shopType);
+      const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
       const { data: newShop, error: shopError } = await supabase
         .from('shops')
         .insert({
@@ -273,6 +274,8 @@ export default function SignupPage() {
           business_type: bType,
           inventory_enabled: isServiceOnly ? false : inventoryEnabled,
           onboarding_completed: true,
+          subscription_status: 'trial',
+          trial_ends_at: trialEndsAt,
         })
         .select('id')
         .single();
@@ -282,6 +285,21 @@ export default function SignupPage() {
         showToast('Account created but shop setup failed.', 'error');
         setLoading(false);
         return;
+      }
+
+      // Send welcome WhatsApp message (non-blocking)
+      try {
+        await fetch('/api/signup/welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ownerName: ownerName.trim(),
+            shopName: shopName.trim(),
+            phone: phone.trim(),
+          }),
+        });
+      } catch (e) {
+        console.error('Welcome WhatsApp send trigger failed:', e);
       }
 
       // Step 3: Insert starter catalog products

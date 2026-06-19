@@ -501,6 +501,24 @@ create policy "own exports" on data_exports for all
     )
   );
 
+-- ═══════════════════════════════════════════
+-- Phase 13 Database Changes
+-- ═══════════════════════════════════════════
+
+-- Add subscription columns to shops
+alter table shops
+  add column if not exists subscription_status text
+    not null default 'trial',
+  add column if not exists trial_ends_at timestamptz,
+  add column if not exists subscription_ends_at timestamptz,
+  add column if not exists subscription_started_at timestamptz,
+  add column if not exists subscription_notes text;
+
+-- Backfill trial_ends_at for existing shops
+update shops
+set trial_ends_at = created_at + interval '14 days'
+where trial_ends_at is null;
+
 
 
 

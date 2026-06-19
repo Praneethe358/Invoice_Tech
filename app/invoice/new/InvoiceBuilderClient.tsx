@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import PageTransition from '@/components/PageTransition';
@@ -17,6 +18,7 @@ import { validatePhone } from '@/lib/validators';
 import { useMemo } from 'react';
 import { SHOP_CONFIG } from '@/lib/shop-config';
 import { ShopType } from '@/lib/starter-catalogs';
+import { getSubscriptionAccess } from '@/lib/subscription';
 
 interface Props {
   products: Product[];
@@ -27,6 +29,9 @@ interface Props {
     gstin: string | null;
     inventory_enabled: boolean;
     shop_type: string;
+    subscription_status?: string | null;
+    trial_ends_at?: string | null;
+    subscription_ends_at?: string | null;
   };
   initialDraft?: any;
 }
@@ -440,6 +445,56 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
       setLoading(false);
     }
   };
+
+  const subAccess = getSubscriptionAccess({
+    subscription_status: shop.subscription_status || 'trial',
+    trial_ends_at: shop.trial_ends_at || null,
+    subscription_ends_at: shop.subscription_ends_at || null,
+  });
+
+  if (!subAccess.canSendInvoices) {
+    const isTrial = (shop.subscription_status || 'trial') === 'trial';
+    return (
+      <div className="min-h-screen bg-[#f9fafb]">
+        <Navbar />
+        <PageTransition className="w-full px-4 lg:px-8 py-12 pb-36 flex flex-col items-center justify-center">
+          <div className="bg-white rounded-2xl border border-[#e5e7eb] p-8 max-w-[400px] w-full text-center shadow-md space-y-6">
+            <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            
+            <div className="space-y-2">
+              <h1 className="text-xl font-bold text-slate-900 flex items-center justify-center gap-2">
+                <span>🔒</span> Subscription Required
+              </h1>
+              <p className="text-sm text-slate-500 leading-relaxed">
+                Your {isTrial ? 'free trial' : 'subscription'} has ended.
+              </p>
+              <p className="text-sm text-slate-500 leading-relaxed">
+                Upgrade to ₹299/month to continue sending professional invoices to your customers on WhatsApp.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 pt-2">
+              <Link href="/upgrade" className="w-full">
+                <button className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white font-bold py-3 px-4 rounded-xl shadow-xs transition-colors cursor-pointer">
+                  Upgrade Now
+                </button>
+              </Link>
+              <Link href="/dashboard" className="w-full">
+                <button className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-xl transition-colors cursor-pointer">
+                  View Dashboard
+                </button>
+              </Link>
+            </div>
+          </div>
+        </PageTransition>
+      </div>
+    );
+  }
 
   // ─── Success state ────────────────────────────────────────
   if (successInvoice) {

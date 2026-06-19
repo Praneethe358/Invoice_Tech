@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
@@ -13,7 +13,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend,
 } from 'recharts';
 import Navbar from '@/components/Navbar';
 import PageTransition from '@/components/PageTransition';
@@ -110,10 +109,11 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
     }
   };
 
-  const COLORS = ['#0050e8', '#0058e8', '#4caf50', '#81c784'];
+  // Curated premium palette for payment methods: Blue (Cash), Emerald (UPI), Amber (Bank Transfer), Purple (Other)
+  const COLORS = ['#0050e8', '#10b981', '#f59e0b', '#8b5cf6'];
 
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
+    <div className="min-h-screen bg-[#f5f6fa]">
       <Navbar />
 
       <PageTransition className="w-full px-4 md:px-8 pt-6 md:pt-0 pb-24">
@@ -164,7 +164,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
             </h2>
             <p className="text-xs text-slate-500 font-semibold mt-0.5 flex items-center gap-2">
               <span>Monthly Business Summary</span>
-              <span className="bg-[#0050e8]/10 text-[#0050e8] px-2 py-0.5 rounded text-[10px] font-bold">
+              <span className="bg-[#0050e8]/10 text-[#0050e8] px-2 py-0.5 rounded-none text-[10px] font-bold">
                 {getFYContext(month, year)}
               </span>
             </p>
@@ -175,7 +175,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
             <button
               onClick={() => handleExport('pdf')}
               disabled={exportingPdf || loading}
-              className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold rounded-xl py-2.5 px-4 text-xs transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+              className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold rounded-none py-2.5 px-4 text-xs transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
             >
               {exportingPdf ? (
                 <>
@@ -192,7 +192,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
             <button
               onClick={() => handleExport('excel')}
               disabled={exportingExcel || loading}
-              className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-250 font-bold rounded-xl py-2.5 px-4 text-xs transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+              className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-250 font-bold rounded-none py-2.5 px-4 text-xs transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
             >
               {exportingExcel ? (
                 <>
@@ -210,7 +210,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
         </div>
 
         {/* Date Selector block */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs mb-8 flex flex-wrap gap-4 items-center">
+        <div className="bg-white border border-[#e5e7eb] rounded-none p-5 shadow-xs mb-8 flex flex-wrap gap-4 items-center">
           <div className="flex-1 min-w-[200px]">
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">
               Select Month
@@ -218,7 +218,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
             <select
               value={month}
               onChange={(e) => setMonth(Number(e.target.value))}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#0050e8]"
+              className="w-full bg-slate-50 border border-[#e5e7eb] rounded-none px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#0050e8]"
             >
               {MONTHS.map((m) => (
                 <option key={m.val} value={m.val}>
@@ -234,7 +234,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
             <select
               value={year}
               onChange={(e) => setYear(Number(e.target.value))}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#0050e8]"
+              className="w-full bg-slate-50 border border-[#e5e7eb] rounded-none px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-[#0050e8]"
             >
               {[currentYear - 2, currentYear - 1, currentYear, currentYear + 1].map((y) => (
                 <option key={y} value={y}>
@@ -249,32 +249,32 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="bg-white border border-slate-200 rounded-2xl p-6 h-28 animate-pulse" />
+                <div key={i} className="bg-white border border-[#e5e7eb] rounded-none p-6 h-28 animate-pulse" />
               ))}
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 h-96 animate-pulse" />
+            <div className="bg-white border border-[#e5e7eb] rounded-none p-6 h-96 animate-pulse" />
           </div>
         ) : (
           <div className="space-y-8">
             {/* SECTION 1 — Sales Summary */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs">
+              <div className="bg-white border border-[#e5e7eb] rounded-none p-5 shadow-2xs">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Invoices Sent</span>
                 <p className="text-2xl font-black text-slate-900 mt-2">{data.salesSummary.totalInvoicesSent}</p>
               </div>
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs">
+              <div className="bg-white border border-[#e5e7eb] rounded-none p-5 shadow-2xs">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Billed</span>
                 <p className="text-2xl font-black text-slate-900 mt-2">₹{data.salesSummary.totalBilled.toLocaleString('en-IN')}</p>
               </div>
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs">
+              <div className="bg-white border border-[#e5e7eb] rounded-none p-5 shadow-2xs">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Collected</span>
                 <p className="text-2xl font-black text-slate-900 mt-2">₹{data.salesSummary.totalCollected.toLocaleString('en-IN')}</p>
               </div>
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs">
+              <div className="bg-white border border-[#e5e7eb] rounded-none p-5 shadow-2xs">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Outstanding</span>
-                <p className="text-2xl font-black text-red-650 mt-2">₹{data.salesSummary.outstanding.toLocaleString('en-IN')}</p>
+                <p className="text-2xl font-black text-red-600 mt-2">₹{data.salesSummary.outstanding.toLocaleString('en-IN')}</p>
               </div>
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs">
+              <div className="bg-white border border-[#e5e7eb] rounded-none p-5 shadow-2xs">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Collection Rate</span>
                 <p className="text-2xl font-black text-[#0050e8] mt-2">{data.salesSummary.collectionRate}%</p>
               </div>
@@ -282,8 +282,8 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
 
             {/* SECTION 2 — GST Summary (only if gst_registered) */}
             {shop.gst_registered && data.gstSummary && (
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-                <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
+              <div className="bg-white border border-[#e5e7eb] rounded-none p-6 shadow-xs">
+                <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-105 pb-3 font-heading">
                   Section 2 — GST Summary
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
@@ -297,15 +297,15 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 block uppercase">CGST Collected</span>
-                    <p className="text-xs font-semibold text-slate-600 mt-1.5">₹{data.gstSummary.cgstCollected.toLocaleString('en-IN')}</p>
+                    <p className="text-xs font-semibold text-slate-650 mt-1.5">₹{data.gstSummary.cgstCollected.toLocaleString('en-IN')}</p>
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 block uppercase">SGST Collected</span>
-                    <p className="text-xs font-semibold text-slate-600 mt-1.5">₹{data.gstSummary.sgstCollected.toLocaleString('en-IN')}</p>
+                    <p className="text-xs font-semibold text-slate-650 mt-1.5">₹{data.gstSummary.sgstCollected.toLocaleString('en-IN')}</p>
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 block uppercase">ITC Available (Purchases)</span>
-                    <p className="text-sm font-black text-blue-650 mt-1">₹{data.gstSummary.itcAvailable.toLocaleString('en-IN')}</p>
+                    <p className="text-sm font-black text-blue-600 mt-1">₹{data.gstSummary.itcAvailable.toLocaleString('en-IN')}</p>
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 block uppercase">Net GST Payable</span>
@@ -318,8 +318,8 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
             {/* Double grid columns for 3 & 4 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* SECTION 3 — Top Products by Revenue */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-                <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
+              <div className="bg-white border border-[#e5e7eb] rounded-none p-6 shadow-xs">
+                <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-105 pb-3 font-heading">
                   Section 3 — Top Products by Revenue
                 </h2>
                 {data.topProducts.length === 0 ? (
@@ -328,7 +328,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs font-semibold text-slate-650">
                       <thead>
-                        <tr className="bg-slate-50 text-slate-805 font-black uppercase text-[9px] border-b border-slate-200">
+                        <tr className="bg-slate-50 text-slate-805 font-black uppercase text-[9px] border-b border-[#e5e7eb]">
                           <th className="py-2 px-2 text-center w-12">Rank</th>
                           <th className="py-2 px-2">Product Name</th>
                           <th className="py-2 px-2 text-right">Qty Sold</th>
@@ -344,7 +344,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                             <td className="py-2.5 px-2 text-right tabular-nums">{p.qty}</td>
                             <td className="py-2.5 px-2 text-right tabular-nums font-extrabold text-slate-900">₹{p.revenue.toLocaleString('en-IN')}</td>
                             <td className="py-2.5 px-2 text-center">
-                              <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-100 text-slate-650">
+                              <span className="inline-block px-1.5 py-0.5 rounded-none text-[9px] font-bold bg-slate-100 text-slate-650 border border-slate-200">
                                 {p.percentage}%
                               </span>
                             </td>
@@ -357,8 +357,8 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
               </div>
 
               {/* SECTION 4 — Top Customers by Revenue */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-                <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
+              <div className="bg-white border border-[#e5e7eb] rounded-none p-6 shadow-xs">
+                <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-105 pb-3 font-heading">
                   Section 4 — Top Customers by Revenue
                 </h2>
                 {data.topCustomers.length === 0 ? (
@@ -367,7 +367,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs font-semibold text-slate-650">
                       <thead>
-                        <tr className="bg-slate-50 text-slate-805 font-black uppercase text-[9px] border-b border-slate-200">
+                        <tr className="bg-slate-50 text-slate-805 font-black uppercase text-[9px] border-b border-[#e5e7eb]">
                           <th className="py-2 px-2 text-center w-12">Rank</th>
                           <th className="py-2 px-2">Customer</th>
                           <th className="py-2 px-2 text-center">Invoices</th>
@@ -385,7 +385,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                             </td>
                             <td className="py-2.5 px-2 text-center tabular-nums">{c.invoices}</td>
                             <td className="py-2.5 px-2 text-right font-extrabold text-slate-900 tabular-nums">₹{c.billed.toLocaleString('en-IN')}</td>
-                            <td className="py-2.5 px-2 text-right text-red-650 tabular-nums">₹{c.outstanding.toLocaleString('en-IN')}</td>
+                            <td className="py-2.5 px-2 text-right text-red-600 tabular-nums">₹{c.outstanding.toLocaleString('en-IN')}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -396,17 +396,22 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
             </div>
 
             {/* SECTION 5 — Daily Sales Chart */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-              <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
+            <div className="bg-white border border-[#e5e7eb] rounded-none p-6 shadow-xs">
+              <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-105 pb-3 font-heading">
                 Section 5 — Daily Sales Chart
               </h2>
               <div className="h-64 mt-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={data.dailySales} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <AreaChart data={data.dailySales} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#0050e8" stopOpacity={0.15}/>
+                        <stop offset="95%" stopColor="#0050e8" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
                     <XAxis
                       dataKey="day"
                       tickFormatter={(val) => {
-                        // show every 5th label on mobile, all on desktop
                         if (typeof window !== 'undefined' && window.innerWidth < 640) {
                           return val % 5 === 0 || val === 1 ? String(val) : '';
                         }
@@ -426,7 +431,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                         if (active && payload && payload.length) {
                           const item = payload[0].payload;
                           return (
-                            <div className="bg-white border border-slate-200 p-2.5 rounded-xl shadow-md text-xs font-semibold">
+                            <div className="bg-white border border-[#e5e7eb] p-2.5 rounded-none shadow-md text-xs font-semibold">
                               <p className="font-extrabold text-slate-800">{item.dateLabel}</p>
                               <p className="text-slate-500 mt-1">Invoices: {item.count}</p>
                               <p className="text-[#0050e8] font-bold">Total: ₹{Number(item.total).toLocaleString('en-IN')}</p>
@@ -437,25 +442,27 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                         return null;
                       }}
                     />
-                    <Line
+                    <Area
                       type="monotone"
                       dataKey="total"
                       stroke="#0050e8"
                       strokeWidth={3}
+                      fillOpacity={1}
+                      fill="url(#salesGradient)"
                       dot={({ cx, cy, payload }) => (
                         <circle
                           key={`dot-${payload.day}`}
                           cx={cx}
                           cy={cy}
                           r={payload.total > 0 ? 4 : 0}
-                          fill={payload.hasFailed ? '#e53e3e' : '#0050e8'}
+                          fill={payload.hasFailed ? '#dc2626' : '#0050e8'}
                           stroke="white"
                           strokeWidth={1.5}
                         />
                       )}
                       activeDot={{ r: 6, fill: '#0050e8', stroke: 'white', strokeWidth: 2 }}
                     />
-                  </LineChart>
+                  </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
@@ -463,8 +470,8 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
             {/* Grid for 6 & 7 */}
             <div className={shop.gst_registered ? "grid grid-cols-1 lg:grid-cols-2 gap-6" : "w-full"}>
               {/* SECTION 6 — Payment Method Breakdown */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-                <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
+              <div className="bg-white border border-[#e5e7eb] rounded-none p-6 shadow-xs">
+                <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-105 pb-3 font-heading">
                   Section 6 — Payment Method Breakdown
                 </h2>
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -482,13 +489,16 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                         >
                           {data.paymentBreakdown
                             .filter((p: any) => p.value > 0)
-                            .map((entry: any, index: number) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
+                            .map((entry: any) => {
+                              const origIdx = data.paymentBreakdown.findIndex((x: any) => x.name === entry.name);
+                              return (
+                                <Cell key={`cell-${entry.name}`} fill={COLORS[origIdx !== -1 ? origIdx : 0]} />
+                              );
+                            })}
                         </Pie>
                         <Tooltip
                           formatter={(value) => `₹${Number(value).toLocaleString('en-IN')}`}
-                          contentStyle={{ fontSize: 11, borderRadius: 10 }}
+                          contentStyle={{ fontSize: 11, borderRadius: 0, border: '1px solid #e5e7eb' }}
                         />
                       </PieChart>
                     </ResponsiveContainer>
@@ -498,10 +508,10 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                       <div key={item.name} className="flex items-center justify-between text-xs font-semibold">
                         <div className="flex items-center gap-2">
                           <span
-                            className="w-3 h-3 rounded-full"
+                            className="w-3 h-3 rounded-none border border-black/5"
                             style={{ backgroundColor: COLORS[idx % COLORS.length] }}
                           />
-                          <span className="text-slate-600 font-bold">{item.name}</span>
+                          <span className="text-slate-650 font-bold">{item.name}</span>
                         </div>
                         <div className="text-right">
                           <p className="text-slate-900 font-black">₹{item.value.toLocaleString('en-IN')}</p>
@@ -515,8 +525,8 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
 
               {/* SECTION 7 — Purchases Summary (only if gst_registered) */}
               {shop.gst_registered && data.purchasesSummary && (
-                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-                  <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
+                <div className="bg-white border border-[#e5e7eb] rounded-none p-6 shadow-xs">
+                  <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-105 pb-3 font-heading">
                     Section 7 — Purchases Summary
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -530,10 +540,10 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                     </div>
                   </div>
 
-                  <div className="border border-slate-100 rounded-xl overflow-hidden mt-4">
+                  <div className="border border-slate-100 rounded-none overflow-hidden mt-4">
                     <table className="w-full text-left text-xs font-semibold text-slate-650">
                       <thead>
-                        <tr className="bg-slate-50 text-slate-805 font-black uppercase text-[9px] border-b border-slate-200">
+                        <tr className="bg-slate-50 text-slate-805 font-black uppercase text-[9px] border-b border-[#e5e7eb]">
                           <th className="py-2 px-3">Supplier Name</th>
                           <th className="py-2 px-3 text-right">Purchases</th>
                           <th className="py-2 px-3 text-right">ITC Earned</th>
@@ -561,14 +571,14 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
             </div>
 
             {/* SECTION 8 — Comparison with Last Month */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-              <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
+            <div className="bg-white border border-[#e5e7eb] rounded-none p-6 shadow-xs">
+              <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-105 pb-3 font-heading">
                 Section 8 — Comparison with Last Month
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs font-semibold text-slate-650">
                   <thead>
-                    <tr className="bg-slate-50 text-slate-805 font-black uppercase text-[9px] border-b border-slate-200">
+                    <tr className="bg-slate-50 text-slate-805 font-black uppercase text-[9px] border-b border-[#e5e7eb]">
                       <th className="py-2 px-3">Metric</th>
                       <th className="py-2 px-3 text-right">This Month</th>
                       <th className="py-2 px-3 text-right">Last Month</th>
@@ -587,13 +597,12 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
                       const isIncrease = changeVal > 0;
                       const isNeutral = changeVal === 0;
 
-                      // determine color: positive is green for billing/collected/sent, but red for outstanding
-                      let colorClass = 'text-slate-600';
+                      let colorClass = 'text-slate-655';
                       if (!isNeutral) {
                         if (row.inverse) {
-                          colorClass = isIncrease ? 'text-red-650' : 'text-emerald-700';
+                          colorClass = isIncrease ? 'text-red-600' : 'text-emerald-700';
                         } else {
-                          colorClass = isIncrease ? 'text-emerald-700' : 'text-red-650';
+                          colorClass = isIncrease ? 'text-emerald-700' : 'text-red-600';
                         }
                       }
 
@@ -625,7 +634,7 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
         )}
 
         {/* Footer with Tamil Nadu 🇮🇳 mention */}
-        <div className="mt-12 pt-6 border-t border-slate-200 text-center text-[10px] text-slate-450 font-bold uppercase tracking-wider">
+        <div className="mt-12 pt-6 border-t border-slate-200 text-center text-[10px] text-slate-400 font-bold uppercase tracking-wider">
           Made for Shopkeepers in Tamil Nadu 🇮🇳
         </div>
       </PageTransition>

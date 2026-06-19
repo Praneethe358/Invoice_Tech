@@ -19,6 +19,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { UserRole } from '@/lib/permissions';
+import { Shop } from '@/lib/types';
+import SubscriptionBanner from './SubscriptionBanner';
 
 const navItems = [
   {
@@ -113,7 +115,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const [shopInfo, setShopInfo] = useState<{ id: string; name: string; shop_type: string; gst_registered: boolean; inventory_enabled: boolean; logo_url?: string | null } | null>(null);
+  const [shopInfo, setShopInfo] = useState<Shop | null>(null);
   const [userRole, setUserRole] = useState<UserRole>('owner');
   const [lowStockCount, setLowStockCount] = useState<number>(0);
 
@@ -217,7 +219,7 @@ export default function Navbar() {
         // Try owner first
         let { data: shop } = await supabase
           .from('shops')
-          .select('id, name, shop_type, gst_registered, inventory_enabled, logo_url')
+          .select('id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at')
           .eq('auth_user_id', user.id)
           .single();
 
@@ -229,7 +231,7 @@ export default function Navbar() {
           // Check if they are a staff member
           const { data: staff } = await supabase
             .from('staff')
-            .select('role, shop_id, shops(id, name, shop_type, gst_registered, inventory_enabled, logo_url)')
+            .select('role, shop_id, shops(id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at)')
             .eq('auth_user_id', user.id)
             .eq('status', 'active')
             .single();
@@ -245,13 +247,16 @@ export default function Navbar() {
                 gst_registered: staffShop.gst_registered,
                 inventory_enabled: staffShop.inventory_enabled,
                 logo_url: staffShop.logo_url,
-              };
+                subscription_status: staffShop.subscription_status,
+                trial_ends_at: staffShop.trial_ends_at,
+                subscription_ends_at: staffShop.subscription_ends_at,
+              } as any;
             }
           }
         }
 
         if (shop) {
-          setShopInfo(shop);
+          setShopInfo(shop as any);
           setUserRole(resolvedRole);
           if (typeof window !== 'undefined') {
             localStorage.setItem('trubill_navbar_shop_info', JSON.stringify(shop));
@@ -639,6 +644,9 @@ export default function Navbar() {
           </div>
         </div>
       )}
+
+      {/* Subscription Banner */}
+      <SubscriptionBanner shop={shopInfo} />
     </>
   );
 }

@@ -4,6 +4,7 @@ import { CreateInvoicePayload, ApiError } from '@/lib/types';
 import { validatePhone, validateInvoiceItems } from '@/lib/validators';
 import { logAudit } from '@/lib/audit';
 import { getCurrentUserContext } from '@/lib/current-user';
+import { getSubscriptionAccess, syncSubscriptionStatus } from '@/lib/subscription';
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
     // Get shop
     const { data: shop, error: shopError } = await supabase
       .from('shops')
-      .select('id, invoice_prefix, next_invoice_number, gst_registered')
+      .select('id, invoice_prefix, next_invoice_number, gst_registered, subscription_status, trial_ends_at, subscription_ends_at')
       .eq('auth_user_id', user.id)
       .single();
 
@@ -52,6 +53,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Shop not found. Please complete your profile.' } satisfies ApiError,
         { status: 404 }
+      );
+    }
+
+    // Sync subscription status in DB
+    await syncSubscriptionStatus(shop.id, {
+      subscription_status: shop.subscription_status || 'trial',
+      trial_ends_at: shop.trial_ends_at || null,
+      subscription_ends_at: shop.subscription_ends_at || null,
+    });
+
+    // Re-fetch or check locally
+    const { data: updatedShop } = await supabase
+      .from('shops')
+      .select('subscription_status, trial_ends_at, subscription_ends_at')
+      .eq('id', shop.id)
+      .single();
+
+    const subAccess = getSubscriptionAccess({
+      subscription_status: updatedShop?.subscription_status || shop.subscription_status || 'trial',
+      trial_ends_at: updatedShop?.trial_ends_at || shop.trial_ends_at || null,
+      subscription_ends_at: updatedShop?.subscription_ends_at || shop.subscription_ends_at || null,
+    });
+
+    if (!subAccess.canSendInvoices) {
+      return NextResponse.json(
+        {
+          error: 'subscription_required',
+          details: 'Your subscription has ended. Please upgrade to continue.',
+        } satisfies ApiError,
+        { status: 403 }
       );
     }
 

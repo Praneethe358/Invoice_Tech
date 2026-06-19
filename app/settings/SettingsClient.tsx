@@ -242,42 +242,44 @@ export default function SettingsClient({
           </p>
         </div>
 
-        {/* Shop Administration - Owner Only */}
-        {role === 'owner' && (
+        {/* Shop Administration - Owner & Admin Only */}
+        {(role === 'owner' || role === 'admin') && (
           <section className="mb-8">
             <h2 className="text-xs font-extrabold text-[#6b7280] uppercase tracking-wider mb-3 font-heading">
               Shop Administration
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Link
-                href="/settings/staff"
-                className="flex items-center justify-between p-5 bg-white border border-[#e5e7eb] hover:border-[#0050e8] hover:bg-[#0050e8]/5 transition-all group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#0050e8]/10 text-[#0050e8] flex items-center justify-center">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                      <circle cx="9" cy="7" r="4" />
-                      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                    </svg>
+            <div className={`grid grid-cols-1 ${role === 'owner' ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
+              {role === 'owner' && (
+                <Link
+                  href="/settings/staff"
+                  className="flex items-center justify-between p-5 bg-white border border-[#e5e7eb] hover:border-[#0050e8] hover:bg-[#0050e8]/5 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-[#0050e8]/10 text-[#0050e8] flex items-center justify-center shrink-0">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-gray-900">Team Members</h3>
+                      <p className="text-[10px] text-gray-500 font-medium mt-0.5">Manage staff roles and access permissions</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-900">Team Members</h3>
-                    <p className="text-[10px] text-gray-500 font-medium mt-0.5">Manage staff roles and access permissions</p>
-                  </div>
-                </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-400 group-hover:text-[#0050e8] group-hover:translate-x-0.5 transition-all">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </Link>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-400 group-hover:text-[#0050e8] group-hover:translate-x-0.5 transition-all shrink-0">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </Link>
+              )}
 
               <Link
                 href="/settings/audit"
                 className="flex items-center justify-between p-5 bg-white border border-[#e5e7eb] hover:border-[#0050e8] hover:bg-[#0050e8]/5 transition-all group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#0050e8]/10 text-[#0050e8] flex items-center justify-center">
+                  <div className="w-10 h-10 bg-[#0050e8]/10 text-[#0050e8] flex items-center justify-center shrink-0">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                       <polyline points="14 2 14 8 20 8" />
@@ -291,7 +293,28 @@ export default function SettingsClient({
                     <p className="text-[10px] text-gray-500 font-medium mt-0.5">Track actions and logs of your business account</p>
                   </div>
                 </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-400 group-hover:text-[#0050e8] group-hover:translate-x-0.5 transition-all">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-400 group-hover:text-[#0050e8] group-hover:translate-x-0.5 transition-all shrink-0">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </Link>
+
+              <Link
+                href="/upgrade"
+                className="flex items-center justify-between p-5 bg-white border border-[#e5e7eb] hover:border-[#0050e8] hover:bg-[#0050e8]/5 transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[#0050e8]/10 text-[#0050e8] flex items-center justify-center shrink-0">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="2" y="4" width="20" height="16" rx="2" />
+                      <line x1="2" y1="10" x2="22" y2="10" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900">Subscription & Upgrade</h3>
+                    <p className="text-[10px] text-gray-500 font-medium mt-0.5">Manage subscription payments and Pro plans</p>
+                  </div>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-400 group-hover:text-[#0050e8] group-hover:translate-x-0.5 transition-all shrink-0">
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </Link>

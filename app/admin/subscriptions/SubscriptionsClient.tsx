@@ -134,13 +134,18 @@ export default function SubscriptionsClient() {
           </div>
           <table className="w-full text-xs text-left">
             <thead><tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              <th className="py-2.5 px-4">Shop Name</th><th className="py-2.5 px-4">Trial Ends</th><th className="py-2.5 px-4">Actions</th>
+              <th className="py-2.5 px-4">Shop Name</th><th className="py-2.5 px-4">Trial Ends</th><th className="py-2.5 px-4">Days Left</th><th className="py-2.5 px-4">Actions</th>
             </tr></thead>
             <tbody className="divide-y divide-slate-100">
               {data.trials_ending_soon.map(shop => (
                 <tr key={shop.id} className="hover:bg-slate-50/70">
-                  <td className="py-3 px-4 font-bold text-slate-800">{shop.name}</td>
-                  <td className="py-3 px-4 text-red-600 font-semibold">{formatDate(shop.trial_ends_at)}</td>
+                  <td className="py-3 px-4 font-bold text-slate-800 cursor-pointer hover:text-[#0050e8]" onClick={() => router.push(`/admin/shops/${shop.id}`)}>{shop.name}</td>
+                  <td className="py-3 px-4 text-slate-600 font-semibold">{formatDate(shop.trial_ends_at)}</td>
+                  <td className="py-3 px-4">
+                    <span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                      (shop.days_left || 0) <= 3 ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'
+                    }`}>{shop.days_left} days</span>
+                  </td>
                   <td className="py-3 px-4">
                     <button onClick={() => setActivatingId(activatingId === shop.id ? null : shop.id)}
                       className="px-3 py-1 rounded-lg text-[10px] font-bold bg-[#0050e8] text-white hover:bg-[#0043c4]">Activate</button>

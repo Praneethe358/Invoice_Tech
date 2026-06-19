@@ -31,13 +31,21 @@ export async function GET(request: NextRequest) {
   const active = shops.filter(s => s.subscription_status === 'active');
   const trial = shops.filter(s => s.subscription_status === 'trial');
 
-  // Trials ending this week (within 7 days)
+  // Trials ending within 7 days
   const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-  const trialsEndingSoon = trial.filter(s => {
-    if (!s.trial_ends_at) return false;
-    const end = new Date(s.trial_ends_at);
-    return end <= weekFromNow && end >= now;
-  });
+  const trialsEndingSoon = trial
+    .filter(s => {
+      if (!s.trial_ends_at) return false;
+      const end = new Date(s.trial_ends_at);
+      return end <= weekFromNow && end >= now;
+    })
+    .map(s => ({
+      ...s,
+      days_left: Math.max(0, Math.ceil(
+        (new Date(s.trial_ends_at!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+      )),
+    }))
+    .sort((a, b) => a.days_left - b.days_left);
 
   // Renewals due within 30 days
   const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -49,9 +57,9 @@ export async function GET(request: NextRequest) {
     })
     .map(s => ({
       ...s,
-      days_left: Math.ceil(
+      days_left: Math.max(0, Math.ceil(
         (new Date(s.subscription_ends_at!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-      ),
+      )),
     }))
     .sort((a, b) => a.days_left - b.days_left);
 
@@ -60,12 +68,18 @@ export async function GET(request: NextRequest) {
     s.subscription_status === 'expired'
   );
 
+  // Trials expiring soon (<= 3 days)
+  const trialsExpiringSoonCount = trialsEndingSoon.filter(s => s.days_left <= 3).length;
+
+  // Renewals due (<= 7 days)
+  const renewalsDueCount = renewalsDue.filter(s => s.days_left <= 7).length;
+
   return NextResponse.json({
     summary: {
       active_subscriptions: active.length,
       mrr: active.length * 299,
-      trials_ending_soon: trialsEndingSoon.length,
-      renewals_due: renewalsDue.length,
+      trials_ending_soon: trialsExpiringSoonCount,
+      renewals_due: renewalsDueCount,
     },
     renewals_due: renewalsDue,
     expired_this_month: expiredThisMonth,

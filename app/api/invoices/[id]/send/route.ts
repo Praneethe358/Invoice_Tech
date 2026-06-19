@@ -8,6 +8,7 @@ import {
 import { Invoice, Shop, ApiError } from '@/lib/types';
 import { syncCustomerOutstanding } from '@/lib/payments';
 import { isRateLimited } from '@/lib/rate-limit';
+import { getSubscriptionAccess, syncSubscriptionStatus } from '@/lib/subscription';
 
 export async function POST(
   request: NextRequest,
@@ -59,7 +60,7 @@ export async function POST(
     // Fetch shop
     const { data: shop, error: shopError } = await supabase
       .from('shops')
-      .select('name, address, phone, logo_url, gst_registered, gstin')
+      .select('id, name, address, phone, logo_url, gst_registered, gstin, subscription_status, trial_ends_at, subscription_ends_at')
       .eq('id', typedInvoice.shop_id)
       .single();
 
@@ -67,6 +68,36 @@ export async function POST(
       return NextResponse.json(
         { error: 'Shop not found' } satisfies ApiError,
         { status: 404 }
+      );
+    }
+
+    // Sync subscription status in DB
+    await syncSubscriptionStatus(shop.id, {
+      subscription_status: shop.subscription_status || 'trial',
+      trial_ends_at: shop.trial_ends_at || null,
+      subscription_ends_at: shop.subscription_ends_at || null,
+    });
+
+    // Re-fetch or check locally
+    const { data: updatedShop } = await supabase
+      .from('shops')
+      .select('subscription_status, trial_ends_at, subscription_ends_at')
+      .eq('id', shop.id)
+      .single();
+
+    const subAccess = getSubscriptionAccess({
+      subscription_status: updatedShop?.subscription_status || shop.subscription_status || 'trial',
+      trial_ends_at: updatedShop?.trial_ends_at || shop.trial_ends_at || null,
+      subscription_ends_at: updatedShop?.subscription_ends_at || shop.subscription_ends_at || null,
+    });
+
+    if (!subAccess.canSendInvoices) {
+      return NextResponse.json(
+        {
+          error: 'subscription_required',
+          details: 'Your subscription has ended. Please upgrade to continue.',
+        } satisfies ApiError,
+        { status: 403 }
       );
     }
 

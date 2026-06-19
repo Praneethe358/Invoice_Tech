@@ -24,7 +24,7 @@ export default async function NewInvoicePage({ searchParams }: PageProps) {
   // Fetch shop products
   const { data: shop } = await supabase
     .from('shops')
-    .select('id, gst_registered, gstin, inventory_enabled, shop_type')
+    .select('id, gst_registered, gstin, inventory_enabled, shop_type, subscription_status, trial_ends_at, subscription_ends_at')
     .eq('auth_user_id', user.id)
     .single();
 
@@ -53,7 +53,7 @@ export default async function NewInvoicePage({ searchParams }: PageProps) {
     <InvoiceBuilderClient
       products={(products ?? []) as Product[]}
       shopId={shop.id}
-      shop={shop as { id: string; gst_registered: boolean; gstin: string | null; inventory_enabled: boolean; shop_type: string }}
+      shop={shop as any}
       initialDraft={initialDraft}
     />
   );

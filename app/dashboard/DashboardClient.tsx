@@ -9,6 +9,7 @@ import InvoiceCard from '@/components/InvoiceCard';
 import EmptyState from '@/components/EmptyState';
 import { createClient } from '@/lib/supabase/client';
 import { Invoice, Shop } from '@/lib/types';
+import { getSubscriptionAccess } from '@/lib/subscription';
 
 interface DashboardClientProps {
   shop: Shop;
@@ -133,35 +134,93 @@ export default function DashboardClient({
           </p>
         </div>
 
-        {/* Stat cards row */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-6">
-          <div
-            onClick={() => setStatusFilter('unpaid_partial')}
-            className="bg-[#fffbeb] border border-[#fef3c7] p-4 flex flex-col justify-between min-h-[90px] rounded-none cursor-pointer hover:shadow-xs transition-shadow"
-          >
-            <span className="text-[10px] font-bold text-[#b45309] uppercase tracking-wide">Receivables (To Collect)</span>
-            <p className="text-xl font-extrabold text-[#d97706] mt-2">₹{Number(stats.totalOutstanding || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-          </div>
-          <div className="bg-[#f9fafb] border border-[#e5e7eb] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
-            <span className="text-[10px] font-bold text-[#4b5563] uppercase tracking-wide">Payables (To Pay)</span>
-            <p className="text-xl font-extrabold text-gray-400 mt-2">₹0.00</p>
-          </div>
-          <div className="bg-[#f0fdf4] border border-[#dcfce7] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
-            <span className="text-[10px] font-bold text-[#0050e8] uppercase tracking-wide">Sales (This Month)</span>
-            <p className="text-xl font-extrabold text-[#16a34a] mt-2">₹{Number(stats.thisMonth || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-          </div>
-          <div className="bg-white border border-[#e5e7eb] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
-            <span className="text-[10px] font-bold text-[#6b7280] uppercase tracking-wide">Total Bills</span>
-            <p className="text-xl font-extrabold text-gray-900 mt-2">{stats.totalInvoices}</p>
-          </div>
-          <div
-            onClick={() => setStatusFilter('failed')}
-            className={`p-4 flex flex-col justify-between min-h-[90px] rounded-none border cursor-pointer hover:shadow-xs transition-shadow ${stats.failedInvoices > 0 ? 'bg-[#fdf2f2] border-[#fde8e8]' : 'bg-white border-[#e5e7eb]'}`}
-          >
-            <span className={`text-[10px] font-bold uppercase tracking-wide ${stats.failedInvoices > 0 ? 'text-[#9b1c1c]' : 'text-gray-500'}`}>Failed Deliveries</span>
-            <p className={`text-xl font-extrabold mt-2 ${stats.failedInvoices > 0 ? 'text-[#e02424]' : 'text-gray-900'}`}>{stats.failedInvoices}</p>
-          </div>
-        </div>
+        {/* Conditional rendering for stats or blocked state */}
+        {(() => {
+          const subAccess = getSubscriptionAccess({
+            subscription_status: shop.subscription_status || 'trial',
+            trial_ends_at: shop.trial_ends_at || null,
+            subscription_ends_at: shop.subscription_ends_at || null,
+          });
+
+          const trialEnds = shop.trial_ends_at ? new Date(shop.trial_ends_at) : null;
+          const daysRemaining = trialEnds ? Math.max(0, Math.ceil((trialEnds.getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : 0;
+          const progressPercent = Math.min(100, Math.max(0, (daysRemaining / 14) * 100)); // Percentage of trial remaining
+
+          if (!subAccess.canSendInvoices) {
+            return (
+              <div className="bg-white border border-red-200 p-8 mb-6 rounded-none text-center space-y-4 shadow-sm">
+                <div className="mx-auto w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-xl">
+                  🔒
+                </div>
+                <div className="max-w-md mx-auto space-y-2">
+                  <h3 className="text-base font-black text-slate-900">Your Subscription Has Ended</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Your TruBill trial or subscription has expired. Upgrading takes less than 2 minutes and unlocks unlimited WhatsApp invoicing, inventory tracking, GST compliance, and more.
+                  </p>
+                </div>
+                <div className="pt-2">
+                  <a href="/upgrade">
+                    <button className="bg-[#0050e8] hover:bg-[#0043c4] text-white font-extrabold text-xs py-3 px-6 rounded-xl transition-all cursor-pointer shadow-md shadow-blue-800/10 active:scale-[0.98] min-h-[44px]">
+                      Upgrade to TruBill Pro (₹299/mo)
+                    </button>
+                  </a>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <>
+              {/* Stat cards row */}
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-6">
+                <div
+                  onClick={() => setStatusFilter('unpaid_partial')}
+                  className="bg-[#fffbeb] border border-[#fef3c7] p-4 flex flex-col justify-between min-h-[90px] rounded-none cursor-pointer hover:shadow-xs transition-shadow"
+                >
+                  <span className="text-[10px] font-bold text-[#b45309] uppercase tracking-wide">Receivables (To Collect)</span>
+                  <p className="text-xl font-extrabold text-[#d97706] mt-2">₹{Number(stats.totalOutstanding || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                </div>
+                <div className="bg-[#f9fafb] border border-[#e5e7eb] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
+                  <span className="text-[10px] font-bold text-[#4b5563] uppercase tracking-wide">Payables (To Pay)</span>
+                  <p className="text-xl font-extrabold text-gray-400 mt-2">₹0.00</p>
+                </div>
+                <div className="bg-[#f0fdf4] border border-[#dcfce7] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
+                  <span className="text-[10px] font-bold text-[#0050e8] uppercase tracking-wide">Sales (This Month)</span>
+                  <p className="text-xl font-extrabold text-[#16a34a] mt-2">₹{Number(stats.thisMonth || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                </div>
+                <div className="bg-white border border-[#e5e7eb] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
+                  <span className="text-[10px] font-bold text-[#6b7280] uppercase tracking-wide">Total Bills</span>
+                  <p className="text-xl font-extrabold text-gray-900 mt-2">{stats.totalInvoices}</p>
+                </div>
+                <div
+                  onClick={() => setStatusFilter('failed')}
+                  className={`p-4 flex flex-col justify-between min-h-[90px] rounded-none border cursor-pointer hover:shadow-xs transition-shadow ${stats.failedInvoices > 0 ? 'bg-[#fdf2f2] border-[#fde8e8]' : 'bg-white border-[#e5e7eb]'}`}
+                >
+                  <span className={`text-[10px] font-bold uppercase tracking-wide ${stats.failedInvoices > 0 ? 'text-[#9b1c1c]' : 'text-gray-500'}`}>Failed Deliveries</span>
+                  <p className={`text-xl font-extrabold mt-2 ${stats.failedInvoices > 0 ? 'text-[#e02424]' : 'text-gray-900'}`}>{stats.failedInvoices}</p>
+                </div>
+              </div>
+
+              {/* Trial progress bar underneath stats cards */}
+              {shop.subscription_status === 'trial' && trialEnds && daysRemaining > 0 && (
+                <div className="bg-white border border-[#e5e7eb] p-4 mb-6 rounded-none space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-bold text-[#0050e8]">Free Trial Progress</span>
+                    <span className="font-semibold text-slate-500">{daysRemaining} days remaining of 14-day trial</span>
+                  </div>
+                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progressPercent}%` }}
+                      transition={{ duration: 0.8, ease: 'easeOut' }}
+                      className="bg-[#0050e8] h-full rounded-full"
+                    />
+                  </div>
+                </div>
+              )}
+            </>
+          );
+        })()}
 
         {/* Filtered by Outstanding Reset Banner */}
         {statusFilter === 'unpaid_partial' && (
