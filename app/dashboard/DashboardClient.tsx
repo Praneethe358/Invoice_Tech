@@ -475,14 +475,7 @@ export default function DashboardClient({
               ))}
             </div>
 
-            <div className="p-4 border-t border-[#e5e7eb] flex justify-center bg-gray-50/50">
-              <Link
-                href="/invoices"
-                className="px-6 py-2 bg-[#0050e8] hover:bg-[#0043c4] text-white text-xs font-bold rounded-none hover:shadow-xs transition-colors"
-              >
-                View All Invoices
-              </Link>
-            </div>
+
           </div>
         )}
       </PageTransition>
