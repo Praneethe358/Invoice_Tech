@@ -25,6 +25,7 @@ export default function LedgerPageClient({ shop, customers }: Props) {
   const [loadingLedger, setLoadingLedger] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [ledgerPeriod, setLedgerPeriod] = useState<'all' | 'this_month' | 'last_month' | 'custom'>('all');
+  const [periodDropdownOpen, setPeriodDropdownOpen] = useState(false);
   const [ledgerStartDate, setLedgerStartDate] = useState('');
   const [ledgerEndDate, setLedgerEndDate] = useState('');
   const [ledgerPage, setLedgerPage] = useState(1);
@@ -263,21 +264,62 @@ export default function LedgerPageClient({ shop, customers }: Props) {
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col gap-4">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex flex-col">
+                  <div className="flex flex-col relative">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Date Range</label>
-                    <select
-                      value={ledgerPeriod}
-                      onChange={(e) => {
-                        setLedgerPeriod(e.target.value as any);
-                        setLedgerPage(1);
-                      }}
-                      className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:border-[#0050e8]"
+                    <button
+                      type="button"
+                      onClick={() => setPeriodDropdownOpen(!periodDropdownOpen)}
+                      className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:border-[#0050e8] flex items-center justify-between gap-2 cursor-pointer min-w-[120px]"
                     >
-                      <option value="all">All Time</option>
-                      <option value="this_month">This Month</option>
-                      <option value="last_month">Last Month</option>
-                      <option value="custom">Custom Range</option>
-                    </select>
+                      <span>
+                        {(() => {
+                          switch (ledgerPeriod) {
+                            case 'all': return 'All Time';
+                            case 'this_month': return 'This Month';
+                            case 'last_month': return 'Last Month';
+                            case 'custom': return 'Custom Range';
+                            default: return 'Select Period';
+                          }
+                        })()}
+                      </span>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`transition-transform duration-200 ${periodDropdownOpen ? 'rotate-180' : ''}`}>
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
+
+                    {periodDropdownOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setPeriodDropdownOpen(false)} />
+                        <div className="absolute left-0 mt-12 bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-1 min-w-[150px]">
+                          {[
+                            { value: 'all', label: 'All Time' },
+                            { value: 'this_month', label: 'This Month' },
+                            { value: 'last_month', label: 'Last Month' },
+                            { value: 'custom', label: 'Custom Range' },
+                          ].map((opt) => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => {
+                                setLedgerPeriod(opt.value as any);
+                                setPeriodDropdownOpen(false);
+                                setLedgerPage(1);
+                              }}
+                              className={`w-full text-left px-3 py-2 text-xs font-bold hover:bg-slate-50 flex items-center justify-between cursor-pointer ${
+                                ledgerPeriod === opt.value ? 'text-[#0050e8] bg-[#0050e8]/5' : 'text-slate-750'
+                              }`}
+                            >
+                              {opt.label}
+                              {ledgerPeriod === opt.value && (
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-[#0050e8]">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {ledgerPeriod === 'custom' && (
@@ -389,7 +431,8 @@ export default function LedgerPageClient({ shop, customers }: Props) {
                 <p className="text-xs text-slate-400 italic py-8 text-center">No transactions match your search filter.</p>
               ) : (
                 <div className="space-y-4">
-                  <div className="overflow-x-auto border border-slate-100 rounded-xl">
+                  {/* Desktop Table View */}
+                  <div className="hidden md:block overflow-x-auto border border-slate-100 rounded-xl">
                     <table className="w-full text-left text-xs font-semibold text-slate-600">
                       <thead>
                         <tr className="bg-slate-50 text-slate-800 font-bold border-b border-slate-200 text-[10px] uppercase">
@@ -525,6 +568,134 @@ export default function LedgerPageClient({ shop, customers }: Props) {
                     </table>
                   </div>
 
+                  {/* Mobile Card View */}
+                  <div className="md:hidden flex flex-col gap-3">
+                    {ledgerEntries.map((entry, idx) => {
+                      const dateStr = new Date(entry.entry_date).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      });
+                      const entryId = entry.id || `row-${idx}`;
+                      const isExpanded = !!expandedRows[entryId];
+                      const isDebit = entry.entry_type === 'debit';
+                      const amt = isDebit ? Number(entry.debit_amount) : Number(entry.credit_amount);
+
+                      return (
+                        <div
+                          key={entryId}
+                          onClick={() => {
+                            if (entry.reference_type === 'invoice') {
+                              setExpandedRows(prev => ({ ...prev, [entryId]: !prev[entryId] }));
+                            }
+                          }}
+                          className={`bg-white border border-slate-150 rounded-xl p-4 shadow-2xs transition-all cursor-pointer ${
+                            isExpanded ? 'ring-1 ring-[#0050e8]/20 bg-slate-50/30' : ''
+                          }`}
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <span className="text-xs font-extrabold text-slate-900 block">
+                                {entry.particulars}
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-semibold">
+                                {dateStr}
+                              </span>
+                            </div>
+                            <div className="text-right">
+                              <span className={`text-sm font-black block tabular-nums ${isDebit ? 'text-slate-800' : 'text-emerald-650'}`}>
+                                {isDebit ? '₹' : '– ₹'}{amt.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                              </span>
+                              <span className="text-[9px] text-slate-400 block font-bold uppercase tracking-wider mt-0.5">
+                                {isDebit ? 'Billed (Debit)' : 'Received (Credit)'}
+                              </span>
+                            </div>
+                          </div>
+
+                          {entry.reference_type === 'invoice' && !isExpanded && (
+                            <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-[#0050e8] font-bold">
+                              <span>View invoice items & details</span>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-[#0050e8]">
+                                <path d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </div>
+                          )}
+
+                          {isExpanded && entry.reference_type === 'invoice' && (
+                            <div className="mt-3 pt-3 border-t border-slate-150 space-y-3">
+                              {/* Invoice Metadata */}
+                              <div className="grid grid-cols-2 gap-3 text-[10px] bg-white border border-slate-100 rounded-xl p-3 shadow-3xs text-left">
+                                <div>
+                                  <span className="text-slate-400 block font-bold uppercase text-[9px]">Invoice Number</span>
+                                  <span className="font-extrabold text-slate-800">{entry.invoice_number}</span>
+                                </div>
+                                <div>
+                                  <span className="text-slate-400 block font-bold uppercase text-[9px]">Total Amount</span>
+                                  <span className="font-extrabold text-slate-800">₹{Number(entry.invoice_amount || entry.debit_amount).toFixed(2)}</span>
+                                </div>
+                                <div>
+                                  <span className="text-slate-400 block font-bold uppercase text-[9px]">Amount Paid</span>
+                                  <span className="font-extrabold text-emerald-650">₹{Number(entry.amount_paid || 0).toFixed(2)}</span>
+                                </div>
+                                <div>
+                                  <span className="text-slate-400 block font-bold uppercase text-[9px]">Outstanding</span>
+                                  <span className="font-extrabold text-red-650">
+                                    ₹{(Number(entry.invoice_amount || entry.debit_amount) - Number(entry.amount_paid || 0)).toFixed(2)}
+                                  </span>
+                                </div>
+                                <div className="col-span-2 flex items-center justify-between pt-1 border-t border-slate-100 mt-1">
+                                  <span className={`inline-flex items-center text-[9px] font-bold px-2 py-0.5 rounded-md uppercase ${
+                                    entry.payment_status === 'paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
+                                    entry.payment_status === 'partial' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
+                                    'bg-red-50 text-red-700 border border-red-100'
+                                  }`}>
+                                    {entry.payment_status}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      router.push(`/invoice/${entry.reference_id}`);
+                                    }}
+                                    className="bg-[#0050e8] hover:bg-[#0043c4] text-white font-extrabold py-1 px-3 rounded-lg text-[10px] transition-colors"
+                                  >
+                                    Go to Invoice Page
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Invoice Items Sub-Table */}
+                              {entry.items && entry.items.length > 0 && (
+                                <div className="border border-slate-100 rounded-xl overflow-hidden bg-white shadow-3xs text-left">
+                                  <table className="w-full text-left text-[10px] font-semibold">
+                                    <thead>
+                                      <tr className="bg-slate-50 text-slate-500 font-bold border-b border-slate-150">
+                                        <th className="py-2 px-3">Item Description</th>
+                                        <th className="py-2 px-2 text-center">Qty</th>
+                                        <th className="py-2 px-3 text-right">Price</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                      {entry.items.map((item: any, i: number) => (
+                                        <tr key={i} className="hover:bg-slate-50/30">
+                                          <td className="py-2 px-3 text-slate-900 font-bold uppercase truncate max-w-[120px]">{item.name}</td>
+                                          <td className="py-2 px-2 text-center tabular-nums">{item.qty}</td>
+                                          <td className="py-2 px-3 text-right font-bold text-slate-800 tabular-nums">
+                                            ₹{Number(item.line_total || item.price * item.qty).toFixed(2)}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
                   {/* Pagination Controls */}
                   {totalLedgerEntries > ledgerLimit && (
                     <div className="flex items-center justify-between border-t border-slate-100 pt-4 text-xs font-bold text-slate-500">
@@ -566,8 +737,9 @@ export default function LedgerPageClient({ shop, customers }: Props) {
                 <p className="text-xs text-slate-400 italic py-4">No product purchases logged for this customer.</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="border border-slate-100 rounded-xl overflow-hidden">
-                    <table className="w-full text-left text-xs font-semibold text-slate-650">
+                  {/* Desktop Table */}
+                  <div className="hidden md:block border border-slate-100 rounded-xl overflow-hidden">
+                    <table className="w-full text-left text-xs font-semibold text-slate-655">
                       <thead>
                         <tr className="bg-slate-50 text-slate-800 font-bold border-b border-slate-200 text-[10px] uppercase">
                           <th className="py-2.5 px-3">Product Name</th>
@@ -587,6 +759,30 @@ export default function LedgerPageClient({ shop, customers }: Props) {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+
+                  {/* Mobile Cards */}
+                  <div className="md:hidden flex flex-col gap-2.5">
+                    {productSummary.map((p, index) => (
+                      <div key={index} className="bg-slate-50/50 border border-slate-150 rounded-xl p-3 flex justify-between items-center text-left">
+                        <div>
+                          <span className="font-bold text-slate-900 block text-xs uppercase truncate max-w-[200px]">
+                            {p.name}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-semibold">
+                            Qty: {p.total_qty} units
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-xs font-extrabold text-slate-850 block tabular-nums">
+                            ₹{Number(p.total_revenue).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          </span>
+                          <span className="text-[9px] text-slate-400 block font-bold uppercase tracking-wider">
+                            Total Spent
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
 
                   <div className="bg-slate-50/50 rounded-xl p-4 flex flex-col justify-center border border-slate-150">
