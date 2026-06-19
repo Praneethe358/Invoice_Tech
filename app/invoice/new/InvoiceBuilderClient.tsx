@@ -72,6 +72,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
   const { showToast } = useToast();
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [tempPrice, setTempPrice] = useState('');
+  const [mobileActiveTab, setMobileActiveTab] = useState<'catalog' | 'checkout'>('catalog');
 
   const [localProducts, setLocalProducts] = useState<Product[]>(products);
 
@@ -519,9 +520,40 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
           </h1>
         </div>
 
+        {/* Mobile View Tab Bar */}
+        <div className="flex lg:hidden bg-white/60 backdrop-blur-sm border border-[#e5e7eb] p-1.5 rounded-2xl mb-6 gap-1">
+          <button
+            type="button"
+            onClick={() => setMobileActiveTab('catalog')}
+            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
+              mobileActiveTab === 'catalog'
+                ? 'bg-[#0050e8] text-white shadow-sm'
+                : 'text-[#6b7280]'
+            }`}
+          >
+            1. Select Products ({items.reduce((sum, i) => sum + i.quantity, 0)})
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileActiveTab('checkout')}
+            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all relative ${
+              mobileActiveTab === 'checkout'
+                ? 'bg-[#0050e8] text-white shadow-sm'
+                : 'text-[#6b7280]'
+            }`}
+          >
+            2. Customer & Pay
+            {items.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
+                {items.length}
+              </span>
+            )}
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* LEFT COLUMN: Catalog / Item Selector */}
-          <div className="lg:col-span-6 xl:col-span-7 space-y-6">
+          <div className={`lg:col-span-6 xl:col-span-7 space-y-6 ${mobileActiveTab === 'catalog' ? 'block' : 'hidden lg:block'}`}>
             {/* Products Header & Search */}
             <div className="space-y-4">
               <h2 className="text-xs font-black text-slate-500 uppercase tracking-wider">
@@ -586,49 +618,203 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
               </div>
             )}
 
-            {/* Products Table Listing */}
+            {/* Products Listing */}
             {searchedProducts.length > 0 ? (
-              <div className="overflow-x-auto border border-slate-200 rounded-xl bg-white shadow-2xs">
-                <table className="w-full border-collapse text-left text-xs">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      <th className="py-3 px-4 w-10 text-center"></th>
-                      <th className="py-3 px-4 font-bold">Item Name</th>
-                      <th className="py-3 px-4 font-bold">Category</th>
-                      <th className="py-3 px-4 text-right font-bold">Sale Price</th>
-                      <th className="py-3 px-4 text-right font-bold">Stock Qty</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {visibleProducts.map((product) => {
-                      const qty = getItemQty(product.name);
-                      const isOutOfStock = shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= 0;
-                      const isLowStock = shop.inventory_enabled && product.track_inventory && !isOutOfStock && (product.stock_qty || 0) <= (product.low_stock_threshold || 5);
+              <>
+                {/* Desktop Products Table */}
+                <div className="hidden md:block overflow-x-auto border border-slate-200 rounded-xl bg-white shadow-2xs">
+                  <table className="w-full border-collapse text-left text-xs">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        <th className="py-3 px-4 w-10 text-center"></th>
+                        <th className="py-3 px-4 font-bold">Item Name</th>
+                        <th className="py-3 px-4 font-bold">Category</th>
+                        <th className="py-3 px-4 text-right font-bold">Sale Price</th>
+                        <th className="py-3 px-4 text-right font-bold">Stock Qty</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {visibleProducts.map((product) => {
+                        const qty = getItemQty(product.name);
+                        const isOutOfStock = shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= 0;
+                        const isLowStock = shop.inventory_enabled && product.track_inventory && !isOutOfStock && (product.stock_qty || 0) <= (product.low_stock_threshold || 5);
 
-                      return (
-                        <tr
-                          key={product.id}
-                          onClick={() => {
-                            if (shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= 0) {
-                              showToast(`⚠️ Warning: "${product.name}" is out of stock. You can still dispatch, but stock will go negative.`, 'warning');
-                            }
-                            addOrIncrement(
-                              product.name,
-                              Number(product.price),
-                              product.hsn_code,
-                              product.gst_rate
-                            );
-                          }}
-                          className={`group cursor-pointer hover:bg-slate-50/70 transition-colors ${
-                            qty > 0 ? 'bg-[#0050e8]/5 hover:bg-[#0050e8]/8' : ''
-                          }`}
-                        >
-                          {/* Favorite Star */}
-                          <td className="py-4 px-4 w-10 text-center" onClick={(e) => e.stopPropagation()}>
+                        return (
+                          <tr
+                            key={product.id}
+                            onClick={() => {
+                              if (shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= 0) {
+                                showToast(`⚠️ Warning: "${product.name}" is out of stock. You can still dispatch, but stock will go negative.`, 'warning');
+                              }
+                              addOrIncrement(
+                                product.name,
+                                Number(product.price),
+                                product.hsn_code,
+                                product.gst_rate
+                              );
+                            }}
+                            className={`group cursor-pointer hover:bg-slate-50/70 transition-colors ${
+                              qty > 0 ? 'bg-[#0050e8]/5 hover:bg-[#0050e8]/8' : ''
+                            }`}
+                          >
+                            {/* Favorite Star */}
+                            <td className="py-4 px-4 w-10 text-center" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                onClick={(e) => handleToggleFavorite(product, e)}
+                                className={`transition-colors hover:scale-110 ${
+                                  product.is_favorite ? 'text-amber-500' : 'text-slate-300 hover:text-slate-400'
+                                }`}
+                              >
+                                {product.is_favorite ? (
+                                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                                  </svg>
+                                ) : (
+                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.969 0 1.371 1.24.588 1.81l-3.97 2.883a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.971-2.883a1 1 0 00-1.175 0l-3.97 2.883c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118l-3.97-2.883c-.783-.57-.38-1.81.588-1.81h4.906a1 1 0 00.951-.69l1.519-4.674z" />
+                                  </svg>
+                                )}
+                              </button>
+                            </td>
+
+                            {/* Item Name & Badges */}
+                            <td className="py-4 px-4">
+                              <div className="flex flex-col gap-1.5">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-bold text-slate-800 uppercase tracking-wide">
+                                    {product.name}
+                                  </span>
+                                  {qty > 0 && (
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black bg-[#0050e8] text-white">
+                                      {qty} Added
+                                    </span>
+                                  )}
+                                  {isLowStock && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[8px] font-extrabold bg-amber-50 text-amber-700 border border-amber-100 uppercase tracking-wide">
+                                      Low Stock
+                                    </span>
+                                  )}
+                                  {isOutOfStock && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[8px] font-extrabold bg-rose-50 text-rose-600 border border-rose-100 uppercase tracking-wide">
+                                      Out of Stock
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  {shop.gst_registered && product.gst_rate !== undefined && product.gst_rate > 0 && (
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#e6efff] text-[#0050e8] border border-[#cce0ff]">
+                                      {product.gst_rate}% GST
+                                    </span>
+                                  )}
+                                  {product.hsn_code && (
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-50 text-slate-500 border border-slate-200">
+                                      HSN: {product.hsn_code}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Category */}
+                            <td className="py-4 px-4 text-slate-500 font-semibold">
+                              {product.category || 'Others'}
+                            </td>
+
+                            {/* Sale Price */}
+                            <td className="py-4 px-4 text-right">
+                              {editingProductId === product.id ? (
+                                <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                                  <span className="text-[11px] font-bold text-slate-500">₹</span>
+                                  <input
+                                    type="number"
+                                    value={tempPrice}
+                                    onChange={(e) => setTempPrice(e.target.value)}
+                                    className="w-16 bg-white border border-slate-300 rounded px-1.5 py-0.5 text-xs font-semibold focus:outline-none"
+                                    autoFocus
+                                  />
+                                  <button
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      const priceVal = parseFloat(tempPrice);
+                                      if (!isNaN(priceVal) && priceVal > 0) {
+                                        await handlePriceUpdate(product, priceVal);
+                                      }
+                                      setEditingProductId(null);
+                                    }}
+                                    className="px-2 py-0.5 bg-[#0050e8] text-white rounded text-[10px] font-bold hover:bg-[#0050e8]/90"
+                                  >
+                                    Save
+                                  </button>
+                                </div>
+                              ) : (
+                                <div
+                                  className="font-extrabold text-slate-900 tabular-nums hover:text-[#0050e8] transition-colors"
+                                  onDoubleClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingProductId(product.id);
+                                    setTempPrice(String(product.price));
+                                  }}
+                                  title="Double click to edit price"
+                                >
+                                  ₹{Number(product.price).toLocaleString('en-IN')}
+                                </div>
+                              )}
+                            </td>
+
+                            {/* Stock Qty */}
+                            <td className="py-4 px-4 text-right">
+                              {shop.inventory_enabled && product.track_inventory ? (
+                                <div className="inline-flex justify-end">
+                                  {isOutOfStock ? (
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-100 uppercase tracking-wide">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                      0 Left
+                                    </span>
+                                  ) : isLowStock ? (
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-100 uppercase tracking-wide">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                      {product.stock_qty} Left
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-50 text-slate-600 border border-slate-200 uppercase tracking-wide">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                      {product.stock_qty} Left
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-slate-400 font-semibold">—</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Products List */}
+                <div className="md:hidden flex flex-col gap-3">
+                  {visibleProducts.map((product) => {
+                    const qty = getItemQty(product.name);
+                    const isOutOfStock = shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= 0;
+                    const isLowStock = shop.inventory_enabled && product.track_inventory && !isOutOfStock && (product.stock_qty || 0) <= (product.low_stock_threshold || 5);
+
+                    return (
+                      <div
+                        key={product.id}
+                        className={`bg-white border rounded-2xl p-4 shadow-2xs transition-all relative flex flex-col gap-3 ${
+                          qty > 0 ? 'border-[#0050e8] bg-[#0050e8]/5' : 'border-slate-150'
+                        }`}
+                      >
+                        {/* Favorite Star & Product Name */}
+                        <div className="flex justify-between items-start gap-2 text-left">
+                          <div className="flex items-center gap-2">
                             <button
+                              type="button"
                               onClick={(e) => handleToggleFavorite(product, e)}
-                              className={`transition-colors hover:scale-110 ${
-                                product.is_favorite ? 'text-amber-500' : 'text-slate-300 hover:text-slate-400'
+                              className={`transition-colors hover:scale-110 shrink-0 ${
+                                product.is_favorite ? 'text-amber-500' : 'text-slate-300'
                               }`}
                             >
                               {product.is_favorite ? (
@@ -641,134 +827,109 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
                                 </svg>
                               )}
                             </button>
-                          </td>
-
-                          {/* Item Name & Badges */}
-                          <td className="py-4 px-4">
-                            <div className="flex flex-col gap-1.5">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-bold text-slate-800 uppercase tracking-wide">
-                                  {product.name}
-                                </span>
-                                {qty > 0 && (
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black bg-[#0050e8] text-white">
-                                    {qty} Added
-                                  </span>
-                                )}
-                                {isLowStock && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[8px] font-extrabold bg-amber-50 text-amber-700 border border-amber-100 uppercase tracking-wide">
-                                    Low Stock
-                                  </span>
-                                )}
-                                {isOutOfStock && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[8px] font-extrabold bg-rose-50 text-rose-600 border border-rose-100 uppercase tracking-wide">
-                                    Out of Stock
-                                  </span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                {shop.gst_registered && product.gst_rate !== undefined && product.gst_rate > 0 && (
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#e6efff] text-[#0050e8] border border-[#cce0ff]">
-                                    {product.gst_rate}% GST
-                                  </span>
-                                )}
-                                {product.hsn_code && (
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-50 text-slate-500 border border-slate-200">
-                                    HSN: {product.hsn_code}
-                                  </span>
-                                )}
-                              </div>
+                            <div className="flex flex-col">
+                              <span className="font-extrabold text-slate-850 uppercase tracking-wide text-xs">
+                                {product.name}
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-semibold uppercase mt-0.5">
+                                {product.category || 'Others'}
+                              </span>
                             </div>
-                          </td>
+                          </div>
 
-                          {/* Category */}
-                          <td className="py-4 px-4 text-slate-500 font-semibold">
-                            {product.category || 'Others'}
-                          </td>
+                          {/* Price */}
+                          <div className="text-right">
+                            <span className="text-xs font-black text-slate-850 block tabular-nums">
+                              ₹{Number(product.price).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                            </span>
+                            <span className="text-[9px] text-slate-400 font-bold block uppercase tracking-wider mt-0.5">
+                              Sale Price
+                            </span>
+                          </div>
+                        </div>
 
-                          {/* Sale Price */}
-                          <td className="py-4 px-4 text-right">
-                            {editingProductId === product.id ? (
-                              <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                                <span className="text-[11px] font-bold text-slate-500">₹</span>
-                                <input
-                                  type="number"
-                                  value={tempPrice}
-                                  onChange={(e) => setTempPrice(e.target.value)}
-                                  className="w-16 bg-white border border-slate-300 rounded px-1.5 py-0.5 text-xs font-semibold focus:outline-none"
-                                  autoFocus
-                                />
-                                <button
-                                  onClick={async (e) => {
-                                    e.stopPropagation();
-                                    const priceVal = parseFloat(tempPrice);
-                                    if (!isNaN(priceVal) && priceVal > 0) {
-                                      await handlePriceUpdate(product, priceVal);
-                                    }
-                                    setEditingProductId(null);
-                                  }}
-                                  className="px-2 py-0.5 bg-[#0050e8] text-white rounded text-[10px] font-bold hover:bg-[#0050e8]/90"
-                                >
-                                  Save
-                                </button>
-                              </div>
-                            ) : (
-                              <div
-                                className="font-extrabold text-slate-900 tabular-nums hover:text-[#0050e8] transition-colors"
-                                onDoubleClick={(e) => {
-                                  e.stopPropagation();
-                                  setEditingProductId(product.id);
-                                  setTempPrice(String(product.price));
-                                }}
-                                title="Double click to edit price"
+                        {/* Badges / Tax details */}
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {shop.gst_registered && product.gst_rate !== undefined && product.gst_rate > 0 && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#e6efff] text-[#0050e8] border border-[#cce0ff]">
+                              {product.gst_rate}% GST
+                            </span>
+                          )}
+                          {product.hsn_code && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-50 text-slate-500 border border-slate-200">
+                              HSN: {product.hsn_code}
+                            </span>
+                          )}
+                          {shop.inventory_enabled && product.track_inventory && (
+                            <>
+                              {isOutOfStock ? (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-rose-50 text-rose-700 border border-rose-100 uppercase">
+                                  0 Left
+                                </span>
+                              ) : isLowStock ? (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-50 text-amber-850 border border-amber-100 uppercase">
+                                  {product.stock_qty} Left
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-50 text-slate-600 border border-slate-200 uppercase">
+                                  {product.stock_qty} Left
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </div>
+
+                        {/* Action Row */}
+                        <div className="flex justify-between items-center pt-2 border-t border-slate-100 mt-1">
+                          <div className="text-[10px] text-slate-400 font-semibold italic">
+                            {qty > 0 ? `${qty} in cart` : 'Tap to add'}
+                          </div>
+
+                          {qty === 0 ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= 0) {
+                                  showToast(`⚠️ Warning: "${product.name}" is out of stock. You can still dispatch, but stock will go negative.`, 'warning');
+                                }
+                                addOrIncrement(product.name, Number(product.price), product.hsn_code, product.gst_rate);
+                              }}
+                              className="bg-[#0050e8] hover:bg-[#0043c4] text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-3xs cursor-pointer min-h-[32px] flex items-center justify-center"
+                            >
+                              + Add
+                            </button>
+                          ) : (
+                            <div className="flex items-center bg-[#0050e8]/10 rounded-lg overflow-hidden border border-[#0050e8]/20">
+                              <button
+                                type="button"
+                                onClick={() => updateQty(product.name, qty - 1)}
+                                className="px-2.5 py-1 text-[#0050e8] hover:bg-[#0050e8]/10 text-sm font-black transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center cursor-pointer"
                               >
-                                ₹{Number(product.price).toLocaleString('en-IN')}
-                              </div>
-                            )}
-                          </td>
-
-                          {/* Stock Qty */}
-                          <td className="py-4 px-4 text-right">
-                            {shop.inventory_enabled && product.track_inventory ? (
-                              <div className="inline-flex justify-end">
-                                {isOutOfStock ? (
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-100 uppercase tracking-wide">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                                    0 Left
-                                  </span>
-                                ) : isLowStock ? (
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-100 uppercase tracking-wide">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                    {product.stock_qty} Left
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-50 text-slate-600 border border-slate-200 uppercase tracking-wide">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                                    {product.stock_qty} Left
-                                  </span>
-                                )}
-                              </div>
-                            ) : (
-                              <span className="text-slate-400 font-semibold">—</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-                {searchedProducts.length > visibleCount && (
-                  <div className="p-3 border-t border-slate-200 flex justify-center bg-slate-50/50">
-                    <button
-                      type="button"
-                      onClick={() => setVisibleCount(prev => prev + 10)}
-                      className="px-4 py-2 bg-white border border-slate-200 text-slate-750 text-xs font-bold rounded-lg hover:bg-slate-50 transition-colors shadow-3xs cursor-pointer"
-                    >
-                      Show More Products ({searchedProducts.length - visibleCount} remaining)
-                    </button>
-                  </div>
-                )}
-              </div>
+                                −
+                              </button>
+                              <span className="px-2 text-xs font-black text-slate-800 tabular-nums">
+                                {qty}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (shop.inventory_enabled && product.track_inventory && (product.stock_qty || 0) <= qty) {
+                                    showToast(`⚠️ Warning: Stock is only ${product.stock_qty}. You are dispatching more than stock.`, 'warning');
+                                  }
+                                  updateQty(product.name, qty + 1);
+                                }}
+                                className="px-2.5 py-1 text-[#0050e8] hover:bg-[#0050e8]/10 text-sm font-black transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center cursor-pointer"
+                              >
+                                +
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
             ) : (
               <div className="text-center py-12 bg-white border border-slate-200 rounded-xl p-6">
                 <span className="text-2xl block mb-2">🔍</span>
@@ -866,7 +1027,7 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
           </div>
 
           {/* RIGHT COLUMN: Invoice Builder Panel */}
-          <div className="lg:col-span-6 xl:col-span-5 space-y-6">
+          <div className={`lg:col-span-6 xl:col-span-5 space-y-6 ${mobileActiveTab === 'checkout' ? 'block' : 'hidden lg:block'}`}>
             {/* Customer Details Form */}
             <section className="bg-white rounded-2xl border border-[#e5e7eb] p-4 space-y-4 shadow-2xs">
               <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide">
@@ -1167,38 +1328,63 @@ export default function InvoiceBuilderClient({ products, shopId, shop, initialDr
       {/* Sticky Footer */}
       <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-white/90 backdrop-blur-lg border-t border-[#e5e7eb] z-30 lg:hidden">
         <div className="w-full px-4 md:px-8 py-3 flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-[#6b7280] font-bold uppercase">Total</p>
-            <p className="text-xl font-extrabold text-[#111827] tabular-nums">
-              ₹{total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => handleSubmit('draft')}
-              disabled={!isValid || loading}
-              className="py-3 px-1 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
-            >
-              Draft
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSubmit('saved')}
-              disabled={!isValid || loading}
-              className="py-3 px-1 border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
-            >
-              Save
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSubmit('sent')}
-              disabled={!isValid || loading}
-              className="py-3 px-1 bg-[#0050e8] hover:bg-[#0043c4] text-white text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
-            >
-              Save & Send
-            </button>
-          </div>
+          {mobileActiveTab === 'catalog' ? (
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-[10px] text-[#6b7280] font-bold uppercase">Total Qty</p>
+                <p className="text-sm font-extrabold text-[#111827] tabular-nums">
+                  {items.reduce((sum, i) => sum + i.quantity, 0)} Items
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileActiveTab('checkout')}
+                disabled={items.length === 0}
+                className="flex-1 py-3 bg-[#0050e8] hover:bg-[#0043c4] text-white text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px] flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                Next: Enter Details
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-[#6b7280] font-bold uppercase">Total</p>
+                <p className="text-xl font-extrabold text-[#111827] tabular-nums">
+                  ₹{total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleSubmit('draft')}
+                  disabled={!isValid || loading}
+                  className="py-3 px-1 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
+                >
+                  Draft
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSubmit('saved')}
+                  disabled={!isValid || loading}
+                  className="py-3 px-1 border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSubmit('sent')}
+                  disabled={!isValid || loading}
+                  className="py-3 px-1 bg-[#0050e8] hover:bg-[#0043c4] text-white text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
+                >
+                  Save & Send
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
