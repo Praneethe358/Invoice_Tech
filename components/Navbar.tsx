@@ -33,7 +33,7 @@ const navItems = [
   },
   {
     href: '/invoices',
-    label: 'Invoices',
+    label: 'Sales Invoices',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -58,7 +58,7 @@ const navItems = [
   },
   {
     href: '/invoice/new',
-    label: 'Invoice',
+    label: 'Sales Invoice',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10" />
@@ -318,18 +318,18 @@ export default function Navbar() {
               <span className="text-[#001048]">Tru</span>
               <span className="text-[#0050e8]">Bill</span>
             </span>
-            <span className="text-[10px] font-bold text-[#0050e8] uppercase tracking-wider mt-0.5 block">Invoice</span>
+            <span className="text-[10px] font-bold text-[#0050e8] uppercase tracking-wider mt-0.5 block">Sales Invoice</span>
           </div>
         </div>
 
-        {/* Quick Action: New Invoice */}
+        {/* Quick Action: New Sales Invoice */}
         <Link href="/invoice/new" className="mb-6 block">
           <button className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white rounded-xl py-3 px-4 flex items-center justify-center gap-2.5 font-bold text-sm shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            New Invoice
+            New Sales Invoice
           </button>
         </Link>
 
@@ -495,7 +495,7 @@ export default function Navbar() {
                       {shopInfo?.name || 'TruBill'}
                     </span>
                     <span className="text-[9px] font-bold text-[#0050e8] uppercase tracking-wider mt-0.5 block truncate">
-                      {shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Invoice'}
+                      {shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Sales Invoice'}
                     </span>
                     {userRole !== 'owner' && (
                       <span className={`inline-block text-[8px] font-bold px-1.5 py-0.5 rounded-none uppercase text-white mt-1 ${
@@ -518,14 +518,14 @@ export default function Navbar() {
                 </button>
               </div>
 
-              {/* Quick Action: New Invoice */}
+              {/* Quick Action: New Sales Invoice */}
               <Link href="/invoice/new" className="mb-6 block" onClick={() => setMobileMenuOpen(false)}>
                 <button className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white rounded-xl py-3 px-4 flex items-center justify-center gap-2.5 font-bold text-sm shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
-                  New Invoice
+                  New Sales Invoice
                 </button>
               </Link>
 
