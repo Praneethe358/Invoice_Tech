@@ -175,26 +175,26 @@ export default function DashboardClient({
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-6">
                 <div
                   onClick={() => setStatusFilter('unpaid_partial')}
-                  className="bg-[#fffbeb] border border-[#fef3c7] p-4 flex flex-col justify-between min-h-[90px] rounded-none cursor-pointer hover:shadow-xs transition-shadow"
+                  className="bg-[#fffbeb] border border-[#fef3c7] p-4 flex flex-col justify-between min-h-[90px] rounded-2xl md:rounded-none cursor-pointer hover:shadow-xs transition-shadow"
                 >
                   <span className="text-[10px] font-bold text-[#b45309] uppercase tracking-wide">Receivables (To Collect)</span>
                   <p className="text-xl font-extrabold text-[#d97706] mt-2">₹{Number(stats.totalOutstanding || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
-                <div className="bg-[#f9fafb] border border-[#e5e7eb] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
+                <div className="bg-[#f9fafb] border border-[#e5e7eb] p-4 flex flex-col justify-between min-h-[90px] rounded-2xl md:rounded-none">
                   <span className="text-[10px] font-bold text-[#4b5563] uppercase tracking-wide">Payables (To Pay)</span>
                   <p className="text-xl font-extrabold text-gray-400 mt-2">₹0.00</p>
                 </div>
-                <div className="bg-[#f0fdf4] border border-[#dcfce7] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
+                <div className="bg-[#f0fdf4] border border-[#dcfce7] p-4 flex flex-col justify-between min-h-[90px] rounded-2xl md:rounded-none">
                   <span className="text-[10px] font-bold text-[#0050e8] uppercase tracking-wide">Sales (This Month)</span>
                   <p className="text-xl font-extrabold text-[#16a34a] mt-2">₹{Number(stats.thisMonth || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
-                <div className="bg-white border border-[#e5e7eb] p-4 flex flex-col justify-between min-h-[90px] rounded-none">
+                <div className="bg-white border border-[#e5e7eb] p-4 flex flex-col justify-between min-h-[90px] rounded-2xl md:rounded-none">
                   <span className="text-[10px] font-bold text-[#6b7280] uppercase tracking-wide">Total Bills</span>
                   <p className="text-xl font-extrabold text-gray-900 mt-2">{stats.totalInvoices}</p>
                 </div>
                 <div
                   onClick={() => setStatusFilter('failed')}
-                  className={`p-4 flex flex-col justify-between min-h-[90px] rounded-none border cursor-pointer hover:shadow-xs transition-shadow ${stats.failedInvoices > 0 ? 'bg-[#fdf2f2] border-[#fde8e8]' : 'bg-white border-[#e5e7eb]'}`}
+                  className={`p-4 flex flex-col justify-between min-h-[90px] rounded-2xl md:rounded-none border cursor-pointer hover:shadow-xs transition-shadow col-span-2 md:col-span-1 ${stats.failedInvoices > 0 ? 'bg-[#fdf2f2] border-[#fde8e8]' : 'bg-white border-[#e5e7eb]'}`}
                 >
                   <span className={`text-[10px] font-bold uppercase tracking-wide ${stats.failedInvoices > 0 ? 'text-[#9b1c1c]' : 'text-gray-500'}`}>Failed Deliveries</span>
                   <p className={`text-xl font-extrabold mt-2 ${stats.failedInvoices > 0 ? 'text-[#e02424]' : 'text-gray-900'}`}>{stats.failedInvoices}</p>
@@ -203,7 +203,7 @@ export default function DashboardClient({
 
               {/* Trial progress bar underneath stats cards */}
               {shop.subscription_status === 'trial' && trialEnds && daysRemaining > 0 && (
-                <div className="bg-white border border-[#e5e7eb] p-4 mb-6 rounded-none space-y-2">
+                <div className="bg-white border border-[#e5e7eb] p-4 mb-6 rounded-2xl md:rounded-none space-y-2">
                   <div className="flex justify-between items-center text-xs">
                     <span className="font-bold text-[#0050e8]">Free Trial Progress</span>
                     <span className="font-semibold text-slate-500">{daysRemaining} days remaining of 14-day trial</span>
@@ -255,9 +255,9 @@ export default function DashboardClient({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
           <a
             href="/invoice/new"
-            className="bg-[#0050e8] hover:bg-[#0043c4] text-white p-4 flex flex-col justify-between h-24 transition-colors shadow-sm rounded-none border border-[#0050e8]"
+            className="bg-[#0050e8] hover:bg-[#0043c4] text-white p-4 flex flex-col justify-between h-24 transition-colors shadow-sm rounded-2xl md:rounded-none border border-[#0050e8]"
           >
-            <div className="w-8 h-8 rounded-none bg-white/20 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl md:rounded-none bg-white/20 flex items-center justify-center">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
@@ -270,9 +270,9 @@ export default function DashboardClient({
           </a>
           <a
             href="/catalog"
-            className="bg-white hover:bg-gray-50 border border-[#e5e7eb] p-4 flex flex-col justify-between h-24 transition-colors shadow-sm rounded-none"
+            className="bg-white hover:bg-gray-50 border border-[#e5e7eb] p-4 flex flex-col justify-between h-24 transition-colors shadow-sm rounded-2xl md:rounded-none"
           >
-            <div className="w-8 h-8 rounded-none bg-[#0050e8]/10 flex items-center justify-center text-[#0050e8]">
+            <div className="w-8 h-8 rounded-xl md:rounded-none bg-[#0050e8]/10 flex items-center justify-center text-[#0050e8]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
@@ -284,9 +284,9 @@ export default function DashboardClient({
           </a>
           <a
             href="/customers"
-            className="bg-white hover:bg-gray-50 border border-[#e5e7eb] p-4 flex flex-col justify-between h-24 transition-colors shadow-sm rounded-none"
+            className="bg-white hover:bg-gray-50 border border-[#e5e7eb] p-4 flex flex-col justify-between h-24 transition-colors shadow-sm rounded-2xl md:rounded-none"
           >
-            <div className="w-8 h-8 rounded-none bg-[#0050e8]/10 flex items-center justify-center text-[#0050e8]">
+            <div className="w-8 h-8 rounded-xl md:rounded-none bg-[#0050e8]/10 flex items-center justify-center text-[#0050e8]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
@@ -301,9 +301,9 @@ export default function DashboardClient({
           </a>
           <a
             href="/payments"
-            className="bg-white hover:bg-gray-50 border border-[#e5e7eb] p-4 flex flex-col justify-between h-24 transition-colors shadow-sm rounded-none"
+            className="bg-white hover:bg-gray-50 border border-[#e5e7eb] p-4 flex flex-col justify-between h-24 transition-colors shadow-sm rounded-2xl md:rounded-none"
           >
-            <div className="w-8 h-8 rounded-none bg-[#0050e8]/10 flex items-center justify-center text-[#0050e8]">
+            <div className="w-8 h-8 rounded-xl md:rounded-none bg-[#0050e8]/10 flex items-center justify-center text-[#0050e8]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="2" y="4" width="20" height="16" rx="2" ry="2" />
                 <line x1="12" y1="4" x2="12" y2="20" />
@@ -325,7 +325,7 @@ export default function DashboardClient({
               placeholder="Search by invoice or phone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white rounded-none border border-[#e5e7eb] py-3 pl-10 pr-4 text-sm font-medium text-[#111827] focus:outline-none focus:border-[#0050e8] focus:ring-0 transition-all"
+              className="w-full bg-white rounded-2xl md:rounded-none border border-[#e5e7eb] py-3 pl-10 pr-4 text-sm font-medium text-[#111827] focus:outline-none focus:border-[#0050e8] focus:ring-0 transition-all"
             />
             <svg className="absolute left-3.5 top-3.5 text-[#9ca3af]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="8" />
@@ -347,7 +347,7 @@ export default function DashboardClient({
               <button
                 key={item.key}
                 onClick={() => setStatusFilter(item.key)}
-                className={`px-4 py-1.5 rounded-none text-xs font-bold capitalize transition-all shrink-0 ${
+                className={`px-4 py-1.5 rounded-xl md:rounded-none text-xs font-bold capitalize transition-all shrink-0 ${
                   statusFilter === item.key
                     ? 'bg-[#0050e8] text-white shadow-xs'
                     : 'bg-white text-[#6b7280] border border-[#e5e7eb] hover:bg-[#f9fafb]'
@@ -393,7 +393,7 @@ export default function DashboardClient({
             }}
           />
         ) : (
-          <div className="bg-white border border-[#e5e7eb] rounded-none overflow-hidden mb-6 shadow-xs">
+          <div className="bg-transparent md:bg-white border-0 md:border border-[#e5e7eb] rounded-none md:overflow-hidden mb-6 md:shadow-xs">
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full border-collapse text-left">
@@ -524,7 +524,7 @@ export default function DashboardClient({
             </div>
 
             {/* Mobile Cards View */}
-            <div className="md:hidden flex flex-col gap-0 divide-y divide-[#f3f4f6]">
+            <div className="md:hidden flex flex-col gap-3 bg-transparent">
               {invoices.map((invoice, i) => (
                 <InvoiceCard
                   key={invoice.id}
