@@ -1,15 +1,9 @@
 import { Metadata } from 'next';
-import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-// Create admin client to query invoice securely
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 interface PageProps {
   params: Promise<{ token: string }>;
@@ -17,6 +11,8 @@ interface PageProps {
 
 async function getInvoiceData(token: string) {
   if (!token) return null;
+
+  const supabaseAdmin = createAdminClient();
 
   // Query invoice and joined shop details
   const { data: invoice, error } = await supabaseAdmin

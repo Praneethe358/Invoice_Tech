@@ -1,14 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
 import ShopClient from './ShopClient';
 import { Metadata } from 'next';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -16,6 +11,8 @@ interface PageProps {
 
 async function getShopData(id: string) {
   if (!id) return null;
+
+  const supabaseAdmin = createAdminClient();
 
   const { data: shop } = await supabaseAdmin
     .from('shops')

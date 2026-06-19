@@ -194,7 +194,7 @@ const industries = [
   },
   {
     name: 'Pharmacies & Chemists',
-    desc: 'Quickly detail medicines, autocomplete repeat customers, and add standard tax fields with ease.',
+    desc: 'Add medicines to your bill quickly, recognize repeat customers instantly, and apply the correct GST tax rate every time.',
     highlights: ['Expiry Tracking', 'Quick Search', 'Tax Code Presets'],
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -212,7 +212,7 @@ const industries = [
   },
   {
     name: 'Restaurants & Cafes',
-    desc: 'Send instant digital receipts directly to diners, reducing waiting lines and saving printing costs.',
+    desc: 'Send instant digital receipts to diners over WhatsApp instead of printed bills — faster checkout, zero printer costs.',
     highlights: ['Table-wise Billing', 'KOT Printing', 'Zero Paper Cost'],
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -231,7 +231,7 @@ const industries = [
   },
   {
     name: 'Freelancers & Agencies',
-    desc: 'Create quotations, outline service deliverables, and track outstanding balances for client projects.',
+    desc: 'Send professional GST invoices for your services over WhatsApp and track exactly which clients still owe payment.',
     highlights: ['Quotations & Estimates', 'One-click Reminders', 'UPI Pre-fill'],
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -677,7 +677,7 @@ export default function LandingPage() {
               </h1>
 
               <p className="text-[13px] sm:text-base md:text-lg text-[#525f7a] leading-relaxed max-w-xl">
-                Easy WhatsApp billing, manage customer payments, track outstanding balances, control inventory, and simplify accounting with <strong className="text-slate-800">TruBill</strong> - Tamil Nadu&apos;s best lightweight billing web app. Start billing free today.
+                Easy WhatsApp billing, manage customer payments, track outstanding balances, control inventory, and simplify accounting with <strong className="text-slate-800">TruBill</strong> — Tamil Nadu&apos;s best lightweight billing web app. Start billing free today.
               </p>
 
               {/* Action Buttons & Trust Badges */}
@@ -692,7 +692,7 @@ export default function LandingPage() {
                   </svg>
                 </Link>
                 <div className="flex items-center gap-2 text-[11px] sm:text-xs text-slate-500 font-semibold mt-1">
-                  <span className="text-emerald-700 font-bold">✓ Free Forever</span>
+                  <span className="text-emerald-700 font-bold">✓ 14-Day Free Trial</span>
                   <span>•</span>
                   <span>No Setup Required</span>
                   <span>•</span>
@@ -1048,50 +1048,48 @@ export default function LandingPage() {
             {/* Quality 1 */}
             <div className="flex flex-col items-center space-y-2 md:space-y-4">
               <div className="text-[#0050e8] flex items-center justify-center">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
-                  <circle cx="16" cy="16" r="13" />
-                  <path d="M11 14a2 2 0 0 1 4 0" />
-                  <path d="M17 14a2 2 0 0 1 4 0" />
-                  <path d="M11 18c0 3 2.5 5 5 5s5-2 5-5H11z" fill="#0050e8" />
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
                 </svg>
               </div>
               <div className="space-y-0.5">
                 <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">
-                  1.5 Lakh<span className="text-[#0050e8]">+</span>
+                  Under 20 Sec
                 </h4>
-                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">Happy Shop Owners</p>
+                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">Per Invoice Generated</p>
               </div>
             </div>
 
             {/* Quality 2 */}
             <div className="flex flex-col items-center space-y-2 md:space-y-4">
               <div className="text-[#0050e8] flex items-center justify-center">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
-                  <rect x="9" y="4" width="14" height="24" rx="3" />
-                  <line x1="9" y1="8" x2="23" y2="8" />
-                  <line x1="9" y1="24" x2="23" y2="24" />
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">Free</h4>
-                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">Web &amp; PWA App</p>
+                <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">14-Day</h4>
+                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">Free Trial, No Card Needed</p>
               </div>
             </div>
 
             {/* Quality 3 */}
             <div className="flex flex-col items-center space-y-2 md:space-y-4">
               <div className="text-[#0050e8] flex items-center justify-center">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
-                  <path d="M8 4L24 16L8 28V4Z" />
-                  <path d="M8 4L19 16L8 28" />
-                  <path d="M19 16L8 16" />
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <path d="m9 11 2 2 4-4" />
                 </svg>
               </div>
               <div className="space-y-0.5">
                 <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">
-                  Rated 4.9<span className="text-[#0050e8]">/5</span>
+                  100% GST
                 </h4>
-                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">User Satisfaction</p>
+                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">Compliant Invoicing</p>
               </div>
             </div>
 
@@ -1595,9 +1593,9 @@ export default function LandingPage() {
             <div className="space-y-3">
               <h4 className="font-bold text-[#1a1d26] text-xs uppercase tracking-wider">HQ Address</h4>
               <p className="text-xs text-[#6b7280] leading-relaxed">
-                TruBill Technologies Ltd.<br />
-                Anna Salai, Chennai,<br />
-                Tamil Nadu 600002
+                TruBill Invoice<br />
+                Coimbatore, Tamil Nadu<br />
+                support@trubill.in
               </p>
             </div>
           </div>

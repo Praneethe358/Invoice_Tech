@@ -1,5 +1,4 @@
 import { Shop } from '@/lib/types';
-import { createAdminClient } from '@/lib/supabase/admin';
 
 export type SubscriptionStatus =
   'trial' | 'active' | 'expired' | 'cancelled';
@@ -143,6 +142,7 @@ export async function syncSubscriptionStatus(
     new Date(shop.trial_ends_at) < new Date()
   ) {
     try {
+      const { createAdminClient } = await import('@/lib/supabase/admin');
       const admin = createAdminClient();
       await admin
         .from('shops')
@@ -160,6 +160,7 @@ export async function syncSubscriptionStatus(
     new Date(shop.subscription_ends_at) < new Date()
   ) {
     try {
+      const { createAdminClient } = await import('@/lib/supabase/admin');
       const admin = createAdminClient();
       await admin
         .from('shops')
