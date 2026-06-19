@@ -299,7 +299,7 @@ export default function Navbar() {
       const supabase = createClient();
       await supabase.auth.signOut();
     } catch { /* ignore */ }
-    router.push('/login');
+    window.location.href = '/login';
   };
 
   return (

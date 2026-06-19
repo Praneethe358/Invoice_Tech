@@ -44,7 +44,7 @@ export default function AdminLayoutShell({
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
     await supabase.auth.signOut();
-    router.push('/login');
+    window.location.href = '/login';
   };
 
   const isActive = (href: string) => {

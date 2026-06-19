@@ -73,12 +73,12 @@ export default function LoginPage() {
             <img src="/trubill-logo.png" alt="TruBill Logo" className="w-10 h-10 object-contain brightness-0 invert" />
             <span className="font-heading font-black text-xl">
               <span className="text-white">Tru</span>
-              <span className="text-[#0050e8]">Bill</span>
+              <span style={{ color: '#93c5fd' }}>Bill</span>
             </span>
           </div>
 
           <h2 className="text-4xl font-black text-white leading-tight mb-4 tracking-tight">
-            Invoice <span className="bg-gradient-to-r from-blue-300 to-[#0050e8] bg-clip-text text-transparent">smarter</span>,<br />not harder.
+            Invoice <span className="bg-gradient-to-r from-blue-200 to-blue-400 bg-clip-text text-transparent">smarter</span>,<br />not harder.
           </h2>
           <p className="text-[#e6efff]/80 text-base leading-relaxed">
             Professional WhatsApp invoicing built for supermarkets, retail shops, and freelancers.
@@ -97,14 +97,14 @@ export default function LoginPage() {
           >
             {/* WhatsApp Header style */}
             <div className="flex items-center gap-2 mb-3 border-b border-white/10 pb-3">
-              <div className="w-6 h-6 rounded-full bg-[#0050e8] flex items-center justify-center text-[10px] text-white font-bold">V</div>
+              <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-[10px] text-white font-bold">V</div>
               <div>
                 <p className="text-[11px] font-bold leading-none">
                   <span className="text-white">Tru</span>
-                  <span className="text-[#0050e8]">Bill</span>
+                  <span style={{ color: '#93c5fd' }}>Bill</span>
                   <span className="text-white"> Store</span>
                 </p>
-                <p className="text-[8px] text-blue-400 font-semibold uppercase tracking-wider mt-0.5">invoicing bot</p>
+                <p className="text-[8px] font-semibold uppercase tracking-wider mt-0.5" style={{ color: '#93c5fd' }}>invoicing bot</p>
               </div>
             </div>
             {/* Message Bubble */}
@@ -128,9 +128,9 @@ export default function LoginPage() {
               { val: '< 30s', label: 'Per invoice' },
               { val: '4.8★', label: 'User rating' },
             ].map((s) => (
-              <div key={s.label} className="glass-card rounded-xl p-4 text-center border border-white/5">
+              <div key={s.label} className="glass-card rounded-xl p-4 text-center border border-white/10">
                 <p className="text-2xl font-extrabold text-white">{s.val}</p>
-                <p className="text-xs text-blue-200/65 mt-1">{s.label}</p>
+                <p className="text-xs mt-1" style={{ color: '#93c5fd' }}>{s.label}</p>
               </div>
             ))}
           </div>
@@ -138,58 +138,59 @@ export default function LoginPage() {
       </div>
 
       {/* Right — Login form */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 bg-[#f8fafc] relative">
-        {/* Subtle mesh background on mobile too */}
-        <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none lg:hidden" />
-        
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 bg-[#f8fafc] bg-[radial-gradient(circle_at_top_right,rgba(0,80,232,0.06),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(0,80,232,0.04),transparent_45%)] relative overflow-hidden">
+        {/* Glow backdrop for glassmorphism */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] rounded-full bg-gradient-to-tr from-[#0050e8]/15 to-blue-500/10 blur-[70px] pointer-events-none" />
+
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
-          className="w-full max-w-[420px]"
+          className="w-full max-w-[430px] relative z-10"
         >
-          {/* Mobile logo */}
-          <div className="lg:hidden flex items-center justify-center gap-2.5 mb-8">
-            <img src="/trubill-logo.png" alt="TruBill Logo" className="w-8 h-8 object-contain shrink-0" />
-            <span className="font-heading font-black text-xl tracking-tight">
-              <span className="text-[#001048]">Tru</span>
-              <span className="text-[#0050e8]">Bill</span>
-            </span>
-          </div>
-
-          <div className="bg-white border border-slate-200/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)] rounded-3xl p-8 sm:p-10">
-            <h1 className="text-2xl font-black text-[#1a1d26] tracking-tight mb-1.5">
+          <div className="bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.04)] rounded-[30px] p-8 sm:p-10">
+            <h1 className="text-3xl font-extrabold text-[#1a1d26] tracking-tight mb-1.5">
               Welcome back
             </h1>
-            <p className="text-sm text-[#6b7280] mb-8">
+            <p className="text-sm text-[#6b7280] mb-8 font-medium">
               Sign in to your TruBill account
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <Input
-                label="Email address"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Input
-                  label="Password"
+                <label className="block text-sm font-bold text-[#1a1d26] mb-2">
+                  Email address
+                </label>
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0050e8] focus:ring-2 focus:ring-[#0050e8]/15"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-[#1a1d26] mb-2">
+                  Password
+                </label>
+                <input
                   type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoComplete="current-password"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0050e8] focus:ring-2 focus:ring-[#0050e8]/15"
                 />
               </div>
+
               <button
                 type="submit"
-                disabled={!email || !password || loading}
-                className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white font-semibold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-blue-800/10 active:scale-[0.99]"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-[#0050e8] to-[#3b82f6] hover:from-[#0043c4] hover:to-[#2563eb] text-white font-bold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-blue-500/20 active:scale-[0.99] mt-2"
               >
                 {loading ? (
                   <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
@@ -198,7 +199,7 @@ export default function LoginPage() {
                   </svg>
                 ) : (
                   <>
-                    <svg className="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                       <path d="M7 11V7a5 5 0 0110 0v4" />
                     </svg>
@@ -208,7 +209,7 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <p className="text-center text-sm text-[#6b7280] mt-8">
+            <p className="text-center text-sm text-[#6b7280] mt-8 font-medium">
               Don&apos;t have an account?{' '}
               <Link href="/signup" className="text-[#0050e8] font-bold hover:underline">
                 Create one free
@@ -217,8 +218,8 @@ export default function LoginPage() {
           </div>
 
           {/* Bottom Security Badges */}
-          <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 mt-8 font-semibold uppercase tracking-wider">
-            <svg className="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+          <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#8a99ad] mt-6 font-bold uppercase tracking-wider">
+            <svg className="w-3.5 h-3.5 text-[#aebecf]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0110 0v4" />
             </svg>
@@ -229,3 +230,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
