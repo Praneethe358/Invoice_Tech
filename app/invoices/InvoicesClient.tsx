@@ -137,28 +137,17 @@ export default function InvoicesClient({ shop, initialInvoices }: Props) {
         </div>
 
         {/* Page Title Header - Mobile only */}
-        <div className="mb-6 md:hidden flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
-              All Invoices
-            </h1>
-            <p className="text-[10px] text-gray-500 font-semibold mt-1">
-              Filter sales records by status & date range.
-            </p>
-          </div>
-          <Link
-            href="/invoice/new"
-            className="bg-[#0050e8] text-white p-2.5 rounded-none"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          </Link>
+        <div className="mb-6 md:hidden">
+          <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
+            All Invoices
+          </h1>
+          <p className="text-[10px] text-gray-500 font-semibold mt-1">
+            Filter sales records by status & date range.
+          </p>
         </div>
 
         {/* Search & Filter Section */}
-        <div className="bg-white border border-[#e5e7eb] p-4 mb-6 shadow-xs space-y-4">
+        <div className="bg-white border border-[#e5e7eb] p-4 mb-6 shadow-xs space-y-4 rounded-2xl md:rounded-none">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Search Input */}
             <div className="relative">
@@ -167,7 +156,7 @@ export default function InvoicesClient({ shop, initialInvoices }: Props) {
                 placeholder="Search invoice number, phone, customer..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-none py-2.5 pl-10 pr-4 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#0050e8] focus:ring-0"
+                className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl md:rounded-none py-2.5 pl-10 pr-4 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#0050e8] focus:ring-0"
               />
               <svg className="absolute left-3.5 top-3.5 text-[#9ca3af]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="8" />
@@ -176,7 +165,7 @@ export default function InvoicesClient({ shop, initialInvoices }: Props) {
             </div>
 
             {/* Date Range Selection */}
-            <div className="flex gap-1 bg-[#f9fafb] border border-[#e5e7eb] p-1 rounded-none overflow-x-auto scrollbar-none">
+            <div className="flex gap-1 bg-[#f9fafb] border border-[#e5e7eb] p-1 rounded-xl md:rounded-none overflow-x-auto scrollbar-none">
               {([
                 { key: 'all', label: 'All Time' },
                 { key: 'today', label: 'Today' },
@@ -187,7 +176,7 @@ export default function InvoicesClient({ shop, initialInvoices }: Props) {
                 <button
                   key={item.key}
                   onClick={() => setDateFilter(item.key)}
-                  className={`px-3 py-1.5 rounded-none text-[10px] font-extrabold capitalize transition-all whitespace-nowrap ${
+                  className={`px-3 py-1.5 rounded-lg md:rounded-none text-[10px] font-extrabold capitalize transition-all whitespace-nowrap ${
                     dateFilter === item.key
                       ? 'bg-[#0050e8] text-white shadow-xs'
                       : 'text-[#4b5563] hover:text-[#111827]'
@@ -203,7 +192,7 @@ export default function InvoicesClient({ shop, initialInvoices }: Props) {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-none py-2.5 px-3 text-xs font-semibold text-[#4b5563] focus:outline-none focus:border-[#0050e8] focus:ring-0"
+                className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl md:rounded-none py-2.5 px-3 text-xs font-semibold text-[#4b5563] focus:outline-none focus:border-[#0050e8] focus:ring-0"
               >
                 <option value="all">All Payment & Delivery Statuses</option>
                 <option value="draft">Drafts Only</option>
@@ -226,7 +215,7 @@ export default function InvoicesClient({ shop, initialInvoices }: Props) {
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-none py-2 px-3 text-xs font-semibold text-[#111827] focus:outline-none"
+                  className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl md:rounded-none py-2 px-3 text-xs font-semibold text-[#111827] focus:outline-none"
                 />
               </div>
               <div>
@@ -235,7 +224,7 @@ export default function InvoicesClient({ shop, initialInvoices }: Props) {
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-none py-2 px-3 text-xs font-semibold text-[#111827] focus:outline-none"
+                  className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl md:rounded-none py-2 px-3 text-xs font-semibold text-[#111827] focus:outline-none"
                 />
               </div>
             </div>
@@ -267,7 +256,7 @@ export default function InvoicesClient({ shop, initialInvoices }: Props) {
             }}
           />
         ) : (
-          <div className="bg-white border border-[#e5e7eb] rounded-none overflow-hidden mb-6 shadow-xs">
+          <div className="bg-transparent md:bg-white border-0 md:border border-[#e5e7eb] rounded-none md:overflow-hidden mb-6 md:shadow-xs">
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full border-collapse text-left">
@@ -398,7 +387,7 @@ export default function InvoicesClient({ shop, initialInvoices }: Props) {
             </div>
 
             {/* Mobile Cards View */}
-            <div className="md:hidden flex flex-col gap-0 divide-y divide-[#f3f4f6]">
+            <div className="md:hidden flex flex-col gap-3 bg-transparent">
               {invoices.map((invoice, i) => (
                 <InvoiceCard
                   key={invoice.id}
