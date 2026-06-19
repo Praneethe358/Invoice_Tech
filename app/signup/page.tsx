@@ -377,26 +377,7 @@ export default function SignupPage() {
             Quick, Professional WhatsApp invoice delivery platform for shops in Tamil Nadu. GST details auto-breakdown, PDF generator, and contact saved catalogs.
           </p>
 
-          <motion.div
-            initial={{ y: 20, opacity: 0, rotate: 2 }}
-            animate={{ y: [0, 10, 0], opacity: 1, rotate: [2, 1, 2] }}
-            transition={{
-              opacity: { duration: 0.6 },
-              y: { repeat: Infinity, duration: 6, ease: 'easeInOut' },
-              rotate: { repeat: Infinity, duration: 9, ease: 'easeInOut' }
-            }}
-            className="mt-10 p-5 rounded-2xl glass-card border border-white/10 shadow-2xl relative max-w-sm mx-auto lg:mx-0 flex items-center gap-4"
-          >
-            <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center shrink-0" style={{ color: '#93c5fd' }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-[11.5px] font-bold text-white leading-none">Shop Registered!</p>
-              <p className="text-[9.5px] font-semibold mt-1" style={{ color: '#93c5fd' }}>Free plan activated instantly</p>
-            </div>
-          </motion.div>
+
         </div>
       </div>
 

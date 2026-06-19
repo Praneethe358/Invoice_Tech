@@ -84,56 +84,7 @@ export default function LoginPage() {
             Professional WhatsApp invoicing built for supermarkets, retail shops, and freelancers.
           </p>
 
-          {/* Floating Glassmorphic WhatsApp Card */}
-          <motion.div
-            initial={{ y: 20, opacity: 0, rotate: -2 }}
-            animate={{ y: [0, -10, 0], opacity: 1, rotate: [-2, -1, -2] }}
-            transition={{ 
-              opacity: { duration: 0.6 },
-              y: { repeat: Infinity, duration: 5, ease: "easeInOut" },
-              rotate: { repeat: Infinity, duration: 8, ease: "easeInOut" }
-            }}
-            className="mt-10 p-5 rounded-2xl glass-card border border-white/10 shadow-2xl relative max-w-sm mx-auto lg:mx-0"
-          >
-            {/* WhatsApp Header style */}
-            <div className="flex items-center gap-2 mb-3 border-b border-white/10 pb-3">
-              <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-[10px] text-white font-bold">V</div>
-              <div>
-                <p className="text-[11px] font-bold leading-none">
-                  <span className="text-white">Tru</span>
-                  <span style={{ color: '#93c5fd' }}>Bill</span>
-                  <span className="text-white"> Store</span>
-                </p>
-                <p className="text-[8px] font-semibold uppercase tracking-wider mt-0.5" style={{ color: '#93c5fd' }}>invoicing bot</p>
-              </div>
-            </div>
-            {/* Message Bubble */}
-            <div className="bg-[#dcf8c6] text-slate-800 p-3.5 rounded-xl text-[11px] space-y-2 relative border border-blue-200/20 shadow-xs">
-              <div className="flex items-center gap-1.5 font-bold text-slate-900 border-b border-blue-100/50 pb-1.5">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
-                <span>Invoice_Ramesh.pdf</span>
-              </div>
-              <p className="leading-relaxed">
-                Dear Ramesh, here is your tax invoice of <strong>₹4,042.50</strong> from TruBill Store. Pay instantly: <em>upi.trubill.in/pay</em>
-              </p>
-              <div className="text-right text-[8px] text-slate-400">11:42 AM ✓✓</div>
-            </div>
-          </motion.div>
 
-          <div className="mt-10 grid grid-cols-2 gap-4">
-            {[
-              { val: '< 30s', label: 'Per invoice' },
-              { val: '4.8★', label: 'User rating' },
-            ].map((s) => (
-              <div key={s.label} className="glass-card rounded-xl p-4 text-center border border-white/10">
-                <p className="text-2xl font-extrabold text-white">{s.val}</p>
-                <p className="text-xs mt-1" style={{ color: '#93c5fd' }}>{s.label}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
