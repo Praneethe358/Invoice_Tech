@@ -63,7 +63,7 @@ export default function UpgradeClient({ shop, upiId, supportPhone }: UpgradeClie
     },
     {
       q: 'How do I renew each month?',
-      a: 'You can pay the same UPI ID (praneeth@upi) anytime before your subscription expires and share the screenshot with us on WhatsApp. We will extend your subscription instantly.'
+      a: `You can pay the same UPI ID (${upiId}) anytime before your subscription expires and share the screenshot with us on WhatsApp. We will extend your subscription instantly.`
     },
     {
       q: 'Can I get a refund?',
@@ -152,9 +152,6 @@ export default function UpgradeClient({ shop, upiId, supportPhone }: UpgradeClie
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
           {/* Pro Plan Details Card */}
           <div className="md:col-span-6 bg-white border border-[#e5e7eb] rounded-none p-6 shadow-xs relative overflow-hidden flex flex-col justify-between min-h-[460px]">
-            <div className="absolute top-0 right-0 bg-[#0050e8] text-white text-[9px] font-black uppercase tracking-wider py-1.5 px-4">
-              Tamil Nadu Best Offer
-            </div>
 
             <div className="space-y-5">
               <div>

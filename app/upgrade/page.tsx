@@ -44,7 +44,7 @@ export default async function UpgradePage() {
     redirect('/signup');
   }
 
-  const upiId = process.env.NEXT_PUBLIC_UPI_ID || 'praneeth@upi';
+  const upiId = process.env.NEXT_PUBLIC_UPI_ID || 'praneethpraneeth8888@oksbi';
   const supportPhone = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || '919876543210';
 
   return (
