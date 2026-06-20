@@ -96,7 +96,7 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex items-center justify-between flex-wrap gap-4 lg:sticky lg:top-[4rem] lg:z-35 lg:bg-[#f8fafc]/95 lg:backdrop-blur-sm lg:py-4 lg:border-b lg:border-slate-200/50 transition-all duration-300">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-cyan-500 flex items-center justify-center text-white font-black text-xl overflow-hidden shadow-md shadow-blue-500/10">
             {shop.logo_url ? (
@@ -119,92 +119,94 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Left Column */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Shop Info */}
-          <div className="bg-white border border-slate-200/85 rounded-2xl p-5 shadow-xs">
-            <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Shop Info</h2>
-            <div className="space-y-3.5 text-xs">
-              {[
-                ['Owner Email', shop.owner_email],
-                ['Phone', shop.phone || '—'],
-                ['Address', shop.address || '—'],
-                ['GSTIN', shop.gstin || '—'],
-                ['Shop Type', shop.shop_type],
-                ['Inventory', shop.inventory_enabled ? 'Enabled' : 'Disabled'],
-                ['GST Registered', shop.gst_registered ? 'Yes' : 'No'],
-                ['Joined', formatDate(shop.created_at)],
-                ['Onboarding', shop.onboarding_completed ? 'Completed' : 'Pending'],
-              ].map(([label, val]) => (
-                <div key={label} className="flex justify-between border-b border-slate-100 pb-2.5 last:border-0 last:pb-0">
-                  <span className="font-bold text-slate-400">{label}</span>
-                  <span className="font-extrabold text-slate-800 text-right max-w-[60%] break-all">{val}</span>
-                </div>
-              ))}
+        <div className="lg:col-span-2">
+          <div className="lg:sticky lg:top-[10.5rem] lg:z-20 space-y-6 lg:max-h-[calc(100vh-13rem)] lg:overflow-y-auto lg:pr-2 scrollbar-none">
+            {/* Shop Info */}
+            <div className="bg-white border border-slate-200/85 rounded-2xl p-5 shadow-xs">
+              <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Shop Info</h2>
+              <div className="space-y-3.5 text-xs">
+                {[
+                  ['Owner Email', shop.owner_email],
+                  ['Phone', shop.phone || '—'],
+                  ['Address', shop.address || '—'],
+                  ['GSTIN', shop.gstin || '—'],
+                  ['Shop Type', shop.shop_type],
+                  ['Inventory', shop.inventory_enabled ? 'Enabled' : 'Disabled'],
+                  ['GST Registered', shop.gst_registered ? 'Yes' : 'No'],
+                  ['Joined', formatDate(shop.created_at)],
+                  ['Onboarding', shop.onboarding_completed ? 'Completed' : 'Pending'],
+                ].map(([label, val]) => (
+                  <div key={label} className="flex justify-between border-b border-slate-100 pb-2.5 last:border-0 last:pb-0">
+                    <span className="font-bold text-slate-400">{label}</span>
+                    <span className="font-extrabold text-slate-800 text-right max-w-[60%] break-all">{val}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Subscription Card */}
-          <div className="bg-white border border-slate-200/85 rounded-2xl p-5 shadow-xs">
-            <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Subscription Details</h2>
-            <div className="space-y-3.5 text-xs mb-5">
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-slate-400">Status</span>
-                <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-black border capitalize ${STATUS_COLORS[status] || STATUS_COLORS.cancelled}`}>{status}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-bold text-slate-400">Trial Ends</span>
-                <span className="font-extrabold text-slate-800">{formatDate(shop.trial_ends_at)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-bold text-slate-400">Sub Started</span>
-                <span className="font-extrabold text-slate-800">{formatDate(shop.subscription_started_at)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-bold text-slate-400">Sub Ends</span>
-                <span className="font-extrabold text-slate-800">{formatDate(shop.subscription_ends_at)}</span>
-              </div>
-              {shop.subscription_notes && (
-                <div className="pt-2">
-                  <span className="font-bold text-slate-400 block mb-1.5">Notes</span>
-                  <pre className="text-[10px] text-slate-600 bg-slate-50 border border-slate-100 p-3 rounded-xl whitespace-pre-wrap font-sans leading-relaxed">{shop.subscription_notes}</pre>
+            {/* Subscription Card */}
+            <div className="bg-white border border-slate-200/85 rounded-2xl p-5 shadow-xs">
+              <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Subscription Details</h2>
+              <div className="space-y-3.5 text-xs mb-5">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-slate-400">Status</span>
+                  <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-black border capitalize ${STATUS_COLORS[status] || STATUS_COLORS.cancelled}`}>{status}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="font-bold text-slate-400">Trial Ends</span>
+                  <span className="font-extrabold text-slate-800">{formatDate(shop.trial_ends_at)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-bold text-slate-400">Sub Started</span>
+                  <span className="font-extrabold text-slate-800">{formatDate(shop.subscription_started_at)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-bold text-slate-400">Sub Ends</span>
+                  <span className="font-extrabold text-slate-800">{formatDate(shop.subscription_ends_at)}</span>
+                </div>
+                {shop.subscription_notes && (
+                  <div className="pt-2">
+                    <span className="font-bold text-slate-400 block mb-1.5">Notes</span>
+                    <pre className="text-[10px] text-slate-600 bg-slate-50 border border-slate-100 p-3 rounded-xl whitespace-pre-wrap font-sans leading-relaxed">{shop.subscription_notes}</pre>
+                  </div>
+                )}
+              </div>
+              <button onClick={() => setShowActivate(!showActivate)}
+                className="w-full py-2.5 rounded-xl text-xs font-black bg-blue-600 text-white hover:bg-blue-500 shadow-md shadow-blue-500/10 transition-all duration-300">
+                {status === 'active' ? 'Extend Subscription' : 'Activate Subscription'}
+              </button>
+
+              {showActivate && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="mt-4 space-y-3.5 border-t border-slate-100 pt-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { m: 1, l: '1 Month', p: '₹299' }, 
+                      { m: 3, l: '3 Months', p: '₹897' }, 
+                      { m: 6, l: '6 Months', p: '₹1,794' }, 
+                      { m: 12, l: '1 Year', p: '₹3,588' }
+                    ].map(o => (
+                      <button key={o.m} onClick={() => setDuration(o.m)}
+                        className={`px-3 py-2.5 rounded-xl text-[10px] font-black border transition-all duration-300 ${
+                          duration === o.m 
+                            ? 'bg-blue-600 text-white border-transparent shadow-[0_4px_10px_rgba(37,99,235,0.2)]' 
+                            : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                        }`}>
+                        {o.l} <span className="opacity-70 font-semibold">({o.p})</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="space-y-1">
+                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Payment Reference</label>
+                    <input type="text" placeholder="Transaction reference or notes" value={paymentRef} onChange={e => setPaymentRef(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500" />
+                  </div>
+                  <button onClick={handleActivate} disabled={activateLoading}
+                    className="w-full py-2.5 rounded-xl text-xs font-black bg-blue-600 text-white disabled:opacity-50 transition-all duration-300">
+                    {activateLoading ? 'Processing...' : 'Confirm Activate'}
+                  </button>
+                </motion.div>
               )}
             </div>
-            <button onClick={() => setShowActivate(!showActivate)}
-              className="w-full py-2.5 rounded-xl text-xs font-black bg-blue-600 text-white hover:bg-blue-500 shadow-md shadow-blue-500/10 transition-all duration-300">
-              {status === 'active' ? 'Extend Subscription' : 'Activate Subscription'}
-            </button>
-
-            {showActivate && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="mt-4 space-y-3.5 border-t border-slate-100 pt-4">
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { m: 1, l: '1 Month', p: '₹299' }, 
-                    { m: 3, l: '3 Months', p: '₹897' }, 
-                    { m: 6, l: '6 Months', p: '₹1,794' }, 
-                    { m: 12, l: '1 Year', p: '₹3,588' }
-                  ].map(o => (
-                    <button key={o.m} onClick={() => setDuration(o.m)}
-                      className={`px-3 py-2.5 rounded-xl text-[10px] font-black border transition-all duration-300 ${
-                        duration === o.m 
-                          ? 'bg-blue-600 text-white border-transparent shadow-[0_4px_10px_rgba(37,99,235,0.2)]' 
-                          : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
-                      }`}>
-                      {o.l} <span className="opacity-70 font-semibold">({o.p})</span>
-                    </button>
-                  ))}
-                </div>
-                <div className="space-y-1">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Payment Reference</label>
-                  <input type="text" placeholder="Transaction reference or notes" value={paymentRef} onChange={e => setPaymentRef(e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500" />
-                </div>
-                <button onClick={handleActivate} disabled={activateLoading}
-                  className="w-full py-2.5 rounded-xl text-xs font-black bg-blue-600 text-white disabled:opacity-50 transition-all duration-300">
-                  {activateLoading ? 'Processing...' : 'Confirm Activate'}
-                </button>
-              </motion.div>
-            )}
           </div>
         </div>
 
