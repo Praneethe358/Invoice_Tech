@@ -6,10 +6,10 @@ import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const STATUS_COLORS: Record<string, string> = {
-  trial: 'bg-blue-500/10 text-blue-400 border-blue-500/25 shadow-[0_0_15px_rgba(59,130,246,0.15)]',
-  active: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25 shadow-[0_0_15px_rgba(16,185,129,0.15)]',
-  expired: 'bg-rose-500/10 text-rose-400 border-rose-500/25 shadow-[0_0_15px_rgba(244,63,94,0.15)]',
-  cancelled: 'bg-slate-800/80 text-slate-400 border-slate-700/60',
+  trial: 'bg-blue-50 text-blue-700 border-blue-200 shadow-[0_0_12px_rgba(59,130,246,0.05)]',
+  active: 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.05)]',
+  expired: 'bg-rose-50 text-rose-700 border-rose-200 shadow-[0_0_12px_rgba(244,63,94,0.05)]',
+  cancelled: 'bg-slate-50 text-slate-500 border-slate-200',
 };
 
 const SHOP_EMOJIS: Record<string, string> = {
@@ -78,15 +78,15 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
     return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
-  if (loading) return <div className="text-center py-20 text-slate-500 font-bold text-sm">Loading shop information...</div>;
-  if (!shop) return <div className="text-center py-20 text-slate-500 font-bold text-sm">Shop record not found</div>;
+  if (loading) return <div className="text-center py-20 text-slate-400 font-bold text-sm">Loading shop information...</div>;
+  if (!shop) return <div className="text-center py-20 text-slate-400 font-bold text-sm">Shop record not found</div>;
 
   const status = shop.subscription_status || 'trial';
 
   return (
     <div className="space-y-6">
       {toast && (
-        <div className="fixed top-6 right-6 z-[100] bg-slate-900 border border-slate-800 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-2xl shadow-black/80">
+        <div className="fixed top-6 right-6 z-[100] bg-slate-900 border border-slate-800 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-xl">
           {toast}
         </div>
       )}
@@ -94,21 +94,21 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white font-black text-xl overflow-hidden shadow-lg shadow-blue-500/10">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-cyan-500 flex items-center justify-center text-white font-black text-xl overflow-hidden shadow-md shadow-blue-500/10">
             {shop.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={shop.logo_url} alt="" className="w-full h-full object-cover" loading="lazy" />
             ) : shop.name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h1 className="text-lg font-black text-white leading-tight">{shop.name}</h1>
+            <h1 className="text-lg font-black text-slate-900 leading-tight">{shop.name}</h1>
             <div className="flex items-center gap-2.5 mt-1.5">
               <span className="text-xs font-bold text-slate-400">{SHOP_EMOJIS[shop.shop_type] || '🏪'} {shop.shop_type}</span>
-              <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-black border capitalize ${STATUS_COLORS[status]}`}>{status}</span>
+              <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-black border capitalize ${STATUS_COLORS[status] || STATUS_COLORS.cancelled}`}>{status}</span>
             </div>
           </div>
         </div>
-        <Link href="/admin" className="text-xs font-bold text-slate-400 hover:text-blue-400 transition-colors flex items-center gap-1.5">
+        <Link href="/admin" className="text-xs font-bold text-slate-500 hover:text-blue-600 transition-colors flex items-center gap-1.5">
           ← Back to Admin
         </Link>
       </div>
@@ -117,7 +117,7 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
         {/* Left Column */}
         <div className="lg:col-span-2 space-y-6">
           {/* Shop Info */}
-          <div className="bg-[#0b132b]/60 backdrop-blur-md border border-slate-800 rounded-2xl p-5 shadow-lg">
+          <div className="bg-white border border-slate-200/85 rounded-2xl p-5 shadow-xs">
             <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Shop Info</h2>
             <div className="space-y-3.5 text-xs">
               {[
@@ -131,48 +131,48 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
                 ['Joined', formatDate(shop.created_at)],
                 ['Onboarding', shop.onboarding_completed ? 'Completed' : 'Pending'],
               ].map(([label, val]) => (
-                <div key={label} className="flex justify-between border-b border-slate-850/50 pb-2.5 last:border-0 last:pb-0">
+                <div key={label} className="flex justify-between border-b border-slate-100 pb-2.5 last:border-0 last:pb-0">
                   <span className="font-bold text-slate-400">{label}</span>
-                  <span className="font-extrabold text-slate-200 text-right max-w-[60%] break-all">{val}</span>
+                  <span className="font-extrabold text-slate-800 text-right max-w-[60%] break-all">{val}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Subscription Card */}
-          <div className="bg-[#0b132b]/60 backdrop-blur-md border border-slate-800 rounded-2xl p-5 shadow-lg">
+          <div className="bg-white border border-slate-200/85 rounded-2xl p-5 shadow-xs">
             <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Subscription Details</h2>
             <div className="space-y-3.5 text-xs mb-5">
               <div className="flex justify-between items-center">
                 <span className="font-bold text-slate-400">Status</span>
-                <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-black border capitalize ${STATUS_COLORS[status]}`}>{status}</span>
+                <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-black border capitalize ${STATUS_COLORS[status] || STATUS_COLORS.cancelled}`}>{status}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-bold text-slate-400">Trial Ends</span>
-                <span className="font-extrabold text-slate-200">{formatDate(shop.trial_ends_at)}</span>
+                <span className="font-extrabold text-slate-800">{formatDate(shop.trial_ends_at)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-bold text-slate-400">Sub Started</span>
-                <span className="font-extrabold text-slate-200">{formatDate(shop.subscription_started_at)}</span>
+                <span className="font-extrabold text-slate-800">{formatDate(shop.subscription_started_at)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-bold text-slate-400">Sub Ends</span>
-                <span className="font-extrabold text-slate-200">{formatDate(shop.subscription_ends_at)}</span>
+                <span className="font-extrabold text-slate-800">{formatDate(shop.subscription_ends_at)}</span>
               </div>
               {shop.subscription_notes && (
                 <div className="pt-2">
                   <span className="font-bold text-slate-400 block mb-1.5">Notes</span>
-                  <pre className="text-[10px] text-slate-300 bg-slate-950/60 border border-slate-850 p-3 rounded-xl whitespace-pre-wrap font-sans leading-relaxed">{shop.subscription_notes}</pre>
+                  <pre className="text-[10px] text-slate-600 bg-slate-50 border border-slate-100 p-3 rounded-xl whitespace-pre-wrap font-sans leading-relaxed">{shop.subscription_notes}</pre>
                 </div>
               )}
             </div>
             <button onClick={() => setShowActivate(!showActivate)}
-              className="w-full py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-500/10 transition-all duration-300">
+              className="w-full py-2.5 rounded-xl text-xs font-black bg-blue-600 text-white hover:bg-blue-500 shadow-md shadow-blue-500/10 transition-all duration-300">
               {status === 'active' ? 'Extend Subscription' : 'Activate Subscription'}
             </button>
 
             {showActivate && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="mt-4 space-y-3.5 border-t border-slate-800/80 pt-4">
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="mt-4 space-y-3.5 border-t border-slate-100 pt-4">
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { m: 1, l: '1 Month', p: '₹299' }, 
@@ -183,8 +183,8 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
                     <button key={o.m} onClick={() => setDuration(o.m)}
                       className={`px-3 py-2.5 rounded-xl text-[10px] font-black border transition-all duration-300 ${
                         duration === o.m 
-                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-transparent shadow-[0_0_10px_rgba(59,130,246,0.3)]' 
-                          : 'bg-slate-900 text-slate-400 border-slate-850 hover:bg-slate-800'
+                          ? 'bg-blue-600 text-white border-transparent shadow-[0_4px_10px_rgba(37,99,235,0.2)]' 
+                          : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
                       }`}>
                       {o.l} <span className="opacity-70 font-semibold">({o.p})</span>
                     </button>
@@ -193,10 +193,10 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
                 <div className="space-y-1">
                   <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Payment Reference</label>
                   <input type="text" placeholder="Transaction reference or notes" value={paymentRef} onChange={e => setPaymentRef(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-850 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500" />
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500" />
                 </div>
                 <button onClick={handleActivate} disabled={activateLoading}
-                  className="w-full py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-blue-600 to-indigo-600 text-white disabled:opacity-50 transition-all duration-300">
+                  className="w-full py-2.5 rounded-xl text-xs font-black bg-blue-600 text-white disabled:opacity-50 transition-all duration-300">
                   {activateLoading ? 'Processing...' : 'Confirm Activate'}
                 </button>
               </motion.div>
@@ -217,60 +217,54 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
               { l: 'Last Login', v: formatDate(stats.last_sign_in as string | null), i: '🔐', color: 'border-t-rose-500' },
             ].map((s, i) => (
               <motion.div key={s.l} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
-                className={`bg-[#0b132b]/60 backdrop-blur-md border-t-2 border-x border-b border-slate-800 rounded-2xl p-4 shadow-lg ${s.color}`}>
+                className={`bg-white border-t-2 border-x border-b border-slate-200/85 rounded-2xl p-4 shadow-xs ${s.color}`}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{s.l}</span>
                   <span className="text-base">{s.i}</span>
                 </div>
-                <p className="text-base font-black text-white tracking-tight">{s.v}</p>
+                <p className="text-base font-black text-slate-900 tracking-tight">{s.v}</p>
               </motion.div>
             ))}
           </div>
 
           {/* Invoice Volume Chart */}
-          <div className="bg-[#0b132b]/60 backdrop-blur-md border border-slate-800 rounded-2xl p-5 shadow-lg">
+          <div className="bg-white border border-slate-200/85 rounded-2xl p-5 shadow-xs">
             <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Invoice Volume (Last 6 Months)</h2>
             <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthlyVolume}>
-                  <defs>
-                    <linearGradient id="barBlue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3b82f6" />
-                      <stop offset="100%" stopColor="#1e3a8a" />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="month" tick={{ fontSize: 9, fill: '#64748b', fontWeight: 650 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 9, fill: '#64748b', fontWeight: 650 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 650 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 650 }} axisLine={false} tickLine={false} allowDecimals={false} />
                   <Tooltip
                     contentStyle={{
                       fontSize: 10,
                       borderRadius: 14,
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      background: 'rgba(15, 23, 42, 0.95)',
-                      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.2)'
+                      border: '1px solid #e2e8f0',
+                      background: 'rgba(255, 255, 255, 0.95)',
+                      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
                     }}
                   />
-                  <Bar dataKey="count" fill="url(#barBlue)" radius={[6, 6, 0, 0]} barSize={16} />
+                  <Bar dataKey="count" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={16} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           {/* Recent Invoices */}
-          <div className="bg-[#0b132b]/60 backdrop-blur-md border border-slate-800 rounded-2xl p-5 shadow-lg">
+          <div className="bg-white border border-slate-200/85 rounded-2xl p-5 shadow-xs">
             <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Recent Invoices</h2>
             {recentInvoices.length === 0 ? (
               <p className="text-xs text-slate-400 font-bold py-6 text-center">No invoices created yet</p>
             ) : (
               <div className="space-y-3">
                 {recentInvoices.map((inv, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b border-slate-850 last:border-0 last:pb-0">
+                  <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0 last:pb-0">
                     <div>
-                      <p className="text-xs font-black text-white">{inv.invoice_number}</p>
+                      <p className="text-xs font-black text-slate-800">{inv.invoice_number}</p>
                       <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{inv.customer_name || inv.customer_phone}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-extrabold text-blue-400 tabular-nums">₹{Number(inv.total).toLocaleString('en-IN')}</p>
+                      <p className="text-xs font-extrabold text-blue-600 tabular-nums">₹{Number(inv.total).toLocaleString('en-IN')}</p>
                       <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{formatDate(inv.created_at as string)}</p>
                     </div>
                   </div>

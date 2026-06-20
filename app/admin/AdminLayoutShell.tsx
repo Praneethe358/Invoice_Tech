@@ -53,27 +53,30 @@ export default function AdminLayoutShell({
   };
 
   return (
-    <div className="min-h-screen bg-[#070b13] text-slate-100 relative overflow-hidden font-sans select-none">
-      {/* Background neon glow spheres for futuristic dashboard depth */}
-      <div className="absolute top-[-300px] left-[-300px] w-[800px] h-[800px] rounded-full bg-blue-600/10 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-300px] right-[-300px] w-[800px] h-[800px] rounded-full bg-purple-600/10 blur-[150px] pointer-events-none" />
-      <div className="absolute top-[20%] right-[10%] w-[400px] h-[400px] rounded-full bg-cyan-600/5 blur-[120px] pointer-events-none" />
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 relative overflow-hidden font-sans select-none">
+      {/* Soft elegant background glow shapes for premium light depth */}
+      <div className="absolute top-[-300px] left-[-300px] w-[800px] h-[800px] rounded-full bg-blue-100/40 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-300px] right-[-300px] w-[800px] h-[800px] rounded-full bg-indigo-100/30 blur-[120px] pointer-events-none" />
+      <div className="absolute top-[20%] right-[10%] w-[400px] h-[400px] rounded-full bg-cyan-100/20 blur-[100px] pointer-events-none" />
 
       {/* Admin Top Navbar */}
-      <header className="bg-[#0b132b]/80 border-b border-slate-800/80 sticky top-0 z-50 backdrop-blur-lg">
+      <header className="bg-white/80 border-b border-slate-200/80 sticky top-0 z-50 backdrop-blur-md">
         <div className="max-w-[1440px] mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left — Brand + Nav */}
             <div className="flex items-center gap-10">
               <Link href="/admin" className="flex items-center gap-3 group">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0052d4] via-[#4364f7] to-[#6fb1fc] flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-300">
-                  <span className="text-white font-black text-sm tracking-tighter">TB</span>
-                </div>
+                <img
+                  src="/trubill-logo.png"
+                  alt="TruBill logo"
+                  className="w-9 h-9 object-contain shrink-0 group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
                 <div className="flex flex-col">
-                  <span className="text-sm font-black text-white tracking-tight leading-none">
+                  <span className="text-sm font-black text-slate-900 tracking-tight leading-none">
                     TruBill
                   </span>
-                  <span className="text-[9px] font-bold text-blue-400 tracking-widest uppercase mt-0.5">
+                  <span className="text-[9px] font-bold text-blue-600 tracking-widest uppercase mt-0.5">
                     Admin Panel
                   </span>
                 </div>
@@ -86,8 +89,8 @@ export default function AdminLayoutShell({
                     href={link.href}
                     className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
                       isActive(link.href)
-                        ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-blue-400 border border-blue-500/35 shadow-[0_0_15px_rgba(59,130,246,0.15)]'
-                        : 'text-slate-400 border border-transparent hover:text-slate-200 hover:bg-white/5'
+                        ? 'bg-blue-50/80 text-blue-600 border border-blue-200/60 shadow-xs'
+                        : 'text-slate-600 border border-transparent hover:text-slate-900 hover:bg-slate-100/60'
                     }`}
                   >
                     {link.label}
@@ -98,21 +101,21 @@ export default function AdminLayoutShell({
 
             {/* Right — User info + Sign Out */}
             <div className="flex items-center gap-6">
-              <span className="hidden lg:block text-[10px] font-bold text-slate-400 tracking-wider tabular-nums uppercase bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-800">
+              <span className="hidden lg:block text-[10px] font-bold text-slate-500 tracking-wider tabular-nums uppercase bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200/50">
                 🕒 {currentTime}
               </span>
-              <div className="h-4 w-px bg-slate-800 hidden lg:block" />
+              <div className="h-4 w-px bg-slate-200 hidden lg:block" />
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-[10px] font-black text-white uppercase shadow-md shadow-indigo-500/10">
                   PE
                 </div>
-                <span className="text-xs font-black text-slate-200">
+                <span className="text-xs font-black text-slate-800">
                   Praneeth E.
                 </span>
               </div>
               <button
                 onClick={handleSignOut}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all duration-300"
+                className="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-all duration-300"
               >
                 Sign Out
               </button>
@@ -121,15 +124,15 @@ export default function AdminLayoutShell({
         </div>
 
         {/* Mobile Nav */}
-        <div className="md:hidden border-t border-slate-900 bg-[#090e1a]/95 px-4 py-2.5 flex gap-1.5 overflow-x-auto">
+        <div className="md:hidden border-t border-slate-100 bg-white/95 px-4 py-2.5 flex gap-1.5 overflow-x-auto">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap border transition-all duration-300 ${
                 isActive(link.href)
-                  ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-blue-400 border-blue-500/30'
-                  : 'text-slate-400 border-transparent hover:bg-white/5'
+                  ? 'bg-blue-50/80 text-blue-600 border-blue-200/60'
+                  : 'text-slate-600 border-transparent hover:bg-slate-50'
               }`}
             >
               {link.label}
