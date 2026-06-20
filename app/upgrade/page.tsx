@@ -45,7 +45,7 @@ export default async function UpgradePage() {
   }
 
   const upiId = process.env.NEXT_PUBLIC_UPI_ID || 'praneethpraneeth8888@oksbi';
-  const supportPhone = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || '919876543210';
+  const supportPhone = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || '919080689844';
 
   return (
     <UpgradeClient
