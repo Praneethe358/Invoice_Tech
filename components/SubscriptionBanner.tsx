@@ -113,7 +113,7 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
           }
         }
         ${urgency === 'blocked' ? `
-          main, #main-content, [role="main"], .page-container, .min-h-screen > div {
+          main:not(.exclude-blur), #main-content:not(.exclude-blur), [role="main"]:not(.exclude-blur), .page-container:not(.exclude-blur), .min-h-screen > div:not(.exclude-blur) {
             filter: blur(2px) !important;
             pointer-events: none !important;
           }
@@ -125,7 +125,7 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: -48, opacity: 0 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className={`fixed left-0 md:left-72 right-0 h-12 z-[40] ${bgClass} flex items-center justify-between px-4 shadow-sm text-xs font-semibold sub-banner-position`}
+        className={`fixed left-0 md:left-72 right-0 h-12 z-[40] ${bgClass} flex items-center justify-between px-4 shadow-sm text-xs font-semibold sub-banner-position exclude-blur`}
       >
         <div className="flex items-center gap-2 overflow-hidden mr-2 truncate">
           <span className="text-base">{icon}</span>

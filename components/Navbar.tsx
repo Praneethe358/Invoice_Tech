@@ -418,7 +418,7 @@ export default function Navbar() {
       </aside>
 
       {/* ─── MOBILE HEADER (Visible only on < 768px) ─── */}
-      <div className="mobile-header-fixed md:hidden w-full">
+      <div className="mobile-header-fixed md:hidden w-full exclude-blur">
         {/* Dark Top Strip (Navy Blue) */}
         <div className="bg-[#001048] h-1 w-full" />
         

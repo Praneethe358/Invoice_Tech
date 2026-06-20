@@ -29,6 +29,11 @@ export default function DashboardClient({
   stats,
 }: DashboardClientProps) {
   const supabase = createClient();
+  const subAccess = getSubscriptionAccess({
+    subscription_status: shop.subscription_status || 'trial',
+    trial_ends_at: shop.trial_ends_at || null,
+    subscription_ends_at: shop.subscription_ends_at || null,
+  });
   const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -90,7 +95,7 @@ export default function DashboardClient({
     <div className="min-h-screen bg-[#f5f6fa]">
       <Navbar />
 
-      <PageTransition className="w-full px-4 md:px-8 pt-6 md:pt-0 pb-24">
+      <PageTransition className={`w-full px-4 md:px-8 pt-6 md:pt-0 pb-24 ${!subAccess.canSendInvoices ? 'exclude-blur' : ''}`}>
         {/* Header with greeting - Desktop only */}
         <div className="hidden md:flex bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-xs items-center justify-between mb-6 md:sticky md:top-0 md:z-30">
           <div className="flex items-center gap-3">
@@ -136,11 +141,6 @@ export default function DashboardClient({
 
         {/* Conditional rendering for stats or blocked state */}
         {(() => {
-          const subAccess = getSubscriptionAccess({
-            subscription_status: shop.subscription_status || 'trial',
-            trial_ends_at: shop.trial_ends_at || null,
-            subscription_ends_at: shop.subscription_ends_at || null,
-          });
 
           const trialEnds = shop.trial_ends_at ? new Date(shop.trial_ends_at) : null;
           const daysRemaining = trialEnds ? Math.max(0, Math.ceil((trialEnds.getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : 0;
