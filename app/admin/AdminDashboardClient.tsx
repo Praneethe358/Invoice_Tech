@@ -40,10 +40,10 @@ interface AnalyticsData {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  trial: 'bg-blue-50 text-blue-700 border-blue-200',
-  active: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  expired: 'bg-red-50 text-red-700 border-red-200',
-  cancelled: 'bg-slate-100 text-slate-500 border-slate-200',
+  trial: 'bg-blue-500/10 text-blue-400 border-blue-500/25 shadow-[0_0_15px_rgba(59,130,246,0.15)]',
+  active: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25 shadow-[0_0_15px_rgba(16,185,129,0.15)]',
+  expired: 'bg-rose-500/10 text-rose-400 border-rose-500/25 shadow-[0_0_15px_rgba(244,63,94,0.15)]',
+  cancelled: 'bg-slate-800/80 text-slate-400 border-slate-700/60',
 };
 
 const SHOP_EMOJIS: Record<string, string> = {
@@ -209,80 +209,78 @@ export default function AdminDashboardClient() {
       label: 'Total Shops',
       value: stats.total_shops,
       icon: (
-        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+        <svg className="w-4 h-4 text-blue-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
           <polyline points="9 22 9 12 15 12 15 22" />
         </svg>
       ),
-      bg: 'border-t-blue-500',
-      pillBg: 'bg-blue-50',
+      bg: 'border-t-blue-500/80 shadow-blue-500/5',
+      pillBg: 'bg-blue-500/10 border border-blue-500/20',
       trend: stats.new_this_month > 0 ? `+${stats.new_this_month} new this month` : 'Steady growth'
     },
     {
       label: 'Active Subs',
       value: stats.active,
       icon: (
-        <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+        <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
           <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
       ),
-      bg: 'border-t-emerald-500',
-      pillBg: 'bg-emerald-50',
+      bg: 'border-t-emerald-500/80 shadow-emerald-500/5',
+      pillBg: 'bg-emerald-500/10 border border-emerald-500/20',
       trend: stats.total_shops > 0 ? `${Math.round((stats.active / stats.total_shops) * 100)}% conversion` : '0% conversion'
     },
     {
       label: 'Trial Shops',
       value: stats.trial,
       icon: (
-        <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+        <svg className="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
           <circle cx="12" cy="12" r="10" />
           <polyline points="12 6 12 12 16 14" />
         </svg>
       ),
-      bg: 'border-t-amber-500',
-      pillBg: 'bg-amber-50',
+      bg: 'border-t-amber-500/80 shadow-amber-500/5',
+      pillBg: 'bg-amber-500/10 border border-amber-500/20',
       trend: stats.total_shops > 0 ? `${Math.round((stats.trial / stats.total_shops) * 100)}% on trial` : '0% on trial'
     },
     {
       label: 'Expired',
       value: stats.expired,
       icon: (
-        <svg className="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+        <svg className="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
       ),
-      bg: 'border-t-rose-500',
-      pillBg: 'bg-rose-50',
+      bg: 'border-t-rose-500/80 shadow-rose-500/5',
+      pillBg: 'bg-rose-5050/10 border border-rose-500/20',
       trend: stats.total_shops > 0 ? `${Math.round((stats.expired / stats.total_shops) * 100)}% expired` : '0% expired'
     },
     {
       label: 'Total Invoices',
       value: stats.total_invoices.toLocaleString('en-IN'),
       icon: (
-        <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+        <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
           <polyline points="14 2 14 8 20 8" />
-          <line x1="16" y1="13" x2="8" y2="13" />
-          <line x1="16" y1="17" x2="8" y2="17" />
         </svg>
       ),
-      bg: 'border-t-indigo-500',
-      pillBg: 'bg-indigo-50',
+      bg: 'border-t-indigo-500/80 shadow-indigo-500/5',
+      pillBg: 'bg-indigo-500/10 border border-indigo-500/20',
       trend: 'Platform-wide usage'
     },
     {
       label: 'MRR',
       value: `₹${stats.mrr.toLocaleString('en-IN')}`,
       icon: (
-        <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+        <svg className="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
           <line x1="12" y1="1" x2="12" y2="23" />
           <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
         </svg>
       ),
-      bg: 'border-t-violet-500',
-      pillBg: 'bg-violet-50',
+      bg: 'border-t-violet-500/80 shadow-violet-500/5',
+      pillBg: 'bg-violet-500/10 border border-violet-500/20',
       trend: '₹299/mo gate active'
     },
   ] : [];
@@ -291,7 +289,7 @@ export default function AdminDashboardClient() {
     <div className="space-y-6">
       {/* Toast */}
       {toast && (
-        <div className="fixed top-4 right-4 z-[100] bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg">
+        <div className="fixed top-6 right-6 z-[100] bg-slate-900 border border-slate-800 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-2xl shadow-black/80">
           {toast}
         </div>
       )}
@@ -304,8 +302,8 @@ export default function AdminDashboardClient() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08, duration: 0.3 }}
-            whileHover={{ y: -2 }}
-            className={`bg-white border-t-4 border-x border-b border-slate-200 rounded-2xl p-5 shadow-2xs hover:shadow-xs transition-all duration-300 ${card.bg}`}
+            whileHover={{ y: -3, scale: 1.01 }}
+            className={`bg-[#0b132b]/60 backdrop-blur-md border-t-2 border-x border-b border-slate-800/80 rounded-2xl p-5 shadow-lg hover:border-slate-700/80 transition-all duration-300 ${card.bg}`}
           >
             <div className="flex items-center justify-between mb-3">
               <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{card.label}</span>
@@ -313,10 +311,10 @@ export default function AdminDashboardClient() {
                 {card.icon}
               </div>
             </div>
-            <p className="text-2xl font-black text-slate-900 tabular-nums tracking-tight">{card.value}</p>
+            <p className="text-2xl font-black text-white tabular-nums tracking-tight">{card.value}</p>
             {card.trend && (
-              <p className="text-[9px] font-extrabold text-slate-400 mt-2 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+              <p className="text-[9px] font-bold text-slate-400 mt-2 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500/60 animate-ping" />
                 {card.trend}
               </p>
             )}
@@ -332,21 +330,21 @@ export default function AdminDashboardClient() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.3 }}
-            className="lg:col-span-8 bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs relative overflow-hidden"
+            className="lg:col-span-8 bg-[#0b132b]/60 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-lg relative overflow-hidden"
           >
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                <h3 className="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
                   <span>📈</span> Shop Growth & Revenue Trend
                 </h3>
-                <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Cumulative shop registrations and monthly run-rate</p>
+                <p className="text-[10px] text-slate-400 font-bold mt-0.5">Cumulative shop registrations and monthly run-rate</p>
               </div>
-              <div className="flex items-center gap-4 text-[10px] font-bold">
-                <span className="flex items-center gap-1.5 text-blue-600">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500" /> Shops
+              <div className="flex items-center gap-4 text-[10px] font-extrabold">
+                <span className="flex items-center gap-1.5 text-blue-400">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-md shadow-blue-500/30" /> Shops
                 </span>
-                <span className="flex items-center gap-1.5 text-emerald-600">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> MRR (₹)
+                <span className="flex items-center gap-1.5 text-emerald-400">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-md shadow-emerald-500/30" /> MRR (₹)
                 </span>
               </div>
             </div>
@@ -356,28 +354,29 @@ export default function AdminDashboardClient() {
                 <AreaChart data={analytics.growth_data}>
                   <defs>
                     <linearGradient id="colorShops" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2}/>
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25}/>
                       <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.01}/>
                     </linearGradient>
                     <linearGradient id="colorMRR" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.25}/>
                       <stop offset="95%" stopColor="#10b981" stopOpacity={0.01}/>
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="month" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} axisLine={false} tickLine={false} />
-                  <YAxis yAxisId="left" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} axisLine={false} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
+                  <XAxis dataKey="month" tick={{ fontSize: 9, fill: '#64748b', fontWeight: 700 }} axisLine={false} tickLine={false} />
+                  <YAxis yAxisId="left" tick={{ fontSize: 9, fill: '#64748b', fontWeight: 700 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9, fill: '#64748b', fontWeight: 700 }} axisLine={false} tickLine={false} />
                   <Tooltip
                     contentStyle={{
                       fontSize: 10,
                       borderRadius: 16,
-                      border: '1px solid #e2e8f0',
-                      background: 'rgba(255, 255, 255, 0.95)',
-                      boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)',
-                      backdropFilter: 'blur(8px)'
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      background: 'rgba(15, 23, 42, 0.95)',
+                      boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)',
+                      backdropFilter: 'blur(8px)',
+                      color: '#fff'
                     }}
                   />
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <Area yAxisId="left" type="monotone" dataKey="shops" stroke="#3b82f6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorShops)" dot={{ fill: '#3b82f6', r: 3 }} activeDot={{ r: 5 }} />
                   <Area yAxisId="right" type="monotone" dataKey={d => d.shops * 299} name="MRR" stroke="#10b981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorMRR)" dot={{ fill: '#10b981', r: 3 }} activeDot={{ r: 5 }} />
                 </AreaChart>
@@ -390,13 +389,13 @@ export default function AdminDashboardClient() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.3 }}
-            className="lg:col-span-4 bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs flex flex-col justify-between"
+            className="lg:col-span-4 bg-[#0b132b]/60 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-lg flex flex-col justify-between"
           >
             <div>
-              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5 mb-1">
+              <h3 className="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-1.5 mb-1">
                 <span>🍰</span> Shop Category Share
               </h3>
-              <p className="text-[10px] text-slate-400 font-semibold mb-6">Distribution by business category</p>
+              <p className="text-[10px] text-slate-400 font-bold mb-6">Distribution by business category</p>
             </div>
             
             <div className="h-44 relative flex items-center justify-center">
@@ -419,28 +418,29 @@ export default function AdminDashboardClient() {
                     contentStyle={{
                       fontSize: 10,
                       borderRadius: 12,
-                      border: '1px solid #e2e8f0',
-                      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      background: 'rgba(15, 23, 42, 0.95)',
+                      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.2)'
                     }}
                   />
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute flex flex-col items-center justify-center">
-                <span className="text-xl font-black text-slate-800">{stats?.total_shops}</span>
-                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Total Shops</span>
+                <span className="text-2xl font-black text-white">{stats?.total_shops}</span>
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Total Shops</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-1.5 mt-4 text-[9px] font-bold text-slate-600">
+            <div className="grid grid-cols-2 gap-2 mt-4 text-[9px] font-black text-slate-300">
               {typeChartData.slice(0, 4).map((entry, idx) => (
-                <div key={entry.name} className="flex items-center gap-1.5 truncate">
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
+                <div key={entry.name} className="flex items-center gap-1.5 truncate bg-slate-950/40 px-2 py-1 rounded-lg border border-slate-800/40">
+                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
                   <span className="truncate">{entry.name}</span>
                   <span className="text-slate-400 ml-auto tabular-nums">{entry.count}</span>
                 </div>
               ))}
               {typeChartData.length > 4 && (
-                <div className="flex items-center gap-1.5 text-slate-400 col-span-2 justify-center pt-1.5 border-t border-slate-50 font-semibold">
+                <div className="flex items-center gap-1.5 text-slate-400 col-span-2 justify-center pt-2 border-t border-slate-800/50 font-bold">
                   + {typeChartData.length - 4} other categories
                 </div>
               )}
@@ -455,43 +455,43 @@ export default function AdminDashboardClient() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.3 }}
-          className="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs"
+          className="bg-[#0b132b]/60 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-lg"
         >
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xs font-black text-slate-200 uppercase tracking-wide flex items-center gap-1.5">
               <span>🛡️</span> Platform Health
             </h3>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 shadow-[0_0_12px_rgba(16,185,129,0.15)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
               All Systems Operational
             </span>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex justify-between items-center">
+            <div className="bg-slate-950/50 rounded-xl p-4 border border-slate-850 flex justify-between items-center">
               <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">
                   Manual Full Data Exports (Last 30 Days)
                 </p>
-                <p className="text-sm font-semibold text-slate-700">
+                <p className="text-xs font-medium text-slate-300">
                   Total requests compiled and downloaded safely.
                 </p>
               </div>
-              <p className="text-2xl font-black text-slate-900 tabular-nums">
+              <p className="text-3xl font-black text-white tabular-nums">
                 {stats.exports_count || 0}
               </p>
             </div>
             
-            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex justify-between items-center">
+            <div className="bg-slate-950/50 rounded-xl p-4 border border-slate-850 flex justify-between items-center">
               <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">
                   Database Backup Status
                 </p>
-                <p className="text-sm font-semibold text-slate-700">
+                <p className="text-xs font-medium text-slate-300">
                   Automated Supabase daily backups enabled.
                 </p>
               </div>
-              <span className="px-2.5 py-1 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-lg">
+              <span className="px-3 py-1 text-[10px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg">
                 Successful
               </span>
             </div>
@@ -506,10 +506,10 @@ export default function AdminDashboardClient() {
             <button
               key={tab}
               onClick={() => { setStatusFilter(tab); setPage(1); }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize whitespace-nowrap border transition-colors ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold capitalize whitespace-nowrap border transition-all duration-300 ${
                 statusFilter === tab
-                  ? 'bg-[#0050e8]/10 text-[#0050e8] border-[#0050e8]'
-                  : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-transparent shadow-[0_0_15px_rgba(59,130,246,0.3)]'
+                  : 'bg-[#0b132b]/60 text-slate-400 border-slate-800/80 hover:bg-slate-800/60'
               }`}
             >
               {tab} {tab !== 'all' && stats ? `(${stats[tab as keyof Stats] || 0})` : ''}
@@ -522,17 +522,17 @@ export default function AdminDashboardClient() {
             placeholder="Search shop name or email..."
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#0050e8] placeholder-slate-400"
+            className="w-full pl-10 pr-4 py-2.5 bg-[#0b132b]/60 border border-slate-800/80 rounded-xl text-xs font-bold text-white focus:outline-none focus:border-blue-500 focus:shadow-[0_0_15px_rgba(59,130,246,0.2)] placeholder-slate-500 transition-all duration-300"
           />
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </div>
       </div>
 
       {/* Shops Table */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-x-auto">
+      <div className="bg-[#0b132b]/40 backdrop-blur-md border border-slate-800 rounded-2xl shadow-lg overflow-x-auto">
         <table className="w-full text-xs text-left">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+            <tr className="bg-slate-950/60 border-b border-slate-800 text-[9px] font-black text-slate-400 uppercase tracking-widest">
               {[
                 { key: 'name', label: 'Shop Name' },
                 { key: 'shop_type', label: 'Type' },
@@ -546,75 +546,76 @@ export default function AdminDashboardClient() {
                 <th
                   key={col.key}
                   onClick={() => handleSort(col.key)}
-                  className="py-3 px-4 cursor-pointer hover:text-slate-600 select-none whitespace-nowrap"
+                  className="py-4 px-5 cursor-pointer hover:text-slate-200 select-none whitespace-nowrap transition-colors"
                 >
                   {col.label}
-                  {sort === col.key && <span className="ml-1">{order === 'asc' ? '↑' : '↓'}</span>}
+                  {sort === col.key && <span className="ml-1 text-blue-400">{order === 'asc' ? '▲' : '▼'}</span>}
                 </th>
               ))}
-              <th className="py-3 px-4">Actions</th>
+              <th className="py-4 px-5">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-800/40">
             {loading ? (
-              <tr><td colSpan={9} className="py-12 text-center text-slate-400 font-semibold">Loading...</td></tr>
+              <tr><td colSpan={9} className="py-12 text-center text-slate-500 font-bold">Loading shop accounts...</td></tr>
             ) : shops.length === 0 ? (
-              <tr><td colSpan={9} className="py-12 text-center text-slate-400 font-semibold">No shops found</td></tr>
+              <tr><td colSpan={9} className="py-12 text-center text-slate-500 font-bold">No shop accounts found</td></tr>
             ) : shops.map((shop, idx) => (
               <Fragment key={shop.id}>
                 <tr
-                  className={`hover:bg-slate-50/70 transition-colors ${idx % 2 === 1 ? 'bg-slate-50/30' : ''} ${activatingId === shop.id ? 'border-l-4 border-l-[#0050e8]' : ''}`}
+                  className={`hover:bg-slate-800/30 transition-colors ${idx % 2 === 1 ? 'bg-slate-900/10' : ''} ${activatingId === shop.id ? 'border-l-4 border-l-blue-500' : ''}`}
                 >
-                  <td className="py-3.5 px-4">
-                    <button onClick={() => router.push(`/admin/shops/${shop.id}`)} className="font-bold text-slate-900 hover:text-[#0050e8] transition-colors text-left">
+                  <td className="py-4 px-5">
+                    <button onClick={() => router.push(`/admin/shops/${shop.id}`)} className="font-extrabold text-white hover:text-blue-400 transition-colors text-left">
                       {shop.name}
                     </button>
                   </td>
-                  <td className="py-3.5 px-4 text-slate-600 whitespace-nowrap">
-                    {SHOP_EMOJIS[shop.shop_type] || '🏪'} {shop.shop_type}
+                  <td className="py-4 px-5 text-slate-300 font-semibold whitespace-nowrap">
+                    <span className="bg-slate-900 px-2 py-1 rounded-lg border border-slate-800/80 mr-1.5">{SHOP_EMOJIS[shop.shop_type] || '🏪'}</span>
+                    {shop.shop_type}
                   </td>
-                  <td className="py-3.5 px-4 text-slate-500 font-medium">{shop.owner_email}</td>
-                  <td className="py-3.5 px-4 text-slate-500 font-mono text-[10px]">{shop.gstin || '—'}</td>
-                  <td className="py-3.5 px-4">
-                    <span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold border capitalize ${STATUS_COLORS[shop.subscription_status] || STATUS_COLORS.cancelled}`}>
+                  <td className="py-4 px-5 text-slate-400 font-bold">{shop.owner_email}</td>
+                  <td className="py-4 px-5 text-slate-400 font-mono text-[10px] tracking-wide">{shop.gstin || '—'}</td>
+                  <td className="py-4 px-5">
+                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-black border capitalize ${STATUS_COLORS[shop.subscription_status] || STATUS_COLORS.cancelled}`}>
                       {shop.subscription_status}
                     </span>
                   </td>
-                  <td className={`py-3.5 px-4 font-semibold tabular-nums ${
-                    isDateUrgent(shop.subscription_ends_at || shop.trial_ends_at) ? 'text-red-600' :
-                    isDateWarning(shop.subscription_ends_at || shop.trial_ends_at) ? 'text-amber-600' : 'text-slate-600'
+                  <td className={`py-4 px-5 font-black tabular-nums ${
+                    isDateUrgent(shop.subscription_ends_at || shop.trial_ends_at) ? 'text-rose-400' :
+                    isDateWarning(shop.subscription_ends_at || shop.trial_ends_at) ? 'text-amber-400' : 'text-slate-300'
                   }`}>
                     {formatDate(shop.subscription_ends_at || shop.trial_ends_at)}
                   </td>
-                  <td className="py-3.5 px-4 text-slate-700 font-bold tabular-nums">{shop.invoice_count}</td>
-                  <td className="py-3.5 px-4 text-slate-500 font-medium tabular-nums">{formatDate(shop.created_at)}</td>
-                  <td className="py-3.5 px-4">
+                  <td className="py-4 px-5 text-white font-extrabold tabular-nums">{shop.invoice_count}</td>
+                  <td className="py-4 px-5 text-slate-400 font-semibold tabular-nums">{formatDate(shop.created_at)}</td>
+                  <td className="py-4 px-5">
                     <div className="flex items-center gap-1.5">
                       {shop.subscription_status !== 'active' ? (
                         <button
                           onClick={() => setActivatingId(activatingId === shop.id ? null : shop.id)}
-                          className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-[#0050e8] text-white hover:bg-[#0043c4] transition-colors"
+                          className="px-3 py-1.5 rounded-xl text-[10px] font-black bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-500/10 transition-all duration-300"
                         >Activate</button>
                       ) : (
                         <button
                           onClick={() => setActivatingId(activatingId === shop.id ? null : shop.id)}
-                          className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors"
+                          className="px-3 py-1.5 rounded-xl text-[10px] font-black bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/25 transition-all duration-300"
                         >Extend</button>
                       )}
                       <button
                         onClick={() => router.push(`/admin/shops/${shop.id}`)}
-                        className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                        className="px-3 py-1.5 rounded-xl text-[10px] font-black bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700 transition-all duration-300"
                       >Details</button>
                       <div className="relative group">
-                        <button className="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-500 hover:bg-slate-200">⋯</button>
-                        <div className="hidden group-hover:block absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-10 min-w-[140px] py-1">
+                        <button className="px-2.5 py-1.5 rounded-xl text-[10px] font-black bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700">⋯</button>
+                        <div className="hidden group-hover:block absolute right-0 top-full mt-1.5 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl z-20 min-w-[140px] py-1">
                           <button
                             onClick={() => setExpireTarget({ id: shop.id, name: shop.name, action: 'expire' })}
-                            className="w-full text-left px-3 py-2 text-[10px] font-semibold text-red-600 hover:bg-red-50"
+                            className="w-full text-left px-3.5 py-2.5 text-[10px] font-bold text-rose-400 hover:bg-rose-500/10 transition-colors"
                           >Expire Now</button>
                           <button
                             onClick={() => setExpireTarget({ id: shop.id, name: shop.name, action: 'cancel' })}
-                            className="w-full text-left px-3 py-2 text-[10px] font-semibold text-slate-600 hover:bg-slate-50"
+                            className="w-full text-left px-3.5 py-2.5 text-[10px] font-bold text-slate-400 hover:bg-white/5 transition-colors"
                           >Cancel Subscription</button>
                         </div>
                       </div>
@@ -630,10 +631,10 @@ export default function AdminDashboardClient() {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="border-l-4 border-l-[#0050e8] bg-[#f8faf9] px-6 py-5"
+                        className="border-l-4 border-l-blue-500 bg-slate-950/60 px-6 py-5"
                       >
-                        <p className="text-xs font-bold text-slate-800 mb-4">
-                          {shop.subscription_status === 'active' ? 'Extend' : 'Activate'} subscription for <span className="text-[#0050e8]">{shop.name}</span>
+                        <p className="text-xs font-bold text-slate-200 mb-4">
+                          {shop.subscription_status === 'active' ? 'Extend' : 'Activate'} subscription for <span className="text-blue-400 font-extrabold">{shop.name}</span>
                         </p>
                         <div className="flex flex-wrap gap-3 mb-4">
                           {[
@@ -645,37 +646,37 @@ export default function AdminDashboardClient() {
                             <button
                               key={opt.m}
                               onClick={() => setDuration(opt.m)}
-                              className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-colors ${
+                              className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-all duration-300 ${
                                 duration === opt.m
-                                  ? 'bg-[#0050e8] text-white border-[#0050e8]'
-                                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-transparent shadow-[0_0_12px_rgba(59,130,246,0.35)]'
+                                  : 'bg-slate-900 text-slate-400 border-slate-800 hover:bg-slate-800'
                               }`}
                             >
-                              {opt.label} <span className="opacity-70">({opt.price})</span>
+                              {opt.label} <span className="opacity-70 font-semibold">({opt.price})</span>
                             </button>
                           ))}
                         </div>
                         <div className="flex flex-wrap items-end gap-3">
                           <div className="flex-1 min-w-[200px]">
-                            <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Payment Reference (optional)</label>
+                            <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Payment Reference (optional)</label>
                             <input
                               type="text"
                               placeholder="UPI transaction ID or note"
                               value={paymentRef}
                               onChange={e => setPaymentRef(e.target.value)}
-                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#0050e8]"
+                              className="w-full bg-slate-900 border border-slate-850 rounded-xl px-3.5 py-2.5 text-xs font-bold text-white focus:outline-none focus:border-blue-500"
                             />
                           </div>
                           <button
                             onClick={() => handleActivate(shop.id)}
                             disabled={activateLoading}
-                            className="px-5 py-2 rounded-xl text-xs font-bold bg-[#0050e8] text-white hover:bg-[#0043c4] disabled:opacity-50 transition-colors"
+                            className="px-5 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 transition-all duration-300"
                           >
                             {activateLoading ? 'Processing...' : 'Confirm Activate'}
                           </button>
                           <button
                             onClick={() => { setActivatingId(null); setPaymentRef(''); setDuration(1); }}
-                            className="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700"
+                            className="px-4 py-2.5 text-xs font-bold text-slate-400 hover:text-slate-200 transition-colors"
                           >Cancel</button>
                         </div>
                       </motion.div>
@@ -691,7 +692,7 @@ export default function AdminDashboardClient() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-[10px] font-semibold text-slate-400">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
             Showing {(page - 1) * 20 + 1}–{Math.min(page * 20, total)} of {total} shops
           </p>
           <div className="flex gap-1">
@@ -701,8 +702,8 @@ export default function AdminDashboardClient() {
               <button
                 key={p}
                 onClick={() => setPage(p)}
-                className={`w-8 h-8 rounded-lg text-xs font-bold ${
-                  p === page ? 'bg-[#0050e8] text-white' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+                className={`w-8 h-8 rounded-lg text-xs font-bold transition-all duration-300 ${
+                  p === page ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/10' : 'bg-slate-900 text-slate-400 border border-slate-800 hover:bg-slate-800'
                 }`}
               >{p}</button>
             ))}
@@ -712,32 +713,32 @@ export default function AdminDashboardClient() {
 
       {/* Expire/Cancel Confirmation Modal */}
       {expireTarget && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
-            <h3 className="text-sm font-black text-slate-900 mb-2">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0b132b] border border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <h3 className="text-sm font-black text-white mb-2 tracking-tight">
               {expireTarget.action === 'cancel' ? 'Cancel' : 'Expire'} Subscription
             </h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Type <span className="font-bold text-slate-800">&quot;{expireTarget.name}&quot;</span> to confirm this action.
+            <p className="text-xs text-slate-400 mb-4 font-semibold">
+              Type <span className="font-extrabold text-slate-200">&quot;{expireTarget.name}&quot;</span> to confirm this action.
             </p>
             <input
               type="text"
               placeholder="Type shop name..."
               value={confirmName}
               onChange={e => setConfirmName(e.target.value)}
-              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-red-500 mb-4"
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-3 text-xs font-bold text-white focus:outline-none focus:border-red-500 mb-4"
             />
-            <div className="flex gap-2">
+            <div className="flex gap-2.5">
               <button
                 onClick={handleExpire}
                 disabled={confirmName.trim().toLowerCase() !== expireTarget.name.trim().toLowerCase() || expireLoading}
-                className="flex-1 px-4 py-2.5 rounded-xl text-xs font-bold bg-red-600 text-white hover:bg-red-700 disabled:opacity-40 transition-colors"
+                className="flex-1 px-4 py-3 rounded-xl text-xs font-black bg-rose-600 text-white hover:bg-rose-500 disabled:opacity-40 transition-all duration-300 shadow-lg shadow-rose-600/10"
               >
                 {expireLoading ? 'Processing...' : `Confirm ${expireTarget.action === 'cancel' ? 'Cancel' : 'Expire'}`}
               </button>
               <button
                 onClick={() => { setExpireTarget(null); setConfirmName(''); }}
-                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 border border-slate-200"
+                className="px-4 py-3 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-200 border border-slate-800 bg-slate-900 transition-colors"
               >Cancel</button>
             </div>
           </div>
