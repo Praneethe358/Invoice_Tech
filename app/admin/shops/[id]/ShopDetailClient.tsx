@@ -32,6 +32,8 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
   const [stats, setStats] = useState<Record<string, number | string | null>>({});
   const [recentInvoices, setRecentInvoices] = useState<Array<Record<string, string | number>>>([]);
   const [monthlyVolume, setMonthlyVolume] = useState<Array<{ month: string; count: number }>>([]);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Activate panel
@@ -52,6 +54,8 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
       setStats(data.stats);
       setRecentInvoices(data.recent_invoices || []);
       setMonthlyVolume(data.monthly_volume || []);
+      setPayments(data.payments || []);
+      setAuditLogs(data.audit_logs || []);
     } catch { /* ignore */ }
     setLoading(false);
   };
@@ -209,6 +213,7 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
           {/* Activity Stats */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[
+              { l: 'Total Revenue', v: `₹${(stats.total_revenue ?? 0).toLocaleString('en-IN')}`, i: '💰', color: 'border-t-emerald-500' },
               { l: 'Invoices', v: stats.total_invoices ?? 0, i: '📄', color: 'border-t-blue-500' },
               { l: 'Customers', v: stats.total_customers ?? 0, i: '👥', color: 'border-t-emerald-500' },
               { l: 'Products', v: stats.total_products ?? 0, i: '📦', color: 'border-t-indigo-500' },
@@ -271,6 +276,68 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Payments and Audit Trails Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Payments Card */}
+            <div className="bg-white border border-slate-200/85 rounded-2xl p-5 shadow-xs">
+              <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center justify-between">
+                <span>💵 Recent Payments Received</span>
+                <span className="text-[8px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-100 font-bold uppercase tracking-wider">Live Log</span>
+              </h2>
+              {payments.length === 0 ? (
+                <p className="text-xs text-slate-400 font-bold py-6 text-center">No payments recorded yet</p>
+              ) : (
+                <div className="space-y-3">
+                  {payments.map((p, idx) => (
+                    <div key={p.id || idx} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0 last:pb-0">
+                      <div>
+                        <p className="text-xs font-black text-slate-800">
+                          ₹{Number(p.amount).toLocaleString('en-IN')}
+                        </p>
+                        <p className="text-[10px] text-slate-400 font-semibold mt-0.5 capitalize">
+                          Via {p.payment_method} {p.note ? `• ${p.note}` : ''}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] text-slate-500 font-semibold">{formatDate(p.paid_at)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Audit Logs Card */}
+            <div className="bg-white border border-slate-200/85 rounded-2xl p-5 shadow-xs">
+              <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center justify-between">
+                <span>🛡️ Shop Audit Trails</span>
+                <span className="text-[8px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-100 font-bold uppercase tracking-wider">Secure Access</span>
+              </h2>
+              {auditLogs.length === 0 ? (
+                <p className="text-xs text-slate-400 font-bold py-6 text-center">No audit logs found for this shop</p>
+              ) : (
+                <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+                  {auditLogs.map((log, idx) => (
+                    <div key={log.id || idx} className="py-2.5 border-b border-slate-100 last:border-0 last:pb-0 text-xs">
+                      <div className="flex items-center justify-between flex-wrap gap-1">
+                        <span className="font-extrabold text-slate-800">{log.actor_name}</span>
+                        <span className="text-[9px] text-slate-400 font-semibold">{formatDate(log.created_at)}</span>
+                      </div>
+                      <p className="text-slate-600 mt-1 font-medium">
+                        Action: <span className="font-bold text-slate-700">{log.action}</span> on <span className="font-bold text-slate-700">{log.entity_type}</span> ({log.entity_label || '—'})
+                      </p>
+                      {log.details && Object.keys(log.details).length > 0 && (
+                        <pre className="mt-1.5 p-2 bg-slate-50 border border-slate-100 rounded-lg text-[9px] text-slate-500 overflow-x-auto font-mono whitespace-pre-wrap">
+                          {JSON.stringify(log.details, null, 2)}
+                        </pre>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

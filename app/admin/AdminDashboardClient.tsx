@@ -528,7 +528,7 @@ export default function AdminDashboardClient() {
       </div>
 
       {/* Shops Table */}
-      <div className="bg-white border border-slate-250/80 rounded-2xl shadow-xs overflow-x-auto">
+      <div className="hidden md:block bg-white border border-slate-250/80 rounded-2xl shadow-xs overflow-x-auto">
         <table className="w-full text-xs text-left">
           <thead>
             <tr className="bg-slate-50/70 border-b border-slate-200 text-[9px] font-black text-slate-400 uppercase tracking-widest">
@@ -686,6 +686,140 @@ export default function AdminDashboardClient() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Shop Cards List */}
+      <div className="block md:hidden space-y-4">
+        {loading ? (
+          <div className="py-12 text-center text-slate-400 font-bold">Loading shops...</div>
+        ) : shops.length === 0 ? (
+          <div className="py-12 text-center text-slate-400 font-bold">No shops found</div>
+        ) : (
+          shops.map((shop) => (
+            <div key={shop.id} className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm space-y-3.5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <button onClick={() => router.push(`/admin/shops/${shop.id}`)} className="text-sm font-black text-slate-900 hover:text-blue-600 transition-colors text-left leading-tight">
+                    {shop.name}
+                  </button>
+                  <p className="text-[10px] text-slate-400 font-bold mt-0.5 uppercase tracking-wider">{shop.owner_email}</p>
+                </div>
+                <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-black border capitalize ${STATUS_COLORS[shop.subscription_status] || STATUS_COLORS.cancelled}`}>
+                  {shop.subscription_status}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-100/60">
+                <div>
+                  <span className="block text-[8px] font-black text-slate-455 uppercase tracking-widest">Type</span>
+                  <span className="font-extrabold text-slate-700">{SHOP_EMOJIS[shop.shop_type] || '🏪'} {shop.shop_type}</span>
+                </div>
+                <div>
+                  <span className="block text-[8px] font-black text-slate-455 uppercase tracking-widest">Invoices</span>
+                  <span className="font-extrabold text-slate-700">{shop.invoice_count}</span>
+                </div>
+                <div>
+                  <span className="block text-[8px] font-black text-slate-455 uppercase tracking-widest">Ends On</span>
+                  <span className={`font-black ${
+                    isDateUrgent(shop.subscription_ends_at || shop.trial_ends_at) ? 'text-rose-600' :
+                    isDateWarning(shop.subscription_ends_at || shop.trial_ends_at) ? 'text-amber-600' : 'text-slate-600'
+                  }`}>{formatDate(shop.subscription_ends_at || shop.trial_ends_at)}</span>
+                </div>
+                <div>
+                  <span className="block text-[8px] font-black text-slate-455 uppercase tracking-widest">Joined</span>
+                  <span className="font-bold text-slate-600">{formatDate(shop.created_at)}</span>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-1 border-t border-slate-100">
+                <button
+                  onClick={() => router.push(`/admin/shops/${shop.id}`)}
+                  className="flex-1 py-2 rounded-xl text-xs font-black bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all duration-300"
+                >
+                  View Details
+                </button>
+                {shop.subscription_status !== 'active' ? (
+                  <button
+                    onClick={() => setActivatingId(activatingId === shop.id ? null : shop.id)}
+                    className="flex-1 py-2 rounded-xl text-xs font-black bg-blue-600 text-white hover:bg-blue-500 shadow-md shadow-blue-500/10 transition-all duration-300"
+                  >
+                    Activate
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setActivatingId(activatingId === shop.id ? null : shop.id)}
+                    className="flex-1 py-2 rounded-xl text-xs font-black bg-blue-55 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all duration-300"
+                  >
+                    Extend
+                  </button>
+                )}
+                <div className="relative group">
+                  <button className="px-3 py-2 rounded-xl text-xs font-black bg-white text-slate-400 border border-slate-200 hover:bg-slate-50">⋯</button>
+                  <div className="hidden group-hover:block absolute right-0 bottom-full mb-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-20 min-w-[140px] py-1">
+                    <button
+                      onClick={() => setExpireTarget({ id: shop.id, name: shop.name, action: 'expire' })}
+                      className="w-full text-left px-3.5 py-2.5 text-[10px] font-bold text-rose-600 hover:bg-rose-50 transition-colors"
+                    >Expire Now</button>
+                    <button
+                      onClick={() => setExpireTarget({ id: shop.id, name: shop.name, action: 'cancel' })}
+                      className="w-full text-left px-3.5 py-2.5 text-[10px] font-bold text-slate-500 hover:bg-slate-50 transition-colors"
+                    >Cancel Subscription</button>
+                  </div>
+                </div>
+              </div>
+
+              {activatingId === shop.id && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 mt-2">
+                  <p className="text-xs font-bold text-slate-700">
+                    Select duration for <span className="text-blue-600 font-extrabold">{shop.name}</span>:
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { m: 1, label: '1 Mo', price: '₹299' },
+                      { m: 3, label: '3 Mo', price: '₹897' },
+                      { m: 6, label: '6 Mo', price: '₹1,794' },
+                      { m: 12, label: '1 Yr', price: '₹3,588' },
+                    ].map(opt => (
+                      <button
+                        key={opt.m}
+                        onClick={() => setDuration(opt.m)}
+                        className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all duration-300 ${
+                          duration === opt.m
+                            ? 'bg-blue-600 text-white border-transparent'
+                            : 'bg-white text-slate-600 border-slate-200'
+                        }`}
+                      >
+                        {opt.label} ({opt.price})
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Reference/Note"
+                    value={paymentRef}
+                    onChange={e => setPaymentRef(e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:border-blue-500"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleActivate(shop.id)}
+                      disabled={activateLoading}
+                      className="flex-1 py-2 rounded-xl text-xs font-black bg-blue-600 text-white"
+                    >
+                      {activateLoading ? 'Processing...' : 'Confirm'}
+                    </button>
+                    <button
+                      onClick={() => { setActivatingId(null); setPaymentRef(''); setDuration(1); }}
+                      className="flex-1 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-655"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))
+        )}
       </div>
 
       {/* Pagination */}

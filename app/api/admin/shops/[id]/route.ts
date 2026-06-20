@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { verifyAdmin } from '@/lib/admin';
-
 import { isRateLimited } from '@/lib/rate-limit';
 
 export async function GET(
@@ -61,6 +60,29 @@ export async function GET(
     .select('*', { count: 'exact', head: true })
     .eq('shop_id', id);
 
+  // Total Revenue calculation
+  const { data: revenueData } = await admin
+    .from('invoices')
+    .select('total')
+    .eq('shop_id', id);
+  const totalRevenue = (revenueData || []).reduce((sum, inv) => sum + Number(inv.total), 0);
+
+  // Payments received by the shop
+  const { data: payments } = await admin
+    .from('payments')
+    .select('id, amount, payment_method, note, paid_at, invoice_id')
+    .eq('shop_id', id)
+    .order('paid_at', { ascending: false })
+    .limit(10);
+
+  // Audit logs of the shop
+  const { data: auditLogs } = await admin
+    .from('audit_logs')
+    .select('id, actor_name, actor_role, action, entity_type, entity_label, created_at, details')
+    .eq('shop_id', id)
+    .order('created_at', { ascending: false })
+    .limit(15);
+
   // Last invoice date
   const { data: lastInvoice } = await admin
     .from('invoices')
@@ -112,8 +134,11 @@ export async function GET(
       total_purchases: totalPurchases || 0,
       last_invoice_date: lastInvoice?.created_at || null,
       last_sign_in: lastSignIn,
+      total_revenue: totalRevenue,
     },
     recent_invoices: recentInvoices || [],
     monthly_volume: monthlyVolume,
+    payments: payments || [],
+    audit_logs: auditLogs || [],
   });
 }
