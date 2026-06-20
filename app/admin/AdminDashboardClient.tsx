@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Fragment } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
 
 interface ShopRow {
   id: string;
@@ -30,6 +31,14 @@ interface Stats {
   exports_count: number;
 }
 
+interface AnalyticsData {
+  revenue: { active_shops: number; mrr: number; new_shops: number; churned: number; net_growth: number };
+  usage: { invoices_this_month: number; total_invoices: number; avg_per_shop: number; most_active: { name: string; count: number } };
+  type_breakdown: Record<string, number>;
+  growth_data: { month: string; shops: number }[];
+  gst: { registered: number; total: number; percentage: number };
+}
+
 const STATUS_COLORS: Record<string, string> = {
   trial: 'bg-blue-50 text-blue-700 border-blue-200',
   active: 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -48,6 +57,7 @@ const TABS = ['all', 'trial', 'active', 'expired', 'cancelled'];
 export default function AdminDashboardClient() {
   const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [shops, setShops] = useState<ShopRow[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -76,9 +86,10 @@ export default function AdminDashboardClient() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // Fetch stats
+  // Fetch stats and analytics
   useEffect(() => {
     fetch('/api/admin/stats').then(r => r.json()).then(setStats).catch(() => {});
+    fetch('/api/admin/analytics').then(r => r.json()).then(setAnalytics).catch(() => {});
   }, []);
 
   // Fetch shops
@@ -127,6 +138,7 @@ export default function AdminDashboardClient() {
         setDuration(1);
         fetchShops();
         fetch('/api/admin/stats').then(r => r.json()).then(setStats);
+        fetch('/api/admin/analytics').then(r => r.json()).then(setAnalytics).catch(() => {});
       } else {
         showToast(data.error || 'Failed');
       }
@@ -150,6 +162,7 @@ export default function AdminDashboardClient() {
         setConfirmName('');
         fetchShops();
         fetch('/api/admin/stats').then(r => r.json()).then(setStats);
+        fetch('/api/admin/analytics').then(r => r.json()).then(setAnalytics).catch(() => {});
       } else {
         showToast(data.error || 'Failed');
       }
@@ -173,13 +186,105 @@ export default function AdminDashboardClient() {
     return diff > 0 && diff < 7 * 24 * 60 * 60 * 1000;
   };
 
+  const typeChartData = analytics
+    ? Object.entries(analytics.type_breakdown).map(([type, count]) => ({
+        name: `${SHOP_EMOJIS[type] || '🏪'} ${type}`,
+        count,
+      }))
+    : [];
+
+  const COLORS = [
+    '#3b82f6', // blue
+    '#10b981', // emerald
+    '#8b5cf6', // violet
+    '#f59e0b', // amber
+    '#ec4899', // pink
+    '#06b6d4', // cyan
+    '#f43f5e', // rose
+    '#14b8a6', // teal
+  ];
+
   const statCards = stats ? [
-    { label: 'Total Shops', value: stats.total_shops, icon: '🏪' },
-    { label: 'Active Subs', value: stats.active, icon: '✅' },
-    { label: 'Trial Shops', value: stats.trial, icon: '⏳' },
-    { label: 'Expired', value: stats.expired, icon: '❌' },
-    { label: 'Total Invoices', value: stats.total_invoices.toLocaleString('en-IN'), icon: '📄' },
-    { label: 'MRR', value: `₹${stats.mrr.toLocaleString('en-IN')}`, icon: '💰' },
+    {
+      label: 'Total Shops',
+      value: stats.total_shops,
+      icon: (
+        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+      ),
+      bg: 'border-t-blue-500',
+      pillBg: 'bg-blue-50',
+      trend: stats.new_this_month > 0 ? `+${stats.new_this_month} new this month` : 'Steady growth'
+    },
+    {
+      label: 'Active Subs',
+      value: stats.active,
+      icon: (
+        <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+      ),
+      bg: 'border-t-emerald-500',
+      pillBg: 'bg-emerald-50',
+      trend: stats.total_shops > 0 ? `${Math.round((stats.active / stats.total_shops) * 100)}% conversion` : '0% conversion'
+    },
+    {
+      label: 'Trial Shops',
+      value: stats.trial,
+      icon: (
+        <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+      ),
+      bg: 'border-t-amber-500',
+      pillBg: 'bg-amber-50',
+      trend: stats.total_shops > 0 ? `${Math.round((stats.trial / stats.total_shops) * 100)}% on trial` : '0% on trial'
+    },
+    {
+      label: 'Expired',
+      value: stats.expired,
+      icon: (
+        <svg className="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+      ),
+      bg: 'border-t-rose-500',
+      pillBg: 'bg-rose-50',
+      trend: stats.total_shops > 0 ? `${Math.round((stats.expired / stats.total_shops) * 100)}% expired` : '0% expired'
+    },
+    {
+      label: 'Total Invoices',
+      value: stats.total_invoices.toLocaleString('en-IN'),
+      icon: (
+        <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+        </svg>
+      ),
+      bg: 'border-t-indigo-500',
+      pillBg: 'bg-indigo-50',
+      trend: 'Platform-wide usage'
+    },
+    {
+      label: 'MRR',
+      value: `₹${stats.mrr.toLocaleString('en-IN')}`,
+      icon: (
+        <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+          <line x1="12" y1="1" x2="12" y2="23" />
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
+      ),
+      bg: 'border-t-violet-500',
+      pillBg: 'bg-violet-50',
+      trend: '₹299/mo gate active'
+    },
   ] : [];
 
   return (
@@ -192,7 +297,7 @@ export default function AdminDashboardClient() {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {statCards.map((card, i) => (
           <motion.div
             key={card.label}
@@ -200,24 +305,157 @@ export default function AdminDashboardClient() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08, duration: 0.3 }}
             whileHover={{ y: -2 }}
-            className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-shadow"
+            className={`bg-white border-t-4 border-x border-b border-slate-200 rounded-2xl p-5 shadow-2xs hover:shadow-xs transition-all duration-300 ${card.bg}`}
           >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{card.label}</span>
-              <span className="text-base">{card.icon}</span>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{card.label}</span>
+              <div className={`w-8 h-8 rounded-xl ${card.pillBg} flex items-center justify-center`}>
+                {card.icon}
+              </div>
             </div>
-            <p className="text-xl font-black text-slate-900 tabular-nums">{card.value}</p>
+            <p className="text-2xl font-black text-slate-900 tabular-nums tracking-tight">{card.value}</p>
+            {card.trend && (
+              <p className="text-[9px] font-extrabold text-slate-400 mt-2 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                {card.trend}
+              </p>
+            )}
           </motion.div>
         ))}
       </div>
+
+      {/* Visual Insights Section */}
+      {analytics && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Revenue & Growth Trend */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.3 }}
+            className="lg:col-span-8 bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs relative overflow-hidden"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                  <span>📈</span> Shop Growth & Revenue Trend
+                </h3>
+                <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Cumulative shop registrations and monthly run-rate</p>
+              </div>
+              <div className="flex items-center gap-4 text-[10px] font-bold">
+                <span className="flex items-center gap-1.5 text-blue-600">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500" /> Shops
+                </span>
+                <span className="flex items-center gap-1.5 text-emerald-600">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> MRR (₹)
+                </span>
+              </div>
+            </div>
+            
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={analytics.growth_data}>
+                  <defs>
+                    <linearGradient id="colorShops" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.01}/>
+                    </linearGradient>
+                    <linearGradient id="colorMRR" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.01}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="month" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} axisLine={false} tickLine={false} />
+                  <YAxis yAxisId="left" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{
+                      fontSize: 10,
+                      borderRadius: 16,
+                      border: '1px solid #e2e8f0',
+                      background: 'rgba(255, 255, 255, 0.95)',
+                      boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)',
+                      backdropFilter: 'blur(8px)'
+                    }}
+                  />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <Area yAxisId="left" type="monotone" dataKey="shops" stroke="#3b82f6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorShops)" dot={{ fill: '#3b82f6', r: 3 }} activeDot={{ r: 5 }} />
+                  <Area yAxisId="right" type="monotone" dataKey={d => d.shops * 299} name="MRR" stroke="#10b981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorMRR)" dot={{ fill: '#10b981', r: 3 }} activeDot={{ r: 5 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+          
+          {/* Shop Type Share */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
+            className="lg:col-span-4 bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs flex flex-col justify-between"
+          >
+            <div>
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5 mb-1">
+                <span>🍰</span> Shop Category Share
+              </h3>
+              <p className="text-[10px] text-slate-400 font-semibold mb-6">Distribution by business category</p>
+            </div>
+            
+            <div className="h-44 relative flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={typeChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={75}
+                    paddingAngle={3}
+                    dataKey="count"
+                  >
+                    {typeChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      fontSize: 10,
+                      borderRadius: 12,
+                      border: '1px solid #e2e8f0',
+                      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute flex flex-col items-center justify-center">
+                <span className="text-xl font-black text-slate-800">{stats?.total_shops}</span>
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Total Shops</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-1.5 mt-4 text-[9px] font-bold text-slate-600">
+              {typeChartData.slice(0, 4).map((entry, idx) => (
+                <div key={entry.name} className="flex items-center gap-1.5 truncate">
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
+                  <span className="truncate">{entry.name}</span>
+                  <span className="text-slate-400 ml-auto tabular-nums">{entry.count}</span>
+                </div>
+              ))}
+              {typeChartData.length > 4 && (
+                <div className="flex items-center gap-1.5 text-slate-400 col-span-2 justify-center pt-1.5 border-t border-slate-50 font-semibold">
+                  + {typeChartData.length - 4} other categories
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       {/* Platform Health Section */}
       {stats && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.3 }}
-          className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs"
+          transition={{ delay: 0.4, duration: 0.3 }}
+          className="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs"
         >
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
