@@ -35,6 +35,8 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
   const [payments, setPayments] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [volumeRange, setVolumeRange] = useState<'1m' | '3m' | '6m'>('1m');
+  const [chartLoading, setChartLoading] = useState(false);
 
   // Activate panel
   const [showActivate, setShowActivate] = useState(false);
@@ -45,10 +47,20 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
 
+  const fetchVolume = async (r: '1m' | '3m' | '6m') => {
+    setChartLoading(true);
+    try {
+      const res = await fetch(`/api/admin/shops/${shopId}?range=${r}`);
+      const data = await res.json();
+      setMonthlyVolume(data.monthly_volume || []);
+    } catch { /* ignore */ }
+    setChartLoading(false);
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/shops/${shopId}`);
+      const res = await fetch(`/api/admin/shops/${shopId}?range=${volumeRange}`);
       const data = await res.json();
       setShop(data.shop);
       setStats(data.stats);
@@ -236,11 +248,39 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
 
           {/* Invoice Volume Chart */}
           <div className="bg-white border border-slate-200/85 rounded-2xl p-5 shadow-xs">
-            <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Invoice Volume (Last 6 Months)</h2>
-            <div className="h-52">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                Invoice Volume {volumeRange === '1m' ? '(Last 30 Days)' : volumeRange === '3m' ? '(Last 12 Weeks)' : '(Last 6 Months)'}
+              </h2>
+              <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200/50">
+                {(['1m', '3m', '6m'] as const).map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => {
+                      setVolumeRange(r);
+                      fetchVolume(r);
+                    }}
+                    className={`px-2.5 py-1 text-[9px] font-bold rounded-md transition-all duration-250 uppercase ${
+                      volumeRange === r
+                        ? 'bg-white text-blue-600 shadow-xs'
+                        : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="h-52 relative">
+              {chartLoading && (
+                <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center z-10 text-[10px] font-black text-blue-600 uppercase tracking-wider">
+                  Updating Chart...
+                </div>
+              )}
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthlyVolume}>
-                  <XAxis dataKey="month" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 650 }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 8, fill: '#94a3b8', fontWeight: 650 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 650 }} axisLine={false} tickLine={false} allowDecimals={false} />
                   <Tooltip
                     contentStyle={{
@@ -251,7 +291,7 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
                       boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
                     }}
                   />
-                  <Bar dataKey="count" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={16} />
+                  <Bar dataKey="count" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={volumeRange === '1m' ? 6 : volumeRange === '3m' ? 14 : 20} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

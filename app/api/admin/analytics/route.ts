@@ -92,14 +92,38 @@ export async function GET(request: NextRequest) {
     typeBreakdown[type] = (typeBreakdown[type] || 0) + 1;
   });
 
-  // Growth chart — shops over last 6 months (cumulative)
+  // Growth chart — shops cumulative growth based on range query parameter
+  const range = searchParams.get('range') || '1m';
   const growthData: { month: string; shops: number }[] = [];
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(year, month - 1 - i, 1);
-    const end = new Date(d.getFullYear(), d.getMonth() + 1, 1).toISOString();
-    const cumulative = shops.filter(s => s.created_at < end).length;
-    const label = d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
-    growthData.push({ month: label, shops: cumulative });
+  const now = new Date();
+
+  if (range === '1m') {
+    // Daily cumulative growth for the last 30 days
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+      const end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999).toISOString();
+      const cumulative = shops.filter(s => s.created_at < end).length;
+      const label = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+      growthData.push({ month: label, shops: cumulative });
+    }
+  } else if (range === '3m') {
+    // Weekly cumulative growth for the last 12 weeks
+    for (let i = 11; i >= 0; i--) {
+      const end = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000).toISOString();
+      const cumulative = shops.filter(s => s.created_at < end).length;
+      const dStart = new Date(now.getTime() - (i + 1) * 7 * 24 * 60 * 60 * 1000);
+      const label = dStart.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+      growthData.push({ month: `Wk of ${label}`, shops: cumulative });
+    }
+  } else {
+    // Monthly cumulative growth for the last 6 months
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(year, month - 1 - i, 1);
+      const end = new Date(d.getFullYear(), d.getMonth() + 1, 1).toISOString();
+      const cumulative = shops.filter(s => s.created_at < end).length;
+      const label = d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+      growthData.push({ month: label, shops: cumulative });
+    }
   }
 
   // GST adoption

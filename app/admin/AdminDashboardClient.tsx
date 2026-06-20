@@ -58,6 +58,8 @@ export default function AdminDashboardClient() {
   const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [growthRange, setGrowthRange] = useState<'1m' | '3m' | '6m'>('1m');
+  const [growthLoading, setGrowthLoading] = useState(false);
   const [shops, setShops] = useState<ShopRow[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -86,10 +88,22 @@ export default function AdminDashboardClient() {
     setTimeout(() => setToast(null), 3000);
   };
 
+  const fetchGrowth = async (r: '1m' | '3m' | '6m') => {
+    setGrowthLoading(true);
+    try {
+      const res = await fetch(`/api/admin/analytics?range=${r}`);
+      const data = await res.json();
+      if (data.growth_data) {
+        setAnalytics(prev => prev ? { ...prev, growth_data: data.growth_data } : null);
+      }
+    } catch { /* ignore */ }
+    setGrowthLoading(false);
+  };
+
   // Fetch stats and analytics
   useEffect(() => {
     fetch('/api/admin/stats').then(r => r.json()).then(setStats).catch(() => {});
-    fetch('/api/admin/analytics').then(r => r.json()).then(setAnalytics).catch(() => {});
+    fetch(`/api/admin/analytics?range=${growthRange}`).then(r => r.json()).then(setAnalytics).catch(() => {});
   }, []);
 
   // Fetch shops
@@ -138,7 +152,7 @@ export default function AdminDashboardClient() {
         setDuration(1);
         fetchShops();
         fetch('/api/admin/stats').then(r => r.json()).then(setStats);
-        fetch('/api/admin/analytics').then(r => r.json()).then(setAnalytics).catch(() => {});
+        fetch(`/api/admin/analytics?range=${growthRange}`).then(r => r.json()).then(setAnalytics).catch(() => {});
       } else {
         showToast(data.error || 'Failed');
       }
@@ -162,7 +176,7 @@ export default function AdminDashboardClient() {
         setConfirmName('');
         fetchShops();
         fetch('/api/admin/stats').then(r => r.json()).then(setStats);
-        fetch('/api/admin/analytics').then(r => r.json()).then(setAnalytics).catch(() => {});
+        fetch(`/api/admin/analytics?range=${growthRange}`).then(r => r.json()).then(setAnalytics).catch(() => {});
       } else {
         showToast(data.error || 'Failed');
       }
@@ -332,24 +346,51 @@ export default function AdminDashboardClient() {
             transition={{ delay: 0.2, duration: 0.3 }}
             className="lg:col-span-8 bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs relative overflow-hidden"
           >
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
               <div>
                 <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                   <span>📈</span> Shop Growth & Revenue Trend
                 </h3>
-                <p className="text-[10px] text-slate-400 font-bold mt-0.5">Cumulative shop registrations and monthly run-rate</p>
+                <p className="text-[10px] text-slate-400 font-bold mt-0.5">
+                  Cumulative shop registrations and monthly run-rate {growthRange === '1m' ? '(Last 30 Days)' : growthRange === '3m' ? '(Last 12 Weeks)' : '(Last 6 Months)'}
+                </p>
               </div>
-              <div className="flex items-center gap-4 text-[10px] font-extrabold">
-                <span className="flex items-center gap-1.5 text-blue-600">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-md shadow-blue-500/10" /> Shops
-                </span>
-                <span className="flex items-center gap-1.5 text-emerald-600">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-md shadow-emerald-500/10" /> MRR (₹)
-                </span>
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200/50">
+                  {(['1m', '3m', '6m'] as const).map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => {
+                        setGrowthRange(r);
+                        fetchGrowth(r);
+                      }}
+                      className={`px-2.5 py-1 text-[9px] font-bold rounded-md transition-all duration-250 uppercase ${
+                        growthRange === r
+                          ? 'bg-white text-blue-600 shadow-xs'
+                          : 'text-slate-500 hover:text-slate-900'
+                      }`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-3.5 text-[10px] font-extrabold">
+                  <span className="flex items-center gap-1.5 text-blue-600">
+                    <span className="w-2 h-2 rounded-full bg-blue-500 shadow-md shadow-blue-500/10" /> Shops
+                  </span>
+                  <span className="flex items-center gap-1.5 text-emerald-600">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-md shadow-emerald-500/10" /> MRR (₹)
+                  </span>
+                </div>
               </div>
             </div>
             
-            <div className="h-64 w-full">
+            <div className="h-64 w-full relative">
+              {growthLoading && (
+                <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center z-10 text-[10px] font-black text-blue-600 uppercase tracking-wider">
+                  Updating Chart...
+                </div>
+              )}
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={analytics.growth_data}>
                   <defs>

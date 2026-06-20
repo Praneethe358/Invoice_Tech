@@ -100,22 +100,60 @@ export async function GET(
     .order('created_at', { ascending: false })
     .limit(5);
 
-  // Invoice volume per month (last 6 months)
+  // Invoice volume aggregation based on range
+  const { searchParams } = new URL(request.url);
+  const range = searchParams.get('range') || '1m';
   const now = new Date();
   const monthlyVolume: { month: string; count: number }[] = [];
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const start = d.toISOString();
-    const end = new Date(d.getFullYear(), d.getMonth() + 1, 1).toISOString();
-    const { count } = await admin
-      .from('invoices')
-      .select('*', { count: 'exact', head: true })
-      .eq('shop_id', id)
-      .gte('created_at', start)
-      .lt('created_at', end);
 
-    const label = d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
-    monthlyVolume.push({ month: label, count: count || 0 });
+  if (range === '1m') {
+    // Daily volume for the last 30 days
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+      const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0).toISOString();
+      const end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999).toISOString();
+      const { count } = await admin
+        .from('invoices')
+        .select('*', { count: 'exact', head: true })
+        .eq('shop_id', id)
+        .gte('created_at', start)
+        .lte('created_at', end);
+
+      const label = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+      monthlyVolume.push({ month: label, count: count || 0 });
+    }
+  } else if (range === '3m') {
+    // Weekly volume for the last 12 weeks
+    for (let i = 11; i >= 0; i--) {
+      const start = new Date(now.getTime() - (i + 1) * 7 * 24 * 60 * 60 * 1000).toISOString();
+      const end = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { count } = await admin
+        .from('invoices')
+        .select('*', { count: 'exact', head: true })
+        .eq('shop_id', id)
+        .gte('created_at', start)
+        .lt('created_at', end);
+
+      const dStart = new Date(now.getTime() - (i + 1) * 7 * 24 * 60 * 60 * 1000);
+      const label = dStart.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+      monthlyVolume.push({ month: `Wk of ${label}`, count: count || 0 });
+    }
+  } else {
+    // Monthly volume for the last 6 months
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const start = d.toISOString();
+      const end = new Date(d.getFullYear(), d.getMonth() + 1, 1).toISOString();
+      const { count } = await admin
+        .from('invoices')
+        .select('*', { count: 'exact', head: true })
+        .eq('shop_id', id)
+        .gte('created_at', start)
+        .lt('created_at', end);
+
+      const label = d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+      monthlyVolume.push({ month: label, count: count || 0 });
+    }
   }
 
   // Last login from auth
