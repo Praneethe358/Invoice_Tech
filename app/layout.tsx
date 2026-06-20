@@ -46,6 +46,11 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
+        <script
+          type="text/javascript"
+          src="https://app.termly.io/resource-blocker/29352c0c-25b3-4799-a507-d425b159bd02?autoBlock=on"
+          async
+        />
       </head>
       <body className="min-h-full flex flex-col font-sans antialiased">
         <ToastProvider>{children}</ToastProvider>
