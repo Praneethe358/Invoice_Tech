@@ -280,7 +280,7 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
               )}
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthlyVolume}>
-                  <XAxis dataKey="month" tick={{ fontSize: 8, fill: '#94a3b8', fontWeight: 650 }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 8, fill: '#94a3b8', fontWeight: 650 }} axisLine={false} tickLine={false} interval={volumeRange === '1m' ? 4 : 0} />
                   <YAxis tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 650 }} axisLine={false} tickLine={false} allowDecimals={false} />
                   <Tooltip
                     contentStyle={{

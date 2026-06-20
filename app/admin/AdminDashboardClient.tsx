@@ -54,6 +54,31 @@ const SHOP_EMOJIS: Record<string, string> = {
 
 const TABS = ['all', 'trial', 'active', 'expired', 'cancelled'];
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const shops = payload[0].value;
+    const mrr = shops * 299;
+    return (
+      <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 p-3.5 rounded-xl shadow-xl text-xs">
+        <p className="font-extrabold text-slate-900 mb-1.5">{label}</p>
+        <div className="space-y-1 font-bold">
+          <div className="flex items-center gap-2 text-blue-600">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+            <span>Total Shops:</span>
+            <span className="font-black text-slate-800 ml-auto">{shops}</span>
+          </div>
+          <div className="flex items-center gap-2 text-emerald-600">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span>Estimated MRR:</span>
+            <span className="font-black text-slate-800 ml-auto">₹{(mrr).toLocaleString('en-IN')}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function AdminDashboardClient() {
   const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
@@ -374,13 +399,8 @@ export default function AdminDashboardClient() {
                     </button>
                   ))}
                 </div>
-                <div className="flex items-center gap-3.5 text-[10px] font-extrabold">
-                  <span className="flex items-center gap-1.5 text-blue-600">
-                    <span className="w-2 h-2 rounded-full bg-blue-500 shadow-md shadow-blue-500/10" /> Shops
-                  </span>
-                  <span className="flex items-center gap-1.5 text-emerald-600">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-md shadow-emerald-500/10" /> MRR (₹)
-                  </span>
+                <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-blue-600">
+                  <span className="w-2 h-2 rounded-full bg-blue-500 shadow-md shadow-blue-500/10" /> Total Shops & Revenue Trend
                 </div>
               </div>
             </div>
@@ -398,28 +418,12 @@ export default function AdminDashboardClient() {
                       <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2}/>
                       <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.01}/>
                     </linearGradient>
-                    <linearGradient id="colorMRR" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.01}/>
-                    </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="month" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
-                  <YAxis yAxisId="left" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
-                  <Tooltip
-                    contentStyle={{
-                      fontSize: 10,
-                      borderRadius: 16,
-                      border: '1px solid #e2e8f0',
-                      background: 'rgba(255, 255, 255, 0.95)',
-                      boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)',
-                      backdropFilter: 'blur(8px)',
-                      color: '#0f172a'
-                    }}
-                  />
-                  <Area yAxisId="left" type="monotone" dataKey="shops" stroke="#3b82f6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorShops)" dot={{ fill: '#3b82f6', r: 3 }} activeDot={{ r: 5 }} />
-                  <Area yAxisId="right" type="monotone" dataKey={d => d.shops * 299} name="MRR" stroke="#10b981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorMRR)" dot={{ fill: '#10b981', r: 3 }} activeDot={{ r: 5 }} />
+                  <XAxis dataKey="month" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} interval={growthRange === '1m' ? 4 : 0} />
+                  <YAxis tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="shops" stroke="#3b82f6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorShops)" dot={{ fill: '#3b82f6', r: 3 }} activeDot={{ r: 5 }} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
