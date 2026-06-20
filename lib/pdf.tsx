@@ -213,17 +213,27 @@ const styles = StyleSheet.create({
     color: TEXT_MUTED,
     lineHeight: 1.4,
   },
-  footer: {
+  footerContainer: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 25,
     left: 40,
     right: 40,
-    textAlign: 'center',
-    fontSize: 8,
-    color: '#9ca3af',
     borderTopWidth: 1,
     borderTopColor: '#f3f4f6',
-    paddingTop: 8,
+    paddingTop: 6,
+    alignItems: 'center',
+  },
+  footerDisclaimer: {
+    fontSize: 6,
+    color: '#9ca3af',
+    textAlign: 'center',
+    marginBottom: 3,
+    lineHeight: 1.2,
+  },
+  footerText: {
+    fontSize: 7.5,
+    color: '#9ca3af',
+    textAlign: 'center',
   },
   stampContainer: {
     borderWidth: 2,
@@ -523,9 +533,14 @@ function InvoicePDF({
         </View>
 
         {/* Footer Accent */}
-        <Text style={styles.footer}>
-          Thank you for shopping! • Powered by TruBill Invoice
-        </Text>
+        <View style={styles.footerContainer}>
+          <Text style={styles.footerDisclaimer}>
+            This invoice is generated using TruBill, a billing automation tool. TruBill does not verify or guarantee GST compliance, tax accuracy, or filing correctness. Users are responsible for verifying GST details and are advised to consult a Chartered Accountant for compliance and filing matters.
+          </Text>
+          <Text style={styles.footerText}>
+            Thank you for shopping! • Powered by TruBill Invoice
+          </Text>
+        </View>
       </Page>
     </Document>
   );

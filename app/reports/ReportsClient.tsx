@@ -981,8 +981,16 @@ export default function ReportsClient({ shop }: ReportsClientProps) {
           </div>
         )}
 
+        <p className="text-[10px] text-slate-500 leading-relaxed text-center mt-8 max-w-2xl mx-auto">
+          This invoice is generated using TruBill, a billing automation tool. 
+          TruBill does not verify or guarantee GST compliance, tax accuracy, or 
+          filing correctness. Users are responsible for verifying GST details 
+          and are advised to consult a Chartered Accountant for compliance and 
+          filing matters.
+        </p>
+
         {/* Footer with Tamil Nadu 🇮🇳 mention */}
-        <div className="mt-12 pt-6 border-t border-slate-200 text-center text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+        <div className="mt-8 pt-6 border-t border-slate-200 text-center text-[10px] text-slate-400 font-bold uppercase tracking-wider">
           Made for Shopkeepers in Tamil Nadu 🇮🇳
         </div>
       </PageTransition>

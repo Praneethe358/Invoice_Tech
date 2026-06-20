@@ -517,6 +517,14 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                 </Button>
               </div>
             </div>
+
+            <p className="text-[10px] text-slate-500 leading-relaxed text-center mt-4 max-w-2xl mx-auto">
+              This invoice is generated using TruBill, a billing automation tool. 
+              TruBill does not verify or guarantee GST compliance, tax accuracy, or 
+              filing correctness. Users are responsible for verifying GST details 
+              and are advised to consult a Chartered Accountant for compliance and 
+              filing matters.
+            </p>
           </div>
         )}
 
@@ -824,6 +832,14 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                 </div>
               </div>
             </div>
+
+            <p className="text-[10px] text-slate-500 leading-relaxed text-center mt-4 max-w-2xl mx-auto">
+              This invoice is generated using TruBill, a billing automation tool. 
+              TruBill does not verify or guarantee GST compliance, tax accuracy, or 
+              filing correctness. Users are responsible for verifying GST details 
+              and are advised to consult a Chartered Accountant for compliance and 
+              filing matters.
+            </p>
           </div>
         )}
 
@@ -1204,6 +1220,14 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
 
               </div>
             </div>
+
+            <p className="text-[10px] text-slate-500 leading-relaxed text-center mt-4 max-w-2xl mx-auto">
+              This invoice is generated using TruBill, a billing automation tool. 
+              TruBill does not verify or guarantee GST compliance, tax accuracy, or 
+              filing correctness. Users are responsible for verifying GST details 
+              and are advised to consult a Chartered Accountant for compliance and 
+              filing matters.
+            </p>
           </div>
         )}
       </PageTransition>
