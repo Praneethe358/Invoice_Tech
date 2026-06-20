@@ -53,7 +53,7 @@ export default function AdminLayoutShell({
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 relative overflow-hidden font-sans select-none">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 relative overflow-x-clip font-sans select-none">
       {/* Soft elegant background glow shapes for premium light depth */}
       <div className="absolute top-[-300px] left-[-300px] w-[800px] h-[800px] rounded-full bg-blue-100/40 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-300px] right-[-300px] w-[800px] h-[800px] rounded-full bg-indigo-100/30 blur-[120px] pointer-events-none" />
