@@ -1043,8 +1043,8 @@ export default function LandingPage() {
 
       {/* ─── Below Qualities (Sub-Hero Bar) ───────────────────── */}
       <section className="bg-white border-b border-[#e8eaed] py-8 md:py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6 md:gap-8 text-center items-start">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-2 md:gap-x-4 gap-y-6 text-center items-start">
             {/* Quality 1 */}
             <div className="flex flex-col items-center space-y-2 md:space-y-4">
               <div className="text-[#0050e8] flex items-center justify-center">
@@ -1081,6 +1081,22 @@ export default function LandingPage() {
             <div className="flex flex-col items-center space-y-2 md:space-y-4">
               <div className="text-[#0050e8] flex items-center justify-center">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
+                  <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.78 4.78 4 4 0 0 1-6.74 0 4 4 0 0 1-4.78-4.78 4 4 0 0 1 0-6.74z" />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
+              </div>
+              <div className="space-y-0.5">
+                <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">
+                  MSME Registered
+                </h4>
+                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">UDYAM-TN-03-0331333</p>
+              </div>
+            </div>
+
+            {/* Quality 4 */}
+            <div className="flex flex-col items-center space-y-2 md:space-y-4">
+              <div className="text-[#0050e8] flex items-center justify-center">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   <path d="m9 11 2 2 4-4" />
                 </svg>
@@ -1093,8 +1109,8 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Quality 4 */}
-            <div className="flex flex-col items-center space-y-2 md:space-y-4">
+            {/* Quality 5 */}
+            <div className="flex flex-col items-center space-y-2 md:space-y-4 col-span-2 sm:col-span-1">
               <div className="text-[#0050e8] flex items-center justify-center">
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
                   <rect x="10" y="6" width="18" height="13" rx="2" />
@@ -1600,9 +1616,15 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between pt-6 md:pt-8 text-[11px] sm:text-xs text-[#6b7280] gap-3">
-            <div>
-              © {new Date().getFullYear()} TruBill. All rights reserved.
+          <div className="flex flex-col lg:flex-row items-center justify-between pt-6 md:pt-8 text-[11px] sm:text-xs text-[#6b7280] gap-3">
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-3 gap-y-1">
+              <span>© {new Date().getFullYear()} TruBill. All rights reserved.</span>
+              <span className="hidden sm:inline text-slate-300">•</span>
+              <span>MSME Registered — UDYAM-TN-03-0331333</span>
+              <span className="hidden sm:inline text-slate-300">•</span>
+              <Link href="/privacy" className="hover:text-[#1a1d26] transition-colors">Privacy Policy</Link>
+              <span className="hidden sm:inline text-slate-300">•</span>
+              <Link href="/terms" className="hover:text-[#1a1d26] transition-colors">Terms of Service</Link>
             </div>
             <div className="flex gap-4">
               <span>Made for Shopkeepers in Tamil Nadu 🇮🇳</span>

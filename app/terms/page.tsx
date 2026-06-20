@@ -349,9 +349,15 @@ export default function TermsPage() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between pt-6 md:pt-8 text-[11px] sm:text-xs text-[#6b7280] gap-3">
-            <div>
-              © {new Date().getFullYear()} TruBill. All rights reserved.
+          <div className="flex flex-col lg:flex-row items-center justify-between pt-6 md:pt-8 text-[11px] sm:text-xs text-[#6b7280] gap-3">
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-3 gap-y-1">
+              <span>© {new Date().getFullYear()} TruBill. All rights reserved.</span>
+              <span className="hidden sm:inline text-slate-300">•</span>
+              <span>MSME Registered — UDYAM-TN-03-0331333</span>
+              <span className="hidden sm:inline text-slate-300">•</span>
+              <Link href="/privacy" className="hover:text-[#1a1d26] transition-colors">Privacy Policy</Link>
+              <span className="hidden sm:inline text-slate-300">•</span>
+              <Link href="/terms" className="hover:text-[#1a1d26] transition-colors">Terms of Service</Link>
             </div>
             <div className="flex gap-4">
               <span>Made for Shopkeepers in Tamil Nadu 🇮🇳</span>
