@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import QtyStepper from './QtyStepper';
 import { InvoiceItem } from '@/lib/types';
@@ -15,6 +16,14 @@ export default function LineItem({ item, onQtyChange, onPriceChange, gstRegister
   const baseTotal = item.price * item.quantity;
   const gstAmount = gstRegistered ? baseTotal * ((item.gst_rate || 0) / 100) : 0;
   const lineTotal = item.line_total !== undefined ? item.line_total : (baseTotal + gstAmount);
+
+  const [localPrice, setLocalPrice] = useState(item.price.toString());
+
+  useEffect(() => {
+    if (parseFloat(localPrice) !== item.price) {
+      setLocalPrice(item.price.toString());
+    }
+  }, [item.price, localPrice]);
 
   return (
     <motion.div
@@ -42,15 +51,26 @@ export default function LineItem({ item, onQtyChange, onPriceChange, gstRegister
             <span className="text-xs text-[#6b7280]">₹</span>
             {onPriceChange ? (
               <input
-                type="number"
-                value={item.price}
-                min="0"
-                step="0.01"
+                type="text"
+                inputMode="decimal"
+                value={localPrice}
                 onChange={(e) => {
-                  const val = parseFloat(e.target.value);
-                  onPriceChange(isNaN(val) ? 0 : val);
+                  const valStr = e.target.value;
+                  // Allow empty string, digits, and a single decimal point
+                  if (valStr === '' || /^\d*\.?\d*$/.test(valStr)) {
+                    setLocalPrice(valStr);
+                    const parsed = parseFloat(valStr);
+                    if (!isNaN(parsed)) {
+                      onPriceChange(parsed);
+                    } else {
+                      onPriceChange(0);
+                    }
+                  }
                 }}
-                className="w-20 h-6 text-xs font-semibold bg-slate-50 hover:bg-slate-100 focus:bg-white border border-[#e5e7eb] rounded px-1.5 focus:outline-none focus:border-[#0050e8] focus:ring-0 text-slate-800 transition-colors text-left"
+                onBlur={() => {
+                  setLocalPrice(item.price.toString());
+                }}
+                className="w-20 h-6 text-xs font-semibold bg-slate-50 hover:bg-slate-100 focus:bg-white border border-[#e5e7eb] rounded px-1.5 focus:outline-none focus:border-[#0050e8] focus:ring-0 text-slate-800 transition-colors text-right"
               />
             ) : (
               <span className="text-xs text-[#6b7280] tabular-nums font-semibold">
