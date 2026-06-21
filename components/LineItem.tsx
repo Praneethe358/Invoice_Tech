@@ -7,10 +7,11 @@ import { InvoiceItem } from '@/lib/types';
 interface LineItemProps {
   item: InvoiceItem;
   onQtyChange: (qty: number) => void;
+  onPriceChange?: (price: number) => void;
   gstRegistered?: boolean;
 }
 
-export default function LineItem({ item, onQtyChange, gstRegistered = false }: LineItemProps) {
+export default function LineItem({ item, onQtyChange, onPriceChange, gstRegistered = false }: LineItemProps) {
   const baseTotal = item.price * item.quantity;
   const gstAmount = gstRegistered ? baseTotal * ((item.gst_rate || 0) / 100) : 0;
   const lineTotal = item.line_total !== undefined ? item.line_total : (baseTotal + gstAmount);
@@ -37,9 +38,27 @@ export default function LineItem({ item, onQtyChange, gstRegistered = false }: L
         </div>
         
         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-          <p className="text-xs text-[#6b7280] tabular-nums">
-            ₹{item.price.toLocaleString('en-IN')} × {item.quantity}
-          </p>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-[#6b7280]">₹</span>
+            {onPriceChange ? (
+              <input
+                type="number"
+                value={item.price}
+                min="0"
+                step="0.01"
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  onPriceChange(isNaN(val) ? 0 : val);
+                }}
+                className="w-20 h-6 text-xs font-semibold bg-slate-50 hover:bg-slate-100 focus:bg-white border border-[#e5e7eb] rounded px-1.5 focus:outline-none focus:border-[#0050e8] focus:ring-0 text-slate-800 transition-colors text-left"
+              />
+            ) : (
+              <span className="text-xs text-[#6b7280] tabular-nums font-semibold">
+                {item.price.toLocaleString('en-IN')}
+              </span>
+            )}
+            <span className="text-xs text-[#6b7280]">× {item.quantity}</span>
+          </div>
           {item.hsn_code && (
             <span className="text-[10px] text-[#9ca3af] font-medium">
               HSN: {item.hsn_code}

@@ -349,6 +349,17 @@ export default function InvoiceBuilderClient({ products, initialVariants = [], s
     []
   );
 
+  const updatePrice = useCallback(
+    (name: string, price: number, variant_id?: string | null) => {
+      setItems((prev) =>
+        prev.map((i) =>
+          (i.name === name && i.variant_id === variant_id) ? { ...i, price: price } : i
+        )
+      );
+    },
+    []
+  );
+
   const getItemQty = (name: string): number => {
     return items
       .filter((i) => i.name === name || i.name.startsWith(name + ' ('))
@@ -1466,7 +1477,10 @@ export default function InvoiceBuilderClient({ products, initialVariants = [], s
                         key={item.name}
                         item={item}
                         onQtyChange={(qty) =>
-                          updateQty(item.name, qty)
+                          updateQty(item.name, qty, item.variant_id)
+                        }
+                        onPriceChange={(price) =>
+                          updatePrice(item.name, price, item.variant_id)
                         }
                         gstRegistered={shop.gst_registered}
                       />
