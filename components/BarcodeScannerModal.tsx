@@ -43,7 +43,7 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
         const { Html5Qrcode } = await import('html5-qrcode');
         if (!active) return;
 
-        // Create the instance first on our container
+        // Create the instance first on our container (which is now guaranteed to be in the DOM)
         const html5QrCode = new Html5Qrcode('reader-container');
         html5QrcodeRef.current = html5QrCode;
 
@@ -133,9 +133,13 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
       }
     }
 
-    startCamera();
+    // Small delay to ensure modal DOM transition is complete and element is mounted
+    const delayTimer = setTimeout(() => {
+      startCamera();
+    }, 200);
 
     return () => {
+      clearTimeout(delayTimer);
       active = false;
       cleanup();
     };
@@ -186,7 +190,7 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
               {/* Scanner Viewport */}
               <div className="relative aspect-square w-full bg-black flex items-center justify-center overflow-hidden">
                 {errorMsg ? (
-                  <div className="p-6 text-center space-y-3">
+                  <div className="p-6 text-center space-y-3 z-40">
                     <span className="text-3xl block">⚠️</span>
                     <p className="text-sm font-bold text-red-400">{errorMsg}</p>
                     <p className="text-xs text-slate-400">
@@ -199,30 +203,35 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
                       Close Scanner
                     </button>
                   </div>
-                ) : hasPermission === null ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="w-8 h-8 border-4 border-[#0050e8] border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      Accessing Camera...
-                    </p>
-                  </div>
                 ) : (
                   <>
-                    {/* Target overlay */}
-                    <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-                      <div className="w-3/4 h-3/4 border-2 border-dashed border-white/40 rounded-xl relative">
-                        {/* Corners */}
-                        <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-[#0050e8] rounded-tl-md"></div>
-                        <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-[#0050e8] rounded-tr-md"></div>
-                        <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-[#0050e8] rounded-bl-md"></div>
-                        <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-[#0050e8] rounded-br-md"></div>
-
-                        {/* Scanning line animation */}
-                        <div className="absolute left-0 right-0 h-0.5 bg-red-500 shadow-[0_0_10px_#ef4444] animate-[scan_2s_ease-in-out_infinite]"></div>
+                    {hasPermission === null && (
+                      <div className="absolute inset-0 z-30 bg-black flex flex-col items-center justify-center gap-3">
+                        <div className="w-8 h-8 border-4 border-[#0050e8] border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                          Accessing Camera...
+                        </p>
                       </div>
-                    </div>
+                    )}
 
-                    <div id="reader-container" className="w-full h-full object-cover [&_video]:object-cover" />
+                    {/* Target overlay */}
+                    {hasPermission && (
+                      <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
+                        <div className="w-3/4 h-3/4 border-2 border-dashed border-white/40 rounded-xl relative">
+                          {/* Corners */}
+                          <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-[#0050e8] rounded-tl-md"></div>
+                          <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-[#0050e8] rounded-tr-md"></div>
+                          <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-[#0050e8] rounded-bl-md"></div>
+                          <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-[#0050e8] rounded-br-md"></div>
+
+                          {/* Scanning line animation */}
+                          <div className="absolute left-0 right-0 h-0.5 bg-red-500 shadow-[0_0_10px_#ef4444] animate-[scan_2s_ease-in-out_infinite]"></div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Camera view container - always in DOM so Html5Qrcode can bind to it */}
+                    <div id="reader-container" className="w-full h-full object-cover [&_video]:object-cover z-10" />
                   </>
                 )}
               </div>
