@@ -57,12 +57,16 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
 
         if (!active) return;
 
+        // Optimize qrbox as a wide rectangle to capture 1D barcodes without cropping sides
         const config = {
-          fps: 15,
+          fps: 20,
           qrbox: (width: number, height: number) => {
-            const size = Math.min(width, height) * 0.7;
-            return { width: size, height: size };
+            const w = Math.floor(width * 0.85);
+            const h = Math.floor(height * 0.35);
+            return { width: w, height: h };
           },
+          aspectRatio: 1.0, // Match viewport container shape
+          useBarCodeDetectorIfSupported: true,
         };
 
         const onScanSuccess = (decodedText: string) => {
@@ -214,10 +218,10 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
                       </div>
                     )}
 
-                    {/* Target overlay */}
+                    {/* Target overlay (wide rectangle optimized for barcodes) */}
                     {hasPermission && (
                       <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-                        <div className="w-3/4 h-3/4 border-2 border-dashed border-white/40 rounded-xl relative">
+                        <div className="w-[85%] h-[35%] border-2 border-dashed border-white/50 rounded-xl relative">
                           {/* Corners */}
                           <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-[#0050e8] rounded-tl-md"></div>
                           <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-[#0050e8] rounded-tr-md"></div>
@@ -249,9 +253,9 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
 
       <style jsx global>{`
         @keyframes scan {
-          0% { top: 12.5%; }
-          50% { top: 87.5%; }
-          100% { top: 12.5%; }
+          0% { top: 10%; }
+          50% { top: 90%; }
+          100% { top: 10%; }
         }
       `}</style>
     </>
