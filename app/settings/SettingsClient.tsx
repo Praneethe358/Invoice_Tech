@@ -531,7 +531,7 @@ export default function SettingsClient({
                 Delete Account
               </h3>
               <p className="text-[11px] text-gray-600 font-medium italic">
-                Want to delete your account? Contact us at <a href="mailto:support@trubill.in" className="text-[#0050e8] underline">support@trubill.in</a> and we will process your request within 24 hours.
+                Want to delete your account? Contact us at <a href="mailto:trubillapp@gmail.com" className="text-[#0050e8] underline">trubillapp@gmail.com</a> and we will process your request within 24 hours.
               </p>
             </div>
           </section>

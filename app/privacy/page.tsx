@@ -746,7 +746,7 @@ export default function PrivacyPage() {
               <p className="text-xs text-[#6b7280] leading-relaxed">
                 TruBill Invoice<br />
                 Coimbatore, Tamil Nadu<br />
-                support@trubill.in
+                trubillapp@gmail.com
               </p>
             </div>
           </div>
