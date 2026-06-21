@@ -48,8 +48,8 @@ export async function GET(request: NextRequest) {
     .select('*', { count: 'exact', head: true })
     .gte('created_at', thirtyDaysAgo);
 
-  // MRR = active shops × 299
-  const mrr = active * 299;
+  // MRR = active shops × 349
+  const mrr = active * 349;
 
   return NextResponse.json({
     total_shops,

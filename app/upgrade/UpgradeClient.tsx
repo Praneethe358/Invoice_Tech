@@ -53,7 +53,7 @@ export default function UpgradeClient({ shop, upiId, supportPhone }: UpgradeClie
   };
 
   // WhatsApp click action text
-  const waMessage = `Hi TruBill, I have paid ₹299 for subscription. Shop name: ${shop.name}, Phone: ${shop.phone || ''}${shop.gstin ? `, GSTIN: ${shop.gstin}` : ''}`;
+  const waMessage = `Hi TruBill, I have paid ₹349 for subscription. Shop name: ${shop.name}, Phone: ${shop.phone || ''}${shop.gstin ? `, GSTIN: ${shop.gstin}` : ''}`;
   const whatsappUrl = `https://wa.me/${supportPhone}?text=${encodeURIComponent(waMessage)}`;
 
   const faqs = [
@@ -160,7 +160,7 @@ export default function UpgradeClient({ shop, upiId, supportPhone }: UpgradeClie
               </div>
 
               <div className="flex items-baseline gap-1 border-y border-gray-100 py-4">
-                <span className="text-3xl font-black text-gray-900">₹299</span>
+                <span className="text-3xl font-black text-gray-900">₹349</span>
                 <span className="text-xs font-semibold text-gray-400">/ month</span>
                 <span className="ml-auto text-[10px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-none uppercase tracking-wide">
                   Tax Included
@@ -205,7 +205,7 @@ export default function UpgradeClient({ shop, upiId, supportPhone }: UpgradeClie
               </div>
               <div className="text-center">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">UPI SCANNING</p>
-                <p className="text-xs text-gray-700 font-bold mt-1">Pay ₹299 using GPay, PhonePe, or Paytm</p>
+                <p className="text-xs text-gray-700 font-bold mt-1">Pay ₹349 using GPay, PhonePe, or Paytm</p>
               </div>
             </div>
 

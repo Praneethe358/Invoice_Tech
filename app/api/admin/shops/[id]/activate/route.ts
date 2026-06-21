@@ -94,7 +94,7 @@ export async function POST(
         month: 'long',
         year: 'numeric',
       });
-      const amount = duration_months * 299;
+      const amount = duration_months * 349;
       const planName =
         duration_months === 1
           ? 'Monthly'

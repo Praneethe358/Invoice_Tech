@@ -161,7 +161,7 @@ export default function DashboardClient({
                 <div className="pt-2">
                   <a href="/upgrade">
                     <button className="bg-[#0050e8] hover:bg-[#0043c4] text-white font-extrabold text-xs py-3 px-6 rounded-xl transition-all cursor-pointer shadow-md shadow-blue-800/10 active:scale-[0.98] min-h-[44px]">
-                      Upgrade to TruBill Pro (₹299/mo)
+                      Upgrade to TruBill Pro (₹349/mo)
                     </button>
                   </a>
                 </div>

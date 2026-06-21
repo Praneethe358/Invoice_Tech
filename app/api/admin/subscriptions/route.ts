@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     summary: {
       active_subscriptions: active.length,
-      mrr: active.length * 299,
+      mrr: active.length * 349,
       trials_ending_soon: trialsExpiringSoonCount,
       renewals_due: renewalsDueCount,
     },

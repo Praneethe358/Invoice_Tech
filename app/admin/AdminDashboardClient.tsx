@@ -57,7 +57,7 @@ const TABS = ['all', 'trial', 'active', 'expired', 'cancelled'];
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const shops = payload[0].value;
-    const mrr = shops * 299;
+    const mrr = shops * 349;
     return (
       <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 p-3.5 rounded-xl shadow-xl text-xs">
         <p className="font-extrabold text-slate-900 mb-1.5">{label}</p>
@@ -320,7 +320,7 @@ export default function AdminDashboardClient() {
       ),
       bg: 'border-t-violet-500',
       pillBg: 'bg-violet-50 border border-violet-100',
-      trend: '₹299/mo gate active'
+      trend: '₹349/mo gate active'
     },
   ] : [];
 
@@ -682,10 +682,10 @@ export default function AdminDashboardClient() {
                         </p>
                         <div className="flex flex-wrap gap-3 mb-4">
                           {[
-                            { m: 1, label: '1 Month', price: '₹299' },
-                            { m: 3, label: '3 Months', price: '₹897' },
-                            { m: 6, label: '6 Months', price: '₹1,794' },
-                            { m: 12, label: '1 Year', price: '₹3,588' },
+                            { m: 1, label: '1 Month', price: '₹349' },
+                            { m: 3, label: '3 Months', price: '₹1,047' },
+                            { m: 6, label: '6 Months', price: '₹2,094' },
+                            { m: 12, label: '1 Year', price: '₹4,188' },
                           ].map(opt => (
                             <button
                               key={opt.m}
@@ -818,13 +818,13 @@ export default function AdminDashboardClient() {
                   <p className="text-xs font-bold text-slate-700">
                     Select duration for <span className="text-blue-600 font-extrabold">{shop.name}</span>:
                   </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { m: 1, label: '1 Mo', price: '₹299' },
-                      { m: 3, label: '3 Mo', price: '₹897' },
-                      { m: 6, label: '6 Mo', price: '₹1,794' },
-                      { m: 12, label: '1 Yr', price: '₹3,588' },
-                    ].map(opt => (
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { m: 1, label: '1 Mo', price: '₹349' },
+                        { m: 3, label: '3 Mo', price: '₹1,047' },
+                        { m: 6, label: '6 Mo', price: '₹2,094' },
+                        { m: 12, label: '1 Yr', price: '₹4,188' },
+                      ].map(opt => (
                       <button
                         key={opt.m}
                         onClick={() => setDuration(opt.m)}

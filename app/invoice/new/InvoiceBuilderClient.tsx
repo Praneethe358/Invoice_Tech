@@ -646,7 +646,7 @@ export default function InvoiceBuilderClient({ products, initialVariants = [], s
                 Your {isTrial ? 'free trial' : 'subscription'} has ended.
               </p>
               <p className="text-sm text-slate-500 leading-relaxed">
-                Upgrade to ₹299/month to continue sending professional invoices to your customers on WhatsApp.
+                Upgrade to ₹349/month to continue sending professional invoices to your customers on WhatsApp.
               </p>
             </div>
 

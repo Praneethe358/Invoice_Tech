@@ -61,13 +61,13 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
   let bgClass = 'bg-blue-50 border-b-2 border-blue-500 text-blue-900';
   let icon = '🎉';
   let text = '';
-  let ctaText = 'Upgrade — ₹299/month';
+  let ctaText = 'Upgrade — ₹349/month';
 
   if (urgency === 'none' && status === 'trial') {
     bgClass = 'bg-[#eff6ff] border-b-2 border-[#3b82f6] text-[#1e3a8a]';
     icon = '🎉';
     text = `Free trial — ${daysRemaining} days remaining. Upgrade to keep sending invoices after your trial.`;
-    ctaText = 'Upgrade — ₹299/month';
+    ctaText = 'Upgrade — ₹349/month';
   } else if (urgency === 'warning' && status === 'trial') {
     bgClass = 'bg-[#fffbeb] border-b-2 border-[#f59e0b] text-[#78350f]';
     icon = '⚠️';
@@ -76,14 +76,14 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
   } else if (urgency === 'warning' && status === 'active') {
     bgClass = 'bg-[#fffbeb] border-b-2 border-[#f59e0b] text-[#78350f]';
     icon = '🔔';
-    text = `Subscription renews in ${daysRemaining} days. Pay ₹299 to continue uninterrupted.`;
+    text = `Subscription renews in ${daysRemaining} days. Pay ₹349 to continue uninterrupted.`;
     ctaText = 'Pay Now';
   } else if (urgency === 'blocked') {
     bgClass = 'bg-[#fef2f2] border-b-2 border-[#ef4444] text-[#991b1b]';
     icon = '🔒';
     const subType = status === 'cancelled' ? 'subscription' : 'free trial';
     text = `Your ${subType} has ended. Upgrade to continue sending invoices.`;
-    ctaText = 'Upgrade Now — ₹299/month';
+    ctaText = 'Upgrade Now — ₹349/month';
   }
 
   return (

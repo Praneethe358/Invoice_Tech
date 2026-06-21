@@ -284,10 +284,10 @@ export default function SubscriptionsClient() {
           <p className="text-xs font-bold text-slate-700 mb-3">Select duration:</p>
           <div className="flex flex-wrap gap-2 mb-3">
             {[
-              { m: 1, l: '1 Month', p: '₹299' }, 
-              { m: 3, l: '3 Months', p: '₹897' }, 
-              { m: 6, l: '6 Months', p: '₹1,794' }, 
-              { m: 12, l: '1 Year', p: '₹3,588' }
+              { m: 1, l: '1 Month', p: '₹349' }, 
+              { m: 3, l: '3 Months', p: '₹1,047' }, 
+              { m: 6, l: '6 Months', p: '₹2,094' }, 
+              { m: 12, l: '1 Year', p: '₹4,188' }
             ].map(o => (
               <button 
                 key={o.m} 

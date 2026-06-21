@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     revenue: {
       active_shops: activeShops.length,
-      mrr: activeShops.length * 299,
+      mrr: activeShops.length * 349,
       new_shops: newShops.length,
       churned: churned.length,
       net_growth: newShops.length - churned.length,

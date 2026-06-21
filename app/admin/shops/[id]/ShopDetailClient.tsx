@@ -192,10 +192,10 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="mt-4 space-y-3.5 border-t border-slate-100 pt-4">
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      { m: 1, l: '1 Month', p: '₹299' }, 
-                      { m: 3, l: '3 Months', p: '₹897' }, 
-                      { m: 6, l: '6 Months', p: '₹1,794' }, 
-                      { m: 12, l: '1 Year', p: '₹3,588' }
+                      { m: 1, l: '1 Month', p: '₹349' }, 
+                      { m: 3, l: '3 Months', p: '₹1,047' }, 
+                      { m: 6, l: '6 Months', p: '₹2,094' }, 
+                      { m: 12, l: '1 Year', p: '₹4,188' }
                     ].map(o => (
                       <button key={o.m} onClick={() => setDuration(o.m)}
                         className={`px-3 py-2.5 rounded-xl text-[10px] font-black border transition-all duration-300 ${
