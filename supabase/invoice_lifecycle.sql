@@ -38,6 +38,7 @@ create table if not exists invoice_audit_logs (
 alter table invoice_audit_logs enable row level security;
 
 -- Policies for RLS
+drop policy if exists "own audit logs" on invoice_audit_logs;
 create policy "own audit logs" on invoice_audit_logs for all
   using (shop_id in (select id from shops where auth_user_id = auth.uid()));
 
@@ -74,6 +75,8 @@ declare
   v_customer_invoices int;
   v_total_billed numeric;
   v_total_paid numeric;
+  v_variant_stock int;
+  v_total_credit numeric;
 begin
   -- Lock shop row and get/increment invoice number
   select next_invoice_number, invoice_prefix into v_next_num, v_prefix 
@@ -132,7 +135,8 @@ begin
       gst_rate,
       cgst,
       sgst,
-      line_total
+      line_total,
+      variant_id
     ) values (
       v_invoice_id,
       (v_item->>'name'),
@@ -142,7 +146,8 @@ begin
       (v_item->>'gst_rate')::numeric,
       (v_item->>'cgst')::numeric,
       (v_item->>'sgst')::numeric,
-      (v_item->>'line_total')::numeric
+      (v_item->>'line_total')::numeric,
+      (v_item->>'variant_id')::uuid
     );
   end loop;
 
@@ -164,22 +169,43 @@ begin
         where id = v_prod_id;
 
         if v_track_inventory = true then
-          if v_stock_qty < (v_item->>'quantity')::int then
-            raise exception 'INSUFFICIENT_STOCK: %', (v_item->>'name');
+          if (v_item->>'variant_id') is not null then
+            select stock_qty into v_variant_stock from product_variants where id = (v_item->>'variant_id')::uuid;
+            if v_variant_stock < (v_item->>'quantity')::int then
+              raise exception 'INSUFFICIENT_STOCK: %', (v_item->>'name');
+            end if;
+
+            update product_variants set stock_qty = stock_qty - (v_item->>'quantity')::int where id = (v_item->>'variant_id')::uuid;
+
+            insert into inventory_logs (shop_id, product_id, invoice_id, variant_id, change_qty, previous_qty, new_qty, reason)
+            values (
+              p_shop_id,
+              v_prod_id,
+              v_invoice_id,
+              (v_item->>'variant_id')::uuid,
+              -(v_item->>'quantity')::int,
+              v_variant_stock,
+              v_variant_stock - (v_item->>'quantity')::int,
+              'invoice'
+            );
+          else
+            if v_stock_qty < (v_item->>'quantity')::int then
+              raise exception 'INSUFFICIENT_STOCK: %', (v_item->>'name');
+            end if;
+
+            update products set stock_qty = stock_qty - (v_item->>'quantity')::int where id = v_prod_id;
+
+            insert into inventory_logs (shop_id, product_id, invoice_id, change_qty, previous_qty, new_qty, reason)
+            values (
+              p_shop_id,
+              v_prod_id,
+              v_invoice_id,
+              -(v_item->>'quantity')::int,
+              v_stock_qty,
+              v_stock_qty - (v_item->>'quantity')::int,
+              'invoice'
+            );
           end if;
-
-          update products set stock_qty = stock_qty - (v_item->>'quantity')::int where id = v_prod_id;
-
-          insert into inventory_logs (shop_id, product_id, invoice_id, change_qty, previous_qty, new_qty, reason)
-          values (
-            p_shop_id,
-            v_prod_id,
-            v_invoice_id,
-            -(v_item->>'quantity')::int,
-            v_stock_qty,
-            v_stock_qty - (v_item->>'quantity')::int,
-            'invoice'
-          );
         end if;
       end if;
     end loop;
@@ -230,10 +256,17 @@ begin
     from payments where shop_id = p_shop_id and customer_phone = p_customer_phone
     and invoice_id in (select id from invoices where shop_id = p_shop_id and customer_phone = p_customer_phone and status in ('saved', 'sent'));
 
+    select coalesce(sum(total), 0) into v_total_credit
+    from credit_debit_notes
+    where shop_id = p_shop_id 
+      and customer_phone = p_customer_phone 
+      and note_type = 'credit' 
+      and status != 'pending_review';
+
     update customers set
       total_invoices = v_customer_invoices,
       total_spent = v_total_paid,
-      outstanding_balance = greatest(0, v_total_billed - v_total_paid)
+      outstanding_balance = greatest(0, v_total_billed - v_total_paid - v_total_credit)
     where shop_id = p_shop_id and phone = p_customer_phone;
 
     -- Write saved audit log
@@ -268,6 +301,8 @@ declare
   v_customer_invoices int;
   v_total_billed numeric;
   v_total_paid numeric;
+  v_variant_stock int;
+  v_total_credit numeric;
 begin
   -- Get invoice info
   select shop_id, status, customer_phone, customer_name, customer_gstin, payment_status, amount_paid, total
@@ -279,7 +314,7 @@ begin
   end if;
 
   -- Process Inventory
-  for v_item in select name, qty from invoice_items where invoice_id = p_invoice_id loop
+  for v_item in select name, qty, variant_id from invoice_items where invoice_id = p_invoice_id loop
     select id, stock_qty, track_inventory into v_prod_id, v_stock_qty, v_track_inventory
     from products where shop_id = v_shop_id and name = v_item.name limit 1;
 
@@ -290,22 +325,43 @@ begin
       where id = v_prod_id;
 
       if v_track_inventory = true then
-        if v_stock_qty < v_item.qty then
-          raise exception 'INSUFFICIENT_STOCK: %', v_item.name;
+        if v_item.variant_id is not null then
+          select stock_qty into v_variant_stock from product_variants where id = v_item.variant_id;
+          if v_variant_stock < v_item.qty then
+            raise exception 'INSUFFICIENT_STOCK: %', v_item.name;
+          end if;
+
+          update product_variants set stock_qty = stock_qty - v_item.qty where id = v_item.variant_id;
+
+          insert into inventory_logs (shop_id, product_id, invoice_id, variant_id, change_qty, previous_qty, new_qty, reason)
+          values (
+            v_shop_id,
+            v_prod_id,
+            p_invoice_id,
+            v_item.variant_id,
+            -v_item.qty,
+            v_variant_stock,
+            v_variant_stock - v_item.qty,
+            'invoice'
+          );
+        else
+          if v_stock_qty < v_item.qty then
+            raise exception 'INSUFFICIENT_STOCK: %', v_item.name;
+          end if;
+
+          update products set stock_qty = stock_qty - v_item.qty where id = v_prod_id;
+
+          insert into inventory_logs (shop_id, product_id, invoice_id, change_qty, previous_qty, new_qty, reason)
+          values (
+            v_shop_id,
+            v_prod_id,
+            p_invoice_id,
+            -v_item.qty,
+            v_stock_qty,
+            v_stock_qty - v_item.qty,
+            'invoice'
+          );
         end if;
-
-        update products set stock_qty = stock_qty - v_item.qty where id = v_prod_id;
-
-        insert into inventory_logs (shop_id, product_id, invoice_id, change_qty, previous_qty, new_qty, reason)
-        values (
-          v_shop_id,
-          v_prod_id,
-          p_invoice_id,
-          -v_item.qty,
-          v_stock_qty,
-          v_stock_qty - v_item.qty,
-          'invoice'
-        );
       end if;
     end if;
   end loop;
@@ -365,10 +421,17 @@ begin
   from payments where shop_id = v_shop_id and customer_phone = v_customer_phone
   and invoice_id in (select id from invoices where shop_id = v_shop_id and customer_phone = v_customer_phone and status in ('saved', 'sent'));
 
+  select coalesce(sum(total), 0) into v_total_credit
+  from credit_debit_notes
+  where shop_id = v_shop_id 
+    and customer_phone = v_customer_phone 
+    and note_type = 'credit' 
+    and status != 'pending_review';
+
   update customers set
     total_invoices = v_customer_invoices,
     total_spent = v_total_paid,
-    outstanding_balance = greatest(0, v_total_billed - v_total_paid)
+    outstanding_balance = greatest(0, v_total_billed - v_total_paid - v_total_credit)
   where shop_id = v_shop_id and phone = v_customer_phone;
 
   -- Audit log
@@ -396,6 +459,8 @@ declare
   v_customer_invoices int;
   v_total_billed numeric;
   v_total_paid numeric;
+  v_variant_stock int;
+  v_total_credit numeric;
 begin
   select shop_id, status, customer_phone into v_shop_id, v_status, v_customer_phone
   from invoices where id = p_invoice_id;
@@ -409,7 +474,7 @@ begin
   end if;
 
   -- 1. Restore stock
-  for v_item in select name, qty from invoice_items where invoice_id = p_invoice_id loop
+  for v_item in select name, qty, variant_id from invoice_items where invoice_id = p_invoice_id loop
     select id, stock_qty, track_inventory into v_prod_id, v_stock_qty, v_track_inventory
     from products where shop_id = v_shop_id and name = v_item.name limit 1;
 
@@ -419,18 +484,36 @@ begin
       where id = v_prod_id;
 
       if v_track_inventory = true then
-        update products set stock_qty = stock_qty + v_item.qty where id = v_prod_id;
+        if v_item.variant_id is not null then
+          select stock_qty into v_variant_stock from product_variants where id = v_item.variant_id;
 
-        insert into inventory_logs (shop_id, product_id, invoice_id, change_qty, previous_qty, new_qty, reason)
-        values (
-          v_shop_id,
-          v_prod_id,
-          p_invoice_id,
-          v_item.qty,
-          v_stock_qty,
-          v_stock_qty + v_item.qty,
-          'return'
-        );
+          update product_variants set stock_qty = stock_qty + v_item.qty where id = v_item.variant_id;
+
+          insert into inventory_logs (shop_id, product_id, invoice_id, variant_id, change_qty, previous_qty, new_qty, reason)
+          values (
+            v_shop_id,
+            v_prod_id,
+            p_invoice_id,
+            v_item.variant_id,
+            v_item.qty,
+            v_variant_stock,
+            v_variant_stock + v_item.qty,
+            'return'
+          );
+        else
+          update products set stock_qty = stock_qty + v_item.qty where id = v_prod_id;
+
+          insert into inventory_logs (shop_id, product_id, invoice_id, change_qty, previous_qty, new_qty, reason)
+          values (
+            v_shop_id,
+            v_prod_id,
+            p_invoice_id,
+            v_item.qty,
+            v_stock_qty,
+            v_stock_qty + v_item.qty,
+            'return'
+          );
+        end if;
       end if;
     end if;
   end loop;
@@ -453,10 +536,17 @@ begin
   from payments where shop_id = v_shop_id and customer_phone = v_customer_phone
   and invoice_id in (select id from invoices where shop_id = v_shop_id and customer_phone = v_customer_phone and status in ('saved', 'sent'));
 
+  select coalesce(sum(total), 0) into v_total_credit
+  from credit_debit_notes
+  where shop_id = v_shop_id 
+    and customer_phone = v_customer_phone 
+    and note_type = 'credit' 
+    and status != 'pending_review';
+
   update customers set
     total_invoices = v_customer_invoices,
     total_spent = v_total_paid,
-    outstanding_balance = greatest(0, v_total_billed - v_total_paid)
+    outstanding_balance = greatest(0, v_total_billed - v_total_paid - v_total_credit)
   where shop_id = v_shop_id and phone = v_customer_phone;
 
   -- 5. Write cancelled audit log

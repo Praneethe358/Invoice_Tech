@@ -10,18 +10,23 @@ import Input from '@/components/Input';
 import EmptyState from '@/components/EmptyState';
 import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
-import { Shop, Product } from '@/lib/types';
+import { Shop, Product, ProductVariant } from '@/lib/types';
 import { SHOP_CONFIG } from '@/lib/shop-config';
 import { ShopType } from '@/lib/starter-catalogs';
+import BarcodeScannerModal from '@/components/BarcodeScannerModal';
+import { resolveBarcode } from '@/lib/barcodeResolver';
+import { playBeep, triggerHaptic } from '@/lib/sound';
 
 interface Props {
   shop: Shop;
   initialProducts: Product[];
+  initialVariants?: ProductVariant[];
 }
 
 export default function CatalogClient({
   shop,
   initialProducts,
+  initialVariants = [],
 }: Props) {
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
@@ -39,6 +44,42 @@ export default function CatalogClient({
   const [mobileStockOpen, setMobileStockOpen] = useState(false);
   const [mobileGstOpen, setMobileGstOpen] = useState(false);
   const [mobileCategoryOpen, setMobileCategoryOpen] = useState(false);
+
+  // Clothing shop specific states
+  const [variants, setVariants] = useState<ProductVariant[]>(initialVariants);
+  const [newWholesalePrice, setNewWholesalePrice] = useState('');
+  const [newSeasonTag, setNewSeasonTag] = useState('');
+  
+  // New Variant fields during product creation
+  const [newSize, setNewSize] = useState('');
+  const [newColor, setNewColor] = useState('');
+  const [newSku, setNewSku] = useState('');
+  const [newVariantStockQty, setNewVariantStockQty] = useState('0');
+  const [newVariantLowStockThreshold, setNewVariantLowStockThreshold] = useState('5');
+
+  // Editing clothing fields
+  const [editWholesalePrice, setEditWholesalePrice] = useState('');
+  const [editSeasonTag, setEditSeasonTag] = useState('');
+
+  // Variant manager modal state
+  const [variantsProduct, setVariantsProduct] = useState<Product | null>(null);
+  
+  // State for adding a variant in the modal
+  const [newVarSize, setNewVarSize] = useState('');
+  const [newVarColor, setNewVarColor] = useState('');
+  const [newVarSku, setNewVarSku] = useState('');
+  const [newVarStockQty, setNewVarStockQty] = useState('0');
+  const [newVarLowStockThreshold, setNewVarLowStockThreshold] = useState('5');
+
+  // Scanner state
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [isStockScannerOpen, setIsStockScannerOpen] = useState(false);
+  const [varBarcodeSource, setVarBarcodeSource] = useState<'scanned' | 'generated' | null>(null);
+  const [isAddingVarInStockModal, setIsAddingVarInStockModal] = useState(false);
+
+  // Print quantities state
+  const [printCopies, setPrintCopies] = useState<Record<string, number>>({});
+  const [selectedPrintVariants, setSelectedPrintVariants] = useState<Record<string, boolean>>({});
 
   // Products
   const [products, setProducts] = useState(initialProducts);
@@ -169,6 +210,9 @@ export default function CatalogClient({
 
     setAddingProduct(true);
     const initialStockVal = newTrackInventory ? parseInt(newStockQty) || 0 : 0;
+    const wholesalePrice = parseFloat(newWholesalePrice) || null;
+    const seasonTag = newSeasonTag.trim() || null;
+
     const { data, error } = await supabase
       .from('products')
       .insert({
@@ -181,6 +225,8 @@ export default function CatalogClient({
         track_inventory: newTrackInventory,
         stock_qty: initialStockVal,
         low_stock_threshold: newTrackInventory ? parseInt(newLowStockThreshold) || 5 : 5,
+        wholesale_price: wholesalePrice,
+        season_tag: seasonTag,
       })
       .select()
       .single();
@@ -202,6 +248,49 @@ export default function CatalogClient({
           });
       }
 
+      // If clothing shop, insert variant if size/color/sku is provided
+      if (shop.shop_type === 'clothing') {
+        const sizeVal = newSize.trim() || 'Free Size';
+        const colorVal = newColor.trim() || 'Assorted';
+        const skuVal = newSku.trim() || `${name.replace(/\s+/g, '-')}-${sizeVal.toUpperCase()}-${colorVal.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+        const variantStockVal = parseInt(newVariantStockQty) || 0;
+        const variantThreshold = parseInt(newVariantLowStockThreshold) || 5;
+
+        const { data: variantData, error: variantError } = await supabase
+          .from('product_variants')
+          .insert({
+            product_id: data.id,
+            size: sizeVal,
+            color: colorVal,
+            sku: skuVal,
+            stock_qty: variantStockVal,
+            low_stock_threshold: variantThreshold,
+            barcode: skuVal,
+            barcode_source: newSku.trim() ? 'scanned' : 'generated'
+          })
+          .select()
+          .single();
+
+        if (variantError) {
+          showToast(`Product added, but variant error: ${variantError.message}`, 'warning');
+        } else if (variantData) {
+          if (variantStockVal > 0) {
+            await supabase
+              .from('inventory_logs')
+              .insert({
+                shop_id: shop.id,
+                product_id: data.id,
+                variant_id: variantData.id,
+                change_qty: variantStockVal,
+                previous_qty: 0,
+                new_qty: variantStockVal,
+                reason: 'restock'
+              });
+          }
+          setVariants(prev => [...prev, variantData as ProductVariant]);
+        }
+      }
+
       setProducts((prev) => [...prev, data as Product]);
       setNewName('');
       setNewPrice('');
@@ -211,6 +300,13 @@ export default function CatalogClient({
       setNewTrackInventory(false);
       setNewStockQty('0');
       setNewLowStockThreshold('5');
+      setNewWholesalePrice('');
+      setNewSeasonTag('');
+      setNewSize('');
+      setNewColor('');
+      setNewSku('');
+      setNewVariantStockQty('0');
+      setNewVariantLowStockThreshold('5');
       showToast('Product added', 'success');
     }
     setAddingProduct(false);
@@ -240,6 +336,8 @@ export default function CatalogClient({
     setEditCategory(product.category || '');
     setEditTrackInventory(!!product.track_inventory);
     setEditLowStockThreshold(String(product.low_stock_threshold || '5'));
+    setEditWholesalePrice(String(product.wholesale_price || ''));
+    setEditSeasonTag(product.season_tag || '');
     setIsEditAddingNewCategory(false);
   };
 
@@ -252,6 +350,8 @@ export default function CatalogClient({
     const category = editCategory || null;
     const trackInventory = editTrackInventory;
     const lowStockThreshold = parseInt(editLowStockThreshold) || 5;
+    const wholesalePrice = parseFloat(editWholesalePrice) || null;
+    const seasonTag = editSeasonTag.trim() || null;
 
     if (!name || isNaN(price) || price <= 0) {
       showToast('Enter valid name and price', 'error');
@@ -267,7 +367,9 @@ export default function CatalogClient({
         gst_rate: gstRate,
         category,
         track_inventory: trackInventory,
-        low_stock_threshold: lowStockThreshold
+        low_stock_threshold: lowStockThreshold,
+        wholesale_price: wholesalePrice,
+        season_tag: seasonTag
       })
       .eq('id', editingId);
 
@@ -285,7 +387,9 @@ export default function CatalogClient({
                 gst_rate: gstRate,
                 category,
                 track_inventory: trackInventory,
-                low_stock_threshold: lowStockThreshold
+                low_stock_threshold: lowStockThreshold,
+                wholesale_price: wholesalePrice,
+                season_tag: seasonTag
               }
             : p
         )
@@ -331,6 +435,38 @@ export default function CatalogClient({
     }
   };
 
+  const handleAdjustVariantStock = async (variantId: string, qty: number, reason: 'restock' | 'adjustment' | 'return') => {
+    const variant = variants.find(v => v.id === variantId);
+    if (!variant) return;
+
+    const currentStock = variant.stock_qty || 0;
+    const newQty = currentStock + qty;
+
+    const { error } = await supabase
+      .from('product_variants')
+      .update({ stock_qty: newQty })
+      .eq('id', variantId);
+
+    if (error) {
+      showToast(`Failed to adjust stock: ${error.message}`, 'error');
+    } else {
+      await supabase
+        .from('inventory_logs')
+        .insert({
+          shop_id: shop.id,
+          product_id: variant.product_id,
+          variant_id: variantId,
+          change_qty: qty,
+          previous_qty: currentStock,
+          new_qty: newQty,
+          reason: reason,
+        });
+
+      setVariants(prev => prev.map(v => v.id === variantId ? { ...v, stock_qty: newQty } : v));
+      showToast(`Stock updated successfully`, 'success');
+    }
+  };
+
   const handleToggleFavorite = async (product: Product) => {
     const nextVal = !product.is_favorite;
     
@@ -351,6 +487,204 @@ export default function CatalogClient({
     } else {
       showToast(nextVal ? `"${product.name}" added to Favorites` : `"${product.name}" removed from Favorites`, 'success');
     }
+  };
+
+  const handleAddVariant = async () => {
+    if (!variantsProduct) return;
+    const size = newVarSize.trim() || 'Free Size';
+    const color = newVarColor.trim() || 'Assorted';
+    const sku = newVarSku.trim() || `${variantsProduct.name.replace(/\s+/g, '-')}-${size.toUpperCase()}-${color.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const stock = parseInt(newVarStockQty) || 0;
+    const threshold = parseInt(newVarLowStockThreshold) || 5;
+    const source = varBarcodeSource || (newVarSku.trim() ? 'scanned' : 'generated');
+
+    const { data, error } = await supabase
+      .from('product_variants')
+      .insert({
+        product_id: variantsProduct.id,
+        size,
+        color,
+        sku,
+        stock_qty: stock,
+        low_stock_threshold: threshold,
+        barcode: sku,
+        barcode_source: source
+      })
+      .select()
+      .single();
+
+    // Reset temporary states
+    setVarBarcodeSource(null);
+
+    if (error) {
+      showToast(`Failed to add variant: ${error.message}`, 'error');
+    } else if (data) {
+      if (stock > 0) {
+        await supabase
+          .from('inventory_logs')
+          .insert({
+            shop_id: shop.id,
+            product_id: variantsProduct.id,
+            variant_id: data.id,
+            change_qty: stock,
+            previous_qty: 0,
+            new_qty: stock,
+            reason: 'restock'
+          });
+      }
+      setVariants(prev => [...prev, data as ProductVariant]);
+      showToast('Variant added successfully', 'success');
+      // Reset
+      setNewVarSize('');
+      setNewVarColor('');
+      setNewVarSku('');
+      setNewVarStockQty('0');
+      setNewVarLowStockThreshold('5');
+    }
+  };
+
+  const handleDeleteVariant = async (id: string) => {
+    const { error } = await supabase
+      .from('product_variants')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      showToast('Failed to delete variant', 'error');
+    } else {
+      setVariants(prev => prev.filter(v => v.id !== id));
+      showToast('Variant deleted successfully', 'success');
+    }
+  };
+
+  const handleBarcodeScanned = (barcode: string) => {
+    playBeep('success');
+    triggerHaptic();
+    setSearchQuery(barcode);
+    showToast(`Scanned SKU: ${barcode}`, 'success');
+  };
+
+  const handleStockBarcodeScanned = async (barcode: string) => {
+    const trimmed = barcode.trim();
+    if (!trimmed) return;
+
+    // Resolve barcode using the consolidated helper function
+    const resolved = resolveBarcode(trimmed, products, variants);
+
+    if (resolved && resolved.type === 'variant' && resolved.variant) {
+      playBeep('success');
+      triggerHaptic();
+
+      const variantId = resolved.variant.id;
+      const currentStock = resolved.variant.stock_qty || 0;
+      const newQty = currentStock + 1;
+
+      const { error } = await supabase
+        .from('product_variants')
+        .update({ stock_qty: newQty, barcode: resolved.variant.barcode || resolved.variant.sku })
+        .eq('id', variantId);
+
+      if (!error) {
+        await supabase
+          .from('inventory_logs')
+          .insert({
+            shop_id: shop.id,
+            product_id: resolved.product.id,
+            variant_id: variantId,
+            change_qty: 1,
+            previous_qty: currentStock,
+            new_qty: newQty,
+            reason: 'restock',
+          });
+
+        setVariants(prev => prev.map(v => v.id === variantId ? { ...v, stock_qty: newQty } : v));
+        showToast(`Stock +1 for ${resolved.product.name} (${resolved.variant.size} / ${resolved.variant.color})`, 'success');
+      } else {
+        showToast(`Failed to update stock: ${error.message}`, 'error');
+      }
+    } else {
+      playBeep('error');
+      setIsStockScannerOpen(false);
+
+      if (stockAdjustProductId) {
+        setVarBarcodeSource('scanned');
+        setNewVarSku(trimmed);
+        setIsAddingVarInStockModal(true);
+        showToast(`No variant found with tag "${trimmed}". Fill details to create variant.`, 'warning');
+      } else {
+        showToast(`No variant found with tag "${trimmed}" in catalog.`, 'error');
+      }
+    }
+  };
+
+  // Keyboard wedge listener for hardware USB/Bluetooth barcode scanners (HID mode)
+  useEffect(() => {
+    if (shop.shop_type !== 'clothing') return;
+
+    let buffer = '';
+    let lastKeyTime = 0;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+
+      const currentTime = Date.now();
+      const delay = currentTime - lastKeyTime;
+      lastKeyTime = currentTime;
+
+      if (delay > 50) {
+        buffer = '';
+      }
+
+      // Block scanner character entries from polluting active text fields
+      if (isInput && delay < 50 && e.key.length === 1) {
+        e.preventDefault();
+      }
+
+      if (e.key === 'Enter') {
+        if (buffer.length >= 4) {
+          e.preventDefault();
+          e.stopPropagation();
+          const scannedCode = buffer;
+          buffer = '';
+          
+          if (stockAdjustProductId) {
+            handleStockBarcodeScanned(scannedCode);
+          } else {
+            handleBarcodeScanned(scannedCode);
+          }
+        }
+        buffer = '';
+      } else if (e.key.length === 1) {
+        buffer += e.key;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }, [shop.shop_type, stockAdjustProductId, products, variants]);
+
+  const handlePrintLabels = (product: Product) => {
+    const productVariants = variants.filter(v => v.product_id === product.id);
+    const selectedIds: string[] = [];
+    const copies: number[] = [];
+    
+    for (const v of productVariants) {
+      if (selectedPrintVariants[v.id]) {
+        selectedIds.push(v.id);
+        copies.push(printCopies[v.id] || 1);
+      }
+    }
+
+    if (selectedIds.length === 0) {
+      showToast('Select at least one variant to print labels', 'error');
+      return;
+    }
+
+    const url = `/api/catalog/labels/pdf?variant_ids=${selectedIds.join(',')}&copies=${copies.join(',')}`;
+    window.open(url, '_blank');
   };
 
   const handleDeleteCategory = async (categoryToDelete: string) => {
@@ -618,46 +952,131 @@ export default function CatalogClient({
                       )}
                     </div>
 
-                    {inventoryEnabledGlobal && (
+                    {shop.shop_type === 'clothing' ? (
                       <div className="border-t border-slate-100 pt-3 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-slate-600">Track inventory / stock</span>
-                          <input
-                            type="checkbox"
-                            checked={newTrackInventory}
-                            onChange={(e) => setNewTrackInventory(e.target.checked)}
-                            className="w-10 h-6 bg-gray-200 checked:bg-[#0050e8] rounded-full appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
-                          />
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[9px] font-extrabold text-slate-450 uppercase tracking-wider mb-1">
+                              Wholesale Price (₹)
+                            </label>
+                            <Input
+                              placeholder="Wholesale (Optional)"
+                              type="number"
+                              prefix="₹"
+                              value={newWholesalePrice}
+                              onChange={(e) => setNewWholesalePrice(e.target.value)}
+                              className="rounded-xl min-h-[44px]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[9px] font-extrabold text-slate-450 uppercase tracking-wider mb-1">
+                              Season Tag
+                            </label>
+                            <Input
+                              placeholder="e.g. Summer 2026"
+                              value={newSeasonTag}
+                              onChange={(e) => setNewSeasonTag(e.target.value)}
+                              className="rounded-xl min-h-[44px]"
+                            />
+                          </div>
                         </div>
-                        {newTrackInventory && (
-                          <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
+                          <span className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">Initial Variant Setup</span>
+                          <div className="grid grid-cols-3 gap-2">
                             <div>
-                              <label className="block text-[9px] font-extrabold text-slate-450 uppercase tracking-wider mb-1">
-                                Initial Stock
-                              </label>
+                              <label className="block text-[8px] font-bold text-slate-500 uppercase mb-1">Size</label>
                               <Input
-                                placeholder="Qty"
-                                type="number"
-                                value={newStockQty}
-                                onChange={(e) => setNewStockQty(e.target.value)}
-                                className="rounded-xl min-h-[44px]"
+                                placeholder="M"
+                                value={newSize}
+                                onChange={(e) => setNewSize(e.target.value)}
+                                className="rounded-lg text-xs min-h-[36px]"
                               />
                             </div>
                             <div>
-                              <label className="block text-[9px] font-extrabold text-slate-450 uppercase tracking-wider mb-1">
-                                Low Stock Alert
-                              </label>
+                              <label className="block text-[8px] font-bold text-slate-500 uppercase mb-1">Color</label>
                               <Input
-                                placeholder="Alert at"
-                                type="number"
-                                value={newLowStockThreshold}
-                                onChange={(e) => setNewLowStockThreshold(e.target.value)}
-                                className="rounded-xl min-h-[44px]"
+                                placeholder="Black"
+                                value={newColor}
+                                onChange={(e) => setNewColor(e.target.value)}
+                                className="rounded-lg text-xs min-h-[36px]"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[8px] font-bold text-slate-500 uppercase mb-1">SKU</label>
+                              <Input
+                                placeholder="Auto"
+                                value={newSku}
+                                onChange={(e) => setNewSku(e.target.value)}
+                                className="rounded-lg text-xs min-h-[36px]"
                               />
                             </div>
                           </div>
-                        )}
+                          <div className="grid grid-cols-2 gap-3 pt-1">
+                            <div>
+                              <label className="block text-[8px] font-bold text-slate-500 uppercase mb-1">Initial Stock</label>
+                              <Input
+                                placeholder="Stock Qty"
+                                type="number"
+                                value={newVariantStockQty}
+                                onChange={(e) => setNewVariantStockQty(e.target.value)}
+                                className="rounded-lg text-xs min-h-[36px]"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[8px] font-bold text-slate-500 uppercase mb-1">Low Stock Alert</label>
+                              <Input
+                                placeholder="Alert limit"
+                                type="number"
+                                value={newVariantLowStockThreshold}
+                                onChange={(e) => setNewVariantLowStockThreshold(e.target.value)}
+                                className="rounded-lg text-xs min-h-[36px]"
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
+                    ) : (
+                      inventoryEnabledGlobal && (
+                        <div className="border-t border-slate-100 pt-3 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-slate-600">Track inventory / stock</span>
+                            <input
+                              type="checkbox"
+                              checked={newTrackInventory}
+                              onChange={(e) => setNewTrackInventory(e.target.checked)}
+                              className="w-10 h-6 bg-gray-200 checked:bg-[#0050e8] rounded-full appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
+                            />
+                          </div>
+                          {newTrackInventory && (
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-[9px] font-extrabold text-slate-450 uppercase tracking-wider mb-1">
+                                  Initial Stock
+                                </label>
+                                <Input
+                                  placeholder="Qty"
+                                  type="number"
+                                  value={newStockQty}
+                                  onChange={(e) => setNewStockQty(e.target.value)}
+                                  className="rounded-xl min-h-[44px]"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] font-extrabold text-slate-450 uppercase tracking-wider mb-1">
+                                  Low Stock Alert
+                                </label>
+                                <Input
+                                  placeholder="Alert at"
+                                  type="number"
+                                  value={newLowStockThreshold}
+                                  onChange={(e) => setNewLowStockThreshold(e.target.value)}
+                                  className="rounded-xl min-h-[44px]"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )
                     )}
                   </div>
 
@@ -799,44 +1218,122 @@ export default function CatalogClient({
             </div>
 
             {/* Inventory Tracking options */}
-            {inventoryEnabledGlobal && (
+            {shop.shop_type === 'clothing' ? (
               <div className="border-t border-[#f3f4f6] pt-3 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-[#4b5563]">Track stock for this item</span>
-                  <input
-                    type="checkbox"
-                    checked={newTrackInventory}
-                    onChange={(e) => setNewTrackInventory(e.target.checked)}
-                    className="w-10 h-6 bg-gray-200 checked:bg-[#0050e8] rounded-full appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
-                  />
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-bold text-[#4b5563] uppercase tracking-wide mb-1">
+                      Wholesale Price
+                    </label>
+                    <Input
+                      placeholder="Wholesale Price (₹)"
+                      type="number"
+                      prefix="₹"
+                      value={newWholesalePrice}
+                      onChange={(e) => setNewWholesalePrice(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-bold text-[#4b5563] uppercase tracking-wide mb-1">
+                      Season Tag
+                    </label>
+                    <Input
+                      placeholder="e.g. Summer 2026"
+                      value={newSeasonTag}
+                      onChange={(e) => setNewSeasonTag(e.target.value)}
+                    />
+                  </div>
                 </div>
-                {newTrackInventory && (
+                <div className="bg-[#f9fafb] p-3 border border-[#e5e7eb] space-y-3">
+                  <span className="text-[10px] font-extrabold text-[#4b5563] uppercase tracking-wider block">Initial Variant Setup</span>
                   <div className="flex gap-3">
                     <div className="flex-1">
-                      <label className="block text-[10px] font-bold text-[#4b5563] uppercase tracking-wide mb-1">
-                        Initial Stock
-                      </label>
+                      <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Size</label>
                       <Input
-                        placeholder="Initial Stock"
-                        type="number"
-                        value={newStockQty}
-                        onChange={(e) => setNewStockQty(e.target.value)}
+                        placeholder="e.g. M"
+                        value={newSize}
+                        onChange={(e) => setNewSize(e.target.value)}
                       />
                     </div>
                     <div className="flex-1">
-                      <label className="block text-[10px] font-bold text-[#4b5563] uppercase tracking-wide mb-1">
-                        Low Stock Alert Level
-                      </label>
+                      <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Color</label>
                       <Input
-                        placeholder="Low Stock Alert Level"
-                        type="number"
-                        value={newLowStockThreshold}
-                        onChange={(e) => setNewLowStockThreshold(e.target.value)}
+                        placeholder="e.g. Black"
+                        value={newColor}
+                        onChange={(e) => setNewColor(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">SKU (optional)</label>
+                      <Input
+                        placeholder="SKU"
+                        value={newSku}
+                        onChange={(e) => setNewSku(e.target.value)}
                       />
                     </div>
                   </div>
-                )}
+                  <div className="flex gap-3 pt-1">
+                    <div className="flex-1">
+                      <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Initial Stock</label>
+                      <Input
+                        placeholder="Stock Qty"
+                        type="number"
+                        value={newVariantStockQty}
+                        onChange={(e) => setNewVariantStockQty(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Low Stock Alert</label>
+                      <Input
+                        placeholder="Alert limit"
+                        type="number"
+                        value={newVariantLowStockThreshold}
+                        onChange={(e) => setNewVariantLowStockThreshold(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
+            ) : (
+              inventoryEnabledGlobal && (
+                <div className="border-t border-[#f3f4f6] pt-3 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-[#4b5563]">Track stock for this item</span>
+                    <input
+                      type="checkbox"
+                      checked={newTrackInventory}
+                      onChange={(e) => setNewTrackInventory(e.target.checked)}
+                      className="w-10 h-6 bg-gray-200 checked:bg-[#0050e8] rounded-full appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
+                    />
+                  </div>
+                  {newTrackInventory && (
+                    <div className="flex gap-3">
+                      <div className="flex-1">
+                        <label className="block text-[10px] font-bold text-[#4b5563] uppercase tracking-wide mb-1">
+                          Initial Stock
+                        </label>
+                        <Input
+                          placeholder="Initial Stock"
+                          type="number"
+                          value={newStockQty}
+                          onChange={(e) => setNewStockQty(e.target.value)}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-[10px] font-bold text-[#4b5563] uppercase tracking-wide mb-1">
+                          Low Stock Alert Level
+                        </label>
+                        <Input
+                          placeholder="Low Stock Alert Level"
+                          type="number"
+                          value={newLowStockThreshold}
+                          onChange={(e) => setNewLowStockThreshold(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
             )}
 
             <Button
@@ -889,12 +1386,21 @@ export default function CatalogClient({
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full pl-10 pr-8 py-2.5 bg-white border border-[#e5e7eb] rounded-none text-sm font-bold focus:outline-none focus:border-[#0050e8] focus:ring-0 transition-all placeholder-gray-400 min-h-[44px]"
                     />
-                    {searchQuery && (
+                    {searchQuery ? (
                       <button
                         onClick={() => setSearchQuery('')}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs font-bold"
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs font-bold cursor-pointer"
                       >
                         ✕
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setIsScannerOpen(true)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-450 hover:text-[#0050e8] transition-colors cursor-pointer text-xs"
+                        title="Scan Barcode"
+                      >
+                        📷
                       </button>
                     )}
                   </div>
@@ -1005,12 +1511,21 @@ export default function CatalogClient({
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-8 py-2.5 bg-white border border-[#e5e7eb] rounded-xl text-xs font-bold focus:outline-none focus:border-[#0050e8] focus:ring-0 transition-all placeholder-slate-400 min-h-[44px]"
                   />
-                  {searchQuery && (
+                  {searchQuery ? (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-450 hover:text-slate-650 text-xs font-bold cursor-pointer"
                     >
                       ✕
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsScannerOpen(true)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-450 hover:text-[#0050e8] transition-colors cursor-pointer text-xs"
+                      title="Scan Barcode"
+                    >
+                      📷
                     </button>
                   )}
                 </div>
@@ -1196,6 +1711,9 @@ export default function CatalogClient({
                             <th className="py-3.5 px-4 w-10"></th>
                             <th className="py-3.5 px-4 font-semibold">Item Name</th>
                             <th className="py-3.5 px-4 font-semibold">Category</th>
+                            {shop.shop_type === 'clothing' && (
+                              <th className="py-3.5 px-4 font-semibold">Variants</th>
+                            )}
                             <th className="py-3.5 px-4 text-right font-semibold">Sale Price</th>
                             {inventoryEnabledGlobal && (
                               <th className="py-3.5 px-4 text-center font-semibold">Stock Qty</th>
@@ -1259,10 +1777,46 @@ export default function CatalogClient({
                                        )}
                                      </div>
                                    )}
+                                   {shop.shop_type === 'clothing' && (
+                                     <div className="flex flex-wrap gap-1.5 mt-1">
+                                       {product.wholesale_price !== null && product.wholesale_price !== undefined && (
+                                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-100">
+                                           Wholesale: ₹{product.wholesale_price}
+                                         </span>
+                                       )}
+                                       {product.season_tag && (
+                                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-100">
+                                           🏷️ {product.season_tag}
+                                         </span>
+                                       )}
+                                     </div>
+                                   )}
                                  </td>
                                  <td className="py-3.5 px-4 text-xs font-semibold text-gray-500">
                                    {product.category || 'Others'}
                                  </td>
+                                 {shop.shop_type === 'clothing' && (
+                                   <td className="py-3.5 px-4">
+                                     <button
+                                       onClick={() => {
+                                         setVariantsProduct(product);
+                                         const prodVars = variants.filter(v => v.product_id === product.id);
+                                         const selected: Record<string, boolean> = {};
+                                         const copies: Record<string, number> = {};
+                                         prodVars.forEach(v => {
+                                           selected[v.id] = true;
+                                           copies[v.id] = 1;
+                                         });
+                                         setSelectedPrintVariants(selected);
+                                         setPrintCopies(copies);
+                                       }}
+                                       className="text-[#0050e8] hover:underline font-bold text-xs bg-[#0050e8]/5 px-2.5 py-1.5 border border-[#0050e8]/20 transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1 hover:bg-[#0050e8]/10"
+                                     >
+                                       <span>👕</span>
+                                       <span>{variants.filter(v => v.product_id === product.id).length} Variants</span>
+                                     </button>
+                                   </td>
+                                 )}
                                  <td className="py-3.5 px-4 text-right text-sm font-semibold text-gray-900 tabular-nums">
                                    ₹{Number(product.price).toLocaleString('en-IN')}
                                  </td>
@@ -1403,6 +1957,20 @@ export default function CatalogClient({
                                 HSN: {product.hsn_code}
                               </span>
                             )}
+                            {shop.shop_type === 'clothing' && (
+                              <>
+                                {product.wholesale_price !== null && product.wholesale_price !== undefined && (
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-100 uppercase">
+                                    Wholesale: ₹{product.wholesale_price}
+                                  </span>
+                                )}
+                                {product.season_tag && (
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-50 text-purple-700 border border-purple-100 uppercase">
+                                    🏷️ {product.season_tag}
+                                  </span>
+                                )}
+                              </>
+                            )}
                             {inventoryEnabledGlobal && product.track_inventory && (
                               <>
                                 {isOutOfStock ? (
@@ -1423,7 +1991,7 @@ export default function CatalogClient({
                           </div>
 
                           <div className="flex justify-between items-center pt-2 border-t border-slate-100 mt-1">
-                            <div>
+                            <div className="flex gap-2">
                               {inventoryEnabledGlobal && product.track_inventory && (
                                 <button
                                   type="button"
@@ -1435,6 +2003,27 @@ export default function CatalogClient({
                                   className="bg-[#0050e8]/10 hover:bg-[#0050e8]/20 text-[#0050e8] text-[10px] font-black px-3 py-1.5 rounded-lg transition-colors cursor-pointer min-h-[32px] flex items-center justify-center"
                                 >
                                   + Add Stock
+                                </button>
+                              )}
+                              {shop.shop_type === 'clothing' && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setVariantsProduct(product);
+                                    const prodVars = variants.filter(v => v.product_id === product.id);
+                                    const selected: Record<string, boolean> = {};
+                                    const copies: Record<string, number> = {};
+                                    prodVars.forEach(v => {
+                                      selected[v.id] = true;
+                                      copies[v.id] = 1;
+                                    });
+                                    setSelectedPrintVariants(selected);
+                                    setPrintCopies(copies);
+                                  }}
+                                  className="bg-[#0050e8]/5 hover:bg-[#0050e8]/10 text-[#0050e8] text-[10px] font-black px-3 py-1.5 rounded-lg border border-[#0050e8]/20 transition-all cursor-pointer min-h-[32px] flex items-center justify-center gap-1"
+                                >
+                                  <span>👕</span>
+                                  <span>{variants.filter(v => v.product_id === product.id).length} Variants</span>
                                 </button>
                               )}
                             </div>
@@ -1795,28 +2384,52 @@ export default function CatalogClient({
                     )}
                   </div>
 
-                  {inventoryEnabledGlobal && (
+                  {shop.shop_type === 'clothing' ? (
                     <div className="border-t border-[#f3f4f6] pt-3 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-[#4b5563]">Track stock for this item</span>
-                        <input
-                          type="checkbox"
-                          checked={editTrackInventory}
-                          onChange={(e) => setEditTrackInventory(e.target.checked)}
-                          className="w-10 h-6 bg-gray-200 checked:bg-[#0050e8] rounded-full appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
-                        />
-                      </div>
-                      {editTrackInventory && (
-                        <div className="w-full">
-                          <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1">Low Stock Alert Level</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1">Wholesale Price</label>
                           <Input
                             type="number"
-                            value={editLowStockThreshold}
-                            onChange={(e) => setEditLowStockThreshold(e.target.value)}
+                            prefix="₹"
+                            value={editWholesalePrice}
+                            onChange={(e) => setEditWholesalePrice(e.target.value)}
                           />
                         </div>
-                      )}
+                        <div>
+                          <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1">Season Tag</label>
+                          <Input
+                            placeholder="e.g. Summer 2026"
+                            value={editSeasonTag}
+                            onChange={(e) => setEditSeasonTag(e.target.value)}
+                          />
+                        </div>
+                      </div>
                     </div>
+                  ) : (
+                    inventoryEnabledGlobal && (
+                      <div className="border-t border-[#f3f4f6] pt-3 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-[#4b5563]">Track stock for this item</span>
+                          <input
+                            type="checkbox"
+                            checked={editTrackInventory}
+                            onChange={(e) => setEditTrackInventory(e.target.checked)}
+                            className="w-10 h-6 bg-gray-200 checked:bg-[#0050e8] rounded-full appearance-none relative cursor-pointer transition-colors duration-200 focus:outline-none before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-1 before:left-1 checked:before:translate-x-4 before:transition-all before:duration-200 border border-gray-300"
+                          />
+                        </div>
+                        {editTrackInventory && (
+                          <div className="w-full">
+                            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1">Low Stock Alert Level</label>
+                            <Input
+                              type="number"
+                              value={editLowStockThreshold}
+                              onChange={(e) => setEditLowStockThreshold(e.target.value)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )
                   )}
                 </div>
 
@@ -1848,7 +2461,10 @@ export default function CatalogClient({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                onClick={() => setStockAdjustProductId(null)}
+                onClick={() => {
+                  setStockAdjustProductId(null);
+                  setIsAddingVarInStockModal(false);
+                }}
                 className="absolute inset-0 bg-black/50 backdrop-blur-xs"
               />
               {/* Modal Box */}
@@ -1856,14 +2472,17 @@ export default function CatalogClient({
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                className="relative bg-white rounded-2xl p-6 shadow-xl max-w-sm w-full border border-gray-100 z-10 space-y-4"
+                className="relative bg-white rounded-2xl p-6 shadow-xl max-w-md w-full border border-gray-100 z-10 space-y-4 max-h-[85vh] overflow-y-auto"
               >
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                   <h3 className="text-base font-black text-gray-900 font-heading">
-                    Add Stock
+                    {shop.shop_type === 'clothing' ? 'Stock-In Manager' : 'Add Stock'}
                   </h3>
                   <button
-                    onClick={() => setStockAdjustProductId(null)}
+                    onClick={() => {
+                      setStockAdjustProductId(null);
+                      setIsAddingVarInStockModal(false);
+                    }}
                     className="text-gray-400 hover:text-gray-600 transition-colors text-lg font-bold"
                   >
                     ✕
@@ -1873,6 +2492,234 @@ export default function CatalogClient({
                 {(() => {
                   const product = products.find(p => p.id === stockAdjustProductId);
                   if (!product) return null;
+
+                  if (shop.shop_type === 'clothing') {
+                    const productVariants = variants.filter(v => v.product_id === product.id);
+
+                    if (isAddingVarInStockModal) {
+                      return (
+                        <div className="space-y-4">
+                          <div className="bg-[#0050e8]/5 p-3 rounded-xl border border-[#0050e8]/10 text-xs text-[#0050e8] font-bold">
+                            {varBarcodeSource === 'scanned' ? (
+                              <span>Scanned Tag: <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-[#0050e8]/20">{newVarSku}</span> (source: scanned)</span>
+                            ) : (
+                              <span>No tag — generating new QR code / SKU automatically</span>
+                            )}
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-[9px] font-black text-gray-400 uppercase tracking-wide mb-1">Size</label>
+                              <Input
+                                placeholder="e.g. M, L, XL"
+                                value={newVarSize}
+                                onChange={(e) => setNewVarSize(e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[9px] font-black text-gray-400 uppercase tracking-wide mb-1">Color</label>
+                              <Input
+                                placeholder="e.g. Red, Blue"
+                                value={newVarColor}
+                                onChange={(e) => setNewVarColor(e.target.value)}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-[9px] font-black text-gray-400 uppercase tracking-wide mb-1">Initial Stock</label>
+                              <Input
+                                type="number"
+                                placeholder="0"
+                                value={newVarStockQty}
+                                onChange={(e) => setNewVarStockQty(e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[9px] font-black text-gray-400 uppercase tracking-wide mb-1">Low Stock Alert Threshold</label>
+                              <Input
+                                type="number"
+                                placeholder="5"
+                                value={newVarLowStockThreshold}
+                                onChange={(e) => setNewVarLowStockThreshold(e.target.value)}
+                              />
+                            </div>
+                          </div>
+
+                          {varBarcodeSource !== 'scanned' && (
+                            <div>
+                              <label className="block text-[9px] font-black text-gray-400 uppercase tracking-wide mb-1">Custom SKU / Barcode (Optional)</label>
+                              <Input
+                                placeholder="Leave blank to auto-generate"
+                                value={newVarSku}
+                                onChange={(e) => setNewVarSku(e.target.value)}
+                              />
+                            </div>
+                          )}
+
+                          <div className="flex gap-2 justify-end pt-3 border-t border-gray-100">
+                            <Button
+                              variant="secondary"
+                              onClick={() => {
+                                setIsAddingVarInStockModal(false);
+                                setVarBarcodeSource(null);
+                              }}
+                            >
+                              Back
+                            </Button>
+                            <Button
+                              variant="primary"
+                              onClick={async () => {
+                                setVariantsProduct(product);
+                                await handleAddVariant();
+                                setIsAddingVarInStockModal(false);
+                              }}
+                            >
+                              Save Variant
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="space-y-4">
+                        <div>
+                          <span className="text-[10px] text-gray-400 font-bold block uppercase tracking-wide">Product</span>
+                          <span className="text-sm font-black text-gray-900 uppercase tracking-wider">{product.name}</span>
+                        </div>
+
+                        {/* Variants List */}
+                        <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
+                          {productVariants.length === 0 ? (
+                            <p className="text-xs text-gray-500 italic py-2 text-center">No variants created yet.</p>
+                          ) : (
+                            productVariants.map((v) => {
+                              const pendingQty = printCopies[v.id] || 1;
+                              const isSelected = !!selectedPrintVariants[v.id];
+                              
+                              return (
+                                <div key={v.id} className="p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 transition-all flex flex-col gap-2">
+                                  <div className="flex justify-between items-start">
+                                    <div>
+                                      <p className="text-xs font-black text-gray-800 uppercase">
+                                        Size: {v.size} | Color: {v.color}
+                                      </p>
+                                      <p className="text-[9px] text-gray-400 font-mono mt-0.5">
+                                        Barcode: {v.barcode || v.sku}
+                                      </p>
+                                    </div>
+                                    <span className="text-xs font-bold text-gray-900 bg-white px-2 py-0.5 rounded-full border border-gray-100 shadow-3xs">
+                                      Stock: {v.stock_qty}
+                                    </span>
+                                  </div>
+
+                                  {/* Direct +/- Adjustment */}
+                                  <div className="flex items-center justify-between gap-2 border-t border-gray-100/50 pt-2 mt-1">
+                                    <div className="flex items-center gap-1">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleAdjustVariantStock(v.id, -1, 'adjustment')}
+                                        className="w-7 h-7 flex items-center justify-center bg-white border border-gray-200 rounded-lg text-xs font-bold hover:bg-gray-50 active:scale-95 transition-all text-gray-600 shadow-3xs"
+                                        title="Deduct 1"
+                                      >
+                                        -
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleAdjustVariantStock(v.id, 1, 'restock')}
+                                        className="w-7 h-7 flex items-center justify-center bg-[#0050e8] text-white rounded-lg text-xs font-bold hover:bg-[#0043c4] active:scale-95 transition-all shadow-3xs"
+                                        title="Add 1"
+                                      >
+                                        +1
+                                      </button>
+                                    </div>
+
+                                    {/* Print Label Controls */}
+                                    <div className="flex items-center gap-1.5">
+                                      <input
+                                        type="checkbox"
+                                        checked={isSelected}
+                                        onChange={(e) => {
+                                          setSelectedPrintVariants(prev => ({ ...prev, [v.id]: e.target.checked }));
+                                        }}
+                                        className="rounded border-gray-300 text-[#0050e8] focus:ring-[#0050e8] h-3.5 w-3.5"
+                                        title="Select to print"
+                                      />
+                                      <input
+                                        type="number"
+                                        min="1"
+                                        value={pendingQty}
+                                        onChange={(e) => {
+                                          const val = Math.max(1, parseInt(e.target.value) || 1);
+                                          setPrintCopies(prev => ({ ...prev, [v.id]: val }));
+                                        }}
+                                        className="w-8 text-center text-[10px] font-bold border border-gray-200 rounded bg-white py-0.5 focus:outline-none focus:border-[#0050e8]"
+                                        title="Copies"
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setSelectedPrintVariants({ [v.id]: true });
+                                          setTimeout(() => handlePrintLabels(product), 50);
+                                        }}
+                                        className="text-[10px] font-black text-[#0050e8] hover:underline"
+                                      >
+                                        Print
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+
+                        {/* Scanner & Manual creation actions */}
+                        <div className="grid grid-cols-2 gap-3 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setVariantsProduct(product);
+                              setIsStockScannerOpen(true);
+                            }}
+                            className="flex items-center justify-center gap-1.5 py-2.5 px-4 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 active:scale-98 transition-all shadow-sm"
+                          >
+                            📷 Scan Tag
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setVariantsProduct(product);
+                              setNewVarSize('');
+                              setNewVarColor('');
+                              setNewVarSku('');
+                              setNewVarStockQty('0');
+                              setVarBarcodeSource('generated');
+                              setIsAddingVarInStockModal(true);
+                            }}
+                            className="flex items-center justify-center gap-1.5 py-2.5 px-4 bg-white border border-gray-200 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-50 active:scale-98 transition-all shadow-xs"
+                          >
+                            No Tag — Gen Code
+                          </button>
+                        </div>
+
+                        {/* Multi-print action */}
+                        {productVariants.some(v => selectedPrintVariants[v.id]) && (
+                          <button
+                            type="button"
+                            onClick={() => handlePrintLabels(product)}
+                            className="w-full py-2.5 bg-[#0050e8]/10 text-[#0050e8] font-bold text-xs rounded-xl hover:bg-[#0050e8]/15 transition-all shadow-3xs"
+                          >
+                            Print Selected Label Sheets
+                          </button>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  // Non-clothing simple stock adjust
                   return (
                     <div className="space-y-4">
                       <div>
@@ -1968,6 +2815,242 @@ export default function CatalogClient({
                   >
                     Delete
                   </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+        <BarcodeScannerModal
+          isOpen={isScannerOpen}
+          onClose={() => setIsScannerOpen(false)}
+          onScan={(code) => {
+            handleBarcodeScanned(code);
+            setIsScannerOpen(false);
+          }}
+        />
+
+        <BarcodeScannerModal
+          isOpen={isStockScannerOpen}
+          onClose={() => setIsStockScannerOpen(false)}
+          onScan={(code) => {
+            handleStockBarcodeScanned(code);
+          }}
+          keepOpenOnScan={true}
+        />
+
+        {/* Manage Variants Modal */}
+        <AnimatePresence>
+          {variantsProduct && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setVariantsProduct(null)}
+                className="absolute inset-0 bg-black/50 backdrop-blur-xs"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                className="relative bg-white rounded-2xl p-6 shadow-xl max-w-2xl w-full border border-gray-100 z-10 space-y-6 max-h-[85vh] overflow-y-auto"
+              >
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                  <div>
+                    <h3 className="text-base font-black text-gray-900 font-heading uppercase tracking-wide">
+                      Manage Variants
+                    </h3>
+                    <p className="text-[10px] text-gray-500 font-semibold mt-0.5">
+                      Product: {variantsProduct.name}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setVariantsProduct(null)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors text-lg font-bold cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Add Variant Form */}
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-3">
+                  <h4 className="text-[11px] font-black text-slate-700 uppercase tracking-wide">Add New Variant</h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Size</label>
+                      <Input
+                        placeholder="e.g. M, L, XL"
+                        value={newVarSize}
+                        onChange={(e) => setNewVarSize(e.target.value)}
+                        className="rounded-lg text-xs min-h-[38px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Color</label>
+                      <Input
+                        placeholder="e.g. Red, Blue"
+                        value={newVarColor}
+                        onChange={(e) => setNewVarColor(e.target.value)}
+                        className="rounded-lg text-xs min-h-[38px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">SKU (optional)</label>
+                      <Input
+                        placeholder="Auto-generated if blank"
+                        value={newVarSku}
+                        onChange={(e) => setNewVarSku(e.target.value)}
+                        className="rounded-lg text-xs min-h-[38px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Initial Stock</label>
+                      <Input
+                        placeholder="0"
+                        type="number"
+                        value={newVarStockQty}
+                        onChange={(e) => setNewVarStockQty(e.target.value)}
+                        className="rounded-lg text-xs min-h-[38px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Low Stock Threshold</label>
+                      <Input
+                        placeholder="5"
+                        type="number"
+                        value={newVarLowStockThreshold}
+                        onChange={(e) => setNewVarLowStockThreshold(e.target.value)}
+                        className="rounded-lg text-xs min-h-[38px]"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <Button
+                        onClick={handleAddVariant}
+                        disabled={!newVarSize && !newVarColor}
+                        fullWidth
+                        className="rounded-lg min-h-[38px] text-xs font-bold"
+                      >
+                        + Add Variant
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Existing Variants Table & Label Print Option */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-[11px] font-black text-slate-700 uppercase tracking-wide">Existing Variants</h4>
+                    <Button
+                      onClick={() => handlePrintLabels(variantsProduct)}
+                      variant="secondary"
+                      className="text-xs py-1.5 px-3 flex items-center gap-1.5 border-[#0050e8]/20 bg-[#0050e8]/5 text-[#0050e8]"
+                    >
+                      🖨️ Print Selected Labels
+                    </Button>
+                  </div>
+
+                  <div className="border border-slate-200 rounded-xl overflow-hidden">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[9px]">
+                          <th className="p-3 w-10">
+                            <input
+                              type="checkbox"
+                              checked={variants.filter(v => v.product_id === variantsProduct.id).every(v => selectedPrintVariants[v.id])}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                const prodVars = variants.filter(v => v.product_id === variantsProduct.id);
+                                const updatedSelected = { ...selectedPrintVariants };
+                                prodVars.forEach(v => {
+                                  updatedSelected[v.id] = checked;
+                                });
+                                setSelectedPrintVariants(updatedSelected);
+                              }}
+                              className="rounded cursor-pointer"
+                            />
+                          </th>
+                          <th className="p-3">Size</th>
+                          <th className="p-3">Color</th>
+                          <th className="p-3">SKU / Barcode</th>
+                          <th className="p-3">Stock</th>
+                          <th className="p-3 text-center">Print Copies</th>
+                          <th className="p-3 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {variants.filter(v => v.product_id === variantsProduct.id).length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="p-4 text-center text-slate-400 font-medium">
+                              No variants added yet.
+                            </td>
+                          </tr>
+                        ) : (
+                          variants.filter(v => v.product_id === variantsProduct.id).map(variant => (
+                            <tr key={variant.id} className="hover:bg-slate-50/50">
+                              <td className="p-3">
+                                <input
+                                  type="checkbox"
+                                  checked={!!selectedPrintVariants[variant.id]}
+                                  onChange={(e) => {
+                                    setSelectedPrintVariants(prev => ({
+                                      ...prev,
+                                      [variant.id]: e.target.checked
+                                    }));
+                                  }}
+                                  className="rounded cursor-pointer"
+                                />
+                              </td>
+                              <td className="p-3 font-bold text-slate-800">{variant.size}</td>
+                              <td className="p-3 font-bold text-slate-800">{variant.color}</td>
+                              <td className="p-3 font-mono font-bold text-slate-600 text-[10px]">{variant.sku}</td>
+                              <td className="p-3 font-semibold text-slate-700">
+                                {variant.stock_qty <= variant.low_stock_threshold ? (
+                                  <span className="text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-100 text-[10px] font-extrabold animate-pulse">
+                                    ⚠️ {variant.stock_qty}
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-700">{variant.stock_qty}</span>
+                                )}
+                              </td>
+                              <td className="p-3 text-center">
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max="99"
+                                  value={printCopies[variant.id] || 1}
+                                  onChange={(e) => {
+                                    const val = Math.max(1, parseInt(e.target.value) || 1);
+                                    setPrintCopies(prev => ({
+                                      ...prev,
+                                      [variant.id]: val
+                                    }));
+                                  }}
+                                  className="w-14 border border-slate-200 rounded p-1 text-center font-bold"
+                                />
+                              </td>
+                              <td className="p-3 text-right">
+                                <button
+                                  onClick={() => handleDeleteVariant(variant.id)}
+                                  className="text-rose-500 hover:text-rose-700 font-extrabold cursor-pointer"
+                                >
+                                  Delete
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-3 border-t border-gray-100">
+                  <Button
+                    variant="secondary"
+                    onClick={() => setVariantsProduct(null)}
+                  >
+                    Close Modal
+                  </Button>
                 </div>
               </motion.div>
             </div>

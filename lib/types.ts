@@ -40,6 +40,7 @@ export interface Customer {
   created_at: string;
   outstanding_balance?: number;
   gstin?: string | null;
+  price_tier?: 'retail' | 'wholesale';
 }
 
 export interface Product {
@@ -57,6 +58,8 @@ export interface Product {
   category?: string | null;
   last_used_at?: string | null;
   use_count?: number;
+  wholesale_price?: number | null;
+  season_tag?: string | null;
 }
 
 export type PaymentStatus = 'unpaid' | 'partial' | 'paid';
@@ -116,6 +119,7 @@ export interface InvoiceItem {
   cgst?: number;
   sgst?: number;
   line_total?: number;
+  variant_id?: string | null;
 }
 
 // ─── API Request/Response Types ───────────────────────────────
@@ -260,6 +264,7 @@ export interface CDNItem {
   cgst: number;
   sgst: number;
   line_total: number;
+  variant_id?: string | null;
   created_at: string;
 }
 
@@ -335,4 +340,17 @@ export interface AuditLog {
   details: Record<string, any> | null;
   ip_address: string | null;
   created_at: string;
+}
+
+export interface ProductVariant {
+  id: string;
+  product_id: string;
+  size: string;
+  color: string;
+  sku: string;
+  stock_qty: number;
+  low_stock_threshold: number;
+  created_at: string;
+  barcode?: string | null;
+  barcode_source?: 'scanned' | 'generated' | null;
 }

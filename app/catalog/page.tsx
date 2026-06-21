@@ -28,10 +28,20 @@ export default async function CatalogPage() {
     .eq('shop_id', shop.id)
     .order('created_at', { ascending: true });
 
+  let initialVariants: any[] = [];
+  if (products && products.length > 0 && shop.shop_type === 'clothing') {
+    const { data: variants } = await supabase
+      .from('product_variants')
+      .select('*')
+      .in('product_id', products.map((p) => p.id));
+    initialVariants = variants || [];
+  }
+
   return (
     <CatalogClient
       shop={shop as Shop}
       initialProducts={(products ?? []) as Product[]}
+      initialVariants={initialVariants}
     />
   );
 }

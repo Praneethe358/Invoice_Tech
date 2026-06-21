@@ -5,6 +5,7 @@ import { validatePhone, validateInvoiceItems } from '@/lib/validators';
 import { getCurrentUserContext } from '@/lib/current-user';
 import { hasPermission } from '@/lib/permissions';
 import { logAudit } from '@/lib/audit';
+import { getClothingGstRate } from '@/lib/clothing/gst';
 
 // PUT: Update a draft invoice
 export async function PUT(
@@ -33,7 +34,7 @@ export async function PUT(
     // Get shop
     const { data: shop, error: shopError } = await supabase
       .from('shops')
-      .select('id, gst_registered')
+      .select('id, gst_registered, shop_type')
       .eq('id', ctx.shopId)
       .single();
 
@@ -100,7 +101,7 @@ export async function PUT(
       let lineTotal = baseAmount;
 
       if (shop.gst_registered) {
-        const gstRate = item.gst_rate || 0;
+        const gstRate = shop.shop_type === 'clothing' ? getClothingGstRate(item.price) : (item.gst_rate || 0);
         const gstAmount = baseAmount * (gstRate / 100);
         cgst = Number((gstAmount / 2).toFixed(2));
         sgst = Number((gstAmount / 2).toFixed(2));
@@ -108,6 +109,13 @@ export async function PUT(
         totalCgst += cgst;
         totalSgst += sgst;
         totalGst += gstAmount;
+        return {
+          ...item,
+          gst_rate: gstRate,
+          cgst,
+          sgst,
+          line_total: lineTotal,
+        };
       }
 
       return {
@@ -183,6 +191,7 @@ export async function PUT(
       cgst: item.cgst,
       sgst: item.sgst,
       line_total: item.line_total,
+      variant_id: item.variant_id || null,
     }));
 
     const { error: itemsInsertError } = await supabase

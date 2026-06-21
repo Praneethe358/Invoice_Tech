@@ -36,6 +36,15 @@ export default async function NewInvoicePage({ searchParams }: PageProps) {
     .eq('shop_id', shop.id)
     .order('created_at', { ascending: true });
 
+  let initialVariants: any[] = [];
+  if (shop.shop_type === 'clothing' && products && products.length > 0) {
+    const { data: vars } = await supabase
+      .from('product_variants')
+      .select('*')
+      .in('product_id', products.map(p => p.id));
+    initialVariants = vars ?? [];
+  }
+
   let initialDraft = null;
   if (draftId) {
     const { data: invoice } = await supabase
@@ -52,6 +61,7 @@ export default async function NewInvoicePage({ searchParams }: PageProps) {
   return (
     <InvoiceBuilderClient
       products={(products ?? []) as Product[]}
+      initialVariants={initialVariants}
       shopId={shop.id}
       shop={shop as any}
       initialDraft={initialDraft}

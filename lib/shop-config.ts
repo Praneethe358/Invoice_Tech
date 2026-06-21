@@ -14,7 +14,7 @@ export interface ShopTypeConfig {
 export const SHOP_CONFIG: Record<ShopType, ShopTypeConfig> = {
   clothing: {
     inventoryEnabled: true,
-    showBarcode: false,
+    showBarcode: true,
     showBundles: true,
     categoryLabels: 'Categories',
     itemLabel: 'Products',

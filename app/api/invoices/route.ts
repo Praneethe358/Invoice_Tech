@@ -5,6 +5,7 @@ import { validatePhone, validateInvoiceItems } from '@/lib/validators';
 import { logAudit } from '@/lib/audit';
 import { getCurrentUserContext } from '@/lib/current-user';
 import { getSubscriptionAccess, syncSubscriptionStatus } from '@/lib/subscription';
+import { getClothingGstRate } from '@/lib/clothing/gst';
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     // Get shop
     const { data: shop, error: shopError } = await supabase
       .from('shops')
-      .select('id, invoice_prefix, next_invoice_number, gst_registered, subscription_status, trial_ends_at, subscription_ends_at')
+      .select('id, invoice_prefix, next_invoice_number, gst_registered, subscription_status, trial_ends_at, subscription_ends_at, shop_type')
       .eq('auth_user_id', user.id)
       .single();
 
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest) {
       let lineTotal = baseAmount;
 
       if (shop.gst_registered) {
-        const gstRate = item.gst_rate || 0;
+        const gstRate = shop.shop_type === 'clothing' ? getClothingGstRate(item.price) : (item.gst_rate || 0);
         const gstAmount = baseAmount * (gstRate / 100);
         cgst = Number((gstAmount / 2).toFixed(2));
         sgst = Number((gstAmount / 2).toFixed(2));
@@ -109,6 +110,13 @@ export async function POST(request: NextRequest) {
         totalCgst += cgst;
         totalSgst += sgst;
         totalGst += gstAmount;
+        return {
+          ...item,
+          gst_rate: gstRate,
+          cgst,
+          sgst,
+          line_total: lineTotal,
+        };
       }
 
       return {
