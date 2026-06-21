@@ -41,10 +41,50 @@ interface Props {
   initialDraft?: any;
 }
 
-export default function InvoiceBuilderClient({ products, initialVariants = [], shopId, shop, initialDraft }: Props) {
+export default function InvoiceBuilderClient({ products: initialProducts, initialVariants = [], shopId, shop, initialDraft }: Props) {
   const supabase = createClient();
-  const [variants] = useState<ProductVariant[]>(initialVariants);
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [variants, setVariants] = useState<ProductVariant[]>(initialVariants);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+
+  const refreshCatalog = useCallback(async () => {
+    try {
+      const { data: prods } = await supabase
+        .from('products')
+        .select('*')
+        .eq('shop_id', shopId)
+        .order('created_at', { ascending: true });
+      
+      if (prods) {
+        setProducts(prods as Product[]);
+        
+        if (shop.shop_type === 'clothing' && prods.length > 0) {
+          const { data: vars } = await supabase
+            .from('product_variants')
+            .select('*')
+            .in('product_id', prods.map((p: any) => p.id));
+          if (vars) {
+            setVariants(vars);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error refreshing catalog:', err);
+    }
+  }, [shopId, shop.shop_type, supabase]);
+
+  useEffect(() => {
+    refreshCatalog();
+
+    const handleFocus = () => {
+      refreshCatalog();
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [refreshCatalog]);
+
   const [expandedProductId, setExpandedProductId] = useState<string | null>(null);
   const [items, setItems] = useState<InvoiceItem[]>(() => {
     if (initialDraft?.invoice_items) {
@@ -757,7 +797,10 @@ export default function InvoiceBuilderClient({ products, initialVariants = [], s
                   </div>
                   <button
                     type="button"
-                    onClick={() => setIsScannerOpen(true)}
+                    onClick={() => {
+                      refreshCatalog();
+                      setIsScannerOpen(true);
+                    }}
                     className="flex items-center justify-center gap-1.5 px-4 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors border border-slate-950 min-h-[44px]"
                     title="Scan Barcode / QR Code"
                   >
