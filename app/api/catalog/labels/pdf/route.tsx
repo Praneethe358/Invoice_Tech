@@ -24,46 +24,26 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     padding: 6,
     flexDirection: 'column',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
+    gap: 6,
     backgroundColor: '#ffffff',
   },
   shopName: {
-    fontSize: 7,
+    fontSize: 8,
     fontFamily: 'Helvetica-Bold',
     color: '#0050e8',
     textTransform: 'uppercase',
     textAlign: 'center',
-    marginBottom: 2,
   },
-  productName: {
-    fontSize: 8,
-    fontFamily: 'Helvetica-Bold',
-    color: '#1f2937',
-    textAlign: 'center',
-    maxHeight: 18,
-    overflow: 'hidden',
-  },
-  variantInfo: {
-    fontSize: 7,
-    color: '#4b5563',
-    fontFamily: 'Helvetica',
-    textAlign: 'center',
-  },
-  qrCode: {
-    width: 42,
-    height: 42,
-    marginVertical: 2,
+  barcode: {
+    width: 135,
+    height: 40,
   },
   skuText: {
-    fontSize: 6,
+    fontSize: 7,
     fontFamily: 'Helvetica',
-    color: '#9ca3af',
-  },
-  priceText: {
-    fontSize: 8,
-    fontFamily: 'Helvetica-Bold',
-    color: '#111827',
+    color: '#4b5563',
   },
 });
 
@@ -84,16 +64,13 @@ const LabelsPDFDocument = ({ shopName, labels }: LabelPDFProps) => {
       <Page size="A4" style={styles.page}>
         <View style={styles.grid}>
           {labels.map((item, idx) => {
-            // Encode SKU for QR code generation
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(item.sku)}&size=120x120&margin=0`;
+            // Encode SKU for Code 128 barcode generation
+            const barcodeUrl = `https://quickchart.io/barcode?type=code128&text=${encodeURIComponent(item.sku)}&height=35`;
             return (
               <View key={idx} style={styles.labelCard}>
                 <Text style={styles.shopName}>{shopName.slice(0, 20)}</Text>
-                <Text style={styles.productName}>{item.productName.slice(0, 24)}</Text>
-                <Text style={styles.variantInfo}>Sz: {item.size} | Col: {item.color}</Text>
-                <Image src={qrUrl} style={styles.qrCode} />
+                <Image src={barcodeUrl} style={styles.barcode} />
                 <Text style={styles.skuText}>{item.sku}</Text>
-                <Text style={styles.priceText}>₹{Number(item.price).toLocaleString('en-IN')}</Text>
               </View>
             );
           })}

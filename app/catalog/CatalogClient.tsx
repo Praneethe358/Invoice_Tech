@@ -74,6 +74,8 @@ export default function CatalogClient({
   // Scanner state
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isStockScannerOpen, setIsStockScannerOpen] = useState(false);
+  const [isNewSkuScannerOpen, setIsNewSkuScannerOpen] = useState(false);
+  const [isNewVarSkuScannerOpen, setIsNewVarSkuScannerOpen] = useState(false);
   const [varBarcodeSource, setVarBarcodeSource] = useState<'scanned' | 'generated' | null>(null);
   const [isAddingVarInStockModal, setIsAddingVarInStockModal] = useState(false);
 
@@ -564,6 +566,27 @@ export default function CatalogClient({
     showToast(`Scanned SKU: ${barcode}`, 'success');
   };
 
+  const handleNewSkuScanned = (barcode: string) => {
+    const trimmed = barcode.trim();
+    if (trimmed) {
+      playBeep('success');
+      triggerHaptic();
+      setNewSku(trimmed);
+      showToast(`Scanned SKU: ${trimmed}`, 'success');
+    }
+  };
+
+  const handleNewVarSkuScanned = (barcode: string) => {
+    const trimmed = barcode.trim();
+    if (trimmed) {
+      playBeep('success');
+      triggerHaptic();
+      setNewVarSku(trimmed);
+      setVarBarcodeSource('scanned');
+      showToast(`Scanned Variant SKU: ${trimmed}`, 'success');
+    }
+  };
+
   const handleStockBarcodeScanned = async (barcode: string) => {
     const trimmed = barcode.trim();
     if (!trimmed) return;
@@ -1003,12 +1026,22 @@ export default function CatalogClient({
                             </div>
                             <div>
                               <label className="block text-[8px] font-bold text-slate-500 uppercase mb-1">SKU</label>
-                              <Input
-                                placeholder="Auto"
-                                value={newSku}
-                                onChange={(e) => setNewSku(e.target.value)}
-                                className="rounded-lg text-xs min-h-[36px]"
-                              />
+                              <div className="relative flex items-center">
+                                <Input
+                                  placeholder="Auto"
+                                  value={newSku}
+                                  onChange={(e) => setNewSku(e.target.value)}
+                                  className="rounded-lg text-xs min-h-[36px] pr-9"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setIsNewSkuScannerOpen(true)}
+                                  className="absolute right-2.5 p-1 text-slate-400 hover:text-[#0050e8] hover:bg-slate-50 rounded-md transition-all duration-150 cursor-pointer"
+                                  title="Scan Barcode"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                                </button>
+                              </div>
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-3 pt-1">
@@ -1265,11 +1298,22 @@ export default function CatalogClient({
                     </div>
                     <div className="flex-1">
                       <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">SKU (optional)</label>
-                      <Input
-                        placeholder="SKU"
-                        value={newSku}
-                        onChange={(e) => setNewSku(e.target.value)}
-                      />
+                      <div className="relative flex items-center">
+                        <Input
+                          placeholder="SKU"
+                          value={newSku}
+                          onChange={(e) => setNewSku(e.target.value)}
+                          className="pr-9"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setIsNewSkuScannerOpen(true)}
+                          className="absolute right-2.5 p-1 text-slate-400 hover:text-[#0050e8] hover:bg-slate-50 rounded-md transition-all duration-150 cursor-pointer"
+                          title="Scan Barcode"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <div className="flex gap-3 pt-1">
@@ -1397,10 +1441,10 @@ export default function CatalogClient({
                       <button
                         type="button"
                         onClick={() => setIsScannerOpen(true)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-450 hover:text-[#0050e8] transition-colors cursor-pointer text-xs"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-[#0050e8] hover:bg-slate-50 rounded-lg transition-all cursor-pointer"
                         title="Scan Barcode"
                       >
-                        📷
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
                       </button>
                     )}
                   </div>
@@ -1522,10 +1566,10 @@ export default function CatalogClient({
                     <button
                       type="button"
                       onClick={() => setIsScannerOpen(true)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-450 hover:text-[#0050e8] transition-colors cursor-pointer text-xs"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-[#0050e8] hover:bg-slate-50 rounded-lg transition-all cursor-pointer"
                       title="Scan Barcode"
                     >
-                      📷
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
                     </button>
                   )}
                 </div>
@@ -2550,11 +2594,22 @@ export default function CatalogClient({
                           {varBarcodeSource !== 'scanned' && (
                             <div>
                               <label className="block text-[9px] font-black text-gray-400 uppercase tracking-wide mb-1">Custom SKU / Barcode (Optional)</label>
-                              <Input
-                                placeholder="Leave blank to auto-generate"
-                                value={newVarSku}
-                                onChange={(e) => setNewVarSku(e.target.value)}
-                              />
+                              <div className="relative flex items-center">
+                                <Input
+                                  placeholder="Leave blank to auto-generate"
+                                  value={newVarSku}
+                                  onChange={(e) => setNewVarSku(e.target.value)}
+                                  className="pr-9"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setIsNewVarSkuScannerOpen(true)}
+                                  className="absolute right-2.5 p-1 text-slate-400 hover:text-[#0050e8] hover:bg-slate-50 rounded-md transition-all duration-150 cursor-pointer"
+                                  title="Scan Barcode"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                                </button>
+                              </div>
                             </div>
                           )}
 
@@ -2686,7 +2741,8 @@ export default function CatalogClient({
                             }}
                             className="flex items-center justify-center gap-1.5 py-2.5 px-4 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 active:scale-98 transition-all shadow-sm"
                           >
-                            📷 Scan Tag
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                            <span>Scan Tag</span>
                           </button>
                           <button
                             type="button"
@@ -2838,6 +2894,24 @@ export default function CatalogClient({
           keepOpenOnScan={true}
         />
 
+        <BarcodeScannerModal
+          isOpen={isNewSkuScannerOpen}
+          onClose={() => setIsNewSkuScannerOpen(false)}
+          onScan={(code) => {
+            handleNewSkuScanned(code);
+            setIsNewSkuScannerOpen(false);
+          }}
+        />
+
+        <BarcodeScannerModal
+          isOpen={isNewVarSkuScannerOpen}
+          onClose={() => setIsNewVarSkuScannerOpen(false)}
+          onScan={(code) => {
+            handleNewVarSkuScanned(code);
+            setIsNewVarSkuScannerOpen(false);
+          }}
+        />
+
         {/* Manage Variants Modal */}
         <AnimatePresence>
           {variantsProduct && (
@@ -2896,12 +2970,22 @@ export default function CatalogClient({
                     </div>
                     <div>
                       <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">SKU (optional)</label>
-                      <Input
-                        placeholder="Auto-generated if blank"
-                        value={newVarSku}
-                        onChange={(e) => setNewVarSku(e.target.value)}
-                        className="rounded-lg text-xs min-h-[38px]"
-                      />
+                      <div className="relative flex items-center">
+                        <Input
+                          placeholder="Auto-generated if blank"
+                          value={newVarSku}
+                          onChange={(e) => setNewVarSku(e.target.value)}
+                          className="rounded-lg text-xs min-h-[38px] pr-9"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setIsNewVarSkuScannerOpen(true)}
+                          className="absolute right-2.5 p-1 text-slate-400 hover:text-[#0050e8] hover:bg-slate-50 rounded-md transition-all duration-150 cursor-pointer"
+                          title="Scan Barcode"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Initial Stock</label>
@@ -2943,9 +3027,10 @@ export default function CatalogClient({
                     <Button
                       onClick={() => handlePrintLabels(variantsProduct)}
                       variant="secondary"
-                      className="text-xs py-1.5 px-3 flex items-center gap-1.5 border-[#0050e8]/20 bg-[#0050e8]/5 text-[#0050e8]"
+                      className="text-xs py-1.5 px-3 flex items-center gap-1.5 border-[#0050e8]/20 bg-[#0050e8]/5 text-[#0050e8] hover:bg-[#0050e8]/10 rounded-lg transition-all"
                     >
-                      🖨️ Print Selected Labels
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                      <span>Print Selected Labels</span>
                     </Button>
                   </div>
 
@@ -3005,8 +3090,9 @@ export default function CatalogClient({
                               <td className="p-3 font-mono font-bold text-slate-600 text-[10px]">{variant.sku}</td>
                               <td className="p-3 font-semibold text-slate-700">
                                 {variant.stock_qty <= variant.low_stock_threshold ? (
-                                  <span className="text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-100 text-[10px] font-extrabold animate-pulse">
-                                    ⚠️ {variant.stock_qty}
+                                  <span className="inline-flex items-center gap-1 text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-100 text-[10px] font-extrabold animate-pulse">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                    <span>{variant.stock_qty}</span>
                                   </span>
                                 ) : (
                                   <span className="text-slate-700">{variant.stock_qty}</span>
