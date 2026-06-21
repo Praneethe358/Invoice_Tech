@@ -14,16 +14,9 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const lastScannedRef = useRef<{ code: string; time: number }>({ code: '', time: 0 });
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
   const html5QrcodeRef = useRef<any>(null);
-  const animationFrameRef = useRef<number | null>(null);
 
   const cleanup = useCallback(() => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
     if (html5QrcodeRef.current) {
       try {
         if (html5QrcodeRef.current.isScanning) {
@@ -33,10 +26,6 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
         console.error(e);
       }
       html5QrcodeRef.current = null;
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
     }
   }, []);
 
@@ -50,132 +39,96 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
         setErrorMsg('');
         setHasPermission(null);
 
-        const constraints = {
-          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-          audio: false,
+        // Dynamically import the html5-qrcode scanner
+        const { Html5Qrcode } = await import('html5-qrcode');
+        if (!active) return;
+
+        // Create the instance first on our container
+        const html5QrCode = new Html5Qrcode('reader-container');
+        html5QrcodeRef.current = html5QrCode;
+
+        // 1. Request camera list (this triggers the browser permission dialog if not already granted)
+        let devices: any[] = [];
+        try {
+          devices = await Html5Qrcode.getCameras();
+        } catch (err: any) {
+          console.warn('getCameras failed, attempting direct facingMode start:', err);
+        }
+
+        if (!active) return;
+
+        const config = {
+          fps: 15,
+          qrbox: (width: number, height: number) => {
+            const size = Math.min(width, height) * 0.7;
+            return { width: size, height: size };
+          },
         };
 
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        if (!active) {
-          stream.getTracks().forEach(track => track.stop());
-          return;
-        }
-
-        streamRef.current = stream;
-        setHasPermission(true);
-
-        const hasNative = 'BarcodeDetector' in window;
-        if (hasNative && videoRef.current) {
-          // ── Native BarcodeDetector path (mobile Chrome, etc.) ──
-          videoRef.current.srcObject = stream;
-          videoRef.current.setAttribute('playsinline', 'true');
-          videoRef.current.play();
-
-          const formats = ['qr_code', 'code_128', 'code_39', 'ean_13', 'ean_8', 'upc_a', 'upc_e'];
-          const detector = new (window as any).BarcodeDetector({ formats });
-
-          const detectFrame = async () => {
-            if (!active || !videoRef.current || videoRef.current.readyState < 2) {
-              animationFrameRef.current = requestAnimationFrame(detectFrame);
-              return;
-            }
-
-            try {
-              const barcodes = await detector.detect(videoRef.current);
-              if (barcodes.length > 0 && active) {
-                const code = barcodes[0].rawValue;
-                if (keepOpenOnScan) {
-                  if (code !== lastScannedRef.current.code || Date.now() - lastScannedRef.current.time > 1500) {
-                    lastScannedRef.current = { code, time: Date.now() };
-                    onScan(code);
-                  }
-                } else {
-                  onScan(code);
-                  cleanup();
-                  onClose();
-                  return;
-                }
+        const onScanSuccess = (decodedText: string) => {
+          if (active) {
+            if (keepOpenOnScan) {
+              if (decodedText !== lastScannedRef.current.code || Date.now() - lastScannedRef.current.time > 1500) {
+                lastScannedRef.current = { code: decodedText, time: Date.now() };
+                onScan(decodedText);
               }
-            } catch (err) {
-              console.error('Detection error:', err);
+            } else {
+              onScan(decodedText);
+              cleanup();
+              onClose();
             }
+          }
+        };
 
-            if (active) {
-              animationFrameRef.current = requestAnimationFrame(detectFrame);
-            }
-          };
+        // 2. Select the camera to start
+        if (devices && devices.length > 0) {
+          setHasPermission(true);
 
-          animationFrameRef.current = requestAnimationFrame(detectFrame);
+          // Find back camera by label matching common terms
+          let selectedCameraId = devices[0].id;
+          const backCamera = devices.find(device => 
+            /back|rear|environment|retro/i.test(device.label || '')
+          );
+
+          if (backCamera) {
+            selectedCameraId = backCamera.id;
+          } else if (devices.length > 1) {
+            // Typically on mobile, the back camera is the last device in the list
+            selectedCameraId = devices[devices.length - 1].id;
+          }
+
+          await html5QrCode.start(
+            selectedCameraId,
+            config,
+            onScanSuccess,
+            () => {} // Verbose check errors, ignore
+          );
         } else {
-          // ── html5-qrcode fallback path (desktop browsers) ──
-          // Stop the stream we grabbed — html5-qrcode manages its own stream
-          stream.getTracks().forEach(track => track.stop());
-          streamRef.current = null;
-
-          setTimeout(async () => {
-            if (!active) return;
-            try {
-              const { Html5Qrcode } = await import('html5-qrcode');
-
-              const html5QrCode = new Html5Qrcode('reader-container');
-              html5QrcodeRef.current = html5QrCode;
-
-              await html5QrCode.start(
-                { facingMode: 'environment' },
-                {
-                  fps: 15,
-                  qrbox: (width: number, height: number) => {
-                    const size = Math.min(width, height) * 0.7;
-                    return { width: size, height: size };
-                  },
-                },
-                (decodedText: string) => {
-                  if (active) {
-                    if (keepOpenOnScan) {
-                      if (decodedText !== lastScannedRef.current.code || Date.now() - lastScannedRef.current.time > 1500) {
-                        lastScannedRef.current = { code: decodedText, time: Date.now() };
-                        onScan(decodedText);
-                      }
-                    } else {
-                      onScan(decodedText);
-                      cleanup();
-                      onClose();
-                    }
-                  }
-                },
-                () => {
-                  // Verbose scan-loop errors, ignore
-                }
-              );
-            } catch (err: any) {
-              console.error('html5-qrcode start failed:', err);
-              if (!active) return;
-              const msg = err?.message || String(err);
-              if (msg.includes('NotAllowedError') || msg.includes('Permission')) {
-                setHasPermission(false);
-                setErrorMsg('Camera permission was denied. Please allow camera access in your browser settings.');
-              } else if (msg.includes('NotFoundError') || msg.includes('not found')) {
-                setErrorMsg('No camera found on this device.');
-              } else {
-                setErrorMsg(msg || 'Failed to start camera scanner.');
-              }
-            }
-          }, 300);
+          // Fallback option: if getCameras returned empty list or failed, try starting with facingMode constraint
+          await html5QrCode.start(
+            { facingMode: 'environment' },
+            config,
+            onScanSuccess,
+            () => {}
+          );
+          setHasPermission(true);
         }
+
       } catch (err: any) {
-        console.error('Camera access error:', err);
+        console.error('Camera initialization error:', err);
         if (!active) return;
+        
         const msg = err?.message || String(err);
-        if (err.name === 'NotAllowedError') {
+        if (msg.includes('NotAllowedError') || msg.includes('Permission') || msg.includes('permission')) {
           setHasPermission(false);
           setErrorMsg('Camera permission was denied. Please allow camera access in your browser settings.');
-        } else if (err.name === 'NotFoundError') {
-          setErrorMsg('No camera found on this device.');
-        } else if (err.name === 'NotReadableError') {
-          setErrorMsg('Camera is already in use by another app. Close other apps using the camera and try again.');
+        } else if (msg.includes('NotFoundError') || msg.includes('not found') || msg.includes('Requested device not found')) {
+          setErrorMsg('No camera found or could not access back camera on this device.');
+        } else if (msg.includes('NotReadableError') || msg.includes('Could not start video source')) {
+          setErrorMsg('Camera is in use by another app or browser tab. Please close them and try again.');
         } else {
           setHasPermission(false);
-          setErrorMsg(msg || 'Camera access denied or device not found.');
+          setErrorMsg(msg || 'Failed to access camera.');
         }
       }
     }
@@ -187,8 +140,6 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
       cleanup();
     };
   }, [isOpen, onClose, onScan, keepOpenOnScan, cleanup]);
-
-  const isNative = typeof window !== 'undefined' && 'BarcodeDetector' in window;
 
   return (
     <>
@@ -220,7 +171,7 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
                       Scan Barcode / QR Code
                     </h3>
                     <p className="text-[10px] text-slate-400 font-semibold">
-                      {isNative ? 'Native scanner active' : 'Scanner active'}
+                      Barcode Scanner Active
                     </p>
                   </div>
                 </div>
@@ -243,7 +194,7 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
                     </p>
                     <button
                       onClick={onClose}
-                      className="px-4 py-2 bg-slate-850 hover:bg-slate-800 text-xs font-bold rounded-lg border border-slate-700"
+                      className="px-4 py-2 bg-slate-850 hover:bg-slate-800 text-xs font-bold rounded-lg border border-slate-700 cursor-pointer"
                     >
                       Close Scanner
                     </button>
@@ -271,16 +222,7 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
                       </div>
                     </div>
 
-                    {isNative ? (
-                      <video
-                        ref={videoRef}
-                        className="w-full h-full object-cover"
-                        muted
-                        playsInline
-                      />
-                    ) : (
-                      <div id="reader-container" className="w-full h-full object-cover [&_video]:object-cover" />
-                    )}
+                    <div id="reader-container" className="w-full h-full object-cover [&_video]:object-cover" />
                   </>
                 )}
               </div>
