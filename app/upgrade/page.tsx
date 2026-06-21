@@ -44,13 +44,11 @@ export default async function UpgradePage() {
     redirect('/signup');
   }
 
-  const upiId = process.env.NEXT_PUBLIC_UPI_ID || 'praneethpraneeth8888@oksbi';
   const supportPhone = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || '919080689844';
 
   return (
     <UpgradeClient
       shop={shop as any}
-      upiId={upiId}
       supportPhone={supportPhone}
     />
   );
