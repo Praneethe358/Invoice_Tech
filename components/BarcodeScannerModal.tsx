@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
@@ -13,49 +13,43 @@ interface Props {
 export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenOnScan = false }: Props) {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
-  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const lastScannedRef = useRef<{ code: string; time: number }>({ code: '', time: 0 });
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const html5QrcodeRef = useRef<any>(null);
   const animationFrameRef = useRef<number | null>(null);
 
-  // Load fallback script if native is not supported
+  const cleanup = useCallback(() => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (html5QrcodeRef.current) {
+      try {
+        if (html5QrcodeRef.current.isScanning) {
+          html5QrcodeRef.current.stop().catch(console.error);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+      html5QrcodeRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+  }, []);
+
   useEffect(() => {
     if (!isOpen) return;
-
-    const hasNative = typeof window !== 'undefined' && 'BarcodeDetector' in window;
-    if (hasNative) {
-      setIsScriptLoaded(true);
-      return;
-    }
-
-    // Check if script is already present
-    if ((window as any).Html5Qrcode) {
-      setIsScriptLoaded(true);
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
-    script.async = true;
-    script.onload = () => setIsScriptLoaded(true);
-    script.onerror = () => setErrorMsg('Failed to load fallback scanner library');
-    document.body.appendChild(script);
-
-    return () => {
-      // Don't remove script, just keep it cached
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen || !isScriptLoaded) return;
 
     let active = true;
 
     async function startCamera() {
       try {
         setErrorMsg('');
+        setHasPermission(null);
+
         const constraints = {
           video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
           audio: false,
@@ -72,13 +66,12 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
 
         const hasNative = 'BarcodeDetector' in window;
         if (hasNative && videoRef.current) {
+          // ── Native BarcodeDetector path (mobile Chrome, etc.) ──
           videoRef.current.srcObject = stream;
           videoRef.current.setAttribute('playsinline', 'true');
           videoRef.current.play();
 
-          // Initialize native detector
           const formats = ['qr_code', 'code_128', 'code_39', 'ean_13', 'ean_8', 'upc_a', 'upc_e'];
-          // eslint-disable-next-line no-undef
           const detector = new (window as any).BarcodeDetector({ formats });
 
           const detectFrame = async () => {
@@ -114,20 +107,20 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
 
           animationFrameRef.current = requestAnimationFrame(detectFrame);
         } else {
-          // Use html5-qrcode fallback
-          setTimeout(() => {
+          // ── html5-qrcode fallback path (desktop browsers) ──
+          // Stop the stream we grabbed — html5-qrcode manages its own stream
+          stream.getTracks().forEach(track => track.stop());
+          streamRef.current = null;
+
+          setTimeout(async () => {
             if (!active) return;
             try {
-              const Html5Qrcode = (window as any).Html5Qrcode;
-              if (!Html5Qrcode) {
-                setErrorMsg('Scanner fallback library not initialized.');
-                return;
-              }
+              const { Html5Qrcode } = await import('html5-qrcode');
 
               const html5QrCode = new Html5Qrcode('reader-container');
               html5QrcodeRef.current = html5QrCode;
 
-              html5QrCode.start(
+              await html5QrCode.start(
                 { facingMode: 'environment' },
                 {
                   fps: 15,
@@ -151,22 +144,39 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
                   }
                 },
                 () => {
-                  // Verbose errors from scan loop, ignore
+                  // Verbose scan-loop errors, ignore
                 }
-              ).catch((err: any) => {
-                console.error('html5-qrcode start failed:', err);
-                setErrorMsg('Failed to start camera scan stream.');
-              });
+              );
             } catch (err: any) {
-              console.error('Fallback setup error:', err);
-              setErrorMsg(err.message || 'Failed to setup fallback scanner.');
+              console.error('html5-qrcode start failed:', err);
+              if (!active) return;
+              const msg = err?.message || String(err);
+              if (msg.includes('NotAllowedError') || msg.includes('Permission')) {
+                setHasPermission(false);
+                setErrorMsg('Camera permission was denied. Please allow camera access in your browser settings.');
+              } else if (msg.includes('NotFoundError') || msg.includes('not found')) {
+                setErrorMsg('No camera found on this device.');
+              } else {
+                setErrorMsg(msg || 'Failed to start camera scanner.');
+              }
             }
           }, 300);
         }
       } catch (err: any) {
         console.error('Camera access error:', err);
-        setHasPermission(false);
-        setErrorMsg(err.message || 'Camera access denied or device not found.');
+        if (!active) return;
+        const msg = err?.message || String(err);
+        if (err.name === 'NotAllowedError') {
+          setHasPermission(false);
+          setErrorMsg('Camera permission was denied. Please allow camera access in your browser settings.');
+        } else if (err.name === 'NotFoundError') {
+          setErrorMsg('No camera found on this device.');
+        } else if (err.name === 'NotReadableError') {
+          setErrorMsg('Camera is already in use by another app. Close other apps using the camera and try again.');
+        } else {
+          setHasPermission(false);
+          setErrorMsg(msg || 'Camera access denied or device not found.');
+        }
       }
     }
 
@@ -176,28 +186,7 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
       active = false;
       cleanup();
     };
-
-    function cleanup() {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-      if (html5QrcodeRef.current) {
-        try {
-          if (html5QrcodeRef.current.isScanning) {
-            html5QrcodeRef.current.stop().catch(console.error);
-          }
-        } catch (e) {
-          console.error(e);
-        }
-        html5QrcodeRef.current = null;
-      }
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-        streamRef.current = null;
-      }
-    }
-  }, [isOpen, isScriptLoaded, onClose, onScan]);
+  }, [isOpen, onClose, onScan, keepOpenOnScan, cleanup]);
 
   const isNative = typeof window !== 'undefined' && 'BarcodeDetector' in window;
 
@@ -231,7 +220,7 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
                       Scan Barcode / QR Code
                     </h3>
                     <p className="text-[10px] text-slate-400 font-semibold">
-                      {isNative ? 'Native scanner active' : 'Fallback scanner active'}
+                      {isNative ? 'Native scanner active' : 'Scanner active'}
                     </p>
                   </div>
                 </div>
@@ -268,7 +257,7 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
                   </div>
                 ) : (
                   <>
-                    {/* Target overlay pointer */}
+                    {/* Target overlay */}
                     <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
                       <div className="w-3/4 h-3/4 border-2 border-dashed border-white/40 rounded-xl relative">
                         {/* Corners */}
@@ -277,7 +266,7 @@ export default function BarcodeScannerModal({ isOpen, onClose, onScan, keepOpenO
                         <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-[#0050e8] rounded-bl-md"></div>
                         <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-[#0050e8] rounded-br-md"></div>
 
-                        {/* Scanning red line animation */}
+                        {/* Scanning line animation */}
                         <div className="absolute left-0 right-0 h-0.5 bg-red-500 shadow-[0_0_10px_#ef4444] animate-[scan_2s_ease-in-out_infinite]"></div>
                       </div>
                     </div>
