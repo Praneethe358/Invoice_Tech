@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getCurrentUserContext } from '@/lib/current-user';
 
 export async function POST(
   request: NextRequest,
@@ -9,12 +10,9 @@ export async function POST(
     const supabase = await createClient();
     const { id: invoiceId } = await params;
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const ctx = await getCurrentUserContext(supabase);
 
-    if (authError || !user) {
+    if (!ctx) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -22,7 +20,7 @@ export async function POST(
     const { data: shop, error: shopError } = await supabase
       .from('shops')
       .select('*')
-      .eq('auth_user_id', user.id)
+      .eq('id', ctx.shopId)
       .single();
 
     if (shopError || !shop) {

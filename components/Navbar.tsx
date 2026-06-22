@@ -47,6 +47,18 @@ const navItems = [
     ),
   },
   {
+    href: '/credit-debit-notes',
+    label: 'Credit/Debit Notes',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="9" y1="15" x2="15" y2="15" />
+        <line x1="9" y1="11" x2="15" y2="11" />
+      </svg>
+    ),
+  },
+  {
     href: '/customers',
     label: 'Customer Ledger',
     icon: (
@@ -103,10 +115,10 @@ const navItems = [
 ];
 
 const ALLOWED_NAV_BY_ROLE: Record<UserRole, string[]> = {
-  owner: ['/dashboard', '/invoices', '/customers', '/catalog', '/payments', '/purchases', '/suppliers', '/reports', '/gst', '/settings', '/invoice/new'],
-  admin: ['/dashboard', '/invoices', '/customers', '/catalog', '/payments', '/purchases', '/suppliers', '/reports', '/gst', '/settings', '/invoice/new'],
-  billing_staff: ['/dashboard', '/invoices', '/customers', '/catalog', '/payments', '/purchases', '/invoice/new'],
-  view_only: ['/dashboard', '/invoices', '/customers', '/catalog'],
+  owner: ['/dashboard', '/invoices', '/credit-debit-notes', '/customers', '/catalog', '/payments', '/purchases', '/suppliers', '/reports', '/gst', '/settings', '/invoice/new'],
+  admin: ['/dashboard', '/invoices', '/credit-debit-notes', '/customers', '/catalog', '/payments', '/purchases', '/suppliers', '/reports', '/gst', '/settings', '/invoice/new'],
+  billing_staff: ['/dashboard', '/invoices', '/credit-debit-notes', '/customers', '/catalog', '/payments', '/purchases', '/invoice/new'],
+  view_only: ['/dashboard', '/invoices', '/credit-debit-notes', '/customers', '/catalog'],
 };
 
 export default function Navbar() {

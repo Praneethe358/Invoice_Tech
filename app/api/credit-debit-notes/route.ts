@@ -1,33 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getCurrentUserContext } from '@/lib/current-user';
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
+    const ctx = await getCurrentUserContext(supabase);
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    if (!ctx) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { data: shop, error: shopError } = await supabase
-      .from('shops')
-      .select('id')
-      .eq('auth_user_id', user.id)
-      .single();
-
-    if (shopError || !shop) {
-      return NextResponse.json({ error: 'Shop not found' }, { status: 404 });
     }
 
     const { data: notes, error: notesError } = await supabase
       .from('credit_debit_notes')
-      .select('*, invoices(invoice_number)')
-      .eq('shop_id', shop.id)
+      .select('*, invoices(invoice_number), cdn_items(*)')
+      .eq('shop_id', ctx.shopId)
       .order('created_at', { ascending: false });
 
     if (notesError) {
