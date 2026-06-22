@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
     const totalCollected = (payments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0) +
       activeInvoices.filter(inv => !inv.uses_payments_table).reduce((sum, inv) => sum + Number(inv.amount_paid || 0), 0);
     const outstanding = Math.max(0, totalBilled - totalCollected);
-    const collectionRate = totalBilled > 0 ? (totalCollected / totalBilled) * 100 : 0;
+    const collectionRate = totalBilled > 0 ? Math.min(100, (totalCollected / totalBilled) * 100) : 0;
 
     // --- Section 8: Comparison ---
     const prevInvoicesCount = prevActiveInvoices.length;
