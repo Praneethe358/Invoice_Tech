@@ -75,15 +75,30 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
 
   // Filtered period data
   const filteredData = useMemo(() => {
-    const startDate = new Date(selectedYear, selectedMonth - 1, 1);
-    const endDate = new Date(selectedYear, selectedMonth, 0);
-    
-    const startStr = startDate.toISOString().split('T')[0];
-    const endStr = endDate.toISOString().split('T')[0];
+    const pad = (num: number) => String(num).padStart(2, '0');
+    const startStr = `${selectedYear}-${pad(selectedMonth)}-01`;
+    const lastDay = new Date(selectedYear, selectedMonth, 0).getDate();
+    const endStr = `${selectedYear}-${pad(selectedMonth)}-${pad(lastDay)}`;
 
-    const periodInvoices = invoices.filter(
-      (inv) => inv.created_at.split('T')[0] >= startStr && inv.created_at.split('T')[0] <= endStr && inv.status === 'sent'
-    );
+    const getLocalDateString = (isoString: string) => {
+      try {
+        const d = new Date(isoString);
+        if (isNaN(d.getTime())) return '';
+        const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+        const nd = new Date(utc + (3600000 * 5.5)); // Convert to IST
+        const y = nd.getFullYear();
+        const m = pad(nd.getMonth() + 1);
+        const day = pad(nd.getDate());
+        return `${y}-${m}-${day}`;
+      } catch {
+        return '';
+      }
+    };
+
+    const periodInvoices = invoices.filter((inv) => {
+      const localDate = getLocalDateString(inv.created_at);
+      return localDate >= startStr && localDate <= endStr && (inv.status === 'sent' || inv.status === 'saved');
+    });
 
     const periodPurchases = purchases.filter(
       (p) => p.purchase_date >= startStr && p.purchase_date <= endStr

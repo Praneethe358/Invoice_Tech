@@ -18,8 +18,10 @@ export async function generateGSTR3B(
 
   const fp = `${String(month).padStart(2, '0')}${year}`;
 
-  const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0];
-  const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+  const pad = (num: number) => String(num).padStart(2, '0');
+  const startDate = `${year}-${pad(month)}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const endDate = `${year}-${pad(month)}-${pad(lastDay)}`;
 
   // 2. Fetch all sent invoices
   const { data: invoices } = await supabase
@@ -27,8 +29,8 @@ export async function generateGSTR3B(
     .select('*, invoice_items(*)')
     .eq('shop_id', shopId)
     .in('status', ['saved', 'sent'])
-    .gte('created_at', `${startDate}T00:00:00Z`)
-    .lte('created_at', `${endDate}T23:59:59Z`);
+    .gte('created_at', `${startDate}T00:00:00+05:30`)
+    .lte('created_at', `${endDate}T23:59:59+05:30`);
 
   let totalTaxableSales = 0;
   let totalZeroRatedSales = 0;

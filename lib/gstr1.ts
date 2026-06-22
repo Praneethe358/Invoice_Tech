@@ -2,10 +2,12 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 export function formatGstDate(dateStr: string): string {
   const date = new Date(dateStr);
-  const day = String(date.getDate()).padStart(2, '0');
+  const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
+  const istDate = new Date(utc + (3600000 * 5.5));
+  const day = String(istDate.getDate()).padStart(2, '0');
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const month = months[date.getMonth()];
-  const year = date.getFullYear();
+  const month = months[istDate.getMonth()];
+  const year = istDate.getFullYear();
   return `${day}-${month}-${year}`;
 }
 
@@ -47,8 +49,10 @@ export async function validateGstr1Data(
   }
 
   // Get date range
-  const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0];
-  const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+  const pad = (num: number) => String(num).padStart(2, '0');
+  const startDate = `${year}-${pad(month)}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const endDate = `${year}-${pad(month)}-${pad(lastDay)}`;
 
   // Fetch invoices
   const { data: invoices } = await supabase
@@ -56,8 +60,8 @@ export async function validateGstr1Data(
     .select('*, invoice_items(*)')
     .eq('shop_id', shopId)
     .in('status', ['saved', 'sent'])
-    .gte('created_at', `${startDate}T00:00:00Z`)
-    .lte('created_at', `${endDate}T23:59:59Z`);
+    .gte('created_at', `${startDate}T00:00:00+05:30`)
+    .lte('created_at', `${endDate}T23:59:59+05:30`);
 
   if (!invoices || invoices.length === 0) {
     warnings.push('No sent invoices found for this period.');
@@ -126,8 +130,10 @@ export async function generateGSTR1(
   // Format filing period MMYYYY
   const fp = `${String(month).padStart(2, '0')}${year}`;
 
-  const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0];
-  const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+  const pad = (num: number) => String(num).padStart(2, '0');
+  const startDate = `${year}-${pad(month)}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const endDate = `${year}-${pad(month)}-${pad(lastDay)}`;
 
   // 2. Fetch all sent invoices
   const { data: invoices } = await supabase
@@ -135,8 +141,8 @@ export async function generateGSTR1(
     .select('*, invoice_items(*)')
     .eq('shop_id', shopId)
     .in('status', ['saved', 'sent'])
-    .gte('created_at', `${startDate}T00:00:00Z`)
-    .lte('created_at', `${endDate}T23:59:59Z`)
+    .gte('created_at', `${startDate}T00:00:00+05:30`)
+    .lte('created_at', `${endDate}T23:59:59+05:30`)
     .order('created_at', { ascending: true });
 
   const b2bMap: { [gstin: string]: any[] } = {};
