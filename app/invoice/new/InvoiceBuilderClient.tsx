@@ -91,7 +91,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
       return initialDraft.invoice_items.map((item: any) => ({
         name: item.name,
         price: Number(item.price),
-        quantity: Number(item.quantity),
+        quantity: Number(item.qty !== undefined ? item.qty : item.quantity),
         hsn_code: item.hsn_code,
         gst_rate: Number(item.gst_rate || 0),
         cgst: Number(item.cgst || 0),
