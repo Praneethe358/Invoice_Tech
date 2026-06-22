@@ -83,6 +83,16 @@ export async function GET(request: NextRequest) {
       purchases = dbPurchases || [];
     }
 
+    // Fetch Credit & Debit Notes for the current month
+    let cdNotes: any[] = [];
+    const { data: dbNotes } = await supabase
+      .from('credit_debit_notes')
+      .select('*')
+      .eq('shop_id', shop.id)
+      .gte('note_date', startDateStr.split('T')[0])
+      .lte('note_date', endDateStr.split('T')[0]);
+    cdNotes = dbNotes || [];
+
     const wb = XLSX.utils.book_new();
 
     // --- Sheet 1: Summary ---
@@ -148,14 +158,21 @@ export async function GET(request: NextRequest) {
         return d.getDate() === day;
       });
 
-      const dayBilled = dayInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0);
-      const dayPaid = dayInvoices.reduce((sum, inv) => {
+      const dayNotes = cdNotes.filter(note => {
+        const d = new Date(note.created_at);
+        return d.getDate() === day;
+      });
+      const dayCredit = dayNotes.filter(n => n.note_type === 'credit').reduce((sum, n) => sum + Number(n.total || 0), 0);
+      const dayDebit = dayNotes.filter(n => n.note_type === 'debit').reduce((sum, n) => sum + Number(n.total || 0), 0);
+
+      const dayBilled = Math.max(0, dayInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0) + dayDebit - dayCredit);
+      const dayPaid = Math.max(0, dayInvoices.reduce((sum, inv) => {
         if (inv.uses_payments_table) {
           const invPayments = payments.filter(p => p.invoice_id === inv.id);
           return sum + invPayments.reduce((s, p) => s + Number(p.amount), 0);
         }
         return sum + Number(inv.amount_paid || 0);
-      }, 0);
+      }, 0) - dayCredit);
       const dayOutstanding = Math.max(0, dayBilled - dayPaid);
 
       totalBilledSum += dayBilled;

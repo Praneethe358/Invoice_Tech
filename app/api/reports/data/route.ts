@@ -130,17 +130,23 @@ export async function GET(request: NextRequest) {
     // --- Section 1: Sales Summary ---
     const totalInvoicesSent = activeInvoices.length;
     const totalBilled = Math.max(0, activeInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0) + currentDebitBilled - currentCreditBilled);
-    // Total collected includes payments received this month or amount_paid for active invoices this month
-    const totalCollected = (payments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0) +
-      activeInvoices.filter(inv => !inv.uses_payments_table).reduce((sum, inv) => sum + Number(inv.amount_paid || 0), 0);
+    // Total collected includes payments received this month or amount_paid for active invoices this month, adjusted for refunded money (credit notes)
+    const totalCollected = Math.max(0,
+      (payments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0) +
+      activeInvoices.filter(inv => !inv.uses_payments_table).reduce((sum, inv) => sum + Number(inv.amount_paid || 0), 0) -
+      currentCreditBilled
+    );
     const outstanding = Math.max(0, totalBilled - totalCollected);
     const collectionRate = totalBilled > 0 ? Math.min(100, (totalCollected / totalBilled) * 100) : 0;
 
     // --- Section 8: Comparison ---
     const prevInvoicesCount = prevActiveInvoices.length;
     const prevBilled = Math.max(0, prevActiveInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0) + prevDebitBilled - prevCreditBilled);
-    const prevCollected = (prevPayments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0) +
-      prevActiveInvoices.filter(inv => !inv.uses_payments_table).reduce((sum, inv) => sum + Number(inv.amount_paid || 0), 0);
+    const prevCollected = Math.max(0,
+      (prevPayments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0) +
+      prevActiveInvoices.filter(inv => !inv.uses_payments_table).reduce((sum, inv) => sum + Number(inv.amount_paid || 0), 0) -
+      prevCreditBilled
+    );
     const prevOutstanding = Math.max(0, prevBilled - prevCollected);
 
     const getChange = (curr: number, prev: number) => {
