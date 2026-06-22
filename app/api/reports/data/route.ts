@@ -46,6 +46,14 @@ export async function GET(request: NextRequest) {
       .gte('paid_at', startDateStr)
       .lte('paid_at', endDateStr);
 
+    // Fetch Credit & Debit Notes for the current month
+    const { data: cdNotes } = await supabase
+      .from('credit_debit_notes')
+      .select('note_type, subtotal, total, total_gst, total_cgst, total_sgst, created_at, customer_phone')
+      .eq('shop_id', shop.id)
+      .gte('note_date', startDateStr.split('T')[0])
+      .lte('note_date', endDateStr.split('T')[0]);
+
     // Active Invoice IDs
     const activeInvoiceIds = activeInvoices.map(i => i.id);
 
@@ -67,9 +75,61 @@ export async function GET(request: NextRequest) {
       .gte('paid_at', prevStartDateStr)
       .lte('paid_at', prevEndDateStr);
 
+    // Fetch Credit & Debit Notes for the previous month
+    const { data: prevCdNotes } = await supabase
+      .from('credit_debit_notes')
+      .select('note_type, total')
+      .eq('shop_id', shop.id)
+      .gte('note_date', prevStartDateStr.split('T')[0])
+      .lte('note_date', prevEndDateStr.split('T')[0]);
+
+    let currentCreditBilled = 0;
+    let currentCreditTaxable = 0;
+    let currentCreditGst = 0;
+    let currentCreditCgst = 0;
+    let currentCreditSgst = 0;
+
+    let currentDebitBilled = 0;
+    let currentDebitTaxable = 0;
+    let currentDebitGst = 0;
+    let currentDebitCgst = 0;
+    let currentDebitSgst = 0;
+
+    (cdNotes || []).forEach((note) => {
+      const total = Number(note.total || 0);
+      const subtotal = Number(note.subtotal || 0);
+      const totalGst = Number(note.total_gst || 0);
+      const cgst = Number(note.total_cgst || 0);
+      const sgst = Number(note.total_sgst || 0);
+
+      if (note.note_type === 'credit') {
+        currentCreditBilled += total;
+        currentCreditTaxable += subtotal;
+        currentCreditGst += totalGst;
+        currentCreditCgst += cgst;
+        currentCreditSgst += sgst;
+      } else if (note.note_type === 'debit') {
+        currentDebitBilled += total;
+        currentDebitTaxable += subtotal;
+        currentDebitGst += totalGst;
+        currentDebitCgst += cgst;
+        currentDebitSgst += sgst;
+      }
+    });
+
+    let prevCreditBilled = 0;
+    let prevDebitBilled = 0;
+    (prevCdNotes || []).forEach((note) => {
+      if (note.note_type === 'credit') {
+        prevCreditBilled += Number(note.total || 0);
+      } else if (note.note_type === 'debit') {
+        prevDebitBilled += Number(note.total || 0);
+      }
+    });
+
     // --- Section 1: Sales Summary ---
     const totalInvoicesSent = activeInvoices.length;
-    const totalBilled = activeInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0);
+    const totalBilled = Math.max(0, activeInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0) + currentDebitBilled - currentCreditBilled);
     // Total collected includes payments received this month or amount_paid for active invoices this month
     const totalCollected = (payments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0) +
       activeInvoices.filter(inv => !inv.uses_payments_table).reduce((sum, inv) => sum + Number(inv.amount_paid || 0), 0);
@@ -78,7 +138,7 @@ export async function GET(request: NextRequest) {
 
     // --- Section 8: Comparison ---
     const prevInvoicesCount = prevActiveInvoices.length;
-    const prevBilled = prevActiveInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0);
+    const prevBilled = Math.max(0, prevActiveInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0) + prevDebitBilled - prevCreditBilled);
     const prevCollected = (prevPayments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0) +
       prevActiveInvoices.filter(inv => !inv.uses_payments_table).reduce((sum, inv) => sum + Number(inv.amount_paid || 0), 0);
     const prevOutstanding = Math.max(0, prevBilled - prevCollected);
@@ -100,10 +160,10 @@ export async function GET(request: NextRequest) {
     let purchasesSummary = null;
 
     if (shop.gst_registered) {
-      const totalTaxableSales = activeInvoices.reduce((sum, inv) => sum + Number(inv.subtotal || inv.total || 0), 0);
-      const gstCollected = activeInvoices.reduce((sum, inv) => sum + Number(inv.total_gst || 0), 0);
-      const cgstCollected = activeInvoices.reduce((sum, inv) => sum + Number(inv.total_cgst || 0), 0);
-      const sgstCollected = activeInvoices.reduce((sum, inv) => sum + Number(inv.total_sgst || 0), 0);
+      const totalTaxableSales = Math.max(0, activeInvoices.reduce((sum, inv) => sum + Number(inv.subtotal || inv.total || 0), 0) + currentDebitTaxable - currentCreditTaxable);
+      const gstCollected = Math.max(0, activeInvoices.reduce((sum, inv) => sum + Number(inv.total_gst || 0), 0) + currentDebitGst - currentCreditGst);
+      const cgstCollected = Math.max(0, activeInvoices.reduce((sum, inv) => sum + Number(inv.total_cgst || 0), 0) + currentDebitCgst - currentCreditCgst);
+      const sgstCollected = Math.max(0, activeInvoices.reduce((sum, inv) => sum + Number(inv.total_sgst || 0), 0) + currentDebitSgst - currentCreditSgst);
 
       // Purchases for the current month
       const { data: purchases } = await supabase
@@ -194,6 +254,18 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    // Add current month's credit and debit notes to customers
+    (cdNotes || []).forEach(note => {
+      const phone = note.customer_phone;
+      if (customerMap[phone]) {
+        if (note.note_type === 'credit') {
+          customerMap[phone].billed -= Number(note.total || 0);
+        } else if (note.note_type === 'debit') {
+          customerMap[phone].billed += Number(note.total || 0);
+        }
+      }
+    });
+
     // Add payments received this month to customers
     if (payments && payments.length > 0) {
       payments.forEach(p => {
@@ -232,7 +304,13 @@ export async function GET(request: NextRequest) {
         return d.getDate() === day;
       });
 
-      const totalBilledDay = dayInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0);
+      const dayNotes = (cdNotes || []).filter(note => {
+        const d = new Date(note.created_at);
+        return d.getDate() === day;
+      });
+      const dayCredit = dayNotes.filter(n => n.note_type === 'credit').reduce((sum, n) => sum + Number(n.total || 0), 0);
+      const dayDebit = dayNotes.filter(n => n.note_type === 'debit').reduce((sum, n) => sum + Number(n.total || 0), 0);
+      const totalBilledDay = Math.max(0, dayInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0) + dayDebit - dayCredit);
 
       dailySales.push({
         day,

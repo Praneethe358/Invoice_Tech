@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUserContext } from '@/lib/current-user';
+import { syncCustomerOutstanding } from '@/lib/payments';
 
 export async function POST(
   request: NextRequest,
@@ -171,6 +172,9 @@ export async function POST(
         .update({ next_debit_note_number: counter + 1 })
         .eq('id', shop.id);
     }
+
+    // 4. Recalculate customer ledger outstanding
+    await syncCustomerOutstanding(shop.id, invoice.customer_phone);
 
     return NextResponse.json(note);
   } catch (error: any) {

@@ -77,6 +77,7 @@ declare
   v_total_paid numeric;
   v_variant_stock int;
   v_total_credit numeric;
+  v_total_debit numeric;
 begin
   -- Lock shop row and get/increment invoice number
   select next_invoice_number, invoice_prefix into v_next_num, v_prefix 
@@ -260,13 +261,18 @@ begin
     from credit_debit_notes
     where shop_id = p_shop_id 
       and customer_phone = p_customer_phone 
-      and note_type = 'credit' 
-      and status != 'pending_review';
+      and note_type = 'credit';
+
+    select coalesce(sum(total), 0) into v_total_debit
+    from credit_debit_notes
+    where shop_id = p_shop_id 
+      and customer_phone = p_customer_phone 
+      and note_type = 'debit';
 
     update customers set
       total_invoices = v_customer_invoices,
       total_spent = v_total_paid,
-      outstanding_balance = greatest(0, v_total_billed - v_total_paid - v_total_credit)
+      outstanding_balance = greatest(0, v_total_billed + v_total_debit - v_total_paid - v_total_credit)
     where shop_id = p_shop_id and phone = p_customer_phone;
 
     -- Write saved audit log
@@ -303,6 +309,7 @@ declare
   v_total_paid numeric;
   v_variant_stock int;
   v_total_credit numeric;
+  v_total_debit numeric;
 begin
   -- Get invoice info
   select shop_id, status, customer_phone, customer_name, customer_gstin, payment_status, amount_paid, total
@@ -425,13 +432,18 @@ begin
   from credit_debit_notes
   where shop_id = v_shop_id 
     and customer_phone = v_customer_phone 
-    and note_type = 'credit' 
-    and status != 'pending_review';
+    and note_type = 'credit';
+
+  select coalesce(sum(total), 0) into v_total_debit
+  from credit_debit_notes
+  where shop_id = v_shop_id 
+    and customer_phone = v_customer_phone 
+    and note_type = 'debit';
 
   update customers set
     total_invoices = v_customer_invoices,
     total_spent = v_total_paid,
-    outstanding_balance = greatest(0, v_total_billed - v_total_paid - v_total_credit)
+    outstanding_balance = greatest(0, v_total_billed + v_total_debit - v_total_paid - v_total_credit)
   where shop_id = v_shop_id and phone = v_customer_phone;
 
   -- Audit log
@@ -461,6 +473,7 @@ declare
   v_total_paid numeric;
   v_variant_stock int;
   v_total_credit numeric;
+  v_total_debit numeric;
 begin
   select shop_id, status, customer_phone into v_shop_id, v_status, v_customer_phone
   from invoices where id = p_invoice_id;
@@ -540,13 +553,18 @@ begin
   from credit_debit_notes
   where shop_id = v_shop_id 
     and customer_phone = v_customer_phone 
-    and note_type = 'credit' 
-    and status != 'pending_review';
+    and note_type = 'credit';
+
+  select coalesce(sum(total), 0) into v_total_debit
+  from credit_debit_notes
+  where shop_id = v_shop_id 
+    and customer_phone = v_customer_phone 
+    and note_type = 'debit';
 
   update customers set
     total_invoices = v_customer_invoices,
     total_spent = v_total_paid,
-    outstanding_balance = greatest(0, v_total_billed - v_total_paid - v_total_credit)
+    outstanding_balance = greatest(0, v_total_billed + v_total_debit - v_total_paid - v_total_credit)
   where shop_id = v_shop_id and phone = v_customer_phone;
 
   -- 5. Write cancelled audit log

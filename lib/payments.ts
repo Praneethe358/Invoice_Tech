@@ -68,9 +68,30 @@ export async function syncCustomerOutstanding(
     totalPaid += await getInvoicePaid(inv.id);
   }
 
+  // Get all credit/debit notes for this customer
+  const { data: notes } = await supabase
+    .from('credit_debit_notes')
+    .select('note_type, total')
+    .eq('shop_id', shopId)
+    .eq('customer_phone', customerPhone);
+
+  let totalCredit = 0;
+  let totalDebit = 0;
+  if (notes) {
+    notes.forEach((note) => {
+      if (note.note_type === 'credit') {
+        totalCredit += Number(note.total || 0);
+      } else if (note.note_type === 'debit') {
+        totalDebit += Number(note.total || 0);
+      }
+    });
+  }
+
+  const outstanding = Math.max(0, totalBilled + totalDebit - totalPaid - totalCredit);
+
   await supabase
     .from('customers')
-    .update({ outstanding_balance: Math.max(0, totalBilled - totalPaid) })
+    .update({ outstanding_balance: outstanding })
     .eq('shop_id', shopId)
     .eq('phone', customerPhone);
 }
