@@ -1011,12 +1011,14 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                           <td className="py-3 px-3 border-r border-slate-200 leading-normal">
                             (a) Outward Taxable Supplies (Other than Zero Rated, Nil Rated and Exempted)
                           </td>
-                          <td className="py-3 px-3 border-r border-slate-200 text-right tabular-nums">0.00</td>
                           <td className="py-3 px-3 border-r border-slate-200 text-right tabular-nums text-red-500">
-                            {(filteredData.totalB2bCgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2)).toFixed(2)}
+                            {(filteredData.totalB2bIgst + filteredData.totalB2cLargeTax + filteredData.totalB2cSmallIgst).toFixed(2)}
                           </td>
                           <td className="py-3 px-3 border-r border-slate-200 text-right tabular-nums text-red-500">
-                            {(filteredData.totalB2bSgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2)).toFixed(2)}
+                            {(filteredData.totalB2bCgst + filteredData.totalB2cSmallCgst).toFixed(2)}
+                          </td>
+                          <td className="py-3 px-3 border-r border-slate-200 text-right tabular-nums text-red-500">
+                            {(filteredData.totalB2bSgst + filteredData.totalB2cSmallSgst).toFixed(2)}
                           </td>
                           <td className="py-3 px-3 text-right tabular-nums">0.00</td>
                         </tr>
@@ -1054,12 +1056,14 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                         </tr>
                         <tr className="bg-[#e6efff] font-extrabold text-[#0050e8] border-t border-slate-250">
                           <td className="py-3 px-3 border-r border-slate-200">Total Tax Liability (1)</td>
-                          <td className="py-3 px-3 border-r border-slate-200 text-right tabular-nums">0.00</td>
                           <td className="py-3 px-3 border-r border-slate-200 text-right tabular-nums">
-                            {(filteredData.totalB2bCgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeCgst).toFixed(2)}
+                            {(filteredData.totalB2bIgst + filteredData.totalB2cLargeTax + filteredData.totalB2cSmallIgst).toFixed(2)}
                           </td>
                           <td className="py-3 px-3 border-r border-slate-200 text-right tabular-nums">
-                            {(filteredData.totalB2bSgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeSgst).toFixed(2)}
+                            {(filteredData.totalB2bCgst + filteredData.totalB2cSmallCgst + filteredData.reverseChargeCgst).toFixed(2)}
+                          </td>
+                          <td className="py-3 px-3 border-r border-slate-200 text-right tabular-nums">
+                            {(filteredData.totalB2bSgst + filteredData.totalB2cSmallSgst + filteredData.reverseChargeSgst).toFixed(2)}
                           </td>
                           <td className="py-3 px-3 text-right tabular-nums">0.00</td>
                         </tr>
@@ -1226,15 +1230,15 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                       <div className="grid grid-cols-2 gap-2 mt-2 text-xs font-bold text-slate-900">
                         <div>
                           <span className="text-[9px] text-slate-400 block font-medium">Integrated Tax</span>
-                          <span>₹ 0.00</span>
+                          <span>₹ {(filteredData.totalB2bIgst + filteredData.totalB2cLargeTax + filteredData.totalB2cSmallIgst).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                         </div>
                         <div>
                           <span className="text-[9px] text-slate-400 block font-medium">Central Tax</span>
-                          <span className="text-red-550 text-red-500">₹ {(filteredData.totalB2bCgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeCgst).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                          <span className="text-red-550 text-red-500">₹ {(filteredData.totalB2bCgst + filteredData.totalB2cSmallCgst + filteredData.reverseChargeCgst).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                         </div>
                         <div className="col-span-2 border-t border-blue-200 pt-1 flex justify-between text-[10px] mt-1">
                           <span className="text-slate-400 font-medium">State/UT Tax:</span>
-                          <span className="text-red-550 text-red-500">₹ {(filteredData.totalB2bSgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeSgst).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                          <span className="text-red-550 text-red-500">₹ {(filteredData.totalB2bSgst + filteredData.totalB2cSmallSgst + filteredData.reverseChargeSgst).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                         </div>
                       </div>
                     </div>
@@ -1260,15 +1264,16 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
 
                     {/* Net Payable */}
                     {(() => {
-                      const netCgst = (filteredData.totalB2bCgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeCgst) - (filteredData.totalItcCgst + filteredData.reverseChargeCgst);
-                      const netSgst = (filteredData.totalB2bSgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeSgst) - (filteredData.totalItcSgst + filteredData.reverseChargeSgst);
+                      const netIgst = (filteredData.totalB2bIgst + filteredData.totalB2cLargeTax + filteredData.totalB2cSmallIgst);
+                      const netCgst = (filteredData.totalB2bCgst + filteredData.totalB2cSmallCgst + filteredData.reverseChargeCgst) - (filteredData.totalItcCgst + filteredData.reverseChargeCgst);
+                      const netSgst = (filteredData.totalB2bSgst + filteredData.totalB2cSmallSgst + filteredData.reverseChargeSgst) - (filteredData.totalItcSgst + filteredData.reverseChargeSgst);
                       return (
                         <div className="bg-[#fff8ee] border border-[#ffe2bf] p-3.5 rounded-xl">
                           <span className="text-[10px] font-bold text-[#c05621] uppercase">Net Tax Payable (1 - 2)</span>
                           <div className="grid grid-cols-2 gap-2 mt-2 text-xs font-bold text-slate-900">
                             <div>
                               <span className="text-[9px] text-slate-400 block font-medium">Integrated Tax</span>
-                              <span>₹ 0.00</span>
+                              <span className={netIgst > 0 ? 'text-red-500' : 'text-emerald-650 text-emerald-700'}>₹ {netIgst.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                             </div>
                             <div>
                               <span className="text-[9px] text-slate-400 block font-medium">Central Tax</span>
@@ -1291,13 +1296,18 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                   <div className="grid grid-cols-2 gap-2.5 text-center text-[10px] font-bold text-slate-850">
                     <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl">
                       <span className="text-slate-400 block font-medium">Integrated Tax</span>
-                      <p className="text-xs font-black mt-1">₹ 0.00</p>
+                      <p className="text-xs font-black mt-1">
+                        {(() => {
+                          const netIgst = (filteredData.totalB2bIgst + filteredData.totalB2cLargeTax + filteredData.totalB2cSmallIgst);
+                          return netIgst > 0 ? `₹ ${netIgst.toFixed(2)}` : '₹ 0.00';
+                        })()}
+                      </p>
                     </div>
                     <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl">
                       <span className="text-slate-400 block font-medium">Central Tax</span>
                       <p className="text-xs font-black mt-1">
                         {(() => {
-                          const netCgst = (filteredData.totalB2bCgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeCgst) - (filteredData.totalItcCgst + filteredData.reverseChargeCgst);
+                          const netCgst = (filteredData.totalB2bCgst + filteredData.totalB2cSmallCgst + filteredData.reverseChargeCgst) - (filteredData.totalItcCgst + filteredData.reverseChargeCgst);
                           return netCgst > 0 ? `₹ ${netCgst.toFixed(2)}` : '₹ 0.00';
                         })()}
                       </p>
@@ -1306,7 +1316,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                       <span className="text-slate-400 block font-medium">State/UT Tax</span>
                       <p className="text-xs font-black mt-1">
                         {(() => {
-                          const netSgst = (filteredData.totalB2bSgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2) + filteredData.reverseChargeSgst) - (filteredData.totalItcSgst + filteredData.reverseChargeSgst);
+                          const netSgst = (filteredData.totalB2bSgst + (filteredData.totalB2cSmallSgst) + filteredData.reverseChargeSgst) - (filteredData.totalItcSgst + filteredData.reverseChargeSgst);
                           return netSgst > 0 ? `₹ ${netSgst.toFixed(2)}` : '₹ 0.00';
                         })()}
                       </p>
