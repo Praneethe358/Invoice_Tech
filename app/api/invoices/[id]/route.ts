@@ -6,6 +6,7 @@ import { getCurrentUserContext } from '@/lib/current-user';
 import { hasPermission } from '@/lib/permissions';
 import { logAudit } from '@/lib/audit';
 import { getClothingGstRate } from '@/lib/clothing/gst';
+import { syncCustomerOutstanding } from '@/lib/payments';
 
 // PUT: Update a draft invoice
 export async function PUT(
@@ -45,10 +46,10 @@ export async function PUT(
       );
     }
 
-    // Get existing invoice
+    // Get existing invoice details
     const { data: invoice, error: invoiceError } = await supabase
       .from('invoices')
-      .select('id, status, shop_id, invoice_number')
+      .select('id, status, shop_id, invoice_number, customer_phone, customer_name, customer_gstin, total, payment_status, amount_paid')
       .eq('id', id)
       .eq('shop_id', ctx.shopId)
       .single();
@@ -60,12 +61,18 @@ export async function PUT(
       );
     }
 
-    if (invoice.status !== 'draft') {
+    if (invoice.status === 'cancelled') {
       return NextResponse.json(
-        { error: 'Only draft invoices can be modified.' } satisfies ApiError,
+        { error: 'Cancelled invoices cannot be modified.' } satisfies ApiError,
         { status: 400 }
       );
     }
+
+    // Get existing items for comparison
+    const { data: existingItems } = await supabase
+      .from('invoice_items')
+      .select('name, price, qty, gst_rate, variant_id')
+      .eq('invoice_id', id);
 
     // Parse body
     const body = (await request.json()) as CreateInvoicePayload;
@@ -145,6 +152,99 @@ export async function PUT(
       ? Number(body.amount_paid)
       : 0;
 
+    // If the invoice is already saved/sent, adjust inventory for item quantity changes
+    if (invoice.status === 'saved' || invoice.status === 'sent') {
+      const oldItemMap = new Map<string, number>();
+      for (const item of existingItems || []) {
+        const key = `${item.name}:${item.variant_id || ''}`;
+        oldItemMap.set(key, item.qty);
+      }
+
+      const newItemMap = new Map<string, number>();
+      for (const item of body.items) {
+        const key = `${item.name}:${item.variant_id || ''}`;
+        newItemMap.set(key, item.quantity);
+      }
+
+      const allKeys = new Set([...oldItemMap.keys(), ...newItemMap.keys()]);
+
+      for (const key of allKeys) {
+        const oldQty = oldItemMap.get(key) || 0;
+        const newQty = newItemMap.get(key) || 0;
+        const diff = newQty - oldQty;
+
+        if (diff === 0) continue;
+
+        const [name, variantId] = key.split(':');
+
+        const { data: prod } = await supabase
+          .from('products')
+          .select('id, stock_qty, track_inventory')
+          .eq('shop_id', ctx.shopId)
+          .eq('name', name)
+          .maybeSingle();
+
+        if (prod && prod.track_inventory) {
+          if (variantId) {
+            const { data: variant } = await supabase
+              .from('product_variants')
+              .select('stock_qty')
+              .eq('id', variantId)
+              .single();
+
+            const currentVariantStock = variant?.stock_qty || 0;
+
+            if (diff > 0 && currentVariantStock < diff) {
+              return NextResponse.json(
+                { error: `Insufficient stock for variant of ${name}. Stock available: ${currentVariantStock}.` } satisfies ApiError,
+                { status: 400 }
+              );
+            }
+
+            await supabase
+              .from('product_variants')
+              .update({ stock_qty: currentVariantStock - diff })
+              .eq('id', variantId);
+
+            await supabase.from('inventory_logs').insert({
+              shop_id: ctx.shopId,
+              product_id: prod.id,
+              invoice_id: id,
+              variant_id: variantId,
+              change_qty: -diff,
+              previous_qty: currentVariantStock,
+              new_qty: currentVariantStock - diff,
+              reason: 'invoice',
+            });
+          } else {
+            const currentStock = prod.stock_qty || 0;
+
+            if (diff > 0 && currentStock < diff) {
+              return NextResponse.json(
+                { error: `Insufficient stock for ${name}. Stock available: ${currentStock}.` } satisfies ApiError,
+                { status: 400 }
+              );
+            }
+
+            await supabase
+              .from('products')
+              .update({ stock_qty: currentStock - diff })
+              .eq('id', prod.id);
+
+            await supabase.from('inventory_logs').insert({
+              shop_id: ctx.shopId,
+              product_id: prod.id,
+              invoice_id: id,
+              change_qty: -diff,
+              previous_qty: currentStock,
+              new_qty: currentStock - diff,
+              reason: 'invoice',
+            });
+          }
+        }
+      }
+    }
+
     // Update invoice
     const { error: updateError } = await supabase
       .from('invoices')
@@ -166,7 +266,7 @@ export async function PUT(
     if (updateError) {
       console.error('Invoice update error:', updateError);
       return NextResponse.json(
-        { error: 'Failed to update draft invoice.' } satisfies ApiError,
+        { error: 'Failed to update invoice.' } satisfies ApiError,
         { status: 500 }
       );
     }
@@ -202,6 +302,43 @@ export async function PUT(
       console.error('Insert new invoice items error:', itemsInsertError);
     }
 
+    // Record audit log with changes
+    const changes: Record<string, { old: any; new: any }> = {};
+
+    if (invoice.customer_phone !== body.customer_phone) {
+      changes.customer_phone = { old: invoice.customer_phone, new: body.customer_phone };
+    }
+    const newName = body.customer_name?.trim().toUpperCase() || null;
+    if ((invoice.customer_name || null) !== newName) {
+      changes.customer_name = { old: invoice.customer_name, new: newName };
+    }
+    const newGstin = body.customer_gstin?.trim().toUpperCase() || null;
+    if ((invoice.customer_gstin || null) !== newGstin) {
+      changes.customer_gstin = { old: invoice.customer_gstin, new: newGstin };
+    }
+    if (invoice.payment_status !== payment_status) {
+      changes.payment_status = { old: invoice.payment_status, new: payment_status };
+    }
+    if (Number(invoice.total || 0) !== Number(total.toFixed(2))) {
+      changes.total = { old: Number(invoice.total || 0), new: Number(total.toFixed(2)) };
+    }
+    if (Number(invoice.amount_paid || 0) !== Number(amount_paid.toFixed(2))) {
+      changes.amount_paid = { old: Number(invoice.amount_paid || 0), new: Number(amount_paid.toFixed(2)) };
+    }
+
+    const oldItemsStr = (existingItems || [])
+      .map(i => `${i.name} (${i.qty}x ₹${i.price})`)
+      .sort()
+      .join(', ');
+    const newItemsStr = processedItems
+      .map(i => `${i.name} (${i.quantity}x ₹${i.price})`)
+      .sort()
+      .join(', ');
+
+    if (oldItemsStr !== newItemsStr) {
+      changes.items = { old: oldItemsStr, new: newItemsStr };
+    }
+
     logAudit({
       shopId: ctx.shopId,
       actorUserId: ctx.userId,
@@ -212,10 +349,25 @@ export async function PUT(
       entityId: id,
       entityLabel: invoice.invoice_number,
       details: {
-        customer_phone: body.customer_phone,
-        total: Number(total.toFixed(2)),
+        changes,
       },
     });
+
+    // Write to invoice_audit_logs as well
+    await supabase
+      .from('invoice_audit_logs')
+      .insert({
+        invoice_id: id,
+        shop_id: ctx.shopId,
+        user_id: ctx.userId,
+        action: 'saved',
+      });
+
+    // Sync customer outstanding balance
+    await syncCustomerOutstanding(ctx.shopId, body.customer_phone);
+    if (invoice.customer_phone !== body.customer_phone) {
+      await syncCustomerOutstanding(ctx.shopId, invoice.customer_phone);
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
@@ -25,6 +25,31 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
   const [downloading, setDownloading] = useState(false);
   const [sendingReminder, setSendingReminder] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
+
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [loadingAudit, setLoadingAudit] = useState(true);
+
+  const fetchAuditLogs = useCallback(async () => {
+    try {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from('audit_logs')
+        .select('*')
+        .eq('entity_id', inv.id)
+        .order('created_at', { ascending: false });
+      if (data) {
+        setAuditLogs(data);
+      }
+    } catch (err) {
+      console.error('Failed to load audit logs:', err);
+    } finally {
+      setLoadingAudit(false);
+    }
+  }, [inv.id]);
+
+  useEffect(() => {
+    fetchAuditLogs();
+  }, [fetchAuditLogs]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && inv.public_token) {
@@ -180,6 +205,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
       setShowNoteForm(false);
       setNoteRemarks('');
       router.refresh();
+      fetchAuditLogs();
     } catch (err: any) {
       showToast(err.message, 'error');
     } finally {
@@ -214,6 +240,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
       } else {
         showToast('Invoice resent successfully', 'success');
         router.refresh();
+        fetchAuditLogs();
       }
     } catch (err) {
       showToast('An unexpected error occurred', 'error');
@@ -259,6 +286,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
       // Update state local status
       setInv(prev => ({ ...prev, status: 'cancelled' }));
       router.refresh();
+      fetchAuditLogs();
     } catch (err: any) {
       showToast(err.message, 'error');
     } finally {
@@ -340,6 +368,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
       }
 
       router.refresh();
+      fetchAuditLogs();
     } catch (err: any) {
       showToast(err.message || 'Error recording payment', 'error');
     } finally {
@@ -372,6 +401,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
       setDeletingPaymentId(null);
       showToast('Payment record removed', 'success');
       router.refresh();
+      fetchAuditLogs();
     } catch (err: any) {
       showToast(err.message || 'Error deleting payment', 'error');
     }
@@ -400,6 +430,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
         sent_reminders: (prev.sent_reminders || 0) + 1,
       }));
       router.refresh();
+      fetchAuditLogs();
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to send reminder', 'error');
     } finally {
@@ -955,6 +986,73 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
               </div>
             )}
           </div>
+
+          {/* Audit Trail Section */}
+          <div className="bg-white rounded-3xl border border-[#e5e7eb] p-6 shadow-sm">
+            <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-3">
+              Audit Trail (Activity Log)
+            </h2>
+            {loadingAudit ? (
+              <p className="text-xs text-[#9ca3af] italic">Loading activity logs...</p>
+            ) : auditLogs.length === 0 ? (
+              <p className="text-xs text-[#9ca3af] italic">No activity recorded yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {auditLogs.map((log) => {
+                  const date = new Date(log.created_at).toLocaleString('en-IN', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  });
+
+                  const changes = log.details?.changes;
+                  const changeList = changes ? Object.entries(changes).map(([field, change]: any) => {
+                    const fieldLabel = field.replace('_', ' ').toUpperCase();
+                    
+                    if (field === 'items') {
+                      return (
+                        <div key={field} className="text-[11px] text-gray-500 mt-1 pl-2 border-l-2 border-blue-200">
+                          <span className="font-semibold text-slate-700">ITEMS MODIFIED:</span>
+                          <div className="mt-0.5 space-y-0.5">
+                            <div className="text-[10px] text-red-500 line-through font-mono">Was: {String(change.old || 'None')}</div>
+                            <div className="text-[10px] text-emerald-600 font-semibold font-mono font-bold">Now: {String(change.new || 'None')}</div>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div key={field} className="text-[11px] text-gray-500 mt-1 pl-2 border-l-2 border-blue-100">
+                        <span className="font-semibold text-slate-700">{fieldLabel}:</span>{' '}
+                        <span className="line-through text-red-500">{String(change.old !== null && change.old !== undefined ? change.old : 'None')}</span>{' '}
+                        <span className="text-gray-400">→</span>{' '}
+                        <span className="text-emerald-600 font-semibold">{String(change.new !== null && change.new !== undefined ? change.new : 'None')}</span>
+                      </div>
+                    );
+                  }) : null;
+
+                  return (
+                    <div key={log.id} className="bg-slate-50 border border-slate-100 rounded-2xl p-3 text-xs">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-extrabold text-[#111827]">
+                            {log.action.replace('invoice.', '').toUpperCase()}
+                          </p>
+                          <p className="text-[#6b7280] font-medium mt-0.5">
+                            By {log.actor_name}
+                          </p>
+                        </div>
+                        <span className="text-[10px] text-[#9ca3af] font-semibold">{date}</span>
+                      </div>
+                      {changeList && <div className="mt-2 space-y-1">{changeList}</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Share Invoice Status section */}
@@ -1048,6 +1146,14 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
           {inv.status === 'saved' && (
             <>
               <Button
+                onClick={() => window.location.href = `/invoice/new?draftId=${inv.id}`}
+                variant="ghost"
+                className="w-full bg-white border border-[#e5e7eb] text-slate-700 hover:bg-slate-50"
+              >
+                Edit Invoice
+              </Button>
+
+              <Button
                 onClick={handleResend}
                 loading={resending}
                 variant="primary"
@@ -1100,6 +1206,14 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
 
           {inv.status === 'sent' && (
             <>
+              <Button
+                onClick={() => window.location.href = `/invoice/new?draftId=${inv.id}`}
+                variant="ghost"
+                className="w-full bg-white border border-[#e5e7eb] text-slate-700 hover:bg-slate-50"
+              >
+                Edit Invoice
+              </Button>
+
               {inv.payment_status !== 'paid' && (
                 <Button
                   onClick={handleSendReminder}

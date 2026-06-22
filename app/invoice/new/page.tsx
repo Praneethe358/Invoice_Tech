@@ -53,7 +53,7 @@ export default async function NewInvoicePage({ searchParams }: PageProps) {
       .eq('id', draftId)
       .eq('shop_id', shop.id)
       .single();
-    if (invoice && invoice.status === 'draft') {
+    if (invoice) {
       initialDraft = invoice;
     }
   }

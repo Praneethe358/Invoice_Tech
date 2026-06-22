@@ -607,7 +607,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
         payment_method: (paymentStatus === 'paid' || paymentStatus === 'partial') ? paymentMethod : undefined,
         payment_note: (paymentStatus === 'paid' || paymentStatus === 'partial') ? (paymentNote.trim() || undefined) : undefined,
         amount_paid: paymentStatus === 'partial' ? Number(partialAmount) : undefined,
-        status: isEditingDraft ? 'draft' : dbStatus,
+        status: (initialDraft && initialDraft.status !== 'draft') ? initialDraft.status : (isEditingDraft ? 'draft' : dbStatus),
       };
 
       const res = await fetch(url, {
@@ -624,7 +624,9 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
       const id = isEditingDraft ? initialDraft.id : resData.id;
       const invoice_number = isEditingDraft ? initialDraft.invoice_number : resData.invoice_number;
 
-      if (isEditingDraft && (targetStatus === 'saved' || targetStatus === 'sent')) {
+      const isAlreadyPublished = initialDraft && (initialDraft.status === 'saved' || initialDraft.status === 'sent');
+
+      if (isEditingDraft && !isAlreadyPublished && (targetStatus === 'saved' || targetStatus === 'sent')) {
         const transitionRes = await fetch(`/api/invoices/${id}/save`, {
           method: 'POST',
         });
@@ -1686,21 +1688,23 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => handleSubmit('draft')}
-                    disabled={!isValid || loading}
-                    className="px-4 py-2.5 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
-                  >
-                    Save as Draft
-                  </button>
+                  {(!initialDraft || initialDraft.status === 'draft') && (
+                    <button
+                      type="button"
+                      onClick={() => handleSubmit('draft')}
+                      disabled={!isValid || loading}
+                      className="px-4 py-2.5 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
+                    >
+                      Save as Draft
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => handleSubmit('saved')}
                     disabled={!isValid || loading}
                     className="px-4 py-2.5 border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
                   >
-                    Save Invoice
+                    {initialDraft && (initialDraft.status === 'saved' || initialDraft.status === 'sent') ? 'Save Changes' : 'Save Invoice'}
                   </button>
                   <button
                     type="button"
@@ -1708,7 +1712,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
                     disabled={!isValid || loading}
                     className="px-5 py-2.5 bg-[#0050e8] hover:bg-[#0043c4] text-white text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
                   >
-                    Save & Send
+                    {initialDraft?.status === 'sent' ? 'Save & Resend' : 'Save & Send'}
                   </button>
                 </div>
               </div>
@@ -1749,15 +1753,17 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
                   ₹{total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
               </div>
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleSubmit('draft')}
-                  disabled={!isValid || loading}
-                  className="py-3 px-1 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
-                >
-                  Draft
-                </button>
+              <div className={`grid ${(!initialDraft || initialDraft.status === 'draft') ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
+                {(!initialDraft || initialDraft.status === 'draft') && (
+                  <button
+                    type="button"
+                    onClick={() => handleSubmit('draft')}
+                    disabled={!isValid || loading}
+                    className="py-3 px-1 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
+                  >
+                    Draft
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => handleSubmit('saved')}
@@ -1772,7 +1778,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
                   disabled={!isValid || loading}
                   className="py-3 px-1 bg-[#0050e8] hover:bg-[#0043c4] text-white text-xs font-extrabold rounded-xl transition-all disabled:opacity-50 min-h-[44px]"
                 >
-                  Save & Send
+                  {initialDraft?.status === 'sent' ? 'Resend' : 'Send'}
                 </button>
               </div>
             </>
