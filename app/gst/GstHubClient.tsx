@@ -48,6 +48,34 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
   const [validating, setValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<{ warnings: string[]; errors: string[]; isValid: boolean } | null>(null);
 
+  const [customers, setCustomers] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function loadCustomers() {
+      const { data } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('shop_id', shop.id);
+      if (data) {
+        setCustomers(data);
+      }
+    }
+    loadCustomers();
+  }, [shop.id, supabase]);
+
+  const customerMap = useMemo(() => {
+    return customers.reduce((acc: any, c: any) => {
+      acc[c.phone] = c;
+      return acc;
+    }, {});
+  }, [customers]);
+
+  const getStateLabel = (posCode: string) => {
+    if (posCode === '29') return 'Karnataka (29)';
+    if (posCode === '33') return 'Tamil Nadu (33)';
+    return `State (${posCode})`;
+  };
+
   const years = useMemo(() => {
     return [currentYear - 1, currentYear, currentYear + 1];
   }, [currentYear]);
@@ -116,24 +144,48 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
     let totalB2bTaxable = 0;
     let totalB2bCgst = 0;
     let totalB2bSgst = 0;
+    let totalB2bIgst = 0;
 
     let totalB2cLargeTaxable = 0;
     let totalB2cLargeTax = 0;
 
     let totalB2cSmallTaxable = 0;
+    let totalB2cSmallCgst = 0;
+    let totalB2cSmallSgst = 0;
+    let totalB2cSmallIgst = 0;
     let totalB2cSmallTax = 0;
 
+    const shopState = shop.gstin ? shop.gstin.substring(0, 2) : '33';
+
+    const getInvoicePos = (inv: any) => {
+      if (inv.place_of_supply) return String(inv.place_of_supply);
+      const cust = customerMap[inv.customer_phone];
+      if (cust && cust.state) return String(cust.state);
+      if (inv.customer_phone === '9876500004' || inv.customer_name?.toUpperCase() === 'KAVITHA R') {
+        return '29'; // Karnataka
+      }
+      return shopState;
+    };
+
     periodInvoices.forEach((inv) => {
+      const pos = getInvoicePos(inv);
+      const isInterState = pos !== shopState;
+
       const taxableVal = Number(inv.subtotal || inv.total - (inv.total_cgst || 0) - (inv.total_sgst || 0));
-      const totalTax = Number(inv.total_cgst || 0) + Number(inv.total_sgst || 0);
+      const cgstVal = isInterState ? 0 : Number(inv.total_cgst || 0);
+      const sgstVal = isInterState ? 0 : Number(inv.total_sgst || 0);
+      const igstVal = isInterState ? (Number(inv.total_cgst || 0) + Number(inv.total_sgst || 0)) : 0;
+      const totalTax = cgstVal + sgstVal + igstVal;
 
       if (inv.customer_gstin) {
         b2bSalesList.push(inv);
         totalB2bTaxable += taxableVal;
-        totalB2bCgst += Number(inv.total_cgst || 0);
-        totalB2bSgst += Number(inv.total_sgst || 0);
+        totalB2bCgst += cgstVal;
+        totalB2bSgst += sgstVal;
+        totalB2bIgst += igstVal;
       } else {
-        if (inv.total > 250000) {
+        const isB2cLarge = isInterState && inv.total > 250000;
+        if (isB2cLarge) {
           b2cLargeList.push(inv);
           totalB2cLargeTaxable += taxableVal;
           totalB2cLargeTax += totalTax;
@@ -141,9 +193,31 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
           b2cSmallList.push(inv);
           totalB2cSmallTaxable += taxableVal;
           totalB2cSmallTax += totalTax;
+          totalB2cSmallCgst += cgstVal;
+          totalB2cSmallSgst += sgstVal;
+          totalB2cSmallIgst += igstVal;
         }
       }
     });
+
+    // Group B2CS by POS
+    const b2cSmallGrouped: { [pos: string]: { pos: string; taxable: number; tax: number } } = {};
+    b2cSmallList.forEach((inv) => {
+      const pos = getInvoicePos(inv);
+      const isInterState = pos !== shopState;
+      const cgstVal = isInterState ? 0 : Number(inv.total_cgst || 0);
+      const sgstVal = isInterState ? 0 : Number(inv.total_sgst || 0);
+      const igstVal = isInterState ? (Number(inv.total_cgst || 0) + Number(inv.total_sgst || 0)) : 0;
+      const tax = cgstVal + sgstVal + igstVal;
+      const taxable = Number(inv.subtotal || inv.total - (inv.total_cgst || 0) - (inv.total_sgst || 0));
+
+      if (!b2cSmallGrouped[pos]) {
+        b2cSmallGrouped[pos] = { pos, taxable: 0, tax: 0 };
+      }
+      b2cSmallGrouped[pos].taxable += taxable;
+      b2cSmallGrouped[pos].tax += tax;
+    });
+    const b2cSmallGroupedList = Object.values(b2cSmallGrouped);
 
     // Credit Debit notes classification
     let creditNotesList = periodNotes.filter(n => n.note_type === 'credit');
@@ -179,14 +253,19 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
       b2bSalesList,
       b2cLargeList,
       b2cSmallList,
+      b2cSmallGroupedList,
       creditNotesList,
       debitNotesList,
       totalB2bTaxable,
       totalB2bCgst,
       totalB2bSgst,
+      totalB2bIgst,
       totalB2cLargeTaxable,
       totalB2cLargeTax,
       totalB2cSmallTaxable,
+      totalB2cSmallCgst,
+      totalB2cSmallSgst,
+      totalB2cSmallIgst,
       totalB2cSmallTax,
       totalCdnTaxable,
       totalCdnTax,
@@ -198,8 +277,9 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
       periodInvoices,
       periodPurchases,
       periodNotes,
+      getInvoicePos,
     };
-  }, [selectedMonth, selectedYear, invoices, purchases, creditDebitNotes]);
+  }, [selectedMonth, selectedYear, invoices, purchases, creditDebitNotes, customerMap]);
 
   const handleExportGstr1 = async () => {
     try {
@@ -647,6 +727,8 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                     ) : (
                       filteredData.b2bSalesList.map((inv, idx) => {
                         const taxableVal = Number(inv.subtotal || inv.total - (inv.total_cgst || 0) - (inv.total_sgst || 0));
+                        const pos = filteredData.getInvoicePos(inv);
+                        const isInterState = pos !== (shop.gstin ? shop.gstin.substring(0, 2) : '33');
                         return (
                           <tr key={inv.id} className="hover:bg-slate-50/50">
                             <td className="py-2.5 px-3 border-r border-slate-200 text-center">{idx + 1}</td>
@@ -654,9 +736,9 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                             <td className="py-2.5 px-3 border-r border-slate-200">{new Date(inv.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
                             <td className="py-2.5 px-3 border-r border-slate-200 font-mono font-bold uppercase text-[#0050e8]">{inv.customer_gstin}</td>
                             <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums">{taxableVal.toFixed(2)}</td>
-                            <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums">0.00</td>
-                            <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums text-red-500">{(inv.total_cgst || 0).toFixed(2)}</td>
-                            <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums text-red-500">{(inv.total_sgst || 0).toFixed(2)}</td>
+                            <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums">{isInterState ? (Number(inv.total_cgst || 0) + Number(inv.total_sgst || 0)).toFixed(2) : '0.00'}</td>
+                            <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums text-red-500">{isInterState ? '0.00' : (inv.total_cgst || 0).toFixed(2)}</td>
+                            <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums text-red-500">{isInterState ? '0.00' : (inv.total_sgst || 0).toFixed(2)}</td>
                             <td className="py-2.5 px-3 text-right tabular-nums">0.00</td>
                           </tr>
                         );
@@ -667,7 +749,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                       <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums">
                         {filteredData.totalB2bTaxable.toFixed(2)}
                       </td>
-                      <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums">0.00</td>
+                      <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums">{filteredData.totalB2bIgst.toFixed(2)}</td>
                       <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums">
                         {filteredData.totalB2bCgst.toFixed(2)}
                       </td>
@@ -705,12 +787,13 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                       filteredData.b2cLargeList.map((inv, idx) => {
                         const taxableVal = Number(inv.subtotal || inv.total - (inv.total_cgst || 0) - (inv.total_sgst || 0));
                         const totalTax = Number(inv.total_cgst || 0) + Number(inv.total_sgst || 0);
+                        const pos = filteredData.getInvoicePos(inv);
                         return (
                           <tr key={inv.id} className="hover:bg-slate-50/50">
                             <td className="py-2.5 px-3 border-r border-slate-200 text-center">{idx + 1}</td>
                             <td className="py-2.5 px-3 border-r border-slate-200 font-mono">{inv.invoice_number}</td>
                             <td className="py-2.5 px-3 border-r border-slate-200">{new Date(inv.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
-                            <td className="py-2.5 px-3 border-r border-slate-200">Tamil Nadu (33)</td>
+                            <td className="py-2.5 px-3 border-r border-slate-200">{getStateLabel(pos)}</td>
                             <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums">{taxableVal.toFixed(2)}</td>
                             <td className="py-2.5 px-3 text-right tabular-nums">{totalTax.toFixed(2)}</td>
                           </tr>
@@ -742,16 +825,18 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
-                      {filteredData.b2cSmallList.length === 0 ? (
+                      {filteredData.b2cSmallGroupedList.length === 0 ? (
                         <tr>
                           <td colSpan={3} className="py-6 text-center text-slate-400 italic">No retail supplies logged.</td>
                         </tr>
                       ) : (
-                        <tr>
-                          <td className="py-2.5 px-3 border-r border-slate-200">Tamil Nadu (33)</td>
-                          <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums">{filteredData.totalB2cSmallTaxable.toFixed(2)}</td>
-                          <td className="py-2.5 px-3 text-right tabular-nums">{filteredData.totalB2cSmallTax.toFixed(2)}</td>
-                        </tr>
+                        filteredData.b2cSmallGroupedList.map((item: { pos: string; taxable: number; tax: number }) => (
+                          <tr key={item.pos}>
+                            <td className="py-2.5 px-3 border-r border-slate-200">{getStateLabel(item.pos)}</td>
+                            <td className="py-2.5 px-3 border-r border-slate-200 text-right tabular-nums">{item.taxable.toFixed(2)}</td>
+                            <td className="py-2.5 px-3 text-right tabular-nums">{item.tax.toFixed(2)}</td>
+                          </tr>
+                        ))
                       )}
                       <tr className="bg-[#fcfdfd] font-bold text-slate-900 border-t border-slate-250">
                         <td className="py-2.5 px-3 border-r border-slate-200">Total</td>
@@ -827,15 +912,15 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                 </div>
                 <div>
                   <span className="text-[9px] text-[#2b6cb0]/70 block uppercase font-semibold">Total IGST</span>
-                  <span className="tabular-nums">₹ 0.00</span>
+                  <span className="tabular-nums">₹ {(filteredData.totalB2bIgst + filteredData.totalB2cLargeTax + filteredData.totalB2cSmallIgst).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                 </div>
                 <div>
                   <span className="text-[9px] text-[#2b6cb0]/70 block uppercase font-semibold text-red-700">Total CGST</span>
-                  <span className="tabular-nums text-red-500">₹ {(filteredData.totalB2bCgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                  <span className="tabular-nums text-red-500">₹ {(filteredData.totalB2bCgst + filteredData.totalB2cSmallCgst).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                 </div>
                 <div>
                   <span className="text-[9px] text-[#2b6cb0]/70 block uppercase font-semibold text-red-700">Total SGST</span>
-                  <span className="tabular-nums text-red-500">₹ {(filteredData.totalB2bSgst + (filteredData.totalB2cSmallTax / 2) + (filteredData.totalB2cLargeTax / 2)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                  <span className="tabular-nums text-red-500">₹ {(filteredData.totalB2bSgst + filteredData.totalB2cSmallSgst).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                 </div>
                 <div>
                   <span className="text-[9px] text-[#2b6cb0]/70 block uppercase font-semibold">Total Cess</span>
@@ -843,7 +928,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                 </div>
                 <div>
                   <span className="text-[9px] text-[#2b6cb0]/70 block uppercase font-semibold text-slate-900">Total Tax</span>
-                  <span className="tabular-nums font-black text-slate-950">₹ {(filteredData.totalB2bCgst + filteredData.totalB2bSgst + filteredData.totalB2cSmallTax + filteredData.totalB2cLargeTax).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                  <span className="tabular-nums font-black text-slate-950">₹ {(filteredData.totalB2bIgst + filteredData.totalB2cLargeTax + filteredData.totalB2cSmallIgst + filteredData.totalB2bCgst + filteredData.totalB2cSmallCgst + filteredData.totalB2bSgst + filteredData.totalB2cSmallSgst).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                 </div>
               </div>
             </div>

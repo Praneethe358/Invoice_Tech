@@ -1,6 +1,24 @@
-import { SupabaseClient } from '@supabase/supabase-js';
+const { createClient } = require('@supabase/supabase-js');
+const fs = require('fs');
+const path = require('path');
 
-export function formatGstDate(dateStr: string): string {
+const envPath = path.join(__dirname, '..', '.env.local');
+const envContent = fs.readFileSync(envPath, 'utf8');
+const envVars = {};
+envContent.split('\n').forEach(line => {
+  const parts = line.split('=');
+  if (parts.length >= 2) {
+    const key = parts[0].trim();
+    const val = parts.slice(1).join('=').trim().replace(/^['"]|['"]$/g, '');
+    envVars[key] = val;
+  }
+});
+
+const supabaseUrl = envVars.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = envVars.SUPABASE_SERVICE_ROLE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+function formatGstDate(dateStr) {
   const date = new Date(dateStr);
   const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
   const istDate = new Date(utc + (3600000 * 5.5));
@@ -11,112 +29,11 @@ export function formatGstDate(dateStr: string): string {
   return `${day}-${month}-${year}`;
 }
 
-export interface Gstr1ValidationResult {
-  warnings: string[];
-  errors: string[];
-  isValid: boolean;
-}
+async function run() {
+  const shopId = 'd5abe065-9c0f-44d4-81ee-67d9be452503';
+  const month = 6;
+  const year = 2026;
 
-export async function validateGstr1Data(
-  supabase: SupabaseClient,
-  shopId: string,
-  month: number,
-  year: number
-): Promise<Gstr1ValidationResult> {
-  const warnings: string[] = [];
-  const errors: string[] = [];
-
-  // Fetch shop
-  const { data: shop } = await supabase
-    .from('shops')
-    .select('*')
-    .eq('id', shopId)
-    .single();
-
-  if (!shop) {
-    errors.push('Shop not found.');
-    return { warnings, errors, isValid: false };
-  }
-
-  if (!shop.gst_registered) {
-    errors.push('Shop is not registered for GST.');
-  }
-
-  if (!shop.gstin) {
-    errors.push('Shop GSTIN is missing.');
-  } else if (shop.gstin.length !== 15) {
-    errors.push(`Shop GSTIN "${shop.gstin}" is invalid (must be 15 characters).`);
-  }
-
-  // Get date range
-  const pad = (num: number) => String(num).padStart(2, '0');
-  const startDate = `${year}-${pad(month)}-01`;
-  const lastDay = new Date(year, month, 0).getDate();
-  const endDate = `${year}-${pad(month)}-${pad(lastDay)}`;
-
-  // Fetch invoices
-  const { data: invoices } = await supabase
-    .from('invoices')
-    .select('*, invoice_items(*)')
-    .eq('shop_id', shopId)
-    .in('status', ['saved', 'sent'])
-    .gte('created_at', `${startDate}T00:00:00+05:30`)
-    .lte('created_at', `${endDate}T23:59:59+05:30`);
-
-  if (!invoices || invoices.length === 0) {
-    warnings.push('No sent invoices found for this period.');
-  } else {
-    // Check missing items or HSN codes
-    let missingHsnCount = 0;
-    let legacyInvoiceCount = 0;
-
-    invoices.forEach((inv: any) => {
-      if (!inv.uses_items_table) {
-        legacyInvoiceCount++;
-      }
-      
-      const items = inv.invoice_items || [];
-      items.forEach((item: any) => {
-        if (!item.hsn_code) {
-          missingHsnCount++;
-        } else if (item.hsn_code.replace(/\D/g, '').length < 4) {
-          warnings.push(`Invoice ${inv.invoice_number} has HSN code "${item.hsn_code}" which is shorter than 4 digits.`);
-        }
-      });
-
-      // Check large B2CS invoices
-      if (!inv.customer_gstin && inv.total > 250000) {
-        warnings.push(`Invoice ${inv.invoice_number} is a B2C transaction exceeding ₹2.5 Lakhs. Ensure this is correct.`);
-      }
-
-      // Check B2B customer gstin length
-      if (inv.customer_gstin && inv.customer_gstin.length !== 15) {
-        errors.push(`Invoice ${inv.invoice_number} has an invalid customer GSTIN "${inv.customer_gstin}" (must be 15 characters).`);
-      }
-    });
-
-    if (legacyInvoiceCount > 0) {
-      warnings.push(`${legacyInvoiceCount} invoices were created using the old system and will not include separate item/HSN breakdowns.`);
-    }
-
-    if (missingHsnCount > 0) {
-      warnings.push(`${missingHsnCount} items in invoices are missing HSN codes.`);
-    }
-  }
-
-  return {
-    warnings,
-    errors,
-    isValid: errors.length === 0,
-  };
-}
-
-export async function generateGSTR1(
-  supabase: SupabaseClient,
-  shopId: string,
-  month: number,
-  year: number
-): Promise<any> {
   // 1. Fetch shop data
   const { data: shop } = await supabase
     .from('shops')
@@ -124,31 +41,25 @@ export async function generateGSTR1(
     .eq('id', shopId)
     .single();
 
-  if (!shop) throw new Error('Shop not found');
-  if (!shop.gstin) throw new Error('Shop GSTIN not configured');
-
-  // Format filing period MMYYYY
   const fp = `${String(month).padStart(2, '0')}${year}`;
-
-  const pad = (num: number) => String(num).padStart(2, '0');
+  const pad = (num) => String(num).padStart(2, '0');
   const startDate = `${year}-${pad(month)}-01`;
   const lastDay = new Date(year, month, 0).getDate();
   const endDate = `${year}-${pad(month)}-${pad(lastDay)}`;
 
-  // Fetch all customers for state lookup
   const { data: customers } = await supabase
     .from('customers')
     .select('*')
     .eq('shop_id', shopId);
 
-  const customerMap = (customers || []).reduce((acc: any, c: any) => {
+  const customerMap = (customers || []).reduce((acc, c) => {
     acc[c.phone] = c;
     return acc;
   }, {});
 
   const shopState = shop.gstin.substring(0, 2) || '33';
 
-  const getInvoicePos = (inv: any) => {
+  const getInvoicePos = (inv) => {
     if (inv.place_of_supply) return String(inv.place_of_supply);
     const cust = customerMap[inv.customer_phone];
     if (cust && cust.state) return String(cust.state);
@@ -168,10 +79,10 @@ export async function generateGSTR1(
     .lte('created_at', `${endDate}T23:59:59+05:30`)
     .order('created_at', { ascending: true });
 
-  const b2bMap: { [gstin: string]: any[] } = {};
-  const b2clMap: { [pos: string]: any[] } = {};
-  const b2csGroupMap: { [key: string]: { pos: string; sply_tp: string; rt: number; txval: number; camt: number; samt: number; iamt: number } } = {};
-  const hsnMap: { [key: string]: { hsn: string; desc: string; qty: number; uqc: string; txval: number; camt: number; samt: number; iamt: number; rt: number; ty: 'B2B' | 'B2CL' | 'B2CS' } } = {};
+  const b2bMap = {};
+  const b2clMap = {};
+  const b2csGroupMap = {};
+  const hsnMap = {};
 
   const invoiceList = invoices || [];
 
@@ -181,10 +92,9 @@ export async function generateGSTR1(
     const pos = getInvoicePos(inv);
     const isInterState = pos !== shopState;
 
-    // Group items by rate for invoice summaries
-    const itemsByRate: { [rate: number]: { txval: number; camt: number; samt: number; iamt: number } } = {};
+    const itemsByRate = {};
     
-    items.forEach((item: any) => {
+    items.forEach((item) => {
       const rate = item.gst_rate || 0;
       if (!itemsByRate[rate]) {
         itemsByRate[rate] = { txval: 0, camt: 0, samt: 0, iamt: 0 };
@@ -207,7 +117,7 @@ export async function generateGSTR1(
       // Group into HSN summary
       const hsnRaw = (item.hsn_code || 'OTH').trim();
       const hsnCode = hsnRaw.length >= 4 ? hsnRaw : hsnRaw.padStart(4, '0');
-      let supplyType: 'B2B' | 'B2CL' | 'B2CS' = 'B2CS';
+      let supplyType = 'B2CS';
       if (isB2B) {
         supplyType = 'B2B';
       } else if (isInterState && inv.total > 250000) {
@@ -220,7 +130,7 @@ export async function generateGSTR1(
           hsn: hsnCode,
           desc: item.name.substring(0, 30),
           qty: 0,
-          uqc: 'OTH', // Default
+          uqc: 'OTH',
           txval: 0,
           camt: 0,
           samt: 0,
@@ -242,16 +152,15 @@ export async function generateGSTR1(
     });
 
     if (isB2B) {
-      const ctin = inv.customer_gstin!.trim().toUpperCase();
+      const ctin = inv.customer_gstin.trim().toUpperCase();
       if (!b2bMap[ctin]) {
         b2bMap[ctin] = [];
       }
 
-      // Construct invoice items breakdown by rate
       const itmsArray = Object.keys(itemsByRate).map((rateStr, idx) => {
         const rate = parseFloat(rateStr);
         const totals = itemsByRate[rate];
-        const itmDet: any = {
+        const itmDet = {
           rt: rate,
           txval: parseFloat(totals.txval.toFixed(2)),
           csamt: 0,
@@ -278,7 +187,6 @@ export async function generateGSTR1(
         itms: itmsArray,
       });
     } else {
-      // Unregistered B2C
       const isB2cLarge = isInterState && inv.total > 250000;
       if (isB2cLarge) {
         if (!b2clMap[pos]) {
@@ -306,7 +214,6 @@ export async function generateGSTR1(
           itms: itmsArray,
         });
       } else {
-        // B2C Small
         Object.keys(itemsByRate).forEach((rateStr) => {
           const rate = parseFloat(rateStr);
           const totals = itemsByRate[rate];
@@ -336,22 +243,19 @@ export async function generateGSTR1(
     }
   });
 
-  // Convert B2B map to array
   const b2bArray = Object.keys(b2bMap).map((ctin) => ({
     ctin,
     inv: b2bMap[ctin],
   }));
 
-  // Convert B2CL map to array
   const b2clArray = Object.keys(b2clMap).map((pos) => ({
     pos,
     inv: b2clMap[pos],
   }));
 
-  // Convert B2CS map to array
   const b2csArray = Object.keys(b2csGroupMap).map((key) => {
     const item = b2csGroupMap[key];
-    const res: any = {
+    const res = {
       sply_tp: item.sply_tp,
       pos: item.pos,
       typ: 'OE',
@@ -368,7 +272,6 @@ export async function generateGSTR1(
     return res;
   });
 
-  // 3. Fetch credit & debit notes
   const { data: cdns } = await supabase
     .from('credit_debit_notes')
     .select('*, cdn_items(*)')
@@ -376,11 +279,10 @@ export async function generateGSTR1(
     .gte('note_date', startDate)
     .lte('note_date', endDate);
 
-  const cdnrMap: { [gstin: string]: any[] } = {};
+  const cdnrMap = {};
   const cdnList = cdns || [];
 
   cdnList.forEach((note) => {
-    // Only B2B credit/debit notes go into CDNR (registered)
     if (!note.customer_gstin) return;
 
     const ctin = note.customer_gstin.trim().toUpperCase();
@@ -392,11 +294,10 @@ export async function generateGSTR1(
     const isInterState = pos !== shopState;
 
     const items = note.cdn_items || [];
-    const itemsByRate: { [rate: number]: { txval: number; camt: number; samt: number; iamt: number } } = {};
+    const itemsByRate = {};
     
-    // Scale items to match direct totals
     let itemsTxValSum = 0;
-    items.forEach((item: any) => {
+    items.forEach((item) => {
       const cgst = item.cgst || 0;
       const sgst = item.sgst || 0;
       const igst = item.igst || 0;
@@ -414,7 +315,7 @@ export async function generateGSTR1(
         iamt: isInterState ? (Number(note.total_cgst || 0) + Number(note.total_sgst || 0)) : 0,
       };
     } else {
-      items.forEach((item: any) => {
+      items.forEach((item) => {
         const rate = item.gst_rate || 0;
         if (!itemsByRate[rate]) {
           itemsByRate[rate] = {
@@ -442,7 +343,7 @@ export async function generateGSTR1(
     const itmsArray = Object.keys(itemsByRate).map((rateStr, idx) => {
       const rate = parseFloat(rateStr);
       const totals = itemsByRate[rate];
-      const itmDet: any = {
+      const itmDet = {
         rt: rate,
         txval: parseFloat(totals.txval.toFixed(2)),
         csamt: 0,
@@ -476,7 +377,6 @@ export async function generateGSTR1(
     nt: cdnrMap[ctin],
   }));
 
-  // Convert HSN map to data array
   const hsnData = Object.keys(hsnMap).map((key, idx) => {
     const item = hsnMap[key];
     return {
@@ -495,7 +395,6 @@ export async function generateGSTR1(
     };
   });
 
-  // Document Issue Summary
   const firstInv = invoiceList[0]?.invoice_number || '—';
   const lastInv = invoiceList[invoiceList.length - 1]?.invoice_number || '—';
   const totalInvoices = invoiceList.length;
@@ -503,7 +402,7 @@ export async function generateGSTR1(
   const docIssue = {
     doc_det: [
       {
-        doc_num: 1, // Invoices
+        doc_num: 1,
         docs: [
           {
             num: 1,
@@ -518,7 +417,6 @@ export async function generateGSTR1(
     ],
   };
 
-  // Build the final JSON structure
   const gstr1Json = {
     version: 'GST3.1.2',
     hash: 'hash',
@@ -534,5 +432,8 @@ export async function generateGSTR1(
     doc_issue: docIssue,
   };
 
-  return gstr1Json;
+  console.log("=== GENERATED GSTR-1 JSON ===");
+  console.log(JSON.stringify(gstr1Json, null, 2));
 }
+
+run();
