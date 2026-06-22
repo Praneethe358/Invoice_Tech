@@ -8,6 +8,7 @@ import PageTransition from '@/components/PageTransition';
 import EmptyState from '@/components/EmptyState';
 import { Shop } from '@/lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createClient } from '@/lib/supabase/client';
 
 interface Props {
   shop: Shop;
@@ -18,6 +19,7 @@ type DateFilterType = 'all' | 'today' | 'week' | 'month' | 'custom';
 
 export default function CreditDebitNotesClient({ shop, initialNotes }: Props) {
   const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
   const [notes, setNotes] = useState<any[]>(initialNotes);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'credit' | 'debit'>('all');
@@ -27,6 +29,49 @@ export default function CreditDebitNotesClient({ shop, initialNotes }: Props) {
   
   const [selectedNote, setSelectedNote] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // New Invoice selector states for note creation flow
+  const [showIssueModal, setShowIssueModal] = useState(false);
+  const [loadingInvoices, setLoadingInvoices] = useState(false);
+  const [invoicesList, setInvoicesList] = useState<any[]>([]);
+  const [invoiceSearch, setInvoiceSearch] = useState('');
+
+  // Fetch invoices for selector modal
+  useEffect(() => {
+    if (showIssueModal) {
+      const fetchInvoices = async () => {
+        setLoadingInvoices(true);
+        try {
+          const { data, error } = await supabase
+            .from('invoices')
+            .select('id, invoice_number, created_at, customer_name, customer_phone, total')
+            .eq('shop_id', shop.id)
+            .neq('status', 'draft')
+            .neq('status', 'cancelled')
+            .order('created_at', { ascending: false });
+          if (!error && data) {
+            setInvoicesList(data);
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setLoadingInvoices(false);
+        }
+      };
+      fetchInvoices();
+    }
+  }, [showIssueModal, supabase, shop.id]);
+
+  const filteredInvoices = useMemo(() => {
+    if (!invoiceSearch.trim()) return invoicesList;
+    const term = invoiceSearch.toLowerCase().trim();
+    return invoicesList.filter(
+      (inv) =>
+        inv.invoice_number.toLowerCase().includes(term) ||
+        inv.customer_phone.includes(term) ||
+        (inv.customer_name && inv.customer_name.toLowerCase().includes(term))
+    );
+  }, [invoicesList, invoiceSearch]);
 
   // Parse notes to compute totals dynamically
   const stats = useMemo(() => {
@@ -170,16 +215,49 @@ export default function CreditDebitNotesClient({ shop, initialNotes }: Props) {
               </p>
             </div>
           </div>
+          {shop.gst_registered && (
+            <div>
+              <button
+                onClick={() => {
+                  setInvoiceSearch('');
+                  setShowIssueModal(true);
+                }}
+                className="bg-[#0050e8] hover:bg-[#0043c4] text-white px-5 py-2.5 text-xs font-bold rounded-none transition-colors inline-flex items-center gap-2 cursor-pointer"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Issue Note
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Page Title Header - Mobile only */}
-        <div className="mb-6 md:hidden">
-          <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
-            Credit & Debit Notes
-          </h1>
-          <p className="text-[10px] text-gray-500 font-semibold mt-1">
-            Issue and track credit/debit notes for GST compliance.
-          </p>
+        <div className="mb-6 md:hidden flex justify-between items-center">
+          <div>
+            <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
+              Credit & Debit Notes
+            </h1>
+            <p className="text-[10px] text-gray-500 font-semibold mt-1">
+              Issue and track credit/debit notes for GST compliance.
+            </p>
+          </div>
+          {shop.gst_registered && (
+            <button
+              onClick={() => {
+                setInvoiceSearch('');
+                setShowIssueModal(true);
+              }}
+              className="bg-[#0050e8] hover:bg-[#0043c4] text-white p-2.5 rounded-xl transition-all shadow-xs cursor-pointer"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+          )}
         </div>
 
         {/* NOT GST REGISTERED WARNING ONBOARDING */}
@@ -623,6 +701,123 @@ export default function CreditDebitNotesClient({ shop, initialNotes }: Props) {
                   className="flex-1 bg-white hover:bg-gray-100 text-gray-800 border border-[#e5e7eb] py-2.5 font-bold text-xs rounded-xl transition-colors"
                 >
                   Close Details
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ISSUE NOTE MODAL */}
+      <AnimatePresence>
+        {showIssueModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-xs">
+            <div className="absolute inset-0" onClick={() => setShowIssueModal(false)} />
+            
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden z-10 max-h-[80vh] flex flex-col"
+            >
+              {/* Modal Header */}
+              <div className="p-5 border-b border-[#f3f4f6] flex justify-between items-center">
+                <div>
+                  <h3 className="text-base font-extrabold text-gray-900">
+                    Issue Note: Select Invoice
+                  </h3>
+                  <p className="text-[10px] text-gray-400 font-semibold mt-0.5">
+                    Select the original invoice you want to adjust
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowIssueModal(false)}
+                  className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Modal search bar */}
+              <div className="p-4 border-b border-[#f3f4f6] bg-gray-50">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search by invoice number or customer phone..."
+                    value={invoiceSearch}
+                    onChange={(e) => setInvoiceSearch(e.target.value)}
+                    className="w-full bg-white border border-[#e5e7eb] rounded-xl py-2 pl-9 pr-3 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#0050e8]"
+                  />
+                  <svg className="absolute left-3 top-3 text-[#9ca3af]" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Invoices list */}
+              <div className="p-4 overflow-y-auto flex-1 space-y-2 max-h-[40vh]">
+                {loadingInvoices ? (
+                  <div className="text-center py-8">
+                    <span className="text-xs font-bold text-gray-500">Loading sales invoices...</span>
+                  </div>
+                ) : filteredInvoices.length === 0 ? (
+                  <div className="text-center py-8">
+                    <span className="text-xs font-semibold text-gray-400">No matching invoices found.</span>
+                  </div>
+                ) : (
+                  filteredInvoices.map((invoice) => {
+                    const dateStr = new Date(invoice.created_at).toLocaleDateString('en-IN', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    });
+                    return (
+                      <div
+                        key={invoice.id}
+                        onClick={() => {
+                          setShowIssueModal(false);
+                          router.push(`/invoice/${invoice.id}?issueNote=true`);
+                        }}
+                        className="p-3 border border-[#e5e7eb] rounded-xl hover:border-[#0050e8] hover:bg-[#0050e8]/5 transition-all cursor-pointer flex justify-between items-center group text-left"
+                      >
+                        <div>
+                          <p className="text-xs font-bold text-gray-900 group-hover:text-[#0050e8] transition-colors">
+                            {invoice.invoice_number}
+                          </p>
+                          <p className="text-[10px] text-gray-400 font-semibold mt-0.5">
+                            {dateStr} · +91 {invoice.customer_phone}
+                          </p>
+                          {invoice.customer_name && (
+                            <p className="text-[9px] text-gray-500 font-bold uppercase mt-0.5">
+                              {invoice.customer_name}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-black text-gray-900 tabular-nums">
+                            ₹{Number(invoice.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          </p>
+                          <span className="text-[9px] font-bold text-[#0050e8] opacity-0 group-hover:opacity-100 transition-opacity">
+                            Select →
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="p-4 bg-gray-50 border-t border-[#f3f4f6] text-center">
+                <button
+                  onClick={() => setShowIssueModal(false)}
+                  className="w-full bg-white hover:bg-gray-100 text-gray-800 border border-[#e5e7eb] py-2 font-bold text-xs rounded-xl transition-colors"
+                >
+                  Cancel
                 </button>
               </div>
             </motion.div>

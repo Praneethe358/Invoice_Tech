@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import PageTransition from '@/components/PageTransition';
@@ -17,6 +17,7 @@ interface Props {
 
 export default function InvoiceDetailClient({ invoice, shop }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
   const [inv, setInv] = useState<Invoice>(invoice);
 
@@ -134,6 +135,18 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
     }
     fetchNotes();
   }, [inv.id, shop.gst_registered]);
+
+  useEffect(() => {
+    if (searchParams?.get('issueNote') === 'true') {
+      setShowNoteForm(true);
+      setTimeout(() => {
+        const el = document.getElementById('credit-debit-notes-section');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300);
+    }
+  }, [searchParams]);
 
   const handleIssueNote = async () => {
     const activeItems = noteItems.filter(item => item.qty > 0);
@@ -773,7 +786,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
 
             {/* Credit & Debit Notes Section */}
             {shop.gst_registered && (
-              <div className="pt-4 border-t border-[#f3f4f6] mt-4">
+              <div id="credit-debit-notes-section" className="pt-4 border-t border-[#f3f4f6] mt-4">
                 <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-3">
                   Credit & Debit Notes
                 </h2>
