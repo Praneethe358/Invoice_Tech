@@ -92,21 +92,21 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
       <style dangerouslySetInnerHTML={{ __html: `
         @media (min-width: 768px) {
           body {
-            padding-top: 48px !important;
+            padding-top: 3rem !important;
           }
           .sub-banner-position {
             top: 0px !important;
           }
           .md\\:sticky.md\\:top-0 {
-            top: 48px !important;
+            top: 3rem !important;
           }
         }
         @media (max-width: 767px) {
           body {
-            padding-top: 104px !important;
+            padding-top: 6.5rem !important;
           }
           .mobile-header-fixed {
-            top: 48px !important;
+            top: 3rem !important;
           }
           .sub-banner-position {
             top: 0px !important;
