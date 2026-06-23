@@ -1789,6 +1789,10 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
         isOpen={isScannerOpen}
         onClose={() => setIsScannerOpen(false)}
         onScan={handleBarcodeScanned}
+        keepOpenOnScan={true}
+        items={items}
+        onUpdateQty={updateQty}
+        totalPrice={calculations.total}
       />
     </div>
   );
