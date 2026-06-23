@@ -168,10 +168,12 @@ export async function POST(
       customerPhone: typedInvoice.customer_phone,
       customerName: typedInvoice.customer_name,
       paymentStatus: typedInvoice.payment_status,
+      amountPaid: Number(typedInvoice.amount_paid || 0),
       shopPhone: typedShop.phone,
       logoBase64,
       gstRegistered: typedShop.gst_registered,
       gstin: typedShop.gstin,
+      customerGstin: typedInvoice.customer_gstin,
     });
 
     const filename = `${typedInvoice.invoice_number}_${typedShop.name.replace(/\s+/g, '_')}.pdf`;

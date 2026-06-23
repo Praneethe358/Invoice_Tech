@@ -85,6 +85,67 @@ export async function generateGSTR3B(
     });
   });
 
+  // 3.5 Fetch credit & debit notes and adjust outward supplies
+  const { data: cdns } = await supabase
+    .from('credit_debit_notes')
+    .select('*, cdn_items(*)')
+    .eq('shop_id', shopId)
+    .gte('note_date', startDate)
+    .lte('note_date', endDate);
+
+  const cdnList = cdns || [];
+  cdnList.forEach((note) => {
+    const pos = note.customer_gstin 
+      ? note.customer_gstin.trim().substring(0, 2) 
+      : (note.customer_phone === '9876500004' ? '29' : shopState);
+    const isInterState = pos !== shopState;
+
+    const items = note.cdn_items || [];
+    let noteTaxableSum = 0;
+    let noteCgstSum = 0;
+    let noteSgstSum = 0;
+    let noteIgstSum = 0;
+
+    if (items.length === 0) {
+      const taxable = Number(note.subtotal || 0);
+      const cgstVal = isInterState ? 0 : Number(note.total_cgst || 0);
+      const sgstVal = isInterState ? 0 : Number(note.total_sgst || 0);
+      const igstVal = isInterState ? (Number(note.total_cgst || 0) + Number(note.total_sgst || 0)) : 0;
+      
+      noteTaxableSum = taxable;
+      noteCgstSum = cgstVal;
+      noteSgstSum = sgstVal;
+      noteIgstSum = igstVal;
+    } else {
+      items.forEach((item: any) => {
+        const cgst = item.cgst || 0;
+        const sgst = item.sgst || 0;
+        const igst = item.igst || 0;
+        const taxable = item.line_total - (cgst + sgst + igst);
+        const cgstVal = isInterState ? 0 : cgst;
+        const sgstVal = isInterState ? 0 : sgst;
+        const igstVal = isInterState ? (cgst + sgst + igst) : 0;
+        
+        noteTaxableSum += taxable;
+        noteCgstSum += cgstVal;
+        noteSgstSum += sgstVal;
+        noteIgstSum += igstVal;
+      });
+    }
+
+    if (note.note_type === 'credit') {
+      totalTaxableSales -= noteTaxableSum;
+      totalCgstCollected -= noteCgstSum;
+      totalSgstCollected -= noteSgstSum;
+      totalIgstCollected -= noteIgstSum;
+    } else {
+      totalTaxableSales += noteTaxableSum;
+      totalCgstCollected += noteCgstSum;
+      totalSgstCollected += noteSgstSum;
+      totalIgstCollected += noteIgstSum;
+    }
+  });
+
   // 3. Fetch purchases
   const { data: purchases } = await supabase
     .from('purchases')

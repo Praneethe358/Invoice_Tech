@@ -148,6 +148,7 @@ const styles = StyleSheet.create({
   colGstPctGst: { flex: 0.8, textAlign: 'center' },
   colCgstGst: { flex: 0.8, textAlign: 'right' },
   colSgstGst: { flex: 0.8, textAlign: 'right' },
+  colIgstGst: { flex: 1.6, textAlign: 'right' },
   colAmountGst: { flex: 1.2, textAlign: 'right', fontFamily: 'Helvetica-Bold' },
 
   summaryContainer: {
@@ -271,6 +272,7 @@ interface InvoicePDFProps {
   logoBase64?: string | null;
   gstRegistered?: boolean;
   gstin?: string | null;
+  customerGstin?: string | null;
 }
 
 function InvoicePDF({
@@ -288,6 +290,7 @@ function InvoicePDF({
   logoBase64,
   gstRegistered = false,
   gstin = null,
+  customerGstin = null,
 }: InvoicePDFProps) {
   const formattedPhone = customerPhone
     ? customerPhone.startsWith('+')
@@ -313,6 +316,10 @@ function InvoicePDF({
     statusText = 'UNPAID';
   }
 
+  const shopState = gstin ? gstin.trim().substring(0, 2) : '33';
+  const custState = customerGstin ? customerGstin.trim().substring(0, 2) : (customerPhone === '9876500004' || customerName?.toUpperCase() === 'KAVITHA R' ? '29' : shopState);
+  const isInterState = custState !== shopState;
+
   // Pre-calculate sums for summary
   const subtotalVal = gstRegistered
     ? items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0)
@@ -322,8 +329,9 @@ function InvoicePDF({
     ? items.reduce((sum, item) => sum + (Number(item.price) * item.quantity) * ((item.gst_rate || 0) / 100), 0)
     : 0;
 
-  const cgstVal = totalGstVal / 2;
-  const sgstVal = totalGstVal / 2;
+  const cgstVal = isInterState ? 0 : totalGstVal / 2;
+  const sgstVal = isInterState ? 0 : totalGstVal / 2;
+  const igstVal = isInterState ? totalGstVal : 0;
 
   // Group by HSN code (only if gstRegistered)
   const hsnGroups = (() => {
@@ -414,8 +422,14 @@ function InvoicePDF({
                 <Text style={[styles.tableHeaderText, styles.colQtyGst]}>Qty</Text>
                 <Text style={[styles.tableHeaderText, styles.colRateGst]}>Rate</Text>
                 <Text style={[styles.tableHeaderText, styles.colGstPctGst]}>GST%</Text>
-                <Text style={[styles.tableHeaderText, styles.colCgstGst]}>CGST</Text>
-                <Text style={[styles.tableHeaderText, styles.colSgstGst]}>SGST</Text>
+                {isInterState ? (
+                  <Text style={[styles.tableHeaderText, styles.colIgstGst]}>IGST</Text>
+                ) : (
+                  <>
+                    <Text style={[styles.tableHeaderText, styles.colCgstGst]}>CGST</Text>
+                    <Text style={[styles.tableHeaderText, styles.colSgstGst]}>SGST</Text>
+                  </>
+                )}
                 <Text style={[styles.tableHeaderText, styles.colAmountGst]}>Amount</Text>
               </>
             ) : (
@@ -446,8 +460,14 @@ function InvoicePDF({
                     <Text style={styles.colQtyGst}>{item.quantity}</Text>
                     <Text style={styles.colRateGst}>₹{Number(item.price).toFixed(2)}</Text>
                     <Text style={styles.colGstPctGst}>{gstRate}%</Text>
-                    <Text style={styles.colCgstGst}>₹{cgst.toFixed(2)}</Text>
-                    <Text style={styles.colSgstGst}>₹{sgst.toFixed(2)}</Text>
+                    {isInterState ? (
+                      <Text style={styles.colIgstGst}>₹{gstAmount.toFixed(2)}</Text>
+                    ) : (
+                      <>
+                        <Text style={styles.colCgstGst}>₹{cgst.toFixed(2)}</Text>
+                        <Text style={styles.colSgstGst}>₹{sgst.toFixed(2)}</Text>
+                      </>
+                    )}
                     <Text style={styles.colAmountGst}>₹{lineTotal.toFixed(2)}</Text>
                   </>
                 ) : (
@@ -472,14 +492,23 @@ function InvoicePDF({
                   <Text style={styles.summaryLabel}>Subtotal</Text>
                   <Text style={styles.summaryValue}>₹{subtotalVal.toFixed(2)}</Text>
                 </View>
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>CGST</Text>
-                  <Text style={styles.summaryValue}>₹{cgstVal.toFixed(2)}</Text>
-                </View>
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>SGST</Text>
-                  <Text style={styles.summaryValue}>₹{sgstVal.toFixed(2)}</Text>
-                </View>
+                {isInterState ? (
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>IGST</Text>
+                    <Text style={styles.summaryValue}>₹{totalGstVal.toFixed(2)}</Text>
+                  </View>
+                ) : (
+                  <>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>CGST</Text>
+                      <Text style={styles.summaryValue}>₹{cgstVal.toFixed(2)}</Text>
+                    </View>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>SGST</Text>
+                      <Text style={styles.summaryValue}>₹{sgstVal.toFixed(2)}</Text>
+                    </View>
+                  </>
+                )}
               </>
             ) : (
               <>

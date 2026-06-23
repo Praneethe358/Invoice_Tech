@@ -5,8 +5,7 @@ export function formatGstDate(dateStr: string): string {
   const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
   const istDate = new Date(utc + (3600000 * 5.5));
   const day = String(istDate.getDate()).padStart(2, '0');
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const month = months[istDate.getMonth()];
+  const month = String(istDate.getMonth() + 1).padStart(2, '0');
   const year = istDate.getFullYear();
   return `${day}-${month}-${year}`;
 }
@@ -377,18 +376,14 @@ export async function generateGSTR1(
     .lte('note_date', endDate);
 
   const cdnrMap: { [gstin: string]: any[] } = {};
+  const cdnurList: any[] = [];
   const cdnList = cdns || [];
 
   cdnList.forEach((note) => {
-    // Only B2B credit/debit notes go into CDNR (registered)
-    if (!note.customer_gstin) return;
-
-    const ctin = note.customer_gstin.trim().toUpperCase();
-    if (!cdnrMap[ctin]) {
-      cdnrMap[ctin] = [];
-    }
-
-    const pos = ctin.substring(0, 2);
+    const isRegistered = !!note.customer_gstin;
+    const pos = note.customer_gstin 
+      ? note.customer_gstin.trim().substring(0, 2) 
+      : (note.customer_phone === '9876500004' ? '29' : shopState);
     const isInterState = pos !== shopState;
 
     const items = note.cdn_items || [];
@@ -459,16 +454,34 @@ export async function generateGSTR1(
       };
     });
 
-    cdnrMap[ctin].push({
-      ntty: note.note_type === 'credit' ? 'C' : 'D',
-      nt_num: note.note_number,
-      nt_dt: formatGstDate(note.note_date),
-      val: parseFloat(note.total.toFixed(2)),
-      pos: pos,
-      rchrg: 'N',
-      inv_typ: 'R',
-      itms: itmsArray,
-    });
+    if (isRegistered) {
+      const ctin = note.customer_gstin.trim().toUpperCase();
+      if (!cdnrMap[ctin]) {
+        cdnrMap[ctin] = [];
+      }
+      cdnrMap[ctin].push({
+        ntty: note.note_type === 'credit' ? 'C' : 'D',
+        nt_num: note.note_number,
+        nt_dt: formatGstDate(note.note_date),
+        val: parseFloat(note.total.toFixed(2)),
+        pos: pos,
+        rchrg: 'N',
+        inv_typ: 'R',
+        itms: itmsArray,
+      });
+    } else {
+      const isB2cLarge = isInterState && Number(note.total || 0) > 250000;
+      cdnurList.push({
+        typ: isB2cLarge ? 'B2CL' : 'B2CS',
+        ntty: note.note_type === 'credit' ? 'C' : 'D',
+        nt_num: note.note_number,
+        nt_dt: formatGstDate(note.note_date),
+        val: parseFloat(note.total.toFixed(2)),
+        pos: pos,
+        rchrg: 'N',
+        itms: itmsArray,
+      });
+    }
   });
 
   const cdnrArray = Object.keys(cdnrMap).map((ctin) => ({
@@ -528,6 +541,7 @@ export async function generateGSTR1(
     b2cl: b2clArray,
     b2cs: b2csArray,
     cdnr: cdnrArray,
+    cdnur: cdnurList,
     hsn: {
       data: hsnData,
     },

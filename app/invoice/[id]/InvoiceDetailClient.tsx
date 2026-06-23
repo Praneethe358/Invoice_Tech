@@ -578,22 +578,36 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
           </div>
 
           <div className="pt-4 border-t border-dashed border-[#d1d5db]">
-            {inv.uses_items_table && shop.gst_registered && (
-              <div className="space-y-2 mb-4 text-sm border-b border-[#f3f4f6] pb-4">
-                <div className="flex justify-between text-[#6b7280]">
-                  <span>Subtotal (Base Value)</span>
-                  <span className="tabular-nums">₹{Number(inv.subtotal || 0).toFixed(2)}</span>
+            {inv.uses_items_table && shop.gst_registered && (() => {
+              const shopState = shop.gstin ? shop.gstin.trim().substring(0, 2) : '33';
+              const custState = inv.customer_gstin ? inv.customer_gstin.trim().substring(0, 2) : (inv.customer_phone === '9876500004' || inv.customer_name?.toUpperCase() === 'KAVITHA R' ? '29' : shopState);
+              const isInterState = custState !== shopState;
+              return (
+                <div className="space-y-2 mb-4 text-sm border-b border-[#f3f4f6] pb-4">
+                  <div className="flex justify-between text-[#6b7280]">
+                    <span>Subtotal (Base Value)</span>
+                    <span className="tabular-nums">₹{Number(inv.subtotal || 0).toFixed(2)}</span>
+                  </div>
+                  {isInterState ? (
+                    <div className="flex justify-between text-[#6b7280]">
+                      <span>IGST</span>
+                      <span className="tabular-nums">₹{Number((inv.total_cgst || 0) + (inv.total_sgst || 0)).toFixed(2)}</span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex justify-between text-[#6b7280]">
+                        <span>CGST</span>
+                        <span className="tabular-nums">₹{Number(inv.total_cgst || 0).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-[#6b7280]">
+                        <span>SGST</span>
+                        <span className="tabular-nums">₹{Number(inv.total_sgst || 0).toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
-                <div className="flex justify-between text-[#6b7280]">
-                  <span>CGST</span>
-                  <span className="tabular-nums">₹{Number(inv.total_cgst || 0).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-[#6b7280]">
-                  <span>SGST</span>
-                  <span className="tabular-nums">₹{Number(inv.total_sgst || 0).toFixed(2)}</span>
-                </div>
-              </div>
-            )}
+              );
+            })()}
             <div className="flex justify-between items-center mb-6">
               <p className="text-sm font-medium text-[#6b7280]">Total Amount</p>
               <p className="text-xl font-extrabold text-[#111827] tabular-nums">

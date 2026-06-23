@@ -106,6 +106,7 @@ export async function GET(
       logoBase64,
       gstRegistered: typedShop.gst_registered,
       gstin: typedShop.gstin,
+      customerGstin: typedInvoice.customer_gstin,
     });
 
     const filename = `${typedInvoice.invoice_number}_${typedShop.name.replace(/\s+/g, '_')}.pdf`;
