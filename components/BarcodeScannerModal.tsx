@@ -496,7 +496,7 @@ export default function BarcodeScannerModal({
                           <div className="absolute bottom-0 right-0 w-6 h-6 border-b-[3px] border-r-[3px] border-emerald-400 rounded-br-md"></div>
 
                           {/* Laser Scan line animation */}
-                          <div className="absolute left-2 right-2 h-[2px] bg-emerald-400/80 shadow-[0_0_12px_#34d399] animate-[scan_2.5s_ease-in-out_infinite]"></div>
+                          <div className="absolute left-2 right-2 top-2 h-[2px] bg-emerald-400/80 shadow-[0_0_12px_#34d399] animate-[scan_2.5s_ease-in-out_infinite]"></div>
                         </div>
                       </div>
                     )}
@@ -630,9 +630,9 @@ export default function BarcodeScannerModal({
 
       <style jsx global>{`
         @keyframes scan {
-          0% { top: 6%; }
-          50% { top: 92%; }
-          100% { top: 6%; }
+          0% { transform: translateY(0); }
+          50% { transform: translateY(176px); }
+          100% { transform: translateY(0); }
         }
         .animate-spin-slow {
           animation: spin 6s linear infinite;

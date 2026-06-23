@@ -195,44 +195,27 @@ input[type="number"] { -moz-appearance: textfield; }
 /* ─── Mobile UI Sizing Adjustments (overall mobile scale & polish) ─── */
 @media (max-width: 768px) {
   html {
-    font-size: 13.5px !important; /* Scale root down for mobile devices */
+    font-size: 14px; /* Gentle root scale down for clean mobile rendering */
   }
 
-  /* Override custom fixed heights so buttons and inputs can shrink nicely */
-  .min-h-\[44px\], 
-  .min-h-\[45px\],
-  .h-\[44px\],
-  .h-\[45px\] {
-    min-height: 38px !important;
-    height: 38px !important;
+  /* Target actual form inputs and buttons rather than generic utility classes to avoid layout thrashing */
+  input[type="text"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="email"],
+  input[type="password"],
+  select,
+  textarea {
+    padding-top: 0.55rem !important;
+    padding-bottom: 0.55rem !important;
+    font-size: 13px !important;
   }
 
-  /* Inputs and buttons general sizing */
-  input, select, textarea, button {
-    border-radius: 10px !important;
-  }
-
-  /* Padding adjustments to custom classes */
-  .py-3\.5 {
-    padding-top: 0.65rem !important;
-    padding-bottom: 0.65rem !important;
-  }
-  .py-4 {
-    padding-top: 0.75rem !important;
-    padding-bottom: 0.75rem !important;
-  }
-  .p-4 {
-    padding: 0.85rem !important;
-  }
-  .p-5 {
-    padding: 1rem !important;
-  }
-  .p-6 {
-    padding: 1.15rem !important;
-  }
-  
-  /* Tables */
-  table td, table th {
-    padding: 8px 10px !important;
+  button, 
+  .btn,
+  .button {
+    padding-top: 0.55rem !important;
+    padding-bottom: 0.55rem !important;
+    font-size: 13px !important;
   }
 }
