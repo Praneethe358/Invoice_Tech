@@ -126,13 +126,15 @@ export default function BarcodeScannerModal({
           }
         };
 
-        const width = document.getElementById('reader-container')?.clientWidth || 300;
-        const height = document.getElementById('reader-container')?.clientHeight || 300;
-        const size = Math.min(width * 0.65, 180);
-
         const config = {
           fps: 25,
-          qrbox: { width: size, height: size },
+          qrbox: (width: number, height: number) => {
+            const size = Math.min(width * 0.7, height * 0.7, 240);
+            return {
+              width: Math.max(Math.floor(size), 160),
+              height: Math.max(Math.floor(size), 160)
+            };
+          },
           aspectRatio: 1.0, // Match viewport container shape
           useBarCodeDetectorIfSupported: true,
         };
@@ -251,13 +253,15 @@ export default function BarcodeScannerModal({
         setTorchOn(false);
         setIsTorchSupported(false);
 
-        const width = document.getElementById('reader-container')?.clientWidth || 300;
-        const height = document.getElementById('reader-container')?.clientHeight || 300;
-        const size = Math.min(width * 0.65, 180);
-
         const config = {
           fps: 25,
-          qrbox: { width: size, height: size },
+          qrbox: (width: number, height: number) => {
+            const size = Math.min(width * 0.7, height * 0.7, 240);
+            return {
+              width: Math.max(Math.floor(size), 160),
+              height: Math.max(Math.floor(size), 160)
+            };
+          },
           aspectRatio: 1.0,
           useBarCodeDetectorIfSupported: true,
         };
