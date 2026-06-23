@@ -163,13 +163,13 @@ export default function SettingsClient({
 
     if (gstRegistered) {
       const trimmedGstin = gstin.trim().toUpperCase();
-      const gstinRegex = /^\d{2}[A-Z]{5}\d{4}[A-Z]\d[A-Z]\d$/;
+      const gstinRegex = /^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/;
       if (!trimmedGstin) {
         showToast('GSTIN is required if GST is enabled', 'error');
         return;
       }
       if (!gstinRegex.test(trimmedGstin)) {
-        showToast('Invalid GSTIN format (15 characters, e.g. 33AAAAA1111A1Z1)', 'error');
+        showToast('Invalid GSTIN format. Must be a valid 15-character Indian GSTIN (e.g. 33AABCS1429B1ZB).', 'error');
         return;
       }
     }

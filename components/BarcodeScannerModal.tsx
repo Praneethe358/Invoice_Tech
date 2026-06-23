@@ -57,6 +57,18 @@ export default function BarcodeScannerModal({
       }
       html5QrcodeRef.current = null;
     }
+    // Hard stop all active video tracks in the document to prevent leaks and release camera immediately
+    try {
+      const videoElement = document.querySelector('#reader-container video') as HTMLVideoElement;
+      if (videoElement && videoElement.srcObject) {
+        const stream = videoElement.srcObject as MediaStream;
+        stream.getTracks().forEach(track => {
+          track.stop();
+        });
+      }
+    } catch (e) {
+      console.warn('Failed to force stop stream tracks:', e);
+    }
   }, []);
 
   // Check torch/flashlight support on current video stream

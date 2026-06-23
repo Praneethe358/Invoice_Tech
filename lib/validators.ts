@@ -20,7 +20,7 @@ export function validateEmail(email: string): boolean {
  * Format: 2 digits + 5 letters + 4 digits + 1 letter + 1 digit + 1 letter + 1 digit.
  */
 export function validateGSTIN(gstin: string): boolean {
-  return /^\d{2}[A-Z]{5}\d{4}[A-Z]\d[A-Z]\d$/.test(gstin.trim().toUpperCase());
+  return /^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/.test(gstin.trim().toUpperCase());
 }
 
 /**

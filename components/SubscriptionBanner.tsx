@@ -98,7 +98,7 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
             top: 0px !important;
           }
           .md\\:sticky.md\\:top-0 {
-            top: 3rem !important;
+            top: 47px !important;
           }
         }
         @media (max-width: 767px) {
@@ -106,7 +106,7 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
             padding-top: 6.5rem !important;
           }
           .mobile-header-fixed {
-            top: 3rem !important;
+            top: 47px !important;
           }
           .sub-banner-position {
             top: 0px !important;

@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import PageTransition from '@/components/PageTransition';
 import EmptyState from '@/components/EmptyState';
+import Modal from '@/components/Modal';
+import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
 import { Customer, CustomerTag, Shop } from '@/lib/types';
 
@@ -29,12 +31,29 @@ function timeAgo(dateStr: string): string {
 export default function CustomersClient({ shop, customers: initial, totalCount }: Props) {
   const supabase = createClient();
   const router = useRouter();
+  const { showToast } = useToast();
+
   const [customers, setCustomers] = useState<Customer[]>(initial);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [tagFilter, setTagFilter] = useState<'all' | CustomerTag>('all');
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(initial.length === 20);
+
+  // Modal states
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+
+  // Form states
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [gstin, setGstin] = useState('');
+  const [tag, setTag] = useState<CustomerTag>('regular');
+  const [priceTier, setPriceTier] = useState<'retail' | 'wholesale'>('retail');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
@@ -78,6 +97,159 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch, tagFilter]);
 
+  // Open modals & setup forms
+  const openAddModal = () => {
+    setName('');
+    setPhone('');
+    setGstin('');
+    setTag('regular');
+    setPriceTier('retail');
+    setFormError('');
+    setIsAddModalOpen(true);
+  };
+
+  const openEditModal = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setName(customer.name);
+    setPhone(customer.phone);
+    setGstin(customer.gstin || '');
+    setTag(customer.tag);
+    setPriceTier(customer.price_tier || 'retail');
+    setFormError('');
+    setIsEditModalOpen(true);
+  };
+
+  const openDeleteModal = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setIsDeleteConfirmOpen(true);
+  };
+
+  // Client-side validations
+  const validateForm = () => {
+    if (!name.trim()) {
+      setFormError('Customer name is required.');
+      return false;
+    }
+    
+    const cleanPhone = phone.replace(/\D/g, '');
+    const last10Digits = cleanPhone.slice(-10);
+    if (last10Digits.length !== 10 || !/^[6-9]\d{9}$/.test(last10Digits)) {
+      setFormError('WhatsApp number must be exactly 10 digits and start with 6-9.');
+      return false;
+    }
+
+    if (gstin.trim()) {
+      const gstinUpper = gstin.trim().toUpperCase();
+      if (gstinUpper.length !== 15) {
+        setFormError('GSTIN must be exactly 15 characters.');
+        return false;
+      }
+      const gstinRegex = /^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/;
+      if (!gstinRegex.test(gstinUpper)) {
+        setFormError('Invalid GSTIN format (e.g. 33AABCS1429B1ZB).');
+        return false;
+      }
+    }
+
+    setFormError('');
+    return true;
+  };
+
+  // API Submit calls
+  const handleAddSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/customers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          phone: phone.trim(),
+          gstin: gstin.trim() || null,
+          tag,
+          price_tier: priceTier,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setFormError(data.error || 'Failed to add customer.');
+        showToast(data.error || 'Failed to add customer.', 'error');
+      } else {
+        showToast('Customer added successfully!', 'success');
+        setIsAddModalOpen(false);
+        fetchCustomers(false);
+      }
+    } catch (err) {
+      setFormError('An unexpected error occurred.');
+      showToast('An unexpected error occurred.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCustomer || !validateForm()) return;
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/customers/${selectedCustomer.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          phone: phone.trim(),
+          gstin: gstin.trim() || null,
+          tag,
+          price_tier: priceTier,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setFormError(data.error || 'Failed to update customer.');
+        showToast(data.error || 'Failed to update customer.', 'error');
+      } else {
+        showToast('Customer updated successfully!', 'success');
+        setIsEditModalOpen(false);
+        fetchCustomers(false);
+      }
+    } catch (err) {
+      setFormError('An unexpected error occurred.');
+      showToast('An unexpected error occurred.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteSubmit = async () => {
+    if (!selectedCustomer) return;
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/customers/${selectedCustomer.id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || 'Failed to delete customer.', 'error');
+      } else {
+        showToast('Customer deleted successfully.', 'success');
+        setIsDeleteConfirmOpen(false);
+        fetchCustomers(false);
+      }
+    } catch (err) {
+      showToast('An unexpected error occurred.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f5f6fa]">
       <Navbar />
@@ -108,16 +280,24 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
               </p>
             </div>
           </div>
-          <button
-            onClick={() => router.push('/customers/ledger')}
-            className="flex items-center gap-1.5 bg-[#0050e8]/10 hover:bg-[#0050e8]/20 text-[#0050e8] font-bold py-2 px-3.5 rounded-xl text-xs transition-all cursor-pointer"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-            </svg>
-            Ledger Book
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => router.push('/customers/ledger')}
+              className="flex items-center gap-1.5 bg-[#0050e8]/10 hover:bg-[#0050e8]/20 text-[#0050e8] font-bold py-2 px-3.5 rounded-xl text-xs transition-all cursor-pointer"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              Ledger Book
+            </button>
+            <button
+              onClick={openAddModal}
+              className="flex items-center gap-1.5 bg-[#0050e8] hover:bg-[#0043c4] text-white font-bold py-2 px-3.5 rounded-xl text-xs transition-all cursor-pointer shadow-xs"
+            >
+              + Add Customer
+            </button>
+          </div>
         </div>
 
         {/* Page Title Header - Mobile only */}
@@ -131,16 +311,24 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
             </p>
           </div>
           
-          <button
-            onClick={() => router.push('/customers/ledger')}
-            className="flex items-center gap-1.5 bg-[#0050e8]/10 hover:bg-[#0050e8]/20 text-[#0050e8] font-bold py-2 px-3.5 rounded-xl text-xs transition-all cursor-pointer self-start"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-            </svg>
-            Ledger Book
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => router.push('/customers/ledger')}
+              className="flex items-center gap-1.5 bg-[#0050e8]/10 hover:bg-[#0050e8]/20 text-[#0050e8] font-bold py-2 px-3.5 rounded-xl text-xs transition-all cursor-pointer self-start"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              Ledger Book
+            </button>
+            <button
+              onClick={openAddModal}
+              className="flex items-center gap-1.5 bg-[#0050e8] hover:bg-[#0043c4] text-white font-bold py-2 px-3.5 rounded-xl text-xs transition-all cursor-pointer shadow-xs self-start"
+            >
+              + Add Customer
+            </button>
+          </div>
         </div>
 
         {/* Search */}
@@ -227,13 +415,23 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
                         <td className="py-3.5 px-4">
                           <span className="font-semibold text-gray-900 block text-xs uppercase">{customer.name}</span>
                           <span className="text-[10px] text-gray-400 font-medium">+91 {customer.phone.slice(-10)}</span>
+                          {customer.gstin && (
+                            <span className="text-[9px] text-blue-600 font-semibold block uppercase">GSTIN: {customer.gstin}</span>
+                          )}
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className={`inline-flex items-center text-[9px] font-bold px-2 py-0.5 rounded-none uppercase ${
-                            customer.tag === 'vip' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-gray-50 text-gray-600 border border-gray-200'
-                          }`}>
-                            {customer.tag}
-                          </span>
+                          <div className="flex flex-col gap-1 items-start">
+                            <span className={`inline-flex items-center text-[9px] font-bold px-2 py-0.5 rounded-none uppercase ${
+                              customer.tag === 'vip' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-gray-50 text-gray-600 border border-gray-200'
+                            }`}>
+                              {customer.tag}
+                            </span>
+                            {customer.price_tier && (
+                              <span className="text-[8px] text-gray-400 font-bold uppercase tracking-wider">
+                                {customer.price_tier} pricing
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-3.5 px-4 text-center text-xs font-semibold text-gray-900">
                           {customer.total_invoices}
@@ -248,12 +446,26 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
                           {timeAgo(customer.created_at)}
                         </td>
                         <td className="py-3.5 px-4 text-right pr-6" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => router.push(`/customers/${customer.id}`)}
-                            className="text-xs font-bold text-[#0050e8] hover:underline"
-                          >
-                            View Ledger
-                          </button>
+                          <div className="flex items-center justify-end gap-3">
+                            <button
+                              onClick={() => openEditModal(customer)}
+                              className="text-xs font-bold text-amber-600 hover:underline"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => openDeleteModal(customer)}
+                              className="text-xs font-bold text-red-600 hover:underline"
+                            >
+                              Delete
+                            </button>
+                            <button
+                              onClick={() => router.push(`/customers/${customer.id}`)}
+                              className="text-xs font-bold text-[#0050e8] hover:underline"
+                            >
+                              View Ledger
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -264,7 +476,7 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
 
             {/* Mobile View */}
             <div className="md:hidden flex flex-col gap-0 divide-y divide-[#f3f4f6]">
-              {customers.map((customer, i) => (
+              {customers.map((customer) => (
                 <div
                   key={customer.id}
                   onClick={() => router.push(`/customers/${customer.id}`)}
@@ -282,6 +494,9 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
                       <div>
                         <p className="text-sm font-bold text-gray-900 uppercase">{customer.name}</p>
                         <p className="text-xs text-gray-400 font-medium">+91 {customer.phone.slice(-10)}</p>
+                        {customer.gstin && (
+                          <span className="text-[9px] text-blue-600 font-bold block uppercase">GSTIN: {customer.gstin}</span>
+                        )}
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1.5">
@@ -306,6 +521,21 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
                     </div>
                     <span>Last active: {timeAgo(customer.created_at)}</span>
                   </div>
+                  {/* Action buttons for mobile */}
+                  <div className="flex justify-end gap-4 mt-2 pt-2 border-t border-dashed border-gray-100" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => openEditModal(customer)}
+                      className="text-xs font-bold text-amber-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => openDeleteModal(customer)}
+                      className="text-xs font-bold text-red-600"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -324,6 +554,230 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
           </div>
         )}
       </PageTransition>
+
+      {/* Add Customer Modal */}
+      <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add New Customer">
+        <form onSubmit={handleAddSubmit} className="space-y-4 pt-2">
+          {formError && (
+            <div className="p-3 bg-red-50 text-red-600 text-xs font-semibold rounded-none border border-red-200">
+              ⚠️ {formError}
+            </div>
+          )}
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+              Customer Name
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. MEENA TRADERS"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-gray-50 rounded-none border border-[#e5e7eb] p-2.5 text-xs font-medium text-gray-900 focus:outline-none focus:border-[#0050e8] focus:bg-white transition-all uppercase"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+              WhatsApp Number (10 Digits)
+            </label>
+            <input
+              type="tel"
+              required
+              placeholder="e.g. 9842155678"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full bg-gray-50 rounded-none border border-[#e5e7eb] p-2.5 text-xs font-medium text-gray-900 focus:outline-none focus:border-[#0050e8] focus:bg-white transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+              GSTIN (Optional)
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. 33AABCS1429B1ZB"
+              value={gstin}
+              onChange={(e) => setGstin(e.target.value)}
+              className="w-full bg-gray-50 rounded-none border border-[#e5e7eb] p-2.5 text-xs font-medium text-gray-900 focus:outline-none focus:border-[#0050e8] focus:bg-white transition-all uppercase"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+                Customer Tag
+              </label>
+              <select
+                value={tag}
+                onChange={(e) => setTag(e.target.value as CustomerTag)}
+                className="w-full bg-gray-50 rounded-none border border-[#e5e7eb] p-2.5 text-xs font-medium text-gray-900 focus:outline-none focus:border-[#0050e8] focus:bg-white transition-all"
+              >
+                <option value="regular">Regular</option>
+                <option value="vip">VIP</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+                Pricing Tier
+              </label>
+              <select
+                value={priceTier}
+                onChange={(e) => setPriceTier(e.target.value as 'retail' | 'wholesale')}
+                className="w-full bg-gray-50 rounded-none border border-[#e5e7eb] p-2.5 text-xs font-medium text-gray-900 focus:outline-none focus:border-[#0050e8] focus:bg-white transition-all"
+              >
+                <option value="retail">Retail</option>
+                <option value="wholesale">Wholesale</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              className="px-4 py-2 border border-gray-200 text-gray-700 text-xs font-bold rounded-none hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 bg-[#0050e8] text-white text-xs font-bold rounded-none hover:bg-[#0043c4] transition-colors disabled:opacity-50"
+            >
+              {isSubmitting ? 'Adding...' : 'Add Customer'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Edit Customer Modal */}
+      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Edit Customer Details">
+        <form onSubmit={handleEditSubmit} className="space-y-4 pt-2">
+          {formError && (
+            <div className="p-3 bg-red-50 text-red-600 text-xs font-semibold rounded-none border border-red-200">
+              ⚠️ {formError}
+            </div>
+          )}
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+              Customer Name
+            </label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-gray-50 rounded-none border border-[#e5e7eb] p-2.5 text-xs font-medium text-gray-900 focus:outline-none focus:border-[#0050e8] focus:bg-white transition-all uppercase"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+              WhatsApp Number (10 Digits)
+            </label>
+            <input
+              type="tel"
+              required
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full bg-gray-50 rounded-none border border-[#e5e7eb] p-2.5 text-xs font-medium text-gray-900 focus:outline-none focus:border-[#0050e8] focus:bg-white transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+              GSTIN (Optional)
+            </label>
+            <input
+              type="text"
+              placeholder="None"
+              value={gstin}
+              onChange={(e) => setGstin(e.target.value)}
+              className="w-full bg-gray-50 rounded-none border border-[#e5e7eb] p-2.5 text-xs font-medium text-gray-900 focus:outline-none focus:border-[#0050e8] focus:bg-white transition-all uppercase"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+                Customer Tag
+              </label>
+              <select
+                value={tag}
+                onChange={(e) => setTag(e.target.value as CustomerTag)}
+                className="w-full bg-gray-50 rounded-none border border-[#e5e7eb] p-2.5 text-xs font-medium text-gray-900 focus:outline-none focus:border-[#0050e8] focus:bg-white transition-all"
+              >
+                <option value="regular">Regular</option>
+                <option value="vip">VIP</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+                Pricing Tier
+              </label>
+              <select
+                value={priceTier}
+                onChange={(e) => setPriceTier(e.target.value as 'retail' | 'wholesale')}
+                className="w-full bg-gray-50 rounded-none border border-[#e5e7eb] p-2.5 text-xs font-medium text-gray-900 focus:outline-none focus:border-[#0050e8] focus:bg-white transition-all"
+              >
+                <option value="retail">Retail</option>
+                <option value="wholesale">Wholesale</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setIsEditModalOpen(false)}
+              className="px-4 py-2 border border-gray-200 text-gray-700 text-xs font-bold rounded-none hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 bg-[#0050e8] text-white text-xs font-bold rounded-none hover:bg-[#0043c4] transition-colors disabled:opacity-50"
+            >
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Delete Customer Confirmation Modal */}
+      <Modal isOpen={isDeleteConfirmOpen} onClose={() => setIsDeleteConfirmOpen(false)} title="Delete Customer">
+        <div className="space-y-4 pt-2">
+          <p className="text-xs text-gray-600 leading-relaxed">
+            Are you sure you want to delete <span className="font-bold text-gray-900 uppercase">{selectedCustomer?.name}</span>?
+            This action is permanent and cannot be undone. Note that their existing invoices will not be deleted.
+          </p>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setIsDeleteConfirmOpen(false)}
+              className="px-4 py-2 border border-gray-200 text-gray-700 text-xs font-bold rounded-none hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteSubmit}
+              disabled={isSubmitting}
+              className="px-4 py-2 bg-red-600 text-white text-xs font-bold rounded-none hover:bg-red-700 transition-colors disabled:opacity-50"
+            >
+              {isSubmitting ? 'Deleting...' : 'Delete Customer'}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
