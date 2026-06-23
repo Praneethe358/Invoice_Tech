@@ -129,11 +129,9 @@ export default function BarcodeScannerModal({
         const config = {
           fps: 25,
           qrbox: (width: number, height: number) => {
-            const size = Math.min(width * 0.7, height * 0.7, 240);
-            return {
-              width: Math.max(Math.floor(size), 160),
-              height: Math.max(Math.floor(size), 160)
-            };
+            const w = Math.floor(width * 0.85);
+            const h = Math.floor(height * 0.35);
+            return { width: w, height: h };
           },
           aspectRatio: 1.0, // Match viewport container shape
           useBarCodeDetectorIfSupported: true,
@@ -256,11 +254,9 @@ export default function BarcodeScannerModal({
         const config = {
           fps: 25,
           qrbox: (width: number, height: number) => {
-            const size = Math.min(width * 0.7, height * 0.7, 240);
-            return {
-              width: Math.max(Math.floor(size), 160),
-              height: Math.max(Math.floor(size), 160)
-            };
+            const w = Math.floor(width * 0.85);
+            const h = Math.floor(height * 0.35);
+            return { width: w, height: h };
           },
           aspectRatio: 1.0,
           useBarCodeDetectorIfSupported: true,
@@ -489,18 +485,18 @@ export default function BarcodeScannerModal({
                       </>
                     )}
 
-                    {/* Target overlay: custom green reticle overlay */}
+                    {/* Target overlay (wide rectangle optimized for barcodes) */}
                     {hasPermission && (
                       <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-                        <div className="w-48 h-48 relative flex items-center justify-center">
+                        <div className="w-[85%] h-[32%] relative">
                           {/* Green Corners */}
-                          <div className="absolute top-0 left-0 w-6 h-6 border-t-[3px] border-l-[3px] border-emerald-400 rounded-tl-md"></div>
-                          <div className="absolute top-0 right-0 w-6 h-6 border-t-[3px] border-r-[3px] border-emerald-400 rounded-tr-md"></div>
-                          <div className="absolute bottom-0 left-0 w-6 h-6 border-b-[3px] border-l-[3px] border-emerald-400 rounded-bl-md"></div>
-                          <div className="absolute bottom-0 right-0 w-6 h-6 border-b-[3px] border-r-[3px] border-emerald-400 rounded-br-md"></div>
+                          <div className="absolute top-0 left-0 w-6 h-6 border-t-[3.5px] border-l-[3.5px] border-emerald-400 rounded-tl-xl"></div>
+                          <div className="absolute top-0 right-0 w-6 h-6 border-t-[3.5px] border-r-[3.5px] border-emerald-400 rounded-tr-xl"></div>
+                          <div className="absolute bottom-0 left-0 w-6 h-6 border-b-[3.5px] border-l-[3.5px] border-emerald-400 rounded-bl-xl"></div>
+                          <div className="absolute bottom-0 right-0 w-6 h-6 border-b-[3.5px] border-r-[3.5px] border-emerald-400 rounded-br-xl"></div>
 
                           {/* Laser Scan line animation */}
-                          <div className="absolute left-2 right-2 top-2 h-[2px] bg-emerald-400/80 shadow-[0_0_12px_#34d399] animate-[scan_2.5s_ease-in-out_infinite]"></div>
+                          <div className="absolute left-3.5 right-3.5 h-[2px] bg-emerald-400/80 shadow-[0_0_12px_#34d399] animate-[scan_2.2s_ease-in-out_infinite]"></div>
                         </div>
                       </div>
                     )}
@@ -634,9 +630,9 @@ export default function BarcodeScannerModal({
 
       <style jsx global>{`
         @keyframes scan {
-          0% { transform: translateY(0); }
-          50% { transform: translateY(176px); }
-          100% { transform: translateY(0); }
+          0% { top: 8%; }
+          50% { top: 92%; }
+          100% { top: 8%; }
         }
         .animate-spin-slow {
           animation: spin 6s linear infinite;
