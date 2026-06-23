@@ -191,3 +191,48 @@ input[type="number"] { -moz-appearance: textfield; }
     text-wrap: balance;
   }
 }
+
+/* ─── Mobile UI Sizing Adjustments (overall mobile scale & polish) ─── */
+@media (max-width: 768px) {
+  html {
+    font-size: 13.5px !important; /* Scale root down for mobile devices */
+  }
+
+  /* Override custom fixed heights so buttons and inputs can shrink nicely */
+  .min-h-\[44px\], 
+  .min-h-\[45px\],
+  .h-\[44px\],
+  .h-\[45px\] {
+    min-height: 38px !important;
+    height: 38px !important;
+  }
+
+  /* Inputs and buttons general sizing */
+  input, select, textarea, button {
+    border-radius: 10px !important;
+  }
+
+  /* Padding adjustments to custom classes */
+  .py-3\.5 {
+    padding-top: 0.65rem !important;
+    padding-bottom: 0.65rem !important;
+  }
+  .py-4 {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+  .p-4 {
+    padding: 0.85rem !important;
+  }
+  .p-5 {
+    padding: 1rem !important;
+  }
+  .p-6 {
+    padding: 1.15rem !important;
+  }
+  
+  /* Tables */
+  table td, table th {
+    padding: 8px 10px !important;
+  }
+}

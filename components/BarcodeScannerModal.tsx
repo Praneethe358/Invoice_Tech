@@ -128,7 +128,7 @@ export default function BarcodeScannerModal({
 
         const width = document.getElementById('reader-container')?.clientWidth || 300;
         const height = document.getElementById('reader-container')?.clientHeight || 300;
-        const size = Math.min(width * 0.7, 260);
+        const size = Math.min(width * 0.65, 180);
 
         const config = {
           fps: 25,
@@ -253,7 +253,7 @@ export default function BarcodeScannerModal({
 
         const width = document.getElementById('reader-container')?.clientWidth || 300;
         const height = document.getElementById('reader-container')?.clientHeight || 300;
-        const size = Math.min(width * 0.7, 260);
+        const size = Math.min(width * 0.65, 180);
 
         const config = {
           fps: 25,
@@ -315,33 +315,33 @@ export default function BarcodeScannerModal({
 
             {/* Main Scanner Card */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: isSplitView ? 30 : 15 }}
+              initial={{ opacity: 0, scale: 0.96, y: isSplitView ? 25 : 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: isSplitView ? 30 : 15 }}
+              exit={{ opacity: 0, scale: 0.96, y: isSplitView ? 25 : 15 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
               className={
                 isSplitView
-                  ? "relative bg-black text-white w-full h-full lg:h-[88vh] lg:max-w-md lg:rounded-[36px] overflow-hidden flex flex-col border border-slate-900/60 shadow-2xl z-10"
-                  : "relative bg-slate-900 text-white rounded-2xl overflow-hidden max-w-md w-full border border-slate-800 shadow-2xl z-10"
+                  ? "relative bg-black text-white w-full h-full lg:h-[82vh] lg:max-w-sm lg:rounded-[28px] overflow-hidden flex flex-col border border-slate-900/60 shadow-2xl z-10"
+                  : "relative bg-slate-900 text-white rounded-2xl overflow-hidden max-w-sm w-full border border-slate-800 shadow-2xl z-10"
               }
             >
               {/* Header for Standard/Compact View */}
               {!isSplitView && (
-                <div className="flex items-center justify-between p-4 border-b border-slate-800">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">📷</span>
+                <div className="flex items-center justify-between p-3.5 border-b border-slate-800">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-lg">📷</span>
                     <div>
-                      <h3 className="text-sm font-black tracking-wide uppercase font-heading">
+                      <h3 className="text-xs font-black tracking-wide uppercase font-heading">
                         Scan Barcode / QR Code
                       </h3>
-                      <p className="text-[10px] text-slate-450 font-semibold">
+                      <p className="text-[9px] text-slate-450 font-semibold">
                         Barcode Scanner Active
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={onClose}
-                    className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-colors font-bold text-slate-400 hover:text-white cursor-pointer"
+                    className="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-colors font-bold text-slate-400 hover:text-white cursor-pointer text-xs"
                   >
                     ✕
                   </button>
@@ -351,19 +351,19 @@ export default function BarcodeScannerModal({
               {/* Camera Viewport Section */}
               <div 
                 className={`relative bg-black flex items-center justify-center overflow-hidden flex-shrink-0 ${
-                  isSplitView ? 'w-full h-[45vh]' : 'aspect-square w-full'
+                  isSplitView ? 'w-full h-[36vh]' : 'aspect-square w-full'
                 }`}
               >
                 {errorMsg ? (
                   <div className="p-6 text-center space-y-3 z-40">
-                    <span className="text-3xl block">⚠️</span>
-                    <p className="text-sm font-bold text-red-400">{errorMsg}</p>
-                    <p className="text-xs text-slate-400">
+                    <span className="text-2xl block">⚠️</span>
+                    <p className="text-xs font-bold text-red-400">{errorMsg}</p>
+                    <p className="text-[10px] text-slate-400">
                       Please verify camera permissions in your browser settings and try again.
                     </p>
                     <button
                       onClick={onClose}
-                      className="px-4 py-2 bg-slate-850 hover:bg-slate-800 text-xs font-bold rounded-lg border border-slate-700 cursor-pointer"
+                      className="px-3.5 py-1.5 bg-slate-850 hover:bg-slate-800 text-[10px] font-bold rounded-lg border border-slate-700 cursor-pointer"
                     >
                       Close Scanner
                     </button>
@@ -372,9 +372,9 @@ export default function BarcodeScannerModal({
                   <>
                     {/* Accessing camera progress placeholder */}
                     {hasPermission === null && (
-                      <div className="absolute inset-0 z-30 bg-black flex flex-col items-center justify-center gap-3">
-                        <div className="w-8 h-8 border-4 border-[#0050e8] border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      <div className="absolute inset-0 z-30 bg-black flex flex-col items-center justify-center gap-2.5">
+                        <div className="w-6 h-6 border-3 border-[#0050e8] border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
                           Accessing Camera...
                         </p>
                       </div>
@@ -387,10 +387,10 @@ export default function BarcodeScannerModal({
                     {isSplitView && (
                       <button
                         onClick={onClose}
-                        className="absolute left-4 top-4 z-30 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white active:scale-95 transition-all cursor-pointer"
+                        className="absolute left-3 top-3 z-30 w-9 h-9 rounded-full bg-black/45 backdrop-blur-md border border-white/10 flex items-center justify-center text-white active:scale-95 transition-all cursor-pointer"
                         title="Close Scanner"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                           <line x1="18" y1="6" x2="6" y2="18" />
                           <line x1="6" y1="6" x2="18" y2="18" />
                         </svg>
@@ -399,19 +399,19 @@ export default function BarcodeScannerModal({
 
                     {/* Side Action Buttons for Camera control (Torch, Settings, Cameras) */}
                     {hasPermission && (
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-4.5 z-30">
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-30">
                         {/* Settings gear */}
                         {cameras.length > 0 && (
                           <button
                             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                            className={`w-11 h-11 rounded-full backdrop-blur-md border flex items-center justify-center transition-all active:scale-95 cursor-pointer ${
+                            className={`w-9 h-9 rounded-full backdrop-blur-md border flex items-center justify-center transition-all active:scale-95 cursor-pointer ${
                               isSettingsOpen 
                                 ? 'bg-[#0050e8] border-[#0050e8] text-white shadow-lg' 
-                                : 'bg-black/40 border-white/10 text-white/90 hover:bg-black/60'
+                                : 'bg-black/45 border-white/10 text-white/90 hover:bg-black/60'
                             }`}
                             title="Camera Settings"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={isSettingsOpen ? 'animate-spin-slow' : ''}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className={isSettingsOpen ? 'animate-spin-slow' : ''}>
                               <circle cx="12" cy="12" r="3" />
                               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
                             </svg>
@@ -422,14 +422,14 @@ export default function BarcodeScannerModal({
                         {isTorchSupported && (
                           <button
                             onClick={toggleTorch}
-                            className={`w-11 h-11 rounded-full backdrop-blur-md border flex items-center justify-center transition-all active:scale-95 cursor-pointer ${
+                            className={`w-9 h-9 rounded-full backdrop-blur-md border flex items-center justify-center transition-all active:scale-95 cursor-pointer ${
                               torchOn 
                                 ? 'bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-500/20' 
-                                : 'bg-black/40 border-white/10 text-white/90 hover:bg-black/60'
+                                : 'bg-black/45 border-white/10 text-white/90 hover:bg-black/60'
                             }`}
                             title="Toggle Torch/Flash"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                               <path d="M15 17H9" />
                               <path d="M18.5 5.5a2.5 2.5 0 0 0-3.5 0L8.5 12H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h3.5l6.5 6.5a2.5 2.5 0 0 0 3.5 0v-20z" />
                             </svg>
@@ -440,10 +440,10 @@ export default function BarcodeScannerModal({
                         {cameras.length > 1 && (
                           <button
                             onClick={switchCamera}
-                            className="w-11 h-11 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white/90 hover:bg-black/60 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+                            className="w-9 h-9 rounded-full bg-black/45 backdrop-blur-md border border-white/10 text-white/90 hover:bg-black/60 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
                             title="Switch Camera Device"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                               <path d="M23 4v6h-6" />
                               <path d="M1 20v-6h6" />
                               <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
@@ -457,11 +457,11 @@ export default function BarcodeScannerModal({
                     {isSettingsOpen && cameras.length > 0 && (
                       <>
                         <div className="fixed inset-0 z-35" onClick={() => setIsSettingsOpen(false)} />
-                        <div className="absolute right-18 top-1/2 -translate-y-1/2 bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-2xl p-2 z-40 max-w-[200px] shadow-2xl">
-                          <p className="text-[9px] font-black text-slate-500 uppercase tracking-wider px-2.5 py-1.5 border-b border-slate-800 mb-1">
+                        <div className="absolute right-14 top-1/2 -translate-y-1/2 bg-slate-955/95 backdrop-blur-md border border-slate-800 rounded-2xl p-1.5 z-40 max-w-[170px] shadow-2xl">
+                          <p className="text-[8px] font-black text-slate-500 uppercase tracking-wider px-2 py-1 border-b border-slate-800 mb-1">
                             Select Camera
                           </p>
-                          <div className="flex flex-col gap-1 max-h-[160px] overflow-y-auto pr-1">
+                          <div className="flex flex-col gap-0.5 max-h-[140px] overflow-y-auto pr-0.5">
                             {cameras.map((camera) => (
                               <button
                                 key={camera.id}
@@ -471,10 +471,10 @@ export default function BarcodeScannerModal({
                                     switchCameraToId(camera.id);
                                   }
                                 }}
-                                className={`text-left px-2.5 py-2 text-[10px] font-bold rounded-xl truncate transition-all cursor-pointer ${
+                                className={`text-left px-2 py-1.5 text-[9px] font-bold rounded-lg truncate transition-all cursor-pointer ${
                                   activeCameraId === camera.id
                                     ? 'bg-[#0050e8] text-white shadow-sm'
-                                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
+                                    : 'text-slate-455 hover:bg-slate-900 hover:text-white'
                                 }`}
                               >
                                 {camera.label || `Camera ${cameras.indexOf(camera) + 1}`}
@@ -488,15 +488,15 @@ export default function BarcodeScannerModal({
                     {/* Target overlay: custom green reticle overlay */}
                     {hasPermission && (
                       <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-                        <div className="w-64 h-64 relative flex items-center justify-center">
+                        <div className="w-48 h-48 relative flex items-center justify-center">
                           {/* Green Corners */}
-                          <div className="absolute top-0 left-0 w-8 h-8 border-t-[4px] border-l-[4px] border-emerald-400 rounded-tl-lg"></div>
-                          <div className="absolute top-0 right-0 w-8 h-8 border-t-[4px] border-r-[4px] border-emerald-400 rounded-tr-lg"></div>
-                          <div className="absolute bottom-0 left-0 w-8 h-8 border-b-[4px] border-l-[4px] border-emerald-400 rounded-bl-lg"></div>
-                          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[4px] border-r-[4px] border-emerald-400 rounded-br-lg"></div>
+                          <div className="absolute top-0 left-0 w-6 h-6 border-t-[3px] border-l-[3px] border-emerald-400 rounded-tl-md"></div>
+                          <div className="absolute top-0 right-0 w-6 h-6 border-t-[3px] border-r-[3px] border-emerald-400 rounded-tr-md"></div>
+                          <div className="absolute bottom-0 left-0 w-6 h-6 border-b-[3px] border-l-[3px] border-emerald-400 rounded-bl-md"></div>
+                          <div className="absolute bottom-0 right-0 w-6 h-6 border-b-[3px] border-r-[3px] border-emerald-400 rounded-br-md"></div>
 
                           {/* Laser Scan line animation */}
-                          <div className="absolute left-2.5 right-2.5 h-[2px] bg-emerald-400/80 shadow-[0_0_15px_#34d399] animate-[scan_2.5s_ease-in-out_infinite]"></div>
+                          <div className="absolute left-2 right-2 h-[2px] bg-emerald-400/80 shadow-[0_0_12px_#34d399] animate-[scan_2.5s_ease-in-out_infinite]"></div>
                         </div>
                       </div>
                     )}
@@ -506,45 +506,45 @@ export default function BarcodeScannerModal({
 
               {/* Scanned Items split view layout */}
               {isSplitView ? (
-                <div className="flex-1 bg-slate-50 rounded-t-[32px] overflow-hidden flex flex-col text-slate-800 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] z-20 -mt-6">
-                  <div className="p-6 flex-1 flex flex-col min-h-0">
+                <div className="flex-1 bg-slate-50 rounded-t-[28px] overflow-hidden flex flex-col text-slate-800 shadow-[0_-6px_25px_rgba(0,0,0,0.08)] z-20 -mt-5">
+                  <div className="p-4 flex-1 flex flex-col min-h-0">
                     
                     {/* Section Header */}
-                    <div className="flex justify-between items-start mb-4">
+                    <div className="flex justify-between items-start mb-3.5">
                       <div className="flex flex-col">
-                        <h4 className="text-base font-black text-slate-800 uppercase tracking-wide">
+                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-wide">
                           Scanned Items
                         </h4>
-                        <span className="text-[10px] text-slate-400 font-bold mt-0.5 uppercase tracking-wider">
+                        <span className="text-[9px] text-slate-400 font-bold mt-0.5 uppercase tracking-wider">
                           {totalQty} {totalQty === 1 ? 'item' : 'items'} total
                         </span>
                       </div>
                       
                       <div className="flex flex-col items-end">
-                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
                           Total Price
                         </span>
-                        <span className="text-lg font-black text-[#0050e8] tabular-nums mt-0.5">
+                        <span className="text-base font-black text-[#0050e8] tabular-nums mt-0.5">
                           ₹{totalPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                     </div>
 
                     {/* Scrollable list container */}
-                    <div className="flex-1 overflow-y-auto min-h-0 pr-1 space-y-2.5">
+                    <div className="flex-1 overflow-y-auto min-h-0 pr-1 space-y-2">
                       <AnimatePresence initial={false}>
                         {items && items.length > 0 ? (
                           items.map((item) => (
                             <motion.div
                               key={`${item.name}-${item.variant_id}`}
-                              initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                              initial={{ opacity: 0, y: 10, scale: 0.96 }}
                               animate={{ opacity: 1, y: 0, scale: 1 }}
                               exit={{ opacity: 0, scale: 0.95 }}
                               transition={{ duration: 0.2 }}
-                              className="flex justify-between items-center py-3 px-4 bg-white border border-slate-150 rounded-2xl shadow-3xs hover:border-slate-200 transition-colors"
+                              className="flex justify-between items-center py-2.5 px-3 bg-white border border-slate-150 rounded-xl shadow-3xs hover:border-slate-200 transition-colors"
                             >
                               <div className="flex flex-col min-w-0 pr-2">
-                                <span className="text-xs font-black text-slate-800 uppercase tracking-wide truncate">
+                                <span className="text-xs font-bold text-slate-800 uppercase tracking-wide truncate max-w-[150px]">
                                   {item.name}
                                 </span>
                                 <span className="text-[10px] text-slate-450 font-bold mt-0.5">
@@ -557,17 +557,17 @@ export default function BarcodeScannerModal({
                                 <button
                                   type="button"
                                   onClick={() => onUpdateQty && onUpdateQty(item.name, item.quantity - 1, item.variant_id)}
-                                  className="w-7 h-7 rounded-full flex items-center justify-center text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-colors font-black text-sm active:scale-90 cursor-pointer"
+                                  className="w-6 h-6 rounded-full flex items-center justify-center text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-colors font-black text-xs active:scale-90 cursor-pointer"
                                 >
                                   −
                                 </button>
-                                <span className="px-2 text-xs font-black text-slate-800 w-5 text-center tabular-nums">
+                                <span className="px-1.5 text-xs font-black text-slate-800 w-4 text-center tabular-nums">
                                   {item.quantity}
                                 </span>
                                 <button
                                   type="button"
                                   onClick={() => onUpdateQty && onUpdateQty(item.name, item.quantity + 1, item.variant_id)}
-                                  className="w-7 h-7 rounded-full flex items-center justify-center text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-colors font-black text-sm active:scale-90 cursor-pointer"
+                                  className="w-6 h-6 rounded-full flex items-center justify-center text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-colors font-black text-xs active:scale-90 cursor-pointer"
                                 >
                                   +
                                 </button>
@@ -576,19 +576,19 @@ export default function BarcodeScannerModal({
                           ))
                         ) : (
                           // List is empty state
-                          <div className="flex-1 flex flex-col items-center justify-center py-12 px-4 text-center my-auto">
-                            <div className="w-16 h-16 bg-slate-100/80 border border-slate-200/50 text-slate-400 rounded-full flex items-center justify-center mb-3">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-75">
+                          <div className="flex-1 flex flex-col items-center justify-center py-8 px-4 text-center my-auto">
+                            <div className="w-12 h-12 bg-slate-100/80 border border-slate-200/50 text-slate-400 rounded-full flex items-center justify-center mb-2.5">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="opacity-75">
                                 <rect x="3" y="3" width="18" height="18" rx="2" />
                                 <path d="M7 7h10" />
                                 <path d="M7 12h10" />
                                 <path d="M7 17h10" />
                               </svg>
                             </div>
-                            <p className="text-sm font-black text-slate-800 uppercase tracking-wide">
+                            <p className="text-xs font-black text-slate-800 uppercase tracking-wide">
                               List is empty
                             </p>
-                            <p className="text-[11px] text-slate-400 mt-1.5 max-w-[240px] leading-relaxed font-semibold">
+                            <p className="text-[10px] text-slate-400 mt-1 max-w-[190px] leading-relaxed font-semibold">
                               Scanned items will appear here as you scan them with the camera above.
                             </p>
                           </div>
@@ -597,14 +597,14 @@ export default function BarcodeScannerModal({
                     </div>
 
                     {/* Footer Action Button */}
-                    <div className="pt-4 border-t border-slate-200/60 bg-white -mx-6 -mb-6 p-6 flex-shrink-0">
+                    <div className="pt-3 border-t border-slate-250/50 bg-white -mx-4 -mb-4 p-4 flex-shrink-0">
                       <button
                         type="button"
                         onClick={onClose}
                         disabled={!items || items.length === 0}
-                        className="w-full py-3.5 bg-[#0050e8] hover:bg-[#0043c4] disabled:bg-slate-200 disabled:text-slate-450 disabled:shadow-none text-white text-xs font-black uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-[#0050e8]/20 transition-all active:scale-[0.98] cursor-pointer"
+                        className="w-full py-3 bg-[#0050e8] hover:bg-[#0043c4] disabled:bg-slate-200 disabled:text-slate-450 disabled:shadow-none text-white text-[11px] font-black uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-[#0050e8]/15 transition-all active:scale-[0.98] cursor-pointer"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
                           <line x1="3" y1="6" x2="21" y2="6" />
                           <path d="M16 10a4 4 0 0 1-8 0" />
@@ -617,8 +617,8 @@ export default function BarcodeScannerModal({
                 </div>
               ) : (
                 /* Standard Footer Guide for Compact view */
-                <div className="p-4 bg-slate-950 text-center">
-                  <p className="text-[10px] font-bold text-slate-450 uppercase tracking-wider leading-relaxed">
+                <div className="p-3.5 bg-slate-950 text-center">
+                  <p className="text-[9px] font-bold text-slate-450 uppercase tracking-wider leading-relaxed">
                     Place the barcode or QR code in the center of the camera screen.
                   </p>
                 </div>
