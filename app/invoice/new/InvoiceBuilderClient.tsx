@@ -20,6 +20,7 @@ import { SHOP_CONFIG } from '@/lib/shop-config';
 import { ShopType } from '@/lib/starter-catalogs';
 import { getSubscriptionAccess } from '@/lib/subscription';
 import { getClothingGstRate } from '@/lib/clothing/gst';
+import { getFootwearGstRate, getItemGstRate } from '@/lib/footwear/gst';
 import BarcodeScannerModal from '@/components/BarcodeScannerModal';
 import { resolveBarcode } from '@/lib/barcodeResolver';
 import { playBeep, triggerHaptic } from '@/lib/sound';
@@ -312,10 +313,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
           }
         }
 
-        let rate = item.gst_rate || 0;
-        if (shop.shop_type === 'clothing') {
-          rate = getClothingGstRate(finalPrice);
-        }
+        const rate = getItemGstRate(shop.shop_type, finalPrice, item.hsn_code, item.gst_rate || 0);
 
         return {
           ...item,
