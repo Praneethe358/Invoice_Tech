@@ -496,7 +496,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
     const name = customName.trim().toUpperCase();
     const price = parseFloat(customPrice);
     const hsn = customHsn.trim();
-    const gstRate = parseFloat(customGst) || 0;
+    let gstRate = parseFloat(customGst) || 0;
 
     if (!name) {
       showToast('Enter an item name', 'error');
@@ -505,6 +505,10 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
     if (isNaN(price) || price <= 0) {
       showToast('Enter a valid price', 'error');
       return;
+    }
+
+    if (shop.shop_type === 'footwear') {
+      gstRate = getFootwearGstRate(price, hsn);
     }
 
     addOrIncrement(name, price, hsn, gstRate);
@@ -1356,9 +1360,14 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
                             type="number"
                             prefix="₹"
                             value={customPrice}
-                            onChange={(e) =>
-                              setCustomPrice(e.target.value)
-                            }
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setCustomPrice(val);
+                              const parsed = parseFloat(val);
+                              if (!isNaN(parsed) && shop.shop_type === 'footwear') {
+                                setCustomGst(String(getFootwearGstRate(parsed, customHsn)));
+                              }
+                            }}
                           />
                         </div>
                       </div>
@@ -1368,13 +1377,26 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
                             <Input
                               placeholder="HSN Code (optional)"
                               value={customHsn}
-                              onChange={(e) => setCustomHsn(e.target.value)}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setCustomHsn(val);
+                                const parsed = parseFloat(customPrice);
+                                if (!isNaN(parsed) && shop.shop_type === 'footwear') {
+                                  setCustomGst(String(getFootwearGstRate(parsed, val)));
+                                }
+                              }}
                             />
                           </div>
                           <div className="w-28">
                             <select
                               value={customGst}
-                              onChange={(e) => setCustomGst(e.target.value)}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (shop.shop_type === 'footwear') {
+                                  showToast('Footwear GST is price-slab based under HSN 6401-6405', 'warning');
+                                }
+                                setCustomGst(val);
+                              }}
                               className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none min-h-[44px]"
                             >
                               <option value="0">0% GST</option>
