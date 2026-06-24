@@ -1564,8 +1564,13 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
             {/* Tax Breakdown Summary (only if gst_registered) */}
             {shop.gst_registered && items.length > 0 && (
               <section className="bg-white rounded-2xl border border-[#e5e7eb] p-4 space-y-2 text-sm shadow-2xs">
-                <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-2">
-                  Tax Summary
+                <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-2 flex items-center justify-between flex-wrap gap-2">
+                  <span>Tax Summary</span>
+                  {shop.shop_type === 'footwear' && (
+                    <span className="text-[10px] text-blue-600 font-semibold bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md normal-case">
+                      ℹ️ GST slab auto-detected based on MRP per pair
+                    </span>
+                  )}
                 </h2>
                 <div className="flex justify-between text-[#6b7280]">
                   <span>Subtotal (Base Value)</span>

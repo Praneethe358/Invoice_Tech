@@ -16,6 +16,8 @@ import { ShopType } from '@/lib/starter-catalogs';
 import BarcodeScannerModal from '@/components/BarcodeScannerModal';
 import { resolveBarcode } from '@/lib/barcodeResolver';
 import { playBeep, triggerHaptic } from '@/lib/sound';
+import { getClothingGstRate } from '@/lib/clothing/gst';
+import { getFootwearGstRate } from '@/lib/footwear/gst';
 
 interface Props {
   shop: Shop;
@@ -250,8 +252,8 @@ export default function CatalogClient({
           });
       }
 
-      // If clothing shop, insert variant if size/color/sku is provided
-      if (shop.shop_type === 'clothing') {
+      // If clothing or footwear shop, insert variant if size/color/sku is provided
+      if (shop.shop_type === 'clothing' || shop.shop_type === 'footwear') {
         const sizeVal = newSize.trim() || 'Free Size';
         const colorVal = newColor.trim() || 'Assorted';
         const skuVal = newSku.trim() || `${name.replace(/\s+/g, '-')}-${sizeVal.toUpperCase()}-${colorVal.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -642,7 +644,7 @@ export default function CatalogClient({
 
   // Keyboard wedge listener for hardware USB/Bluetooth barcode scanners (HID mode)
   useEffect(() => {
-    if (shop.shop_type !== 'clothing') return;
+    if (shop.shop_type !== 'clothing' && shop.shop_type !== 'footwear') return;
 
     let buffer = '';
     let lastKeyTime = 0;
@@ -975,7 +977,7 @@ export default function CatalogClient({
                       )}
                     </div>
 
-                    {shop.shop_type === 'clothing' ? (
+                    {shop.shop_type === 'clothing' || shop.shop_type === 'footwear' ? (
                       <div className="border-t border-slate-100 pt-3 space-y-3">
                         <div className="grid grid-cols-2 gap-3">
                           <div>
@@ -1251,7 +1253,7 @@ export default function CatalogClient({
             </div>
 
             {/* Inventory Tracking options */}
-            {shop.shop_type === 'clothing' ? (
+            {shop.shop_type === 'clothing' || shop.shop_type === 'footwear' ? (
               <div className="border-t border-[#f3f4f6] pt-3 space-y-3">
                 <div className="flex gap-3">
                   <div className="flex-1">
@@ -1755,7 +1757,7 @@ export default function CatalogClient({
                             <th className="py-3.5 px-4 w-10"></th>
                             <th className="py-3.5 px-4 font-semibold">Item Name</th>
                             <th className="py-3.5 px-4 font-semibold">Category</th>
-                            {shop.shop_type === 'clothing' && (
+                            {(shop.shop_type === 'clothing' || shop.shop_type === 'footwear') && (
                               <th className="py-3.5 px-4 font-semibold">Variants</th>
                             )}
                             <th className="py-3.5 px-4 text-right font-semibold">Sale Price</th>
@@ -1767,8 +1769,18 @@ export default function CatalogClient({
                         </thead>
                         <tbody className="divide-y divide-[#f3f4f6]">
                           {filteredProducts.map((product) => {
-                            const isLowStock = inventoryEnabledGlobal && product.track_inventory && (product.stock_qty || 0) <= (product.low_stock_threshold || 5);
-                            const isOutOfStock = inventoryEnabledGlobal && product.track_inventory && (product.stock_qty || 0) === 0;
+                            const prodVars = variants.filter(v => v.product_id === product.id);
+                            const hasAnySizeOutOfStock = shop.shop_type === 'footwear' && prodVars.length > 0 && prodVars.some(v => (v.stock_qty || 0) === 0);
+                            const isOutOfStock = inventoryEnabledGlobal && product.track_inventory && (
+                              shop.shop_type === 'footwear' && prodVars.length > 0
+                                ? hasAnySizeOutOfStock
+                                : (product.stock_qty || 0) === 0
+                            );
+                            const isLowStock = inventoryEnabledGlobal && product.track_inventory && (
+                              shop.shop_type === 'footwear' && prodVars.length > 0
+                                ? prodVars.some(v => (v.stock_qty || 0) < 2)
+                                : (product.stock_qty || 0) <= (product.low_stock_threshold || 5)
+                            );
 
                             return (
                                <tr 
@@ -1807,13 +1819,15 @@ export default function CatalogClient({
                                        </span>
                                      )}
                                    </div>
-                                   {gstRegistered && ((product.gst_rate !== undefined && product.gst_rate > 0) || product.hsn_code) && (
-                                     <div className="flex gap-1.5 mt-1">
-                                       {product.gst_rate !== undefined && product.gst_rate > 0 && (
-                                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-50 text-[#0050e8] border border-green-100">
-                                           {product.gst_rate}% GST
-                                         </span>
-                                       )}
+                                   {gstRegistered && (
+                                     <div className="flex gap-1.5 mt-1 flex-wrap">
+                                       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-50 text-[#0050e8] border border-green-100">
+                                         {shop.shop_type === 'clothing'
+                                           ? getClothingGstRate(Number(product.price))
+                                           : shop.shop_type === 'footwear'
+                                           ? getFootwearGstRate(Number(product.price), product.hsn_code)
+                                           : (product.gst_rate || 0)}% GST
+                                       </span>
                                        {product.hsn_code && (
                                          <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">
                                            HSN: {product.hsn_code}
@@ -1839,26 +1853,80 @@ export default function CatalogClient({
                                  <td className="py-3.5 px-4 text-xs font-semibold text-gray-500">
                                    {product.category || 'Others'}
                                  </td>
-                                 {shop.shop_type === 'clothing' && (
+                                 {(shop.shop_type === 'clothing' || shop.shop_type === 'footwear') && (
                                    <td className="py-3.5 px-4">
-                                     <button
-                                       onClick={() => {
-                                         setVariantsProduct(product);
-                                         const prodVars = variants.filter(v => v.product_id === product.id);
-                                         const selected: Record<string, boolean> = {};
-                                         const copies: Record<string, number> = {};
-                                         prodVars.forEach(v => {
-                                           selected[v.id] = true;
-                                           copies[v.id] = 1;
-                                         });
-                                         setSelectedPrintVariants(selected);
-                                         setPrintCopies(copies);
-                                       }}
-                                       className="text-[#0050e8] hover:underline font-bold text-xs bg-[#0050e8]/5 px-2.5 py-1.5 border border-[#0050e8]/20 transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1 hover:bg-[#0050e8]/10"
-                                     >
-                                       <span>👕</span>
-                                       <span>{variants.filter(v => v.product_id === product.id).length} Variants</span>
-                                     </button>
+                                     {shop.shop_type === 'footwear' ? (
+                                       <div className="space-y-1">
+                                         {Object.entries(
+                                           prodVars.reduce((acc, v) => {
+                                             const color = v.color || 'Assorted';
+                                             if (!acc[color]) acc[color] = [];
+                                             acc[color].push(v);
+                                             return acc;
+                                            }, {} as Record<string, typeof variants>)
+                                         ).map(([color, colorVars]) => (
+                                           <div key={color} className="flex items-center gap-1.5 flex-wrap">
+                                             <span className="text-[9px] font-black text-slate-500 uppercase">{color}:</span>
+                                             <div className="flex gap-1 flex-wrap">
+                                               {colorVars.map(v => {
+                                                 const qty = v.stock_qty || 0;
+                                                 const isLow = qty < 2;
+                                                 const isOut = qty === 0;
+                                                 return (
+                                                   <span
+                                                     key={v.id}
+                                                     className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-extrabold ${
+                                                       isOut
+                                                         ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                                         : isLow
+                                                         ? 'bg-amber-50 text-amber-800 border border-amber-250 animate-pulse'
+                                                         : 'bg-slate-50 text-slate-600 border border-slate-200'
+                                                     }`}
+                                                     title={`SKU: ${v.sku}`}
+                                                   >
+                                                     {v.size} ({qty})
+                                                   </span>
+                                                 );
+                                               })}
+                                             </div>
+                                           </div>
+                                         ))}
+                                         <button
+                                           onClick={() => {
+                                             setVariantsProduct(product);
+                                             const selected: Record<string, boolean> = {};
+                                             const copies: Record<string, number> = {};
+                                             prodVars.forEach(v => {
+                                               selected[v.id] = true;
+                                               copies[v.id] = 1;
+                                             });
+                                             setSelectedPrintVariants(selected);
+                                             setPrintCopies(copies);
+                                           }}
+                                           className="text-[9px] text-[#0050e8] hover:underline font-bold mt-1 block"
+                                         >
+                                           Manage Variants / Print Barcodes
+                                         </button>
+                                       </div>
+                                     ) : (
+                                       <button
+                                         onClick={() => {
+                                           setVariantsProduct(product);
+                                           const selected: Record<string, boolean> = {};
+                                           const copies: Record<string, number> = {};
+                                           prodVars.forEach(v => {
+                                             selected[v.id] = true;
+                                             copies[v.id] = 1;
+                                           });
+                                           setSelectedPrintVariants(selected);
+                                           setPrintCopies(copies);
+                                         }}
+                                         className="text-[#0050e8] hover:underline font-bold text-xs bg-[#0050e8]/5 px-2.5 py-1.5 border border-[#0050e8]/20 transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1 hover:bg-[#0050e8]/10"
+                                       >
+                                         <span>👕</span>
+                                         <span>{prodVars.length} Variants</span>
+                                       </button>
+                                     )}
                                    </td>
                                  )}
                                  <td className="py-3.5 px-4 text-right text-sm font-semibold text-gray-900 tabular-nums">
@@ -1937,8 +2005,18 @@ export default function CatalogClient({
                   {/* Mobile Cards View */}
                   <div className="md:hidden flex flex-col gap-3.5">
                     {filteredProducts.map((product) => {
-                      const isLowStock = inventoryEnabledGlobal && product.track_inventory && (product.stock_qty || 0) <= (product.low_stock_threshold || 5);
-                      const isOutOfStock = inventoryEnabledGlobal && product.track_inventory && (product.stock_qty || 0) === 0;
+                      const prodVars = variants.filter(v => v.product_id === product.id);
+                      const hasAnySizeOutOfStock = shop.shop_type === 'footwear' && prodVars.length > 0 && prodVars.some(v => (v.stock_qty || 0) === 0);
+                      const isOutOfStock = inventoryEnabledGlobal && product.track_inventory && (
+                        shop.shop_type === 'footwear' && prodVars.length > 0
+                          ? hasAnySizeOutOfStock
+                          : (product.stock_qty || 0) === 0
+                      );
+                      const isLowStock = inventoryEnabledGlobal && product.track_inventory && (
+                        shop.shop_type === 'footwear' && prodVars.length > 0
+                          ? prodVars.some(v => (v.stock_qty || 0) < 2)
+                          : (product.stock_qty || 0) <= (product.low_stock_threshold || 5)
+                      );
 
                       return (
                         <div 
@@ -1991,9 +2069,13 @@ export default function CatalogClient({
                           </div>
 
                           <div className="flex flex-wrap items-center gap-1.5">
-                            {shop.gst_registered && product.gst_rate !== undefined && product.gst_rate > 0 && (
+                            {shop.gst_registered && (
                               <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#e6efff] text-[#0050e8] border border-[#cce0ff]">
-                                {product.gst_rate}% GST
+                                {shop.shop_type === 'clothing'
+                                  ? getClothingGstRate(Number(product.price))
+                                  : shop.shop_type === 'footwear'
+                                  ? getFootwearGstRate(Number(product.price), product.hsn_code)
+                                  : (product.gst_rate ?? 0)}% GST
                               </span>
                             )}
                             {product.hsn_code && (
@@ -2014,6 +2096,43 @@ export default function CatalogClient({
                                   </span>
                                 )}
                               </>
+                            )}
+                            {shop.shop_type === 'footwear' && (
+                              <div className="w-full mt-1 bg-slate-50 p-2.5 rounded-xl border border-slate-150 space-y-1.5 text-left">
+                                {Object.entries(
+                                  prodVars.reduce((acc, v) => {
+                                    const color = v.color || 'Assorted';
+                                    if (!acc[color]) acc[color] = [];
+                                    acc[color].push(v);
+                                    return acc;
+                                  }, {} as Record<string, typeof variants>)
+                                ).map(([color, colorVars]) => (
+                                  <div key={color} className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase">{color}:</span>
+                                    <div className="flex gap-1 flex-wrap">
+                                      {colorVars.map(v => {
+                                        const qty = v.stock_qty || 0;
+                                        const isLow = qty < 2;
+                                        const isOut = qty === 0;
+                                        return (
+                                          <span
+                                            key={v.id}
+                                            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-extrabold ${
+                                              isOut
+                                                ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                                : isLow
+                                                ? 'bg-amber-50 text-amber-800 border border-amber-250 animate-pulse'
+                                                : 'bg-slate-100 text-slate-650 border border-slate-200'
+                                            }`}
+                                          >
+                                            {v.size} ({qty})
+                                          </span>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
                             )}
                             {inventoryEnabledGlobal && product.track_inventory && (
                               <>
@@ -2049,12 +2168,11 @@ export default function CatalogClient({
                                   + Add Stock
                                 </button>
                               )}
-                              {shop.shop_type === 'clothing' && (
+                              {(shop.shop_type === 'clothing' || shop.shop_type === 'footwear') && (
                                 <button
                                   type="button"
                                   onClick={() => {
                                     setVariantsProduct(product);
-                                    const prodVars = variants.filter(v => v.product_id === product.id);
                                     const selected: Record<string, boolean> = {};
                                     const copies: Record<string, number> = {};
                                     prodVars.forEach(v => {
@@ -2067,7 +2185,7 @@ export default function CatalogClient({
                                   className="bg-[#0050e8]/5 hover:bg-[#0050e8]/10 text-[#0050e8] text-[10px] font-black px-3 py-1.5 rounded-lg border border-[#0050e8]/20 transition-all cursor-pointer min-h-[32px] flex items-center justify-center gap-1"
                                 >
                                   <span>👕</span>
-                                  <span>{variants.filter(v => v.product_id === product.id).length} Variants</span>
+                                  <span>{prodVars.length} Variants</span>
                                 </button>
                               )}
                             </div>

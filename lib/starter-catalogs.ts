@@ -1,5 +1,6 @@
 export type ShopType =
   | 'clothing'
+  | 'footwear'
   | 'tailoring'
   | 'fertilizer'
   | 'grocery'
@@ -123,4 +124,111 @@ export const STARTER_CATALOGS: Record<ShopType, StarterItem[]> = {
     { name: 'Item 2', price: 0, hsn_code: '', gst_rate: 0 },
     { name: 'Item 3', price: 0, hsn_code: '', gst_rate: 0 },
   ],
+
+  footwear: [
+    { name: "Men's Formal Shoes", price: 1499, hsn_code: '6403', gst_rate: 12, category: 'Formal Shoes' },
+    { name: "Men's Casual Shoes", price: 1299, hsn_code: '6403', gst_rate: 12, category: 'Casual Shoes' },
+    { name: "Men's Slippers/Chappals", price: 399, hsn_code: '6402', gst_rate: 5, category: 'Slippers' },
+    { name: "Women's Heels/Sandals", price: 1199, hsn_code: '6402', gst_rate: 12, category: 'Sandals' },
+    { name: "Women's Slippers/Flats", price: 299, hsn_code: '6402', gst_rate: 5, category: 'Slippers' },
+    { name: "Kids' Shoes", price: 799, hsn_code: '6404', gst_rate: 5, category: 'Kids' },
+    { name: "Sports/Running Shoes", price: 2499, hsn_code: '6404', gst_rate: 12, category: 'Sports Shoes' },
+    { name: "Canvas/School Shoes", price: 499, hsn_code: '6404', gst_rate: 5, category: 'School Shoes' },
+    { name: "Rubber/PVC Slippers", price: 199, hsn_code: '6401', gst_rate: 5, category: 'Slippers' },
+    { name: "Shoe Accessories", price: 99, hsn_code: '6406', gst_rate: 12, category: 'Accessories' }
+  ],
 };
+
+export interface StarterVariant {
+  product_name: string;
+  size: string;
+  color: string;
+  sku: string;
+  stock_qty: number;
+}
+
+export const FOOTWEAR_STARTER_VARIANTS: StarterVariant[] = [
+  // Men's Formal Shoes
+  { product_name: "Men's Formal Shoes", size: '7', color: 'Black', sku: 'M-FORM-BLK-7', stock_qty: 5 },
+  { product_name: "Men's Formal Shoes", size: '8', color: 'Black', sku: 'M-FORM-BLK-8', stock_qty: 5 },
+  { product_name: "Men's Formal Shoes", size: '9', color: 'Black', sku: 'M-FORM-BLK-9', stock_qty: 5 },
+  { product_name: "Men's Formal Shoes", size: '7', color: 'Brown', sku: 'M-FORM-BRN-7', stock_qty: 5 },
+  { product_name: "Men's Formal Shoes", size: '8', color: 'Brown', sku: 'M-FORM-BRN-8', stock_qty: 5 },
+  { product_name: "Men's Formal Shoes", size: '9', color: 'Brown', sku: 'M-FORM-BRN-9', stock_qty: 5 },
+
+  // Men's Casual Shoes
+  { product_name: "Men's Casual Shoes", size: '7', color: 'Blue', sku: 'M-CAS-BLU-7', stock_qty: 5 },
+  { product_name: "Men's Casual Shoes", size: '8', color: 'Blue', sku: 'M-CAS-BLU-8', stock_qty: 5 },
+  { product_name: "Men's Casual Shoes", size: '9', color: 'Blue', sku: 'M-CAS-BLU-9', stock_qty: 5 },
+  { product_name: "Men's Casual Shoes", size: '7', color: 'Grey', sku: 'M-CAS-GRY-7', stock_qty: 5 },
+  { product_name: "Men's Casual Shoes", size: '8', color: 'Grey', sku: 'M-CAS-GRY-8', stock_qty: 5 },
+  { product_name: "Men's Casual Shoes", size: '9', color: 'Grey', sku: 'M-CAS-GRY-9', stock_qty: 5 },
+
+  // Men's Slippers/Chappals
+  { product_name: "Men's Slippers/Chappals", size: '7', color: 'Black', sku: 'M-SLIP-BLK-7', stock_qty: 10 },
+  { product_name: "Men's Slippers/Chappals", size: '8', color: 'Black', sku: 'M-SLIP-BLK-8', stock_qty: 10 },
+  { product_name: "Men's Slippers/Chappals", size: '9', color: 'Black', sku: 'M-SLIP-BLK-9', stock_qty: 10 },
+  { product_name: "Men's Slippers/Chappals", size: '7', color: 'Blue', sku: 'M-SLIP-BLU-7', stock_qty: 10 },
+  { product_name: "Men's Slippers/Chappals", size: '8', color: 'Blue', sku: 'M-SLIP-BLU-8', stock_qty: 10 },
+  { product_name: "Men's Slippers/Chappals", size: '9', color: 'Blue', sku: 'M-SLIP-BLU-9', stock_qty: 10 },
+
+  // Women's Heels/Sandals
+  { product_name: "Women's Heels/Sandals", size: '5', color: 'Red', sku: 'W-HEEL-RED-5', stock_qty: 4 },
+  { product_name: "Women's Heels/Sandals", size: '6', color: 'Red', sku: 'W-HEEL-RED-6', stock_qty: 4 },
+  { product_name: "Women's Heels/Sandals", size: '7', color: 'Red', sku: 'W-HEEL-RED-7', stock_qty: 4 },
+  { product_name: "Women's Heels/Sandals", size: '5', color: 'Black', sku: 'W-HEEL-BLK-5', stock_qty: 4 },
+  { product_name: "Women's Heels/Sandals", size: '6', color: 'Black', sku: 'W-HEEL-BLK-6', stock_qty: 4 },
+  { product_name: "Women's Heels/Sandals", size: '7', color: 'Black', sku: 'W-HEEL-BLK-7', stock_qty: 4 },
+
+  // Women's Slippers/Flats
+  { product_name: "Women's Slippers/Flats", size: '5', color: 'Pink', sku: 'W-SLIP-PNK-5', stock_qty: 8 },
+  { product_name: "Women's Slippers/Flats", size: '6', color: 'Pink', sku: 'W-SLIP-PNK-6', stock_qty: 8 },
+  { product_name: "Women's Slippers/Flats", size: '7', color: 'Pink', sku: 'W-SLIP-PNK-7', stock_qty: 8 },
+  { product_name: "Women's Slippers/Flats", size: '5', color: 'Beige', sku: 'W-SLIP-BEI-5', stock_qty: 8 },
+  { product_name: "Women's Slippers/Flats", size: '6', color: 'Beige', sku: 'W-SLIP-BEI-6', stock_qty: 8 },
+  { product_name: "Women's Slippers/Flats", size: '7', color: 'Beige', sku: 'W-SLIP-BEI-7', stock_qty: 8 },
+
+  // Kids' Shoes
+  { product_name: "Kids' Shoes", size: '1C', color: 'Blue', sku: 'K-SHOE-BLU-1C', stock_qty: 6 },
+  { product_name: "Kids' Shoes", size: '2C', color: 'Blue', sku: 'K-SHOE-BLU-2C', stock_qty: 6 },
+  { product_name: "Kids' Shoes", size: '3C', color: 'Blue', sku: 'K-SHOE-BLU-3C', stock_qty: 6 },
+  { product_name: "Kids' Shoes", size: '1C', color: 'Pink', sku: 'K-SHOE-PNK-1C', stock_qty: 6 },
+  { product_name: "Kids' Shoes", size: '2C', color: 'Pink', sku: 'K-SHOE-PNK-2C', stock_qty: 6 },
+  { product_name: "Kids' Shoes", size: '3C', color: 'Pink', sku: 'K-SHOE-PNK-3C', stock_qty: 6 },
+
+  // Sports/Running Shoes
+  { product_name: "Sports/Running Shoes", size: '7', color: 'Black', sku: 'S-SPOR-BLK-7', stock_qty: 3 },
+  { product_name: "Sports/Running Shoes", size: '8', color: 'Black', sku: 'S-SPOR-BLK-8', stock_qty: 3 },
+  { product_name: "Sports/Running Shoes", size: '9', color: 'Black', sku: 'S-SPOR-BLK-9', stock_qty: 3 },
+  { product_name: "Sports/Running Shoes", size: '10', color: 'Black', sku: 'S-SPOR-BLK-10', stock_qty: 3 },
+  { product_name: "Sports/Running Shoes", size: '7', color: 'White', sku: 'S-SPOR-WHT-7', stock_qty: 3 },
+  { product_name: "Sports/Running Shoes", size: '8', color: 'White', sku: 'S-SPOR-WHT-8', stock_qty: 3 },
+  { product_name: "Sports/Running Shoes", size: '9', color: 'White', sku: 'S-SPOR-WHT-9', stock_qty: 3 },
+  { product_name: "Sports/Running Shoes", size: '10', color: 'White', sku: 'S-SPOR-WHT-10', stock_qty: 3 },
+
+  // Canvas/School Shoes
+  { product_name: "Canvas/School Shoes", size: '5', color: 'White', sku: 'C-SCH-WHT-5', stock_qty: 15 },
+  { product_name: "Canvas/School Shoes", size: '6', color: 'White', sku: 'C-SCH-WHT-6', stock_qty: 15 },
+  { product_name: "Canvas/School Shoes", size: '7', color: 'White', sku: 'C-SCH-WHT-7', stock_qty: 15 },
+  { product_name: "Canvas/School Shoes", size: '8', color: 'White', sku: 'C-SCH-WHT-8', stock_qty: 15 },
+  { product_name: "Canvas/School Shoes", size: '5', color: 'Black', sku: 'C-SCH-BLK-5', stock_qty: 15 },
+  { product_name: "Canvas/School Shoes", size: '6', color: 'Black', sku: 'C-SCH-BLK-6', stock_qty: 15 },
+  { product_name: "Canvas/School Shoes", size: '7', color: 'Black', sku: 'C-SCH-BLK-7', stock_qty: 15 },
+  { product_name: "Canvas/School Shoes", size: '8', color: 'Black', sku: 'C-SCH-BLK-8', stock_qty: 15 },
+
+  // Rubber/PVC Slippers
+  { product_name: "Rubber/PVC Slippers", size: '6', color: 'Blue', sku: 'R-SLIP-BLU-6', stock_qty: 20 },
+  { product_name: "Rubber/PVC Slippers", size: '7', color: 'Blue', sku: 'R-SLIP-BLU-7', stock_qty: 20 },
+  { product_name: "Rubber/PVC Slippers", size: '8', color: 'Blue', sku: 'R-SLIP-BLU-8', stock_qty: 20 },
+  { product_name: "Rubber/PVC Slippers", size: '9', color: 'Blue', sku: 'R-SLIP-BLU-9', stock_qty: 20 },
+  { product_name: "Rubber/PVC Slippers", size: '10', color: 'Blue', sku: 'R-SLIP-BLU-10', stock_qty: 20 },
+  { product_name: "Rubber/PVC Slippers", size: '6', color: 'Green', sku: 'R-SLIP-GRN-6', stock_qty: 20 },
+  { product_name: "Rubber/PVC Slippers", size: '7', color: 'Green', sku: 'R-SLIP-GRN-7', stock_qty: 20 },
+  { product_name: "Rubber/PVC Slippers", size: '8', color: 'Green', sku: 'R-SLIP-GRN-8', stock_qty: 20 },
+  { product_name: "Rubber/PVC Slippers", size: '9', color: 'Green', sku: 'R-SLIP-GRN-9', stock_qty: 20 },
+  { product_name: "Rubber/PVC Slippers", size: '10', color: 'Green', sku: 'R-SLIP-GRN-10', stock_qty: 20 },
+
+  // Shoe Accessories
+  { product_name: 'Shoe Accessories', size: 'Universal', color: 'Black', sku: 'A-ACC-BLK-U', stock_qty: 25 },
+  { product_name: 'Shoe Accessories', size: 'Universal', color: 'White', sku: 'A-ACC-WHT-U', stock_qty: 25 },
+];

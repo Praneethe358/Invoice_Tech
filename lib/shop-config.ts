@@ -23,6 +23,17 @@ export const SHOP_CONFIG: Record<ShopType, ShopTypeConfig> = {
     stockUnitShort: 'pcs',
   },
 
+  footwear: {
+    inventoryEnabled: true,
+    showBarcode: true,
+    showBundles: true,
+    categoryLabels: 'Categories',
+    itemLabel: 'Products',
+    defaultCategories: [],
+    stockUnit: 'pairs',
+    stockUnitShort: 'prs',
+  },
+
   tailoring: {
     inventoryEnabled: false,
     showBarcode: false,

@@ -148,7 +148,11 @@ export default function SignupPage() {
           return;
         }
       }
-      setStep(4);
+      if (shopType === 'footwear') {
+        handleSignupSubmit();
+      } else {
+        setStep(4);
+      }
     }
   };
 
@@ -194,20 +198,22 @@ export default function SignupPage() {
     setShowAddForm(false);
   };
 
-  const handleSignupSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (step !== 4) return;
+  const handleSignupSubmit = async (e?: FormEvent) => {
+    if (e) e.preventDefault();
+    if (shopType !== 'footwear' && step !== 4) return;
 
-    // Validate prices on submit
-    const invalidItems = catalogItems.filter(
-      (item) => !item.price || parseFloat(item.price) <= 0
-    );
-    if (invalidItems.length > 0) {
-      showToast(
-        'Please enter a valid price for all remaining products or delete them.',
-        'error'
+    // Validate prices on submit (only if NOT footwear shop)
+    if (shopType !== 'footwear') {
+      const invalidItems = catalogItems.filter(
+        (item) => !item.price || parseFloat(item.price) <= 0
       );
-      return;
+      if (invalidItems.length > 0) {
+        showToast(
+          'Please enter a valid price for all remaining products or delete them.',
+          'error'
+        );
+        return;
+      }
     }
 
     setLoading(true);
@@ -279,7 +285,54 @@ export default function SignupPage() {
       }
 
       // Step 3: Insert starter catalog products
-      if (catalogItems.length > 0) {
+      if (shopType === 'footwear') {
+        const footwearCatalog = STARTER_CATALOGS['footwear'] || [];
+        const productsToInsert = footwearCatalog.map((item) => ({
+          shop_id: newShop.id,
+          name: item.name,
+          price: item.price,
+          hsn_code: item.hsn_code || null,
+          gst_rate: item.gst_rate || 0,
+          category: item.category || null,
+          track_inventory: true,
+        }));
+
+        const { data: insertedProducts, error: productsError } = await supabase
+          .from('products')
+          .insert(productsToInsert)
+          .select('id, name');
+
+        if (productsError) {
+          console.error('Failed to pre-populate footwear starter catalog:', productsError);
+        } else if (insertedProducts && insertedProducts.length > 0) {
+          const nameToIdMap = new Map<string, string>();
+          insertedProducts.forEach((p: { id: string; name: string }) => {
+            nameToIdMap.set(p.name, p.id);
+          });
+
+          const { FOOTWEAR_STARTER_VARIANTS } = await import('@/lib/starter-catalogs');
+          const variantsToInsert = FOOTWEAR_STARTER_VARIANTS.map((v: any) => {
+            const productId = nameToIdMap.get(v.product_name);
+            return {
+              product_id: productId,
+              size: v.size,
+              color: v.color,
+              sku: v.sku,
+              stock_qty: v.stock_qty,
+              barcode: v.sku,
+            };
+          }).filter((v: any) => !!v.product_id);
+
+          if (variantsToInsert.length > 0) {
+            const { error: variantsError } = await supabase
+              .from('product_variants')
+              .insert(variantsToInsert);
+            if (variantsError) {
+              console.error('Failed to pre-populate footwear variants:', variantsError);
+            }
+          }
+        }
+      } else if (catalogItems.length > 0) {
         const productsToInsert = catalogItems.map((item) => ({
           shop_id: newShop.id,
           name: item.name,
@@ -294,7 +347,6 @@ export default function SignupPage() {
 
         if (productsError) {
           console.error('Failed to pre-populate starter catalog:', productsError);
-          // Non-fatal, user is already signed up and shop is created
         }
       }
 
@@ -483,6 +535,7 @@ export default function SignupPage() {
                     <div className="grid grid-cols-2 gap-2.5 max-h-[300px] overflow-y-auto pr-1">
                       {([
                         { type: 'clothing', label: 'Clothing / Textiles', emoji: '👗' },
+                        { type: 'footwear', label: 'Footwear Shop', emoji: '👟' },
                         { type: 'tailoring', label: 'Tailoring Shop', emoji: '🪡' },
                         { type: 'fertilizer', label: 'Agri / Fertilizer', emoji: '🌱' },
                         { type: 'grocery', label: 'Grocery / Kirana', emoji: '🛒' },
@@ -508,6 +561,18 @@ export default function SignupPage() {
                         </button>
                       ))}
                     </div>
+
+                    {shopType === 'footwear' && (
+                      <div className="p-3.5 bg-blue-50/40 border border-blue-100 rounded-2xl text-[10px] font-semibold text-[#0050e8] flex items-start gap-2.5 shadow-2xs">
+                        <span className="text-sm shrink-0">💡</span>
+                        <div>
+                          <p className="font-extrabold text-blue-900 uppercase tracking-wide">Footwear Shop Selected</p>
+                          <p className="text-slate-600 mt-0.5 leading-relaxed">
+                            Footwear shops skip the manual catalog pricing wizard. We will pre-load 10 products with size (5-12) & color variant matrix configurations automatically.
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="flex gap-3 pt-2">
                       <button
