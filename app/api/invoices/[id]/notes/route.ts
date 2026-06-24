@@ -116,6 +116,7 @@ export async function POST(
         cgst,
         sgst,
         line_total: lineTotal,
+        variant_id: item.variant_id || null,
       };
     });
 
@@ -158,6 +159,63 @@ export async function POST(
     if (itemsError) {
       await supabase.from('credit_debit_notes').delete().eq('id', note.id);
       return NextResponse.json({ error: itemsError.message }, { status: 500 });
+    }
+
+    // 2.5 Adjust inventory if it is a Credit Note (Sales Return)
+    if (note_type === 'credit') {
+      for (const item of processedItems) {
+        const { data: prod } = await supabase
+          .from('products')
+          .select('id, stock_qty, track_inventory')
+          .eq('shop_id', shop.id)
+          .eq('name', item.name)
+          .maybeSingle();
+
+        if (prod && prod.track_inventory) {
+          if (item.variant_id) {
+            const { data: variant } = await supabase
+              .from('product_variants')
+              .select('stock_qty')
+              .eq('id', item.variant_id)
+              .single();
+
+            if (variant) {
+              const currentVariantStock = variant.stock_qty || 0;
+              await supabase
+                .from('product_variants')
+                .update({ stock_qty: currentVariantStock + item.qty })
+                .eq('id', item.variant_id);
+
+              await supabase.from('inventory_logs').insert({
+                shop_id: shop.id,
+                product_id: prod.id,
+                invoice_id: invoiceId,
+                variant_id: item.variant_id,
+                change_qty: item.qty,
+                previous_qty: currentVariantStock,
+                new_qty: currentVariantStock + item.qty,
+                reason: 'return',
+              });
+            }
+          } else {
+            const currentStock = prod.stock_qty || 0;
+            await supabase
+              .from('products')
+              .update({ stock_qty: currentStock + item.qty })
+              .eq('id', prod.id);
+
+            await supabase.from('inventory_logs').insert({
+              shop_id: shop.id,
+              product_id: prod.id,
+              invoice_id: invoiceId,
+              change_qty: item.qty,
+              previous_qty: currentStock,
+              new_qty: currentStock + item.qty,
+              reason: 'return',
+            });
+          }
+        }
+      }
     }
 
     // 3. Increment Counter in shop

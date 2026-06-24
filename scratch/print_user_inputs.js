@@ -6,9 +6,20 @@ if (fs.existsSync(logPath)) {
   console.log('Total log lines:', lines.length);
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].includes('"USER_INPUT"')) {
-      console.log(`Line ${i} USER_INPUT:`, lines[i].substring(0, 300));
+      try {
+        const obj = JSON.parse(lines[i]);
+        const text = obj.content || '';
+        if (text.includes('CN-002') || text.includes('Phase 5')) {
+          console.log(`--- Line ${i} USER_INPUT ---`);
+          console.log(text);
+          console.log('----------------------------');
+        }
+      } catch (e) {
+        // ignore
+      }
     }
   }
 } else {
   console.log('Log file does not exist.');
 }
+

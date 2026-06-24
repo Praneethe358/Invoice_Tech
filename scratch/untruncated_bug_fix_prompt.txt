@@ -1,0 +1,16 @@
+<USER_REQUEST>
+Three things to tell the agent before it starts:
+
+Start with Bug 1 — fix place of supply first. Bug 3 disappears automatically once that's done, so don't let it waste time fixing Bug 3 separately.
+Bug 2 is independent — credit note fix can be done in parallel or after Bug 1, it doesn't depend on anything else.
+After fixing, run the verification checklist at the bottom — the exact numbers are there so the agent can self-verify before marking it done. Don't accept "done" without those totals matching.# TruBill GSTR-1 — 3 Bug Fix Prompt
+
+## Context
+TruBill is a Next.js + Supabase GST invoicing SaaS. The GSTR-1 worksheet has 3 confirmed bugs found during end-to-end testing. Fix all 3 without touching unrelated code. Each fix is scoped — do not refactor anything outside the described files/functions.
+
+---
+
+## Bug 1 — B2C Large: Place of Supply showing wrong state (Tamil Nadu instead of Karnataka)
+
+### What is happening
+<truncated 5752 bytes>

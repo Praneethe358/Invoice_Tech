@@ -195,10 +195,10 @@ input[type="number"] { -moz-appearance: textfield; }
 /* ─── Mobile UI Sizing Adjustments (overall mobile scale & polish) ─── */
 @media (max-width: 768px) {
   html {
-    font-size: 14px; /* Gentle root scale down for clean mobile rendering */
+    font-size: 13px !important; /* Scale down base size for clean, high-density mobile interface */
   }
 
-  /* Target actual form inputs and buttons rather than generic utility classes to avoid layout thrashing */
+  /* Target actual form inputs and buttons to ensure consistency without breaking layouts */
   input[type="text"],
   input[type="number"],
   input[type="tel"],
@@ -206,16 +206,49 @@ input[type="number"] { -moz-appearance: textfield; }
   input[type="password"],
   select,
   textarea {
-    padding-top: 0.55rem !important;
-    padding-bottom: 0.55rem !important;
-    font-size: 13px !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    font-size: 12.5px !important;
+    min-height: 38px !important; /* Snug but finger-tap friendly */
+    border-radius: 10px !important;
   }
 
   button, 
   .btn,
   .button {
-    padding-top: 0.55rem !important;
-    padding-bottom: 0.55rem !important;
-    font-size: 13px !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    font-size: 12.5px !important;
+    min-height: 38px !important;
+    border-radius: 10px !important;
   }
+
+  /* Snug up container paddings and margins on mobile to maximize viewport usage */
+  .p-6 { padding: 1rem !important; }
+  .p-8 { padding: 1.25rem !important; }
+  .px-6 { padding-left: 1rem !important; padding-right: 1rem !important; }
+  .px-8 { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+  .px-10 { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+  .py-6 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+  .py-8 { padding-top: 1.25rem !important; padding-bottom: 1.25rem !important; }
+
+  /* Adjust gaps and margins for clean spacing flow */
+  .gap-6 { gap: 1rem !important; }
+  .gap-8 { gap: 1.25rem !important; }
+  .mb-6 { margin-bottom: 1rem !important; }
+  .mb-8 { margin-bottom: 1.25rem !important; }
+  .mt-6 { margin-top: 1rem !important; }
+  .mt-8 { margin-top: 1.25rem !important; }
+
+  /* Snug table layouts */
+  th, td {
+    padding: 0.625rem 0.75rem !important;
+  }
+
+  /* Compact typography scaling for headers */
+  h1 { font-size: 1.25rem !important; }
+  h2 { font-size: 1.1rem !important; }
+  h3 { font-size: 1rem !important; }
 }

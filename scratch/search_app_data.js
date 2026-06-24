@@ -1,43 +1,42 @@
 const fs = require('fs');
 const path = require('path');
 
-function searchDir(dir) {
-  let files;
-  try {
-    files = fs.readdirSync(dir);
-  } catch (err) {
-    return;
-  }
-  for (const file of files) {
-    const fullPath = path.join(dir, file);
-    let stat;
-    try {
-      stat = fs.statSync(fullPath);
-    } catch (e) {
-      continue;
-    }
+const brainDir = '/home/pranii/.gemini/antigravity/brain';
+let longestContent = '';
+
+function searchLogs(dir) {
+  if (!fs.existsSync(dir)) return;
+  const items = fs.readdirSync(dir);
+  for (const item of items) {
+    const itemPath = path.join(dir, item);
+    const stat = fs.statSync(itemPath);
     if (stat.isDirectory()) {
-      if (file !== 'node_modules' && file !== '.git') {
-        searchDir(fullPath);
-      }
-    } else if (stat.isFile()) {
-      // search in text/json/md files
-      const ext = path.extname(file).toLowerCase();
-      if (['.txt', '.json', '.md', '.pb', '.log', '.js', '.ts'].includes(ext) || file.startsWith('dom_')) {
-        try {
-          const content = fs.readFileSync(fullPath, 'utf8');
-          const idx = content.toLowerCase().indexOf('senthil');
-          if (idx !== -1) {
-            console.log(`Found 'senthil' in file: ${fullPath}`);
-            console.log(content.substring(Math.max(0, idx - 300), Math.min(content.length, idx + 1000)));
-            console.log('--------------------------------------------------');
+      searchLogs(itemPath);
+    } else if (item === 'overview.txt') {
+      const content = fs.readFileSync(itemPath, 'utf8');
+      const lines = content.split('\n');
+      for (const line of lines) {
+        if (line.includes('Sri Murugan Textiles')) {
+          try {
+            const parsed = JSON.parse(line);
+            const text = parsed.content || '';
+            if (text.includes('Sri Murugan Textiles') && text.length > longestContent.length) {
+              longestContent = text;
+            }
+          } catch (err) {
+            // Ignore parse errors
           }
-        } catch (e) {
-          // ignore binary/read errors
         }
       }
     }
   }
 }
 
-searchDir('/home/pranii/.gemini/antigravity');
+searchLogs(brainDir);
+
+if (longestContent) {
+  console.log(`Found longest text of size ${longestContent.length}`);
+  fs.writeFileSync('/home/pranii/Desktop/Shipped /Invoice_startup/scratch/untruncated_simulation_prompt.txt', longestContent);
+} else {
+  console.log('No matches found.');
+}

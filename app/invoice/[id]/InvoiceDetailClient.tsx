@@ -134,6 +134,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
           qty: item.quantity,
           price: item.price,
           gst_rate: item.gst_rate || 0,
+          variant_id: item.variant_id || null,
         }))
       );
     }

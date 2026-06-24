@@ -77,6 +77,7 @@ export default async function InvoiceDetailPage({
         cgst: Number(item.cgst),
         sgst: Number(item.sgst),
         line_total: Number(item.line_total),
+        variant_id: item.variant_id || null,
       }));
     }
   }
