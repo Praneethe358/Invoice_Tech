@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const, @typescript-eslint/no-explicit-any, react-hooks/exhaustive-deps */
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -10,6 +11,7 @@ import { createClient } from '@/lib/supabase/client';
 import { generateGSTR1, validateGstr1Data } from '@/lib/gstr1';
 import { generateGSTR3B } from '@/lib/gstr3b';
 import { Invoice, Purchase, Shop } from '@/lib/types';
+import { isValidGSTIN } from '@/lib/gstin-states';
 
 interface Props {
   shop: Shop;
@@ -47,6 +49,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
   
   const [validating, setValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<{ warnings: string[]; errors: string[]; isValid: boolean } | null>(null);
+  const [exportingExcel, setExportingExcel] = useState(false);
 
   const [customers, setCustomers] = useState<any[]>([]);
 
@@ -294,6 +297,91 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
       showToast('GSTR-1 JSON downloaded successfully!', 'success');
     } catch (err: any) {
       showToast(err.message || 'Failed to generate GSTR-1', 'error');
+    }
+  };
+
+  const handleExportExcel = async () => {
+    if (!shop.gstin) {
+      showToast("Shop's own GSTIN is not configured. Please configure it in Settings.", "error");
+      return;
+    }
+
+    // Pre-export validation 1: invalid B2B receiver GSTIN formats
+    const invalidGstCustomerNames: string[] = [];
+    filteredData.periodInvoices.forEach(inv => {
+      if (inv.customer_gstin && !isValidGSTIN(inv.customer_gstin)) {
+        invalidGstCustomerNames.push(inv.customer_name || 'N/A');
+      }
+    });
+
+    if (invalidGstCustomerNames.length > 0) {
+      const uniqueNames = Array.from(new Set(invalidGstCustomerNames));
+      const proceed = window.confirm(
+        `Warning: The following customer(s) have invalid GSTIN formats:\n${uniqueNames.join(', ')}\n\nExport anyway?`
+      );
+      if (!proceed) return;
+    }
+
+    // Pre-export validation 2: missing HSN codes
+    let missingHsnInvoiceCount = 0;
+    filteredData.periodInvoices.forEach(inv => {
+      const items = inv.items || [];
+      const hasMissing = items.some((item: any) => !item.hsn_code);
+      if (hasMissing) {
+        missingHsnInvoiceCount++;
+      }
+    });
+
+    if (missingHsnInvoiceCount > 0) {
+      const proceed = window.confirm(
+        `${missingHsnInvoiceCount} invoices have missing HSN codes. Export anyway?`
+      );
+      if (!proceed) return;
+    }
+
+    setExportingExcel(true);
+    try {
+      const response = await fetch('/api/gst/export-excel', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          shopId: shop.id,
+          month: selectedMonth,
+          year: selectedYear,
+        }),
+      });
+
+      if (!response.ok) {
+        const errJson = await response.json();
+        throw new Error(errJson.error || 'Failed to export Excel report');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.href = url;
+      
+      const disposition = response.headers.get('Content-Disposition');
+      let filename = `GSTR1_${shop.name.replace(/\s+/g, '_')}_${selectedMonth}_${selectedYear}.xlsx`;
+      if (disposition && disposition.indexOf('attachment') !== -1) {
+        const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+        const matches = filenameRegex.exec(disposition);
+        if (matches != null && matches[1]) {
+          filename = matches[1].replace(/['"]/g, '');
+        }
+      }
+      downloadAnchor.download = filename;
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      window.URL.revokeObjectURL(url);
+      showToast('GSTR-1 Excel downloaded successfully!', 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Failed to generate Excel', 'error');
+    } finally {
+      setExportingExcel(false);
     }
   };
 
@@ -653,16 +741,45 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
                   <span className="text-slate-400 font-medium">Return Period:</span>
                   <span>{returnPeriodLabel}</span>
                 </div>
+              </div>
+            </div>
+
+            {/* Download and CA Instructions Card */}
+            <div className="bg-[#f8fafc] border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="space-y-1.5 flex-1">
+                <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                  <svg className="text-[#0050e8]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                  GSTR-1 Reports Export
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed font-semibold">
+                  Share this Excel with your CA. They can use the GST Offline Tool at <a href="https://www.gstn.org.in" target="_blank" rel="noopener noreferrer" className="text-[#0050e8] hover:underline font-bold">gstn.org.in</a> to upload and file your GSTR-1.
+                </p>
+                <p className="text-[11px] text-emerald-600 font-bold flex items-center gap-1">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Excel recommended — your CA can directly use this with the GST Offline Tool
+                </p>
+              </div>
+
+              <div className="flex flex-col items-stretch md:items-end gap-2 min-w-[240px]">
+                <button
+                  onClick={handleExportExcel}
+                  disabled={exportingExcel}
+                  className="bg-[#0050e8] hover:bg-[#0040c7] text-white font-extrabold px-5 py-2.5 rounded-xl flex flex-col items-center justify-center gap-0.5 shadow-sm transition-all text-xs"
+                >
+                  <span>{exportingExcel ? 'Generating...' : 'Download GST Report (Excel)'}</span>
+                  <span className="text-[9px] text-blue-200 font-medium font-sans">Share with your CA for GSTR-1 filing</span>
+                </button>
+                
                 <button
                   onClick={handleExportGstr1}
-                  className="bg-[#2b6cb0] hover:bg-[#2b5c90] text-white font-extrabold px-4.5 py-2 rounded-xl flex items-center gap-2 shadow-sm transition-colors text-xs"
+                  className="text-[#6b7280] hover:text-[#374151] font-bold text-[11px] flex items-center justify-center gap-1 transition-colors underline mt-1"
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  Export JSON
+                  Download JSON (Advanced)
                 </button>
               </div>
             </div>
