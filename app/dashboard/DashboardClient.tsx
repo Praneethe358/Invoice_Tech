@@ -144,7 +144,7 @@ export default function DashboardClient({
 
           const trialEnds = shop.trial_ends_at ? new Date(shop.trial_ends_at) : null;
           const daysRemaining = trialEnds ? Math.max(0, Math.ceil((trialEnds.getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : 0;
-          const progressPercent = Math.min(100, Math.max(0, (daysRemaining / 14) * 100)); // Percentage of trial remaining
+          const progressPercent = Math.min(100, Math.max(0, (daysRemaining / 7) * 100)); // Percentage of trial remaining
 
           if (!subAccess.canSendInvoices) {
             return (
@@ -161,7 +161,7 @@ export default function DashboardClient({
                 <div className="pt-2">
                   <a href="/upgrade">
                     <button className="bg-[#0050e8] hover:bg-[#0043c4] text-white font-extrabold text-xs py-3 px-6 rounded-xl transition-all cursor-pointer shadow-md shadow-blue-800/10 active:scale-[0.98] min-h-[44px]">
-                      Upgrade to TruBill Pro (₹349/mo)
+                       Upgrade to TruBill Pro (₹349/mo)
                     </button>
                   </a>
                 </div>
@@ -206,7 +206,7 @@ export default function DashboardClient({
                 <div className="bg-white border border-[#e5e7eb] p-4 mb-6 rounded-2xl md:rounded-none space-y-2">
                   <div className="flex justify-between items-center text-xs">
                     <span className="font-bold text-[#0050e8]">Free Trial Progress</span>
-                    <span className="font-semibold text-slate-500">{daysRemaining} days remaining of 14-day trial</span>
+                    <span className="font-semibold text-slate-500">{daysRemaining} days remaining of 7-day trial</span>
                   </div>
                   <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                     <motion.div

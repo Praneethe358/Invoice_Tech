@@ -231,7 +231,7 @@ export default function Navbar() {
         // Try owner first
         let { data: shop } = await supabase
           .from('shops')
-          .select('id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at')
+          .select('id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at, whatsapp_invoices_sent')
           .eq('auth_user_id', user.id)
           .single();
 
@@ -243,7 +243,7 @@ export default function Navbar() {
           // Check if they are a staff member
           const { data: staff } = await supabase
             .from('staff')
-            .select('role, shop_id, shops(id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at)')
+            .select('role, shop_id, shops(id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at, whatsapp_invoices_sent)')
             .eq('auth_user_id', user.id)
             .eq('status', 'active')
             .single();
@@ -262,6 +262,7 @@ export default function Navbar() {
                 subscription_status: staffShop.subscription_status,
                 trial_ends_at: staffShop.trial_ends_at,
                 subscription_ends_at: staffShop.subscription_ends_at,
+                whatsapp_invoices_sent: staffShop.whatsapp_invoices_sent,
               } as any;
             }
           }

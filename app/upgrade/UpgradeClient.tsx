@@ -257,7 +257,7 @@ export default function UpgradeClient({ shop, supportPhone }: UpgradeClientProps
               <span className="text-2xl shrink-0">⚠️</span>
               <div>
                 <p className="text-sm font-bold text-[#78350f]">Trial Expired</p>
-                <p className="text-xs text-amber-800 mt-0.5">Your 14-day free trial has ended. Upgrade to continue sending professional invoices to customers on WhatsApp.</p>
+                <p className="text-xs text-amber-800 mt-0.5">Your 7-day free trial has ended. Upgrade to continue sending professional invoices to customers on WhatsApp.</p>
               </div>
             </div>
           )}

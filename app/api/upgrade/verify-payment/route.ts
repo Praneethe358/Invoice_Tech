@@ -93,6 +93,7 @@ export async function POST(request: NextRequest) {
         subscription_ends_at: newEndDate.toISOString(),
         trial_ends_at: null,
         subscription_notes: notes,
+        whatsapp_invoices_sent: 0,
       })
       .eq('id', shop.id);
 

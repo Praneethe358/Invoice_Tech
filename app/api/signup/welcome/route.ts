@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     const message = [
       `Hi ${ownerName}! Welcome to TruBill Invoice. 🎉`,
       '',
-      `Your 14-day free trial has been activated for *${shopName}*.`,
+      `Your 7-day free trial has been activated for *${shopName}*.`,
       'You can now start sending professional GST invoices directly to your customers on WhatsApp!',
       '',
       `Try creating your first invoice now: ${origin}/invoice/new`,

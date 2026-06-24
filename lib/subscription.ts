@@ -29,7 +29,7 @@ export function getSubscriptionAccess(
       return {
         canSendInvoices: true,
         status: 'trial',
-        daysRemaining: 14,
+        daysRemaining: 7,
         trialActive: true,
         message: 'Free trial active',
         urgency: 'none'

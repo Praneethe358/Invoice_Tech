@@ -692,7 +692,7 @@ export default function LandingPage() {
                   </svg>
                 </Link>
                 <div className="flex items-center gap-2 text-[11px] sm:text-xs text-slate-500 font-semibold mt-1">
-                  <span className="text-emerald-700 font-bold">✓ 14-Day Free Trial</span>
+                  <span className="text-emerald-700 font-bold">✓ 7-Day Free Trial</span>
                   <span>•</span>
                   <span>No Setup Required</span>
                   <span>•</span>
@@ -1072,7 +1072,7 @@ export default function LandingPage() {
                 </svg>
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">14-Day</h4>
+                <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">7-Day</h4>
                 <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">Free Trial, No Card Needed</p>
               </div>
             </div>

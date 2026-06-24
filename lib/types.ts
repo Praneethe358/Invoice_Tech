@@ -25,6 +25,7 @@ export interface Shop {
   next_debit_note_number?: number;
   credit_note_prefix?: string;
   debit_note_prefix?: string;
+  whatsapp_invoices_sent?: number;
 }
 
 export type CustomerTag = 'regular' | 'vip';

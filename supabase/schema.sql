@@ -512,7 +512,8 @@ alter table shops
   add column if not exists trial_ends_at timestamptz,
   add column if not exists subscription_ends_at timestamptz,
   add column if not exists subscription_started_at timestamptz,
-  add column if not exists subscription_notes text;
+  add column if not exists subscription_notes text,
+  add column if not exists whatsapp_invoices_sent integer not null default 0;
 
 -- Backfill trial_ends_at for existing shops
 update shops

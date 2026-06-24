@@ -41,11 +41,11 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
   const access = getSubscriptionAccess(shop);
   const { urgency, status, daysRemaining, message } = access;
 
-  // No banner needed for active shops with high remaining days
-  if (urgency === 'none' && status === 'active') return null;
+  const sentCount = shop.whatsapp_invoices_sent || 0;
+  const isWhatsappCapHit = status === 'trial' && sentCount >= 10;
 
   // Determine if this banner is dismissible
-  const isDismissible = urgency === 'none' || (status === 'active' && urgency === 'warning');
+  const isDismissible = (urgency === 'none' || (status === 'active' && urgency === 'warning')) && !isWhatsappCapHit;
 
   // If already dismissed this session, don't render
   if (isDismissible && dismissed) return null;
@@ -62,28 +62,49 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
   let icon = '🎉';
   let text = '';
   let ctaText = 'Upgrade — ₹349/month';
+  let ctaLink = '/upgrade';
 
-  if (urgency === 'none' && status === 'trial') {
-    bgClass = 'bg-[#eff6ff] border-b-2 border-[#3b82f6] text-[#1e3a8a]';
-    icon = '🎉';
-    text = `Free trial — ${daysRemaining} days remaining. Upgrade to keep sending invoices after your trial.`;
-    ctaText = 'Upgrade — ₹349/month';
-  } else if (urgency === 'warning' && status === 'trial') {
-    bgClass = 'bg-[#fffbeb] border-b-2 border-[#f59e0b] text-[#78350f]';
-    icon = '⚠️';
-    text = `Trial ends in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}! Upgrade now to avoid interruption.`;
-    ctaText = 'Upgrade Now';
+  if (status === 'trial') {
+    if (daysRemaining !== null && daysRemaining <= 0) {
+      bgClass = 'bg-[#fef2f2] border-b-2 border-[#ef4444] text-[#991b1b]';
+      icon = '🔒';
+      text = `Your free trial has ended. Upgrade to continue sending invoices.`;
+      ctaText = 'Upgrade Now — ₹349/month';
+      ctaLink = '/upgrade';
+    } else if (isWhatsappCapHit) {
+      bgClass = 'bg-[#fffbeb] border-b-2 border-[#f59e0b] text-[#78350f]';
+      icon = '⚠️';
+      text = `WhatsApp limit reached — Upgrade now`;
+      ctaText = 'Upgrade Now';
+      ctaLink = '/upgrade?reason=whatsapp_cap';
+    } else {
+      const daysLeft = daysRemaining ?? 7;
+      if (daysLeft <= 3) {
+        bgClass = 'bg-[#fffbeb] border-b-2 border-[#f59e0b] text-[#78350f]';
+        icon = '⚠️';
+        text = `Trial ends in ${daysLeft} day${daysLeft === 1 ? '' : 's'}! Upgrade now to avoid interruption.`;
+        ctaText = 'Upgrade Now';
+      } else {
+        bgClass = 'bg-[#eff6ff] border-b-2 border-[#3b82f6] text-[#1e3a8a]';
+        icon = '🎉';
+        text = `Free trial — ${daysLeft} days remaining. Upgrade to keep sending invoices after your trial.`;
+        ctaText = 'Upgrade — ₹349/month';
+      }
+      ctaLink = '/upgrade';
+    }
   } else if (urgency === 'warning' && status === 'active') {
     bgClass = 'bg-[#fffbeb] border-b-2 border-[#f59e0b] text-[#78350f]';
     icon = '🔔';
     text = `Subscription renews in ${daysRemaining} days. Pay ₹349 to continue uninterrupted.`;
     ctaText = 'Pay Now';
+    ctaLink = '/upgrade';
   } else if (urgency === 'blocked') {
     bgClass = 'bg-[#fef2f2] border-b-2 border-[#ef4444] text-[#991b1b]';
     icon = '🔒';
     const subType = status === 'cancelled' ? 'subscription' : 'free trial';
     text = `Your ${subType} has ended. Upgrade to continue sending invoices.`;
     ctaText = 'Upgrade Now — ₹349/month';
+    ctaLink = '/upgrade';
   }
 
   return (
@@ -133,7 +154,7 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
         </div>
         
         <div className="flex items-center gap-3 shrink-0">
-          <Link href="/upgrade">
+          <Link href={ctaLink}>
             <button className="bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-3 py-1 rounded-md text-[11px] shadow-xs active:scale-[0.98] transition-all cursor-pointer">
               {ctaText}
             </button>

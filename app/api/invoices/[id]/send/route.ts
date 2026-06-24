@@ -60,7 +60,7 @@ export async function POST(
     // Fetch shop
     const { data: shop, error: shopError } = await supabase
       .from('shops')
-      .select('id, name, address, phone, logo_url, gst_registered, gstin, subscription_status, trial_ends_at, subscription_ends_at')
+      .select('id, name, address, phone, logo_url, gst_registered, gstin, subscription_status, trial_ends_at, subscription_ends_at, whatsapp_invoices_sent')
       .eq('id', typedInvoice.shop_id)
       .single();
 
@@ -81,15 +81,29 @@ export async function POST(
     // Re-fetch or check locally
     const { data: updatedShop } = await supabase
       .from('shops')
-      .select('subscription_status, trial_ends_at, subscription_ends_at')
+      .select('subscription_status, trial_ends_at, subscription_ends_at, whatsapp_invoices_sent')
       .eq('id', shop.id)
       .single();
 
+    const currentStatus = updatedShop?.subscription_status || shop.subscription_status || 'trial';
+    const currentTrialEnds = updatedShop?.trial_ends_at || shop.trial_ends_at || null;
+    const currentSubEnds = updatedShop?.subscription_ends_at || shop.subscription_ends_at || null;
+    const currentSentCount = updatedShop?.whatsapp_invoices_sent ?? shop.whatsapp_invoices_sent ?? 0;
+
     const subAccess = getSubscriptionAccess({
-      subscription_status: updatedShop?.subscription_status || shop.subscription_status || 'trial',
-      trial_ends_at: updatedShop?.trial_ends_at || shop.trial_ends_at || null,
-      subscription_ends_at: updatedShop?.subscription_ends_at || shop.subscription_ends_at || null,
+      subscription_status: currentStatus,
+      trial_ends_at: currentTrialEnds,
+      subscription_ends_at: currentSubEnds,
     });
+
+    if (currentStatus === 'trial' && currentSentCount >= 10) {
+      return NextResponse.json(
+        {
+          error: "You've used your 10 free WhatsApp invoices. Upgrade to TruBill Pro at ₹349/month to continue.",
+        } satisfies ApiError,
+        { status: 403 }
+      );
+    }
 
     if (!subAccess.canSendInvoices) {
       return NextResponse.json(
@@ -221,6 +235,14 @@ export async function POST(
         delivery_status: 'delivered'
       })
       .eq('id', id);
+
+    // Increment whatsapp_invoices_sent counter
+    await supabase
+      .from('shops')
+      .update({
+        whatsapp_invoices_sent: currentSentCount + 1
+      })
+      .eq('id', shop.id);
 
     // Record audit log
     await supabase

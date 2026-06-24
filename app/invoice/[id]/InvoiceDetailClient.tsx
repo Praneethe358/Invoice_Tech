@@ -236,8 +236,9 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
       const res = await fetch(`/api/invoices/${inv.id}/send`, {
         method: 'POST',
       });
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        showToast('Failed to resend invoice', 'error');
+        showToast(data.error || 'Failed to resend invoice', 'error');
       } else {
         showToast('Invoice resent successfully', 'success');
         router.refresh();

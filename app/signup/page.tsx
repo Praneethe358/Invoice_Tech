@@ -243,7 +243,7 @@ export default function SignupPage() {
 
       // Step 2: Create Shop row
       const bType = getBusinessType(shopType);
-      const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+      const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
       const { data: newShop, error: shopError } = await supabase
         .from('shops')
         .insert({
