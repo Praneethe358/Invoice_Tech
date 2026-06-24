@@ -362,10 +362,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
               : i
           );
         }
-        let rate = gst_rate || 0;
-        if (shop.shop_type === 'clothing') {
-          rate = getClothingGstRate(finalPrice);
-        }
+        const rate = getItemGstRate(shop.shop_type, finalPrice, hsn_code, gst_rate || 0);
         return [...prev, { name, price: finalPrice, quantity: 1, hsn_code: hsn_code || null, gst_rate: rate, variant_id: variant_id || null }];
       });
     },
@@ -390,12 +387,16 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
   const updatePrice = useCallback(
     (name: string, price: number, variant_id?: string | null) => {
       setItems((prev) =>
-        prev.map((i) =>
-          (i.name === name && i.variant_id === variant_id) ? { ...i, price: price } : i
-        )
+        prev.map((i) => {
+          if (i.name === name && i.variant_id === variant_id) {
+            const rate = getItemGstRate(shop.shop_type, price, i.hsn_code, i.gst_rate || 0);
+            return { ...i, price, gst_rate: rate };
+          }
+          return i;
+        })
       );
     },
-    []
+    [shop.shop_type]
   );
 
   const getItemQty = (name: string): number => {
