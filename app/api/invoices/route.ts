@@ -6,6 +6,7 @@ import { logAudit } from '@/lib/audit';
 import { getCurrentUserContext } from '@/lib/current-user';
 import { getSubscriptionAccess, syncSubscriptionStatus } from '@/lib/subscription';
 import { getClothingGstRate } from '@/lib/clothing/gst';
+import { getFootwearGstRate } from '@/lib/footwear/gst';
 
 export async function POST(request: NextRequest) {
   try {
@@ -102,7 +103,12 @@ export async function POST(request: NextRequest) {
       let lineTotal = baseAmount;
 
       if (shop.gst_registered) {
-        const gstRate = shop.shop_type === 'clothing' ? getClothingGstRate(item.price) : (item.gst_rate || 0);
+        let gstRate = item.gst_rate || 0;
+        if (shop.shop_type === 'clothing') {
+          gstRate = getClothingGstRate(item.price);
+        } else if (shop.shop_type === 'footwear') {
+          gstRate = getFootwearGstRate(item.price, item.hsn_code);
+        }
         const gstAmount = baseAmount * (gstRate / 100);
         cgst = Number((gstAmount / 2).toFixed(2));
         sgst = Number((gstAmount / 2).toFixed(2));
