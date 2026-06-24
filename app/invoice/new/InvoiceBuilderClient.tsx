@@ -934,7 +934,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
                                   <div className="flex items-center gap-1.5">
                                     {shop.gst_registered && (
                                       <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#e6efff] text-[#0050e8] border border-[#cce0ff]">
-                                        {shop.shop_type === 'clothing' ? getClothingGstRate(Number(product.price)) : (product.gst_rate ?? 0)}% GST
+                                        {getItemGstRate(shop.shop_type, Number(product.price), product.hsn_code, product.gst_rate ?? 0)}% GST
                                       </span>
                                     )}
                                     {product.hsn_code && (
@@ -1162,7 +1162,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
                         <div className="flex flex-wrap items-center gap-1.5">
                           {shop.gst_registered && (
                             <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#e6efff] text-[#0050e8] border border-[#cce0ff]">
-                              {shop.shop_type === 'clothing' ? getClothingGstRate(Number(product.price)) : (product.gst_rate ?? 0)}% GST
+                              {getItemGstRate(shop.shop_type, Number(product.price), product.hsn_code, product.gst_rate ?? 0)}% GST
                             </span>
                           )}
                           {product.hsn_code && (
