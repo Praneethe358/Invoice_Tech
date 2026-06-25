@@ -160,8 +160,16 @@ begin
   if p_status = 'saved' then
     -- Process Inventory
     for v_item in select * from jsonb_array_elements(p_items) loop
-      select id, stock_qty, track_inventory into v_prod_id, v_stock_qty, v_track_inventory
-      from products where shop_id = p_shop_id and name = (v_item->>'name') limit 1;
+      if (v_item->>'variant_id') is not null then
+        select product_id into v_prod_id from product_variants where id = (v_item->>'variant_id')::uuid;
+        if v_prod_id is not null then
+          select stock_qty, track_inventory into v_stock_qty, v_track_inventory
+          from products where id = v_prod_id;
+        end if;
+      else
+        select id, stock_qty, track_inventory into v_prod_id, v_stock_qty, v_track_inventory
+        from products where shop_id = p_shop_id and name = (v_item->>'name') limit 1;
+      end if;
       
       if v_prod_id is not null then
         update products set 
@@ -322,8 +330,16 @@ begin
 
   -- Process Inventory
   for v_item in select name, qty, variant_id from invoice_items where invoice_id = p_invoice_id loop
-    select id, stock_qty, track_inventory into v_prod_id, v_stock_qty, v_track_inventory
-    from products where shop_id = v_shop_id and name = v_item.name limit 1;
+    if v_item.variant_id is not null then
+      select product_id into v_prod_id from product_variants where id = v_item.variant_id;
+      if v_prod_id is not null then
+        select stock_qty, track_inventory into v_stock_qty, v_track_inventory
+        from products where id = v_prod_id;
+      end if;
+    else
+      select id, stock_qty, track_inventory into v_prod_id, v_stock_qty, v_track_inventory
+      from products where shop_id = v_shop_id and name = v_item.name limit 1;
+    end if;
 
     if v_prod_id is not null then
       update products set 
@@ -488,8 +504,16 @@ begin
 
   -- 1. Restore stock
   for v_item in select name, qty, variant_id from invoice_items where invoice_id = p_invoice_id loop
-    select id, stock_qty, track_inventory into v_prod_id, v_stock_qty, v_track_inventory
-    from products where shop_id = v_shop_id and name = v_item.name limit 1;
+    if v_item.variant_id is not null then
+      select product_id into v_prod_id from product_variants where id = v_item.variant_id;
+      if v_prod_id is not null then
+        select stock_qty, track_inventory into v_stock_qty, v_track_inventory
+        from products where id = v_prod_id;
+      end if;
+    else
+      select id, stock_qty, track_inventory into v_prod_id, v_stock_qty, v_track_inventory
+      from products where shop_id = v_shop_id and name = v_item.name limit 1;
+    end if;
 
     if v_prod_id is not null then
       update products set 

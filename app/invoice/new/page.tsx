@@ -25,7 +25,7 @@ export default async function NewInvoicePage({ searchParams }: PageProps) {
   // Fetch shop products
   const { data: shop } = await supabase
     .from('shops')
-    .select('id, gst_registered, gstin, inventory_enabled, shop_type, subscription_status, trial_ends_at, subscription_ends_at')
+    .select('*')
     .eq('auth_user_id', user.id)
     .single();
 
