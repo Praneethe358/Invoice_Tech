@@ -452,7 +452,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
 
   return (
     <div className="min-h-screen bg-[#f9fafb]">
-      <Navbar />
+      <Navbar initialShop={shop} />
 
       <PageTransition className="w-full px-4 md:px-8 py-6 pb-24">
         {/* Header / Back */}

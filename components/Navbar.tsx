@@ -121,14 +121,21 @@ const ALLOWED_NAV_BY_ROLE: Record<UserRole, string[]> = {
   view_only: ['/dashboard', '/invoices', '/credit-debit-notes', '/customers', '/catalog'],
 };
 
-export default function Navbar() {
+interface NavbarProps {
+  initialShop?: Shop | null;
+  initialRole?: UserRole;
+}
+
+export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
   const [showProfile, setShowProfile] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
-  const [shopInfo, setShopInfo] = useState<Shop | null>(null);
-  const [userRole, setUserRole] = useState<UserRole>('owner');
+  // If initialShop is passed in from the server, use it immediately
+  const [shopInfo, setShopInfo] = useState<Shop | null>(initialShop ?? null);
+  const [shopLoaded, setShopLoaded] = useState(!!initialShop);
+  const [userRole, setUserRole] = useState<UserRole>(initialRole ?? 'owner');
   const [lowStockCount, setLowStockCount] = useState<number>(0);
 
   const purchasesItem = {
@@ -204,6 +211,15 @@ export default function Navbar() {
 
 
   useEffect(() => {
+    // If data was passed in as props, persist to localStorage and skip fetch
+    if (initialShop) {
+      try {
+        localStorage.setItem('trubill_navbar_shop_info', JSON.stringify(initialShop));
+        if (initialRole) localStorage.setItem('trubill_navbar_role', initialRole);
+      } catch {}
+      return; // Skip the Supabase fetch entirely
+    }
+
     // Hydrate state from localStorage immediately on mount (client-side only)
     if (typeof window !== 'undefined') {
       try {
@@ -220,6 +236,8 @@ export default function Navbar() {
           setLowStockCount(parseInt(storedLowStock, 10) || 0);
         }
       } catch {}
+      // Mark hydration complete regardless of whether cache hit
+      setShopLoaded(true);
     }
 
     const fetchNavbarData = async () => {
@@ -271,6 +289,7 @@ export default function Navbar() {
         if (shop) {
           setShopInfo(shop as any);
           setUserRole(resolvedRole);
+          setShopLoaded(true);
           if (typeof window !== 'undefined') {
             localStorage.setItem('trubill_navbar_shop_info', JSON.stringify(shop));
             localStorage.setItem('trubill_navbar_role', resolvedRole);
@@ -460,31 +479,48 @@ export default function Navbar() {
                 </svg>
               </button>
 
-              <Link href="/dashboard" className="flex items-center gap-2 max-w-[180px] min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e8eaed] shrink-0">
-                  {shopInfo?.logo_url ? (
-                    <img src={shopInfo.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
-                  ) : (
-                    <span className="text-xs font-bold text-[#0050e8]">
-                      {(shopInfo?.name || 'AS').slice(0, 2).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <span className="font-heading font-black text-sm text-[#1a1d26] truncate uppercase">
-                  {shopInfo?.name || 'Active Shop'}
+              <Link href="/dashboard" className="flex items-center gap-2">
+                <img src="/trubill-logo.png" alt="TruBill logo" className="w-8 h-8 object-contain shrink-0" loading="lazy" />
+                <span className="font-heading font-black text-sm">
+                  <span className="text-[#001048]">Tru</span>
+                  <span className="text-[#0050e8]">Bill</span>
                 </span>
               </Link>
             </div>
 
-            {userRole !== 'owner' && (
-              <div className="flex flex-col items-end justify-center">
-                <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-none uppercase text-white ${
+            <div className="flex flex-col items-end justify-center">
+              {!shopLoaded ? (
+                /* Shimmer skeleton while data loads */
+                <div className="h-6 w-28 rounded-lg bg-gray-200 animate-pulse" />
+              ) : (
+                <button
+                  onClick={() => setMobileMenuOpen(true)}
+                  className="flex items-center gap-1.5 bg-[#f3f4f6] hover:bg-[#e5e7eb] px-2 py-1 rounded-lg transition-colors max-w-[160px]"
+                  aria-label="Open navigation menu"
+                >
+                  {/* Shop logo / initials */}
+                  <div className="w-5 h-5 rounded bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e8eaed] shrink-0">
+                    {shopInfo?.logo_url ? (
+                      <img src={shopInfo.logo_url} alt="Shop logo" className="w-full h-full object-cover" loading="lazy" />
+                    ) : (
+                      <span className="text-[8px] font-bold text-[#0050e8] leading-none">
+                        {(shopInfo?.name || 'TB').slice(0, 2).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[11px] font-bold text-gray-700 truncate max-w-[110px]">
+                    {shopInfo?.name || 'My Shop'}
+                  </span>
+                </button>
+              )}
+              {shopLoaded && userRole !== 'owner' && (
+                <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-none uppercase text-white mt-0.5 ${
                   userRole === 'admin' ? 'bg-[#16a34a]' : userRole === 'billing_staff' ? 'bg-[#2563eb]' : 'bg-[#6b7280]'
                 }`}>
                   {userRole === 'admin' ? 'Admin' : userRole === 'billing_staff' ? 'Billing' : 'View Only'}
                 </span>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </nav>
         {/* Bottom Accent Strip (Primary Blue) */}

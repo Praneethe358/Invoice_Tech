@@ -117,7 +117,7 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
-      <Navbar />
+      <Navbar initialShop={shop} />
 
       <PageTransition className="w-full px-4 md:px-8 pt-6 md:pt-0 pb-24">
         {/* Header matched with profile logo format - Desktop only */}

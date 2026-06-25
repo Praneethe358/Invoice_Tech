@@ -404,7 +404,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
   if (!shop.gst_registered) {
     return (
       <div className="min-h-screen bg-[#f8fafc]">
-        <Navbar />
+        <Navbar initialShop={shop} />
         <PageTransition className="max-w-lg md:max-w-3xl mx-auto px-4 py-12">
           <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-4 shadow-sm">
             <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center mx-auto border border-amber-200">
@@ -429,7 +429,7 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
-      <Navbar />
+      <Navbar initialShop={shop} />
 
       <PageTransition className="w-full px-4 md:px-8 pt-6 md:pt-0 pb-24">
         {/* Header with greeting - Desktop only */}

@@ -205,7 +205,7 @@ export default function SettingsClient({
 
   return (
     <div className="min-h-screen bg-[#f5f6fa]">
-      <Navbar />
+      <Navbar initialShop={shop} />
       <PageTransition className="w-full px-4 md:px-8 pt-6 md:pt-0 pb-12">
         {/* Header with greeting - Desktop only */}
         <div className="hidden md:flex bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-xs items-center justify-between mb-6 md:sticky md:top-0 md:z-30">

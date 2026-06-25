@@ -93,7 +93,7 @@ export default function DashboardClient({
 
   return (
     <div className="min-h-screen bg-[#f5f6fa]">
-      <Navbar />
+      <Navbar initialShop={shop} initialRole="owner" />
 
       <PageTransition className={`w-full px-4 md:px-8 pt-6 md:pt-0 pb-24 ${!subAccess.canSendInvoices ? 'exclude-blur' : ''}`}>
         {/* Header with greeting - Desktop only */}
@@ -184,9 +184,9 @@ export default function DashboardClient({
                   <span className="text-[10px] font-bold text-[#4b5563] uppercase tracking-wide">Payables (To Pay)</span>
                   <p className="text-xl font-extrabold text-gray-400 mt-2">₹0.00</p>
                 </div>
-                <div className="bg-[#f0fdf4] border border-[#dcfce7] p-4 flex flex-col justify-between min-h-[90px] rounded-2xl md:rounded-none">
+                <div className="bg-white border border-[#e5e7eb] p-4 flex flex-col justify-between min-h-[90px] rounded-2xl md:rounded-none">
                   <span className="text-[10px] font-bold text-[#0050e8] uppercase tracking-wide">Sales (This Month)</span>
-                  <p className="text-xl font-extrabold text-[#16a34a] mt-2">₹{Number(stats.thisMonth || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p className="text-xl font-extrabold text-[#059669] mt-2">₹{Number(stats.thisMonth || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
                 <div className="bg-white border border-[#e5e7eb] p-4 flex flex-col justify-between min-h-[90px] rounded-2xl md:rounded-none">
                   <span className="text-[10px] font-bold text-[#6b7280] uppercase tracking-wide">Total Bills</span>
