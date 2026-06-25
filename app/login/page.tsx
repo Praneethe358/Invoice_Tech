@@ -51,7 +51,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex relative">
-      {/* DESKTOP LAYOUT (lg:flex) */}
+      {/* ==================== DESKTOP LAYOUT ==================== */}
       {/* Left — Branding panel (hidden on mobile) */}
       <div className="hidden lg:flex lg:w-1/2 gradient-hero gradient-hero-mesh relative items-center justify-center p-12 overflow-hidden">
         {/* Back Link */}
@@ -188,153 +188,162 @@ export default function LoginPage() {
         </motion.div>
       </div>
 
-      {/* MOBILE LAYOUT (lg:hidden) */}
-      <div className="lg:hidden w-full min-h-screen flex flex-col bg-[#0050e8]">
-        {/* Top Header Section */}
-        <div className="pt-12 pb-8 px-6 flex flex-col items-center text-center">
-          {/* Logo */}
-          <div className="flex items-center gap-2 mb-3">
-            <img src="/trubill-logo.png" alt="TruBill Logo" className="w-7 h-7 object-contain brightness-0 invert" />
-            <span className="font-heading font-black text-2xl tracking-tight text-white">
+      {/* ==================== MOBILE LAYOUT ==================== */}
+      <div className="lg:hidden w-full min-h-screen flex flex-col bg-gradient-to-b from-[#0050e8] via-[#003bb5] to-[#001c66] relative overflow-hidden">
+        {/* Decorative blurred orbs */}
+        <div className="absolute top-[-15%] right-[-20%] w-80 h-80 rounded-full bg-blue-400/20 blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-[10%] left-[-15%] w-64 h-64 rounded-full bg-indigo-500/15 blur-[80px] pointer-events-none" />
+
+        {/* Top Branding */}
+        <div className="flex flex-col items-center text-center pt-14 pb-6 px-6 relative z-10">
+          <div className="flex items-center gap-2.5 mb-3">
+            <img src="/trubill-logo.png" alt="TruBill Logo" className="w-9 h-9 object-contain brightness-0 invert" />
+            <span className="font-heading font-black text-[26px] tracking-tight text-white">
               TruBill
             </span>
           </div>
-          {/* Slogan */}
-          <p className="text-[#e6efff] text-xs font-semibold max-w-[280px] leading-relaxed">
+          <p className="text-blue-200/80 text-[13px] font-semibold max-w-[280px] leading-relaxed">
             GST Invoicing made simple for Tamil Nadu retail.
           </p>
         </div>
 
-        {/* Card Section */}
-        <div className="flex-1 bg-white rounded-t-[32px] px-6 pt-7 pb-10 flex flex-col justify-between shadow-[0_-12px_24px_rgba(0,0,0,0.08)]">
-          <div className="w-full max-w-[430px] mx-auto space-y-5">
-            {/* Back Home Link */}
-            <Link 
-              href="/" 
-              className="inline-flex items-center gap-1 text-[#0050e8] font-bold text-sm"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-              Home
-            </Link>
+        {/* Floating Card */}
+        <div className="flex-1 flex flex-col items-center justify-center px-5 pb-8 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="w-full max-w-[400px]"
+          >
+            <div className="bg-white rounded-[26px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] p-7 space-y-5">
+              {/* Back Home Link */}
+              <Link 
+                href="/" 
+                className="inline-flex items-center gap-1 text-[#0050e8] hover:text-[#0043c4] font-bold text-xs transition-colors"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                Home
+              </Link>
 
-            {/* Title / Subtitle */}
-            <div className="space-y-1">
-              <h1 className="text-2xl font-extrabold text-[#1a1d26]">
-                Welcome back
-              </h1>
-              <p className="text-xs text-slate-400 font-medium">
-                Sign in to your account
+              {/* Title */}
+              <div>
+                <h1 className="text-[22px] font-extrabold text-[#1a1d26] tracking-tight">
+                  Welcome back
+                </h1>
+                <p className="text-[11px] text-slate-400 font-bold mt-0.5">
+                  Sign in to your account
+                </p>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Email */}
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                    Email address
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoComplete="email"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50/60 pr-10 pl-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0050e8] focus:bg-white focus:ring-4 focus:ring-[#0050e8]/5"
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-350">
+                      <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                        <rect width="20" height="16" x="2" y="4" rx="2" />
+                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-350">
+                      <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                      </svg>
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      autoComplete="current-password"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-10 pr-10 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0050e8] focus:bg-white focus:ring-4 focus:ring-[#0050e8]/5"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      {showPassword ? (
+                        <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                          <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                          <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                          <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                          <line x1="2" x2="22" y1="2" y2="22" />
+                        </svg>
+                      ) : (
+                        <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white font-bold py-3.5 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] flex items-center justify-center gap-2 cursor-pointer shadow-[0_8px_24px_-4px_rgba(0,80,232,0.4)] active:scale-[0.98] text-sm mt-1"
+                >
+                  {loading ? (
+                    <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                      </svg>
+                      <span>Secure Sign In</span>
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {/* Bottom text */}
+              <p className="text-center text-[11px] text-slate-500 font-semibold pt-1">
+                Don&apos;t have an account?{' '}
+                <Link href="/signup" className="text-[#0050e8] font-black hover:underline">
+                  Create one free
+                </Link>
               </p>
             </div>
+          </motion.div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Email Input */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-extrabold text-slate-500 uppercase tracking-wide">
-                  Email address
-                </label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    autoComplete="email"
-                    className="w-full rounded-xl border border-slate-250 bg-slate-50/50 pr-10 pl-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0050e8] focus:bg-white focus:ring-4 focus:ring-[#0050e8]/5"
-                  />
-                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                      <rect width="20" height="16" x="2" y="4" rx="2" />
-                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* Password Input */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-extrabold text-slate-500 uppercase tracking-wide">
-                  Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                    </svg>
-                  </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    autoComplete="current-password"
-                    className="w-full rounded-xl border border-slate-250 bg-slate-50/50 pl-10 pr-10 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0050e8] focus:bg-white focus:ring-4 focus:ring-[#0050e8]/5"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
-                  >
-                    {showPassword ? (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
-                        <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
-                        <line x1="2" x2="22" y1="2" y2="22" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white font-bold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-blue-500/20 active:scale-[0.99] mt-2 text-sm"
-              >
-                {loading ? (
-                  <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                    </svg>
-                    <span>Secure Sign In</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Bottom text */}
-            <p className="text-center text-xs text-slate-500 font-medium">
-              Don&apos;t have an account?{' '}
-              <Link href="/signup" className="text-[#0050e8] font-bold hover:underline">
-                Create one free.
-              </Link>
-            </p>
-          </div>
-
-          {/* Footer Security logo */}
-          <div className="flex items-center justify-center gap-1.5 text-[9px] text-slate-400 mt-8 font-bold uppercase tracking-wider">
-            <svg className="w-3.5 h-3.5 text-slate-450" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+          {/* Footer Security badge */}
+          <div className="flex items-center justify-center gap-1.5 text-[9px] text-blue-200/50 mt-6 font-bold uppercase tracking-wider">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0110 0v4" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
             <span>Secured by TruBill • SSL Encrypted</span>
           </div>
@@ -343,4 +352,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
