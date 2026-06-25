@@ -13,6 +13,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Shop, Product, ProductVariant } from '@/lib/types';
 import BarcodeScannerModal from '@/components/BarcodeScannerModal';
 import { playBeep, triggerHaptic } from '@/lib/sound';
+import { sanitizeVariantField } from '@/lib/sanitize';
 
 interface Props {
   shop: Shop;
@@ -49,6 +50,7 @@ export default function CatalogClient({
   const [addingProduct, setAddingProduct] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [variantsProduct, setVariantsProduct] = useState<Product | null>(null);
+  const [editingVariant, setEditingVariant] = useState<ProductVariant | null>(null);
 
   // Form states for Add/Edit Product
   const [prodName, setProdName] = useState('');
@@ -99,6 +101,37 @@ export default function CatalogClient({
     setCustomCategories(merged);
     localStorage.setItem(`custom_categories_${shop.id}`, JSON.stringify(merged));
   }, [products, shop.id]);
+
+  // Fetch variants from Supabase
+  const fetchVariants = async (productId: string) => {
+    const { data, error } = await supabase
+      .from('product_variants')
+      .select('*')
+      .eq('product_id', productId)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      showToast('Failed to fetch variants', 'error');
+    } else if (data) {
+      setVariants(data as ProductVariant[]);
+    }
+  };
+
+  const refetchVariants = async () => {
+    if (variantsProduct) {
+      await fetchVariants(variantsProduct.id);
+    }
+  };
+
+  // Sync variants from Supabase on modal open or product switch
+  useEffect(() => {
+    if (variantsProduct) {
+      fetchVariants(variantsProduct.id);
+    } else {
+      setEditingVariant(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variantsProduct]);
 
   // Derived Categories lists
   const allCategories = useMemo(() => {
@@ -254,61 +287,120 @@ export default function CatalogClient({
     setShowAddNewCategoryInline(false);
   };
 
-  // Add Variant Handler
+  // Row Click Handler - Populate Form in Edit Mode
+  const handleRowClick = (variant: ProductVariant) => {
+    setEditingVariant(variant);
+    setNewVarSize(variant.size);
+    setNewVarColor(variant.color);
+    setNewVarSku(variant.sku);
+    setNewVarStockQty(String(variant.stock_qty || 0));
+    setNewVarLowStockThreshold(String(variant.low_stock_threshold || 5));
+  };
+
+  // Cancel edit mode
+  const handleCancelEdit = () => {
+    setEditingVariant(null);
+    setNewVarSize('');
+    setNewVarColor('');
+    setNewVarSku('');
+    setNewVarStockQty('0');
+    setNewVarLowStockThreshold('5');
+  };
+
+  // Unified Variant Add/Update Handler
   const handleAddVariant = async () => {
     if (!variantsProduct) return;
-    const size = newVarSize.trim();
-    const color = newVarColor.trim();
+    const size = sanitizeVariantField(newVarSize);
+    const color = sanitizeVariantField(newVarColor);
     if (!size || !color) {
       showToast('Size and Color are required', 'error');
       return;
     }
 
-    const generatedSku = newVarSku.trim() || `${variantsProduct.name.replace(/\s+/g, '-')}-${size.toUpperCase()}-${color.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const stockVal = parseInt(newVarStockQty) || 0;
     const thresholdVal = parseInt(newVarLowStockThreshold) || 5;
 
-    const payload = {
-      product_id: variantsProduct.id,
-      size,
-      color,
-      sku: generatedSku,
-      stock_qty: stockVal,
-      low_stock_threshold: thresholdVal,
-      barcode: generatedSku,
-      barcode_source: newVarSku.trim() ? 'scanned' : 'generated',
-    };
+    if (editingVariant) {
+      // UPDATE existing variant - never touch SKU
+      const payload = {
+        size,
+        color,
+        stock_qty: stockVal,
+        low_stock_threshold: thresholdVal,
+      };
 
-    const { data, error } = await supabase
-      .from('product_variants')
-      .insert(payload)
-      .select()
-      .single();
+      const previousStock = editingVariant.stock_qty || 0;
+      const stockDiff = stockVal - previousStock;
 
-    if (error || !data) {
-      showToast(`Failed to add variant: ${error?.message}`, 'error');
-    } else {
-      // Log initial stock if any
-      if (stockVal > 0) {
-        await supabase.from('inventory_logs').insert({
-          shop_id: shop.id,
-          product_id: variantsProduct.id,
-          variant_id: data.id,
-          change_qty: stockVal,
-          previous_qty: 0,
-          new_qty: stockVal,
-          reason: 'restock',
-        });
+      const { error } = await supabase
+        .from('product_variants')
+        .update(payload)
+        .eq('id', editingVariant.id);
+
+      if (error) {
+        showToast(`Failed to update variant: ${error.message}`, 'error');
+      } else {
+        if (stockDiff !== 0) {
+          await supabase.from('inventory_logs').insert({
+            shop_id: shop.id,
+            product_id: variantsProduct.id,
+            variant_id: editingVariant.id,
+            change_qty: stockDiff,
+            previous_qty: previousStock,
+            new_qty: stockVal,
+            reason: stockDiff > 0 ? 'restock' : 'reconciliation',
+          });
+        }
+        showToast('Variant updated successfully', 'success');
+        handleCancelEdit();
+        await refetchVariants();
       }
-      setVariants((prev) => [...prev, data as ProductVariant]);
-      showToast('Variant added successfully', 'success');
+    } else {
+      // INSERT new variant - generate SKU fresh
+      const generatedSku = newVarSku.trim() || `${variantsProduct.name.replace(/\s+/g, '-')}-${size.toUpperCase()}-${color.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-      // Clear input fields
-      setNewVarSize('');
-      setNewVarColor('');
-      setNewVarSku('');
-      setNewVarStockQty('0');
-      setNewVarLowStockThreshold('5');
+      const payload = {
+        product_id: variantsProduct.id,
+        size,
+        color,
+        sku: generatedSku,
+        stock_qty: stockVal,
+        low_stock_threshold: thresholdVal,
+        barcode: generatedSku,
+        barcode_source: newVarSku.trim() ? 'scanned' : 'generated',
+      };
+
+      const { data, error } = await supabase
+        .from('product_variants')
+        .insert(payload)
+        .select()
+        .single();
+
+      if (error || !data) {
+        showToast(`Failed to add variant: ${error?.message}`, 'error');
+      } else {
+        if (stockVal > 0) {
+          await supabase.from('inventory_logs').insert({
+            shop_id: shop.id,
+            product_id: variantsProduct.id,
+            variant_id: data.id,
+            change_qty: stockVal,
+            previous_qty: 0,
+            new_qty: stockVal,
+            reason: 'restock',
+          });
+        }
+        showToast('Variant added successfully', 'success');
+        
+        // Clear input fields
+        setNewVarSize('');
+        setNewVarColor('');
+        setNewVarSku('');
+        setNewVarStockQty('0');
+        setNewVarLowStockThreshold('5');
+        
+        await refetchVariants();
+      }
     }
   };
 
@@ -341,11 +433,9 @@ export default function CatalogClient({
         reason: 'restock',
       });
 
-      setVariants((prev) =>
-        prev.map((v) => (v.id === variant.id ? { ...v, stock_qty: newQty } : v))
-      );
       setVariantStockAddId(null);
       showToast(`Added ${qty} units to stock`, 'success');
+      await refetchVariants();
     }
   };
 
@@ -360,8 +450,8 @@ export default function CatalogClient({
     if (error) {
       showToast('Failed to delete variant', 'error');
     } else {
-      setVariants((prev) => prev.filter((v) => v.id !== id));
       showToast('Variant deleted', 'success');
+      await refetchVariants();
     }
   };
 
@@ -389,9 +479,9 @@ export default function CatalogClient({
     if (error) {
       showToast('Failed to delete selected variants', 'error');
     } else {
-      setVariants((prev) => prev.filter((v) => !selectedIds.includes(v.id)));
       setSelectedVariantsCheckbox({});
       showToast('Selected variants deleted successfully', 'success');
+      await refetchVariants();
     }
   };
 
@@ -1213,11 +1303,28 @@ export default function CatalogClient({
                 {/* Main Scrollable Content */}
                 <div className="overflow-y-auto flex-1 pr-1 space-y-6">
                   
-                  {/* ADD NEW VARIANT section */}
+                  {/* ADD/EDIT VARIANT section */}
                   <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-3">
-                      Add New Variant Option
-                    </h4>
+                    <div className="flex items-center justify-between mb-3">
+                      {editingVariant ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-amber-800 font-extrabold text-xs flex items-center gap-1">
+                            <span>✏️</span> Editing: {editingVariant.color} / Size {editingVariant.size}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleCancelEdit}
+                            className="text-[10px] text-slate-500 underline hover:text-rose-500 font-semibold cursor-pointer"
+                          >
+                            ✕ Cancel Edit
+                          </button>
+                        </div>
+                      ) : (
+                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                          ADD NEW VARIANT
+                        </h4>
+                      )}
+                    </div>
                     
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 items-end">
                       
@@ -1230,6 +1337,7 @@ export default function CatalogClient({
                           className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
                           value={newVarSize}
                           onChange={(e) => setNewVarSize(e.target.value)}
+                          onBlur={(e) => setNewVarSize(sanitizeVariantField(e.target.value))}
                         />
                       </div>
 
@@ -1242,6 +1350,7 @@ export default function CatalogClient({
                           className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
                           value={newVarColor}
                           onChange={(e) => setNewVarColor(e.target.value)}
+                          onBlur={(e) => setNewVarColor(sanitizeVariantField(e.target.value))}
                         />
                       </div>
 
@@ -1254,24 +1363,28 @@ export default function CatalogClient({
                           <input
                             type="text"
                             placeholder="Auto-generated if empty"
-                            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-400"
                             value={newVarSku}
                             onChange={(e) => setNewVarSku(e.target.value)}
+                            disabled={!!editingVariant}
                           />
                           <button
                             type="button"
                             onClick={() => setIsNewVarSkuScannerOpen(true)}
-                            className="bg-slate-100 hover:bg-slate-200 border rounded-lg px-2 flex items-center justify-center cursor-pointer"
+                            className="bg-slate-100 hover:bg-slate-200 border rounded-lg px-2 flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Scan Barcode"
+                            disabled={!!editingVariant}
                           >
                             📸
                           </button>
                         </div>
                       </div>
 
-                      {/* Initial Stock */}
+                      {/* Initial/Current Stock */}
                       <div>
-                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Initial Stock</label>
+                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">
+                          {editingVariant ? 'Stock Quantity' : 'Initial Stock'}
+                        </label>
                         <input
                           type="number"
                           min="0"
@@ -1297,14 +1410,14 @@ export default function CatalogClient({
 
                     <div className="mt-3 flex items-center justify-between text-[10px]">
                       <span className="text-slate-400 italic">
-                        Preview SKU: {generatedSkuPreview}
+                        {editingVariant ? 'SKU is locked and immutable' : `Preview SKU: ${generatedSkuPreview}`}
                       </span>
                       <button
                         type="button"
                         onClick={handleAddVariant}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-lg shadow-xs cursor-pointer text-xs"
                       >
-                        + Add Variant
+                        {editingVariant ? 'Save Changes' : '+ Add Variant'}
                       </button>
                     </div>
 
@@ -1392,9 +1505,17 @@ export default function CatalogClient({
                               }
 
                               return (
-                                <tr key={variant.id} className="hover:bg-slate-50/50">
+                                <tr
+                                  key={variant.id}
+                                  onClick={() => handleRowClick(variant)}
+                                  className={`cursor-pointer transition-colors ${
+                                    editingVariant?.id === variant.id
+                                      ? 'bg-yellow-50 border-l-4 border-yellow-400 font-medium'
+                                      : 'hover:bg-slate-50/50'
+                                  }`}
+                                >
                                   {/* Checkbox */}
-                                  <td className="py-2.5 px-3 text-center">
+                                  <td className="py-2.5 px-3 text-center" onClick={(e) => e.stopPropagation()}>
                                     <input
                                       type="checkbox"
                                       checked={isChecked}
@@ -1424,7 +1545,7 @@ export default function CatalogClient({
                                     
                                     {/* Print copies input per-row ONLY if checked (printing triggered) */}
                                     {isChecked && (
-                                      <div className="flex items-center gap-1.5 mt-1">
+                                      <div className="flex items-center gap-1.5 mt-1" onClick={(e) => e.stopPropagation()}>
                                         <span className="text-[9px] text-blue-600 font-bold">Print Copies:</span>
                                         <input
                                           type="number"
@@ -1441,7 +1562,7 @@ export default function CatalogClient({
                                   </td>
 
                                   {/* Stock status & Inline Stock adjust */}
-                                  <td className="py-2.5 px-3 text-right">
+                                  <td className="py-2.5 px-3 text-right" onClick={(e) => e.stopPropagation()}>
                                     <div className="flex items-center justify-end gap-2">
                                       <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ${stockColorClass}`}>
                                         {stock} units
@@ -1449,7 +1570,7 @@ export default function CatalogClient({
 
                                       {/* Inline + Add Stock */}
                                       {variantStockAddId === variant.id ? (
-                                        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                        <div className="flex items-center gap-1">
                                           <input
                                             type="number"
                                             className="w-12 px-1 py-0.5 text-xs border rounded-md text-center bg-white"
@@ -1490,7 +1611,7 @@ export default function CatalogClient({
                                   </td>
 
                                   {/* Delete Variant */}
-                                  <td className="py-2.5 px-3 text-right">
+                                  <td className="py-2.5 px-3 text-right" onClick={(e) => e.stopPropagation()}>
                                     <button
                                       onClick={() => handleDeleteVariant(variant.id)}
                                       className="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
