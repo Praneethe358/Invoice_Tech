@@ -28,6 +28,11 @@ export default function CatalogClient({
   const supabase = useMemo(() => createClient(), []);
   const { showToast } = useToast();
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Active Tab
   const [activeTab, setActiveTab] = useState<'products' | 'categories'>('products');
 
@@ -532,37 +537,80 @@ export default function CatalogClient({
   }, [newVarSize, newVarColor, variantsProduct]);
 
   return (
-    <PageTransition>
-      <div className="min-h-screen bg-[#F9FAFB] text-slate-900 pb-16">
-        <Navbar />
+    <div className="min-h-screen bg-[#f5f6fa] text-slate-900">
+      <Navbar />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-          
-          {/* Header Area */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+      <PageTransition className="w-full px-4 md:px-8 pt-6 md:pt-0 pb-24">
+        {/* Header with greeting - Desktop only */}
+        <div className="hidden md:flex bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-xs items-center justify-between mb-6 md:sticky md:top-0 md:z-30">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-none bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
+              {shop.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
+              ) : (
+                <div className="w-full h-full bg-[#0050e8] flex items-center justify-center text-white">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                </div>
+              )}
+            </div>
             <div>
-              <h1 className="text-2xl font-extrabold text-[#111827] tracking-tight">
-                Product Catalog
+              <h1 className="text-xl font-bold text-gray-900 leading-tight">
+                {shop.name}
               </h1>
-              <p className="text-sm text-slate-500 mt-1">
-                Manage your product models, categories, pricing, and variants for billing.
+              <p className="text-[#6b7280] text-[10px] mt-0.5 font-medium">
+                {shop.shop_type.replace('_', ' ').toUpperCase()} · GSTIN: {shop.gstin || 'None'}
               </p>
             </div>
+          </div>
+          <div className="text-right">
+            <span className="text-[10px] font-bold text-[#6b7280] uppercase tracking-wider block">Logged In As</span>
+            <p className="text-xs font-bold text-slate-800 mt-1">
+              Good {mounted ? (new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening') : 'day'}!
+            </p>
+          </div>
+        </div>
 
-            <div className="flex items-center gap-3">
+        {/* Page Title Header - Mobile only */}
+        <div className="mb-6 md:hidden">
+          <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
+            Product Catalog
+          </h1>
+          <p className="text-[10px] text-gray-500 font-semibold mt-1">
+            Good {mounted ? (new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening') : 'day'}! Manage items, barcodes and categories.
+          </p>
+        </div>
+
+        {/* Content Wrapper */}
+        <div className="max-w-7xl mx-auto pt-2">
+          
+          {/* Header Area & Action - Desktop/Tablet view */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div className="hidden md:block">
+              <h2 className="text-lg font-bold text-[#111827]">Catalog Items</h2>
+              <p className="text-xs text-slate-500">Manage your product models, categories, pricing, and variants for billing.</p>
+            </div>
+
+            <div className="flex items-center justify-between w-full md:w-auto">
+              <div className="md:hidden">
+                <h2 className="text-sm font-bold text-[#111827]">Catalog Items</h2>
+              </div>
               <Button
                 onClick={() => {
                   setEditingProduct(null);
                   setProdName('');
                   setProdPrice('');
                   setProdHsn('');
-                  setProdGst('12'); // Default GST rate for footwear is usually 12% or 5%
+                  setProdGst('12');
                   setProdDescription('');
                   setProdCategory('');
                   setAddingProduct(true);
                 }}
                 variant="primary"
-                className="shadow-md font-semibold text-xs px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+                className="shadow-xs font-semibold text-xs px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
               >
                 + New Product
               </Button>
@@ -1491,7 +1539,7 @@ export default function CatalogClient({
           }}
         />
 
-      </div>
-    </PageTransition>
+      </PageTransition>
+    </div>
   );
 }
