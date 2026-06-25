@@ -286,52 +286,7 @@ export default function SignupPage() {
 
       // Step 3: Insert starter catalog products
       if (shopType === 'footwear') {
-        const footwearCatalog = STARTER_CATALOGS['footwear'] || [];
-        const productsToInsert = footwearCatalog.map((item) => ({
-          shop_id: newShop.id,
-          name: item.name,
-          price: item.price,
-          hsn_code: item.hsn_code || null,
-          gst_rate: item.gst_rate || 0,
-          category: item.category || null,
-          track_inventory: true,
-        }));
-
-        const { data: insertedProducts, error: productsError } = await supabase
-          .from('products')
-          .insert(productsToInsert)
-          .select('id, name');
-
-        if (productsError) {
-          console.error('Failed to pre-populate footwear starter catalog:', productsError);
-        } else if (insertedProducts && insertedProducts.length > 0) {
-          const nameToIdMap = new Map<string, string>();
-          insertedProducts.forEach((p: { id: string; name: string }) => {
-            nameToIdMap.set(p.name, p.id);
-          });
-
-          const { FOOTWEAR_STARTER_VARIANTS } = await import('@/lib/starter-catalogs');
-          const variantsToInsert = FOOTWEAR_STARTER_VARIANTS.map((v: any) => {
-            const productId = nameToIdMap.get(v.product_name);
-            return {
-              product_id: productId,
-              size: v.size,
-              color: v.color,
-              sku: v.sku,
-              stock_qty: v.stock_qty,
-              barcode: v.sku,
-            };
-          }).filter((v: any) => !!v.product_id);
-
-          if (variantsToInsert.length > 0) {
-            const { error: variantsError } = await supabase
-              .from('product_variants')
-              .insert(variantsToInsert);
-            if (variantsError) {
-              console.error('Failed to pre-populate footwear variants:', variantsError);
-            }
-          }
-        }
+        // Purged starter data seeding for footwear shops as requested
       } else if (catalogItems.length > 0) {
         const productsToInsert = catalogItems.map((item) => ({
           shop_id: newShop.id,
