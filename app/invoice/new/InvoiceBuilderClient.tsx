@@ -43,9 +43,11 @@ interface Props {
     subscription_ends_at?: string | null;
   };
   initialDraft?: any;
+  userRole: string;
+  userId: string;
 }
 
-export default function InvoiceBuilderClient({ products: initialProducts, initialVariants = [], shopId, shop, initialDraft }: Props) {
+export default function InvoiceBuilderClient({ products: initialProducts, initialVariants = [], shopId, shop, initialDraft, userRole, userId }: Props) {
   const supabase = createClient();
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [variants, setVariants] = useState<ProductVariant[]>(initialVariants);
@@ -110,6 +112,37 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
   const [phoneError, setPhoneError] = useState('');
   const [customerName, setCustomerName] = useState(initialDraft?.customer_name || '');
   const [customerGstin, setCustomerGstin] = useState(initialDraft?.customer_gstin || '');
+  
+  const [pricingMode, setPricingMode] = useState<'retail' | 'wholesale'>('retail');
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [passcode, setPasscode] = useState('');
+  const [pendingStatus, setPendingStatus] = useState<'draft' | 'saved' | 'sent' | null>(null);
+  const [managerApproval, setManagerApproval] = useState<any>(null);
+  const [verifyingPasscode, setVerifyingPasscode] = useState(false);
+  const [passcodeError, setPasscodeError] = useState('');
+
+  const isGstinValid = (gst: string) => {
+    const cleanGst = gst.trim().toUpperCase();
+    const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+    return gstinRegex.test(cleanGst);
+  };
+
+  const handleCustomerGstinChange = (value: string) => {
+    const cleanVal = value.toUpperCase();
+    setCustomerGstin(cleanVal);
+
+    if (isGstinValid(cleanVal)) {
+      if (pricingMode !== 'wholesale') {
+        setPricingMode('wholesale');
+        showToast('Valid GSTIN detected! Switched invoice to Wholesale prices.', 'success');
+      }
+    } else {
+      if (pricingMode !== 'retail') {
+        setPricingMode('retail');
+        showToast('Reverted invoice to Retail prices.', 'info');
+      }
+    }
+  };
   const [paymentStatus, setPaymentStatus] = useState<'paid' | 'unpaid' | 'partial'>(initialDraft?.payment_status || 'paid');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'upi' | 'bank_transfer' | 'other'>(initialDraft?.payment_method || 'cash');
   const [paymentNote, setPaymentNote] = useState(initialDraft?.payment_note || '');
@@ -305,13 +338,13 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Recalculate cart item prices when customer price tier changes
+  // Recalculate cart item prices when customer price tier or pricing mode changes
   useEffect(() => {
     if (items.length === 0) return;
     setItems((prev) =>
       prev.map((item) => {
         let finalPrice = item.price;
-        const isWholesale = selectedCustomer?.price_tier === 'wholesale';
+        const isWholesale = pricingMode === 'wholesale' || selectedCustomer?.price_tier === 'wholesale';
         
         if (item.variant_id) {
           const v = variants.find((val) => val.id === item.variant_id);
@@ -341,21 +374,32 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
         };
       })
     );
-  }, [selectedCustomer, variants, products, shop.shop_type]);
+  }, [pricingMode, selectedCustomer, variants, products, shop.shop_type]);
 
   const selectCustomer = (c: Customer) => {
     setPhone(c.phone.slice(-10));
     setCustomerName(c.name);
-    setCustomerGstin(c.gstin || '');
+    const gstinVal = c.gstin || '';
+    setCustomerGstin(gstinVal);
     setSelectedCustomer(c);
     setShowSuggestions(false);
     setPhoneError('');
+
+    if (gstinVal && isGstinValid(gstinVal)) {
+      setPricingMode('wholesale');
+      showToast('Valid GSTIN detected! Switched invoice to Wholesale prices.', 'success');
+    } else if (c.price_tier === 'wholesale') {
+      setPricingMode('wholesale');
+    } else {
+      setPricingMode('retail');
+    }
   };
 
   const addOrIncrement = useCallback(
     (name: string, price: number, hsn_code?: string | null, gst_rate?: number, variant_id?: string | null) => {
       let finalPrice = price;
-      if (selectedCustomer?.price_tier === 'wholesale') {
+      const isWholesale = pricingMode === 'wholesale' || selectedCustomer?.price_tier === 'wholesale';
+      if (isWholesale) {
         if (variant_id) {
           const v = variants.find((val) => val.id === variant_id);
           if (v) {
@@ -527,7 +571,14 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
     }
 
     if (shop.shop_type === 'footwear') {
-      gstRate = getFootwearGstRate(price, hsn);
+      const cleanHsn = hsn.replace(/\D/g, '').trim();
+      if (cleanHsn.startsWith('64')) {
+        gstRate = price <= 1000 ? 5 : 12;
+      } else {
+        gstRate = 18;
+      }
+    } else if (shop.shop_type === 'clothing') {
+      gstRate = getClothingGstRate(price);
     }
 
     addOrIncrement(name, price, hsn, gstRate);
@@ -603,6 +654,24 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
       }
     }
 
+    // MSP checks
+    const itemsBelowMsp = items.filter((item) => {
+      if (!item.variant_id) return false;
+      const v = variants.find((val) => val.id === item.variant_id);
+      if (!v) return false;
+      if (v.min_selling_price === null || v.min_selling_price === undefined) return false;
+      return item.price < Number(v.min_selling_price);
+    });
+
+    if (itemsBelowMsp.length > 0) {
+      const isPrivileged = userRole === 'owner' || userRole === 'admin';
+      if (!isPrivileged && !managerApproval) {
+        setPendingStatus(targetStatus);
+        setShowApprovalModal(true);
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -645,6 +714,34 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
 
       const id = isEditingDraft ? initialDraft.id : resData.id;
       const invoice_number = isEditingDraft ? initialDraft.invoice_number : resData.invoice_number;
+
+      // Log silent override or approved override
+      if (itemsBelowMsp.length > 0) {
+        const isSilent = userRole === 'owner' || userRole === 'admin';
+        await fetch('/api/audit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: isSilent ? 'MSP_OVERRIDE_SILENT' : 'MSP_OVERRIDE_AUTHORIZED',
+            entity_type: 'invoice',
+            entity_id: id,
+            entity_label: invoice_number,
+            details: {
+              cashier: isSilent ? null : { role: userRole, userId: userId },
+              authorized_by: managerApproval || { name: 'Owner/Manager', role: userRole },
+              items: itemsBelowMsp.map(i => {
+                const v = variants.find(val => val.id === i.variant_id);
+                return {
+                  name: i.name,
+                  price: i.price,
+                  msp: v ? Number(v.min_selling_price) : 0
+                };
+              })
+            }
+          })
+        }).catch(e => console.error(e));
+      }
+      setManagerApproval(null);
 
       const isAlreadyPublished = initialDraft && (initialDraft.status === 'saved' || initialDraft.status === 'sent');
 
@@ -1512,9 +1609,44 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
                   label="Customer GSTIN (Optional)"
                   placeholder="e.g. 33AAAAA0000A1Z2"
                   value={customerGstin}
-                  onChange={(e) => setCustomerGstin(e.target.value.toUpperCase())}
+                  onChange={(e) => handleCustomerGstinChange(e.target.value)}
                 />
               )}
+
+              {/* Pricing Mode Toggle Selector */}
+              <div className="mt-2.5 flex items-center justify-between bg-slate-50 border border-slate-200/60 rounded-xl p-2.5">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Pricing Mode</span>
+                <div className="flex bg-slate-200/60 p-0.5 rounded-lg border border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPricingMode('retail');
+                      showToast('Reverted invoice to Retail prices.', 'info');
+                    }}
+                    className={`px-3 py-1 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                      pricingMode === 'retail'
+                        ? 'bg-white text-slate-800 shadow-2xs'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    B2C (Retail)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPricingMode('wholesale');
+                      showToast('Switched invoice to Wholesale prices.', 'success');
+                    }}
+                    className={`px-3 py-1 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                      pricingMode === 'wholesale'
+                        ? 'bg-blue-600 text-white shadow-2xs'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    B2B (Wholesale)
+                  </button>
+                </div>
+              </div>
 
               <div className="relative" ref={dropdownRef}>
                 <Input
@@ -1874,6 +2006,145 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
         onUpdateQty={updateQty}
         totalPrice={calculations.total}
       />
+      {/* Manager Approval Modal */}
+      <AnimatePresence>
+        {showApprovalModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setShowApprovalModal(false);
+                setPasscode('');
+                setPasscodeError('');
+              }}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs"
+            />
+
+            {/* Modal Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-2xl p-6 overflow-hidden z-10"
+            >
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-12 h-12 bg-amber-50 rounded-full border border-amber-200 flex items-center justify-center text-amber-500">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+
+                <div className="space-y-1.5">
+                  <h3 className="text-lg font-bold text-slate-900 font-sans">Manager Authorization Required</h3>
+                  <p className="text-xs text-slate-500 max-w-xs leading-relaxed font-sans">
+                    One or more items in the cart are priced below their Minimum Selling Price (MSP). A manager or owner passcode is required to authorize checkout.
+                  </p>
+                </div>
+
+                {/* List of items below MSP */}
+                <div className="w-full bg-slate-50 border border-slate-200/60 rounded-xl p-3 text-left space-y-1.5 max-h-32 overflow-y-auto">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-sans">Affected Items</span>
+                  {items.filter(item => {
+                    if (!item.variant_id) return false;
+                    const v = variants.find(val => val.id === item.variant_id);
+                    if (!v || v.min_selling_price === null) return false;
+                    return item.price < Number(v.min_selling_price);
+                  }).map(item => {
+                    const v = variants.find(val => val.id === item.variant_id);
+                    return (
+                      <div key={item.name} className="flex justify-between text-xs font-sans">
+                        <span className="font-semibold text-slate-700 truncate max-w-[200px]">{item.name}</span>
+                        <span className="text-slate-500 font-medium">
+                          ₹{item.price.toFixed(2)} <span className="text-red-500 font-semibold">(MSP: ₹{Number(v?.min_selling_price).toFixed(2)})</span>
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Passcode input field */}
+                <div className="w-full space-y-3 pt-2">
+                  <div className="relative">
+                    <input
+                      type="password"
+                      value={passcode}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                        setPasscode(val);
+                        if (passcodeError) setPasscodeError('');
+                      }}
+                      placeholder="Enter 6-digit passcode"
+                      maxLength={6}
+                      autoFocus
+                      className="w-full tracking-[0.5em] text-center bg-slate-50 border border-slate-200 rounded-xl py-3 text-lg font-bold text-slate-800 placeholder:tracking-normal placeholder:text-sm focus:outline-none focus:border-blue-600 focus:bg-white"
+                    />
+                  </div>
+
+                  {passcodeError && (
+                    <p className="text-xs text-red-500 font-semibold flex items-center justify-center gap-1 font-sans">
+                      <span>⚠️</span> {passcodeError}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex gap-3 w-full pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowApprovalModal(false);
+                      setPasscode('');
+                      setPasscodeError('');
+                    }}
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-4 text-xs rounded-xl transition-all cursor-pointer font-sans"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={passcode.length !== 6 || verifyingPasscode}
+                    onClick={async () => {
+                      setVerifyingPasscode(true);
+                      setPasscodeError('');
+                      try {
+                        const response = await fetch('/api/verify-passcode', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ passcode }),
+                        });
+                        const data = await response.json();
+                        if (response.ok && data.success) {
+                          showToast(`Authorized by ${data.authorizedBy.name}`, 'success');
+                          setManagerApproval(data.authorizedBy);
+                          setShowApprovalModal(false);
+                          setPasscode('');
+                          // Trigger submit with the saved manager approval
+                          setTimeout(() => {
+                            if (pendingStatus) {
+                              handleSubmit(pendingStatus);
+                            }
+                          }, 100);
+                        } else {
+                          setPasscodeError(data.error || 'Invalid passcode. Please try again.');
+                        }
+                      } catch (err) {
+                        setPasscodeError('Error verifying passcode');
+                      } finally {
+                        setVerifyingPasscode(false);
+                      }
+                    }}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 text-xs rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-sans"
+                  >
+                    {verifyingPasscode ? 'Verifying...' : 'Authorize'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

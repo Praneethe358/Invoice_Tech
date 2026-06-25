@@ -2,6 +2,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { Product } from '@/lib/types';
+import { getCurrentUserContext } from '@/lib/current-user';
 import InvoiceBuilderClient from './InvoiceBuilderClient';
 
 export const dynamic = 'force-dynamic';
@@ -15,18 +16,15 @@ export default async function NewInvoicePage({ searchParams }: PageProps) {
   const draftId = params?.draftId;
 
   const supabase = await createClient();
+  const context = await getCurrentUserContext(supabase);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  if (!context) redirect('/login');
 
-  if (!user) redirect('/login');
-
-  // Fetch shop products
+  // Fetch shop details for active context
   const { data: shop } = await supabase
     .from('shops')
     .select('*')
-    .eq('auth_user_id', user.id)
+    .eq('id', context.shopId)
     .single();
 
   if (!shop) redirect('/signup');
@@ -66,6 +64,8 @@ export default async function NewInvoicePage({ searchParams }: PageProps) {
       shopId={shop.id}
       shop={shop as any}
       initialDraft={initialDraft}
+      userRole={context.role}
+      userId={context.userId}
     />
   );
 }

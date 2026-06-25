@@ -24,7 +24,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { role } = body;
+    const { role, passcode } = body;
 
     const validRoles = ['admin', 'billing_staff', 'view_only'];
     if (!role || !validRoles.includes(role)) {
@@ -45,9 +45,14 @@ export async function PATCH(
 
     const oldRole = staff.role;
 
+    const updateData: Record<string, any> = { role };
+    if (passcode !== undefined) {
+      updateData.passcode = passcode ? passcode.trim() : null;
+    }
+
     const { error: updateError } = await supabase
       .from('staff')
-      .update({ role })
+      .update(updateData)
       .eq('id', id);
 
     if (updateError) {

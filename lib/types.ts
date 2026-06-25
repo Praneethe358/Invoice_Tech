@@ -326,6 +326,7 @@ export interface Staff {
   invite_sent_at: string | null;
   joined_at: string | null;
   created_at: string;
+  passcode?: string | null;
 }
 
 export interface AuditLog {
@@ -354,4 +355,6 @@ export interface ProductVariant {
   created_at: string;
   barcode?: string | null;
   barcode_source?: 'scanned' | 'generated' | null;
+  cost_price?: number | null;
+  min_selling_price?: number | null;
 }

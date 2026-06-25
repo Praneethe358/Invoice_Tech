@@ -43,6 +43,7 @@ export default function SettingsClient({
   // GST State Details
   const [gstRegistered, setGstRegistered] = useState(shop.gst_registered || false);
   const [gstin, setGstin] = useState(shop.gstin || '');
+  const [passcode, setPasscode] = useState((shop as any).passcode || '');
 
   const config = SHOP_CONFIG[shop.shop_type as ShopType] || SHOP_CONFIG.other;
   const isInventoryAllowed = config.inventoryEnabled || shop.shop_type === 'other';
@@ -187,6 +188,7 @@ export default function SettingsClient({
         gst_registered: gstRegistered,
         gstin: gstRegistered ? gstin.trim().toUpperCase() : null,
         inventory_enabled: inventoryEnabledGlobal,
+        passcode: passcode.trim() || null,
       })
       .eq('id', shop.id);
 
@@ -395,6 +397,14 @@ export default function SettingsClient({
               value={shopPhone}
               onChange={(e) => setShopPhone(e.target.value)}
               type="tel"
+              disabled={!canEditShop}
+            />
+            <Input
+              label="Manager Approval Passcode (6 digits, defaults to 123456)"
+              value={passcode}
+              onChange={(e) => setPasscode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="e.g. 123456"
+              maxLength={6}
               disabled={!canEditShop}
             />
 

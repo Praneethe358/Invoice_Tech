@@ -41,6 +41,7 @@ export default function StaffClient({ staff: initialStaff, ownerName, shopName }
   const [generatedName, setGeneratedName] = useState('');
   const [editingRoleId, setEditingRoleId] = useState<string | null>(null);
   const [editRole, setEditRole] = useState<string>('');
+  const [editPasscode, setEditPasscode] = useState<string>('');
   const [confirmDeactivateId, setConfirmDeactivateId] = useState<string | null>(null);
 
   const handleInvite = async () => {
@@ -78,14 +79,14 @@ export default function StaffClient({ staff: initialStaff, ownerName, shopName }
       const res = await fetch(`/api/staff/${staffId}/role`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: editRole }),
+        body: JSON.stringify({ role: editRole, passcode: editPasscode }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      setStaff((prev) => prev.map((s) => (s.id === staffId ? { ...s, role: editRole as any } : s)));
+      setStaff((prev) => prev.map((s) => (s.id === staffId ? { ...s, role: editRole as any, passcode: editPasscode || null } : s)));
       setEditingRoleId(null);
-      showToast(`Role updated to ${ROLE_LABELS[editRole as keyof typeof ROLE_LABELS]}`, 'success');
+      showToast('Staff role and passcode updated successfully', 'success');
     } catch (err: any) {
       showToast(err.message || 'Failed to update role', 'error');
     }
@@ -355,10 +356,10 @@ export default function StaffClient({ staff: initialStaff, ownerName, shopName }
                       {member.status === 'active' && (
                         <div className="flex items-center gap-1.5">
                           <button
-                            onClick={() => { setEditingRoleId(member.id); setEditRole(member.role); }}
+                            onClick={() => { setEditingRoleId(member.id); setEditRole(member.role); setEditPasscode((member as any).passcode || ''); }}
                             className="text-[10px] font-bold text-[#0050e8] hover:underline"
                           >
-                            Edit Role
+                            Edit Role / Passcode
                           </button>
                           {confirmDeactivateId === member.id ? (
                             <div className="flex items-center gap-1 text-[10px] font-bold">
@@ -397,32 +398,49 @@ export default function StaffClient({ staff: initialStaff, ownerName, shopName }
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden mt-3 pt-3 border-t border-dashed border-gray-200"
                       >
-                        <div className="flex items-center gap-3 flex-wrap">
-                          {(['admin', 'billing_staff', 'view_only'] as const).map((r) => (
+                        <div className="flex flex-col gap-3">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            {(['admin', 'billing_staff', 'view_only'] as const).map((r) => (
+                              <button
+                                key={r}
+                                onClick={() => setEditRole(r)}
+                                className={`px-3 py-1.5 text-[10px] font-bold rounded-none border transition-all ${
+                                  editRole === r
+                                    ? 'border-[#0050e8] bg-[#0050e8]/10 text-[#0050e8]'
+                                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                                }`}
+                              >
+                                {ROLE_LABELS[r]}
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <div className="flex items-end gap-3 flex-wrap">
+                            <div className="flex flex-col gap-1 w-full max-w-[200px]">
+                              <label className="block text-[9px] font-bold text-gray-500 uppercase">Numeric Passcode (6 digits)</label>
+                              <input
+                                type="text"
+                                value={editPasscode}
+                                onChange={(e) => setEditPasscode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                placeholder="Defaults to 123456"
+                                maxLength={6}
+                                className="bg-[#f9fafb] border border-[#e5e7eb] rounded-none py-1.5 px-3 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#0050e8]"
+                              />
+                            </div>
+                            
                             <button
-                              key={r}
-                              onClick={() => setEditRole(r)}
-                              className={`px-3 py-1.5 text-[10px] font-bold rounded-none border transition-all ${
-                                editRole === r
-                                  ? 'border-[#0050e8] bg-[#0050e8]/10 text-[#0050e8]'
-                                  : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                              }`}
+                              onClick={() => handleEditRole(member.id)}
+                              className="bg-[#0050e8] text-white px-4 py-1.5 text-[10px] font-bold rounded-none h-[34px]"
                             >
-                              {ROLE_LABELS[r]}
+                              Save Settings
                             </button>
-                          ))}
-                          <button
-                            onClick={() => handleEditRole(member.id)}
-                            className="bg-[#0050e8] text-white px-4 py-1.5 text-[10px] font-bold rounded-none"
-                          >
-                            Save Role
-                          </button>
-                          <button
-                            onClick={() => setEditingRoleId(null)}
-                            className="text-[10px] font-bold text-gray-400 hover:text-gray-600"
-                          >
-                            Cancel
-                          </button>
+                            <button
+                              onClick={() => setEditingRoleId(null)}
+                              className="text-[10px] font-bold text-gray-400 hover:text-gray-600 h-[34px]"
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </div>
                       </motion.div>
                     )}

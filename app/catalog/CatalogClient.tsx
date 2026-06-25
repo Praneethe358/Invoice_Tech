@@ -61,6 +61,8 @@ export default function CatalogClient({
   const [prodDescription, setProdDescription] = useState('');
   const [showAddNewCategoryInline, setShowAddNewCategoryInline] = useState(false);
   const [newInlineCategoryName, setNewInlineCategoryName] = useState('');
+  const [prodWholesalePrice, setProdWholesalePrice] = useState('');
+  const [gstManuallySet, setGstManuallySet] = useState(false);
 
   // Form states for Add Variant in Modal
   const [newVarSize, setNewVarSize] = useState('');
@@ -68,6 +70,8 @@ export default function CatalogClient({
   const [newVarSku, setNewVarSku] = useState('');
   const [newVarStockQty, setNewVarStockQty] = useState('0');
   const [newVarLowStockThreshold, setNewVarLowStockThreshold] = useState('5');
+  const [newVarCostPrice, setNewVarCostPrice] = useState('');
+  const [newVarMinSellingPrice, setNewVarMinSellingPrice] = useState('');
 
   // Inline stock adjustment state inside Variants Modal
   const [variantStockAddId, setVariantStockAddId] = useState<string | null>(null);
@@ -177,6 +181,7 @@ export default function CatalogClient({
     const hsn = prodHsn.trim();
     const gstRate = parseFloat(prodGst) || 0;
     const finalCategory = prodCategory.trim();
+    const wholesalePrice = prodWholesalePrice ? parseFloat(prodWholesalePrice) : null;
 
     if (!name) {
       showToast('Enter a product name', 'error');
@@ -185,6 +190,16 @@ export default function CatalogClient({
     if (isNaN(price) || price <= 0) {
       showToast('Enter a valid price', 'error');
       return;
+    }
+    if (wholesalePrice !== null) {
+      if (isNaN(wholesalePrice) || wholesalePrice <= 0) {
+        showToast('Enter a valid wholesale price', 'error');
+        return;
+      }
+      if (wholesalePrice >= price) {
+        showToast('Wholesale price must be less than Sale Price', 'error');
+        return;
+      }
     }
 
     const payload = {
@@ -195,6 +210,7 @@ export default function CatalogClient({
       gst_rate: gstRate,
       category: finalCategory || null,
       track_inventory: true,
+      wholesale_price: wholesalePrice,
     };
 
     if (editingProduct) {
@@ -236,6 +252,8 @@ export default function CatalogClient({
         setAddingProduct(false);
         setProdName('');
         setProdPrice('');
+        setProdWholesalePrice('');
+        setGstManuallySet(false);
         setProdHsn('');
         setProdGst('0');
         setProdDescription('');
@@ -263,16 +281,55 @@ export default function CatalogClient({
     }
   };
 
+  const openNewProductModal = () => {
+    setEditingProduct(null);
+    setProdName('');
+    setProdPrice('');
+    setProdWholesalePrice('');
+    setGstManuallySet(false);
+    setProdHsn('');
+    setProdGst('12');
+    setProdDescription('');
+    setProdCategory('');
+    setAddingProduct(true);
+  };
+
   // Open Edit Product Modal
   const openEditProduct = (product: Product) => {
     setEditingProduct(product);
     setProdName(product.name);
     setProdCategory(product.category || '');
     setProdPrice(String(product.price));
+    setProdWholesalePrice(product.wholesale_price !== null && product.wholesale_price !== undefined ? String(product.wholesale_price) : '');
+    setGstManuallySet(true);
     setProdHsn(product.hsn_code || '');
     setProdGst(String(product.gst_rate || 0));
     setProdDescription((product as any).description || '');
     setAddingProduct(true);
+  };
+
+  const getRecommendedGST = (price: number): number => {
+    if (price <= 0) return 0;
+    if (price <= 1000) return 5;
+    return 12;
+  };
+
+  const handleSalePriceChange = (value: string) => {
+    setProdPrice(value);
+    const price = parseFloat(value) || 0;
+
+    // Auto-suggest GST only if merchant hasn't manually overridden it and it's footwear/textile
+    const isFootwearOrTextile = shop.shop_type === 'footwear' || shop.shop_type === 'clothing' || 
+      ['footwear', 'textile', 'clothing', 'shoes', 'shoe', 'shirt', 'saree'].includes(prodCategory.toLowerCase().trim());
+
+    if (isFootwearOrTextile && !gstManuallySet) {
+      setProdGst(String(getRecommendedGST(price)));
+    }
+  };
+
+  const handleGSTChange = (value: string) => {
+    setProdGst(value);
+    setGstManuallySet(true); // lock auto-suggestion after manual selection
   };
 
   // Inline Category Add Option helper
@@ -295,6 +352,8 @@ export default function CatalogClient({
     setNewVarSku(variant.sku);
     setNewVarStockQty(String(variant.stock_qty || 0));
     setNewVarLowStockThreshold(String(variant.low_stock_threshold || 5));
+    setNewVarCostPrice(variant.cost_price !== null && variant.cost_price !== undefined ? String(variant.cost_price) : '');
+    setNewVarMinSellingPrice(variant.min_selling_price !== null && variant.min_selling_price !== undefined ? String(variant.min_selling_price) : '');
   };
 
   // Cancel edit mode
@@ -305,6 +364,8 @@ export default function CatalogClient({
     setNewVarSku('');
     setNewVarStockQty('0');
     setNewVarLowStockThreshold('5');
+    setNewVarCostPrice('');
+    setNewVarMinSellingPrice('');
   };
 
   // Unified Variant Add/Update Handler
@@ -319,6 +380,17 @@ export default function CatalogClient({
 
     const stockVal = parseInt(newVarStockQty) || 0;
     const thresholdVal = parseInt(newVarLowStockThreshold) || 5;
+    const costVal = newVarCostPrice ? parseFloat(newVarCostPrice) : null;
+    const mspVal = newVarMinSellingPrice ? parseFloat(newVarMinSellingPrice) : null;
+
+    if (costVal !== null && (isNaN(costVal) || costVal < 0)) {
+      showToast('Enter a valid cost price', 'error');
+      return;
+    }
+    if (mspVal !== null && (isNaN(mspVal) || mspVal < 0)) {
+      showToast('Enter a valid minimum selling price', 'error');
+      return;
+    }
 
     if (editingVariant) {
       // UPDATE existing variant - never touch SKU
@@ -327,6 +399,8 @@ export default function CatalogClient({
         color,
         stock_qty: stockVal,
         low_stock_threshold: thresholdVal,
+        cost_price: costVal,
+        min_selling_price: mspVal,
       };
 
       const previousStock = editingVariant.stock_qty || 0;
@@ -368,6 +442,8 @@ export default function CatalogClient({
         low_stock_threshold: thresholdVal,
         barcode: generatedSku,
         barcode_source: newVarSku.trim() ? 'scanned' : 'generated',
+        cost_price: costVal,
+        min_selling_price: mspVal,
       };
 
       const { data, error } = await supabase
@@ -398,6 +474,8 @@ export default function CatalogClient({
         setNewVarSku('');
         setNewVarStockQty('0');
         setNewVarLowStockThreshold('5');
+        setNewVarCostPrice('');
+        setNewVarMinSellingPrice('');
         
         await refetchVariants();
       }
@@ -689,16 +767,7 @@ export default function CatalogClient({
                 <h2 className="text-sm font-bold text-[#111827]">Catalog Items</h2>
               </div>
               <Button
-                onClick={() => {
-                  setEditingProduct(null);
-                  setProdName('');
-                  setProdPrice('');
-                  setProdHsn('');
-                  setProdGst('12');
-                  setProdDescription('');
-                  setProdCategory('');
-                  setAddingProduct(true);
-                }}
+                onClick={openNewProductModal}
                 variant="primary"
                 className="shadow-xs font-semibold text-xs px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
               >
@@ -746,7 +815,7 @@ export default function CatalogClient({
                     title="No products yet"
                     description="Add your first product to start creating invoices"
                     actionLabel="+ Add Product"
-                    onAction={() => setAddingProduct(true)}
+                    onAction={openNewProductModal}
                   />
                 </div>
               ) : (
@@ -1171,30 +1240,76 @@ export default function CatalogClient({
                         placeholder="0.00"
                         required
                         value={prodPrice}
-                        onChange={(e) => setProdPrice(e.target.value)}
+                        onChange={(e) => handleSalePriceChange(e.target.value)}
                         className="text-xs font-semibold"
                         prefix="₹"
                       />
                     </div>
 
-                    {/* GST Rate */}
+                    {/* Wholesale Price */}
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                        GST Rate %
+                        Wholesale Price ₹ <span className="text-[9px] text-slate-400 font-normal">(Optional)</span>
                       </label>
-                      <select
-                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
-                        value={prodGst}
-                        onChange={(e) => setProdGst(e.target.value)}
-                      >
-                        <option value="0">0% (Exempted)</option>
-                        <option value="5">5% GST</option>
-                        <option value="12">12% GST</option>
-                        <option value="18">18% GST</option>
-                        <option value="28">28% GST</option>
-                      </select>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="Leave blank if not applicable"
+                        value={prodWholesalePrice}
+                        onChange={(e) => setProdWholesalePrice(e.target.value)}
+                        className="text-xs font-semibold"
+                        prefix="₹"
+                      />
                     </div>
 
+                  </div>
+
+                  {/* GST Selector */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                      GST Rate %
+                    </label>
+                    <select
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+                      value={prodGst}
+                      onChange={(e) => handleGSTChange(e.target.value)}
+                    >
+                      <option value="0">0% (Exempted)</option>
+                      <option value="5">5% GST</option>
+                      <option value="12">12% GST</option>
+                      <option value="18">18% GST</option>
+                      <option value="28">28% GST</option>
+                    </select>
+                    {!gstManuallySet && parseFloat(prodPrice) > 0 && (
+                      <span className="text-[10px] text-blue-600 mt-1 block font-medium flex items-center justify-between bg-blue-50/50 p-2 rounded-lg border border-blue-100">
+                        <span>💡 Auto-suggested based on ₹{parseFloat(prodPrice).toFixed(2)} price point</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setGstManuallySet(true); // lock it if they explicitly keep recommended
+                          }}
+                          className="underline text-slate-400 hover:text-slate-600 font-bold ml-1 cursor-pointer"
+                        >
+                          dismiss
+                        </button>
+                      </span>
+                    )}
+                    {gstManuallySet && (
+                      <span className="text-[10px] text-slate-400 mt-1 block font-medium flex items-center justify-between">
+                        <span>🔒 GST Rate locked manually</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setGstManuallySet(false);
+                            const price = parseFloat(prodPrice) || 0;
+                            setProdGst(String(getRecommendedGST(price)));
+                          }}
+                          className="underline text-blue-600 hover:text-blue-800 font-bold ml-1 cursor-pointer"
+                        >
+                          Auto-suggest
+                        </button>
+                      </span>
+                    )}
                   </div>
 
                   {/* HSN Code with GST Tooltip */}
@@ -1326,7 +1441,7 @@ export default function CatalogClient({
                       )}
                     </div>
                     
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 items-end">
+                    <div className="grid grid-cols-2 sm:grid-cols-7 gap-3 items-end">
                       
                       {/* Size */}
                       <div>
@@ -1362,8 +1477,8 @@ export default function CatalogClient({
                         <div className="flex gap-1">
                           <input
                             type="text"
-                            placeholder="Auto-generated if empty"
-                            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-400"
+                            placeholder="Auto-generated"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] focus:outline-hidden focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-400"
                             value={newVarSku}
                             onChange={(e) => setNewVarSku(e.target.value)}
                             disabled={!!editingVariant}
@@ -1380,10 +1495,38 @@ export default function CatalogClient({
                         </div>
                       </div>
 
+                      {/* Cost Price */}
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Cost Price ₹</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 font-semibold"
+                          value={newVarCostPrice}
+                          onChange={(e) => setNewVarCostPrice(e.target.value)}
+                        />
+                      </div>
+
+                      {/* Min Selling Price */}
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Min Price ₹</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 font-semibold"
+                          value={newVarMinSellingPrice}
+                          onChange={(e) => setNewVarMinSellingPrice(e.target.value)}
+                        />
+                      </div>
+
                       {/* Initial/Current Stock */}
                       <div>
                         <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">
-                          {editingVariant ? 'Stock Quantity' : 'Initial Stock'}
+                          {editingVariant ? 'Stock Qty' : 'Init Stock'}
                         </label>
                         <input
                           type="number"
@@ -1396,7 +1539,7 @@ export default function CatalogClient({
 
                       {/* Low Stock Alert */}
                       <div>
-                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Low Stock Alert</label>
+                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Low Alert</label>
                         <input
                           type="number"
                           min="1"
@@ -1473,6 +1616,8 @@ export default function CatalogClient({
                           <th className="py-2.5 px-3">Size</th>
                           <th className="py-2.5 px-3">Color</th>
                           <th className="py-2.5 px-3">SKU / Barcode</th>
+                          <th className="py-2.5 px-3 text-right">Cost Price</th>
+                          <th className="py-2.5 px-3 text-right">Min Price</th>
                           <th className="py-2.5 px-3 text-right">Stock</th>
                           <th className="py-2.5 px-3 text-center">Low Stock Alert</th>
                           <th className="py-2.5 px-3 text-right w-24">Actions</th>
@@ -1481,7 +1626,7 @@ export default function CatalogClient({
                       <tbody className="divide-y divide-slate-100">
                         {variants.filter((v) => v.product_id === variantsProduct.id).length === 0 ? (
                           <tr>
-                            <td colSpan={7} className="py-8 text-center text-slate-400">
+                            <td colSpan={9} className="py-8 text-center text-slate-400">
                               No variants created for this product. Add one above.
                             </td>
                           </tr>
@@ -1559,6 +1704,16 @@ export default function CatalogClient({
                                         />
                                       </div>
                                     )}
+                                  </td>
+
+                                  {/* Cost Price */}
+                                  <td className="py-2.5 px-3 text-right text-slate-600">
+                                    {variant.cost_price !== null && variant.cost_price !== undefined ? `₹${Number(variant.cost_price).toFixed(2)}` : '—'}
+                                  </td>
+
+                                  {/* Min Selling Price */}
+                                  <td className="py-2.5 px-3 text-right font-medium text-slate-700">
+                                    {variant.min_selling_price !== null && variant.min_selling_price !== undefined ? `₹${Number(variant.min_selling_price).toFixed(2)}` : '—'}
                                   </td>
 
                                   {/* Stock status & Inline Stock adjust */}
