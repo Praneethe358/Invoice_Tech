@@ -862,7 +862,7 @@ export default function CatalogClient({
                   </div>
 
                   {/* Clean Products Data Table */}
-                  <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+                  <div className="hidden md:block bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
                     <div className="overflow-x-auto">
                       <table className="w-full text-left border-collapse text-xs">
                         <thead>
@@ -1008,6 +1008,108 @@ export default function CatalogClient({
                     </div>
                   </div>
 
+                  {/* Clean Products Mobile Card View */}
+                  <div className="md:hidden flex flex-col gap-3">
+                    {searchedProducts.length === 0 ? (
+                      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs py-8 text-center text-slate-400 text-xs">
+                        No products found matching your search.
+                      </div>
+                    ) : (
+                      searchedProducts.map((p) => (
+                        <div
+                          key={p.id}
+                          className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-3"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-2.5">
+                              {/* Favorite star */}
+                              <button
+                                onClick={() => handleToggleFavorite(p)}
+                                className={`transition-all hover:scale-110 cursor-pointer text-base leading-none -mt-0.5 ${
+                                  p.is_favorite ? 'text-amber-500' : 'text-slate-300'
+                                }`}
+                              >
+                                ★
+                              </button>
+                              <div>
+                                <h4 className="text-sm font-bold text-[#111827] uppercase">{p.name}</h4>
+                                {p.hsn_code && (
+                                  <span className="text-[10px] text-slate-400 block mt-0.5">HSN: {p.hsn_code}</span>
+                                )}
+                                <div className="mt-1 flex flex-wrap gap-1.5 items-center">
+                                  {p.category ? (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                                      {p.category}
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-300 italic text-[9px]">Uncategorized</span>
+                                  )}
+                                  <span className="text-[10px] font-medium text-slate-500">
+                                    · {p.totalVariants} variant{p.totalVariants !== 1 ? 's' : ''}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="text-right">
+                              <span className="text-xs font-bold text-gray-900 block">₹{p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                              <span className="text-[10px] font-bold text-slate-500 block mt-0.5">{p.totalStock} units</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                            <div>
+                              {p.stockStatus === 'out' ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-rose-50 text-rose-700 border border-rose-100">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                  Out of Stock
+                                </span>
+                              ) : p.stockStatus === 'low' ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-amber-50 text-amber-700 border border-amber-100">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                  Low Stock
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                  In Stock
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setVariantsProduct(p)}
+                                className="flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded-md cursor-pointer"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                                Variants
+                              </button>
+                              <button
+                                onClick={() => openEditProduct(p)}
+                                className="p-1 text-slate-500 hover:text-amber-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                              >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => handleDeleteProduct(p.id)}
+                                className="p-1 text-slate-500 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                              >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
                 </div>
               )}
             </>
@@ -1044,23 +1146,92 @@ export default function CatalogClient({
                   No categories yet. Add one above.
                 </div>
               ) : (
-                <div className="border border-slate-200 rounded-xl overflow-hidden">
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                        <th className="py-3 px-4">Category Name</th>
-                        <th className="py-3 px-4 text-center">Product Count</th>
-                        <th className="py-3 px-4 text-right w-44">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {allCategories.map((cat) => {
-                        const prodCount = products.filter((p) => p.category === cat).length;
-                        const isEditing = editingCategoryOldName === cat;
+                <>
+                  <div className="hidden md:block border border-slate-200 rounded-xl overflow-hidden">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          <th className="py-3 px-4">Category Name</th>
+                          <th className="py-3 px-4 text-center">Product Count</th>
+                          <th className="py-3 px-4 text-right w-44">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {allCategories.map((cat) => {
+                          const prodCount = products.filter((p) => p.category === cat).length;
+                          const isEditing = editingCategoryOldName === cat;
 
-                        return (
-                          <tr key={cat} className="hover:bg-slate-50/50">
-                            <td className="py-2.5 px-4 font-semibold text-slate-700">
+                          return (
+                            <tr key={cat} className="hover:bg-slate-50/50">
+                              <td className="py-2.5 px-4 font-semibold text-slate-700">
+                                {isEditing ? (
+                                  <input
+                                    type="text"
+                                    className="px-2 py-1 border rounded-md text-xs w-full max-w-xs focus:ring-1 focus:ring-blue-500 focus:outline-hidden bg-white"
+                                    value={editingCategoryNewName}
+                                    onChange={(e) => setEditingCategoryNewName(e.target.value)}
+                                    autoFocus
+                                  />
+                                ) : (
+                                  cat
+                                )}
+                              </td>
+                              <td className="py-2.5 px-4 text-center text-slate-600 font-medium">
+                                {prodCount} products
+                              </td>
+                              <td className="py-2.5 px-4 text-right">
+                                {isEditing ? (
+                                  <div className="flex justify-end gap-1.5">
+                                    <button
+                                      onClick={handleRenameCategory}
+                                      className="bg-emerald-600 text-white font-bold px-2.5 py-1 rounded-md text-[10px] hover:bg-emerald-700 cursor-pointer"
+                                    >
+                                      Save
+                                    </button>
+                                    <button
+                                      onClick={() => setEditingCategoryOldName(null)}
+                                      className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-[10px] hover:bg-slate-200 cursor-pointer"
+                                    >
+                                      Cancel
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="flex justify-end gap-2">
+                                    <button
+                                      onClick={() => {
+                                        setEditingCategoryOldName(cat);
+                                        setEditingCategoryNewName(cat);
+                                      }}
+                                      className="text-blue-600 hover:text-blue-800 hover:underline font-bold cursor-pointer"
+                                    >
+                                      Rename
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteCategory(cat)}
+                                      className="text-rose-600 hover:text-rose-800 hover:underline font-bold cursor-pointer"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Categories Mobile Card View */}
+                  <div className="md:hidden flex flex-col gap-2">
+                    {allCategories.map((cat) => {
+                      const prodCount = products.filter((p) => p.category === cat).length;
+                      const isEditing = editingCategoryOldName === cat;
+
+                      return (
+                        <div key={cat} className="bg-white p-3 rounded-lg border border-slate-200 shadow-3xs flex flex-col gap-2">
+                          <div className="flex items-center justify-between">
+                            <div className="font-semibold text-slate-700 text-xs">
                               {isEditing ? (
                                 <input
                                   type="text"
@@ -1072,52 +1243,52 @@ export default function CatalogClient({
                               ) : (
                                 cat
                               )}
-                            </td>
-                            <td className="py-2.5 px-4 text-center text-slate-600 font-medium">
+                            </div>
+                            <span className="text-[10px] text-slate-500 font-medium bg-slate-100 px-2 py-0.5 rounded-full">
                               {prodCount} products
-                            </td>
-                            <td className="py-2.5 px-4 text-right">
-                              {isEditing ? (
-                                <div className="flex justify-end gap-1.5">
-                                  <button
-                                    onClick={handleRenameCategory}
-                                    className="bg-emerald-600 text-white font-bold px-2.5 py-1 rounded-md text-[10px] hover:bg-emerald-700 cursor-pointer"
-                                  >
-                                    Save
-                                  </button>
-                                  <button
-                                    onClick={() => setEditingCategoryOldName(null)}
-                                    className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-[10px] hover:bg-slate-200 cursor-pointer"
-                                  >
-                                    Cancel
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="flex justify-end gap-2">
-                                  <button
-                                    onClick={() => {
-                                      setEditingCategoryOldName(cat);
-                                      setEditingCategoryNewName(cat);
-                                    }}
-                                    className="text-blue-600 hover:text-blue-800 hover:underline font-bold cursor-pointer"
-                                  >
-                                    Rename
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteCategory(cat)}
-                                    className="text-rose-600 hover:text-rose-800 hover:underline font-bold cursor-pointer"
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                            </span>
+                          </div>
+                          <div className="flex justify-end gap-4 pt-2 border-t border-slate-100 text-xs font-bold">
+                            {isEditing ? (
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={handleRenameCategory}
+                                  className="text-emerald-600 cursor-pointer"
+                                >
+                                  Save
+                                </button>
+                                <button
+                                  onClick={() => setEditingCategoryOldName(null)}
+                                  className="text-slate-400 cursor-pointer"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex gap-3">
+                                <button
+                                  onClick={() => {
+                                    setEditingCategoryOldName(cat);
+                                    setEditingCategoryNewName(cat);
+                                  }}
+                                  className="text-blue-600 cursor-pointer"
+                                >
+                                  Rename
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteCategory(cat)}
+                                  className="text-rose-600 cursor-pointer"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
               )}
             </div>
           )}
@@ -1383,11 +1554,11 @@ export default function CatalogClient({
                 onClick={() => setVariantsProduct(null)}
               />
 
-              <motion.div
+               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 15 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                className="relative bg-white rounded-2xl shadow-xl w-full max-w-4xl p-6 overflow-hidden flex flex-col max-h-[90vh]"
+                className="relative bg-white rounded-2xl shadow-xl w-full max-w-4xl p-4 md:p-6 overflow-hidden flex flex-col max-h-[95vh] md:max-h-[90vh]"
               >
                 
                 {/* Modal Header */}
@@ -1444,7 +1615,7 @@ export default function CatalogClient({
                     <div className="grid grid-cols-2 sm:grid-cols-7 gap-3 items-end">
                       
                       {/* Size */}
-                      <div>
+                      <div className="col-span-1">
                         <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Size *</label>
                         <input
                           type="text"
@@ -1457,7 +1628,7 @@ export default function CatalogClient({
                       </div>
 
                       {/* Color */}
-                      <div>
+                      <div className="col-span-1">
                         <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Color *</label>
                         <input
                           type="text"
@@ -1470,7 +1641,7 @@ export default function CatalogClient({
                       </div>
 
                       {/* SKU / Barcode */}
-                      <div>
+                      <div className="col-span-2 sm:col-span-1">
                         <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">
                           SKU / Barcode
                         </label>
@@ -1486,7 +1657,7 @@ export default function CatalogClient({
                           <button
                             type="button"
                             onClick={() => setIsNewVarSkuScannerOpen(true)}
-                            className="bg-slate-100 hover:bg-slate-200 border rounded-lg px-2 flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="bg-slate-100 hover:bg-slate-200 border rounded-lg px-2 flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-xs"
                             title="Scan Barcode"
                             disabled={!!editingVariant}
                           >
@@ -1496,7 +1667,7 @@ export default function CatalogClient({
                       </div>
 
                       {/* Cost Price */}
-                      <div>
+                      <div className="col-span-1">
                         <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Cost Price ₹</label>
                         <input
                           type="number"
@@ -1510,7 +1681,7 @@ export default function CatalogClient({
                       </div>
 
                       {/* Min Selling Price */}
-                      <div>
+                      <div className="col-span-1">
                         <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Min Price ₹</label>
                         <input
                           type="number"
@@ -1524,7 +1695,7 @@ export default function CatalogClient({
                       </div>
 
                       {/* Initial/Current Stock */}
-                      <div>
+                      <div className="col-span-1">
                         <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">
                           {editingVariant ? 'Stock Qty' : 'Init Stock'}
                         </label>
@@ -1538,7 +1709,7 @@ export default function CatalogClient({
                       </div>
 
                       {/* Low Stock Alert */}
-                      <div>
+                      <div className="col-span-1">
                         <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Low Alert</label>
                         <input
                           type="number"
@@ -1551,14 +1722,14 @@ export default function CatalogClient({
 
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between text-[10px]">
-                      <span className="text-slate-400 italic">
+                    <div className="mt-3 flex items-center justify-between gap-3 text-[10px]">
+                      <span className="text-slate-400 italic break-all text-[9px] max-w-[60%] sm:max-w-none">
                         {editingVariant ? 'SKU is locked and immutable' : `Preview SKU: ${generatedSkuPreview}`}
                       </span>
                       <button
                         type="button"
                         onClick={handleAddVariant}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-lg shadow-xs cursor-pointer text-xs"
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-lg shadow-xs cursor-pointer text-xs shrink-0"
                       >
                         {editingVariant ? 'Save Changes' : '+ Add Variant'}
                       </button>
@@ -1591,7 +1762,7 @@ export default function CatalogClient({
                   )}
 
                   {/* EXISTING VARIANTS Table */}
-                  <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
+                  <div className="hidden md:block border border-slate-200 rounded-xl overflow-hidden bg-white">
                     <table className="w-full text-left border-collapse text-xs">
                       <thead>
                         <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
@@ -1785,6 +1956,162 @@ export default function CatalogClient({
                         )}
                       </tbody>
                     </table>
+                  </div>
+
+                  {/* EXISTING VARIANTS Mobile Card View */}
+                  <div className="md:hidden flex flex-col gap-2.5">
+                    {variants.filter((v) => v.product_id === variantsProduct.id).length === 0 ? (
+                      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs py-8 text-center text-slate-400 text-xs">
+                        No variants created for this product. Add one above.
+                      </div>
+                    ) : (
+                      variants
+                        .filter((v) => v.product_id === variantsProduct.id)
+                        .map((variant) => {
+                          const isChecked = !!selectedVariantsCheckbox[variant.id];
+                          const stock = variant.stock_qty || 0;
+                          const th = variant.low_stock_threshold || 5;
+
+                          let stockColorClass = 'text-emerald-700 bg-emerald-50 border border-emerald-100';
+                          if (stock <= th) {
+                            stockColorClass = 'text-rose-700 bg-rose-50 border border-rose-100';
+                          } else if (stock <= th * 2) {
+                            stockColorClass = 'text-amber-700 bg-amber-50 border border-amber-100';
+                          }
+
+                          return (
+                            <div
+                              key={variant.id}
+                              onClick={() => handleRowClick(variant)}
+                              className={`bg-white p-3 rounded-xl border transition-colors cursor-pointer space-y-2 ${
+                                editingVariant?.id === variant.id
+                                  ? 'border-amber-400 bg-amber-50/15'
+                                  : 'border-slate-200 hover:border-slate-300'
+                              }`}
+                            >
+                              {/* Header: Checkbox + Name & Stock status */}
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <div onClick={(e) => e.stopPropagation()} className="shrink-0">
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={(e) => {
+                                        setSelectedVariantsCheckbox((prev) => ({
+                                          ...prev,
+                                          [variant.id]: e.target.checked,
+                                        }));
+                                      }}
+                                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer w-4 h-4"
+                                    />
+                                  </div>
+                                  <span className="font-bold text-slate-800 text-xs truncate">
+                                    Size {variant.size} · {variant.color}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                  <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${stockColorClass}`}>
+                                    {stock} units
+                                  </span>
+                                  {variantStockAddId === variant.id ? (
+                                    <div className="flex items-center gap-1">
+                                      <input
+                                        type="number"
+                                        className="w-10 px-1 py-0.5 text-xs border rounded-md text-center bg-white"
+                                        value={variantStockAddQty}
+                                        onChange={(e) => setVariantStockAddQty(e.target.value)}
+                                        autoFocus
+                                      />
+                                      <button
+                                        onClick={() => handleConfirmAddStock(variant)}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white text-[9px] px-1.5 py-0.5 rounded cursor-pointer font-bold"
+                                      >
+                                        OK
+                                      </button>
+                                      <button
+                                        onClick={() => setVariantStockAddId(null)}
+                                        className="text-slate-400 hover:text-slate-600 text-xs px-1 cursor-pointer"
+                                      >
+                                        ✕
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      onClick={() => {
+                                        setVariantStockAddId(variant.id);
+                                        setVariantStockAddQty('10');
+                                      }}
+                                      className="text-[10px] text-blue-600 hover:text-blue-800 font-bold hover:underline cursor-pointer bg-blue-50 hover:bg-blue-100/80 px-2 py-0.5 rounded-md transition-colors"
+                                    >
+                                      + Add
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Details Grid */}
+                              <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                <div className="flex justify-between">
+                                  <span className="text-slate-400">Cost:</span>
+                                  <span className="font-semibold text-slate-700">
+                                    {variant.cost_price !== null && variant.cost_price !== undefined ? `₹${Number(variant.cost_price).toFixed(2)}` : '—'}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-slate-400">Min Price:</span>
+                                  <span className="font-bold text-slate-800">
+                                    {variant.min_selling_price !== null && variant.min_selling_price !== undefined ? `₹${Number(variant.min_selling_price).toFixed(2)}` : '—'}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between col-span-2 border-t border-slate-200/60 pt-1 mt-0.5">
+                                  <span className="text-slate-400">SKU / Barcode:</span>
+                                  <span className="font-mono text-[9px] text-slate-600 truncate max-w-[150px] sm:max-w-none select-all" title={variant.sku}>{variant.sku}</span>
+                                </div>
+                                <div className="flex justify-between col-span-2">
+                                  <span className="text-slate-400">Low Alert:</span>
+                                  <span className="font-medium text-slate-600">{variant.low_stock_threshold || 5} units</span>
+                                </div>
+                                
+                                {isChecked && (
+                                  <div className="flex justify-between items-center col-span-2 pt-1.5 border-t border-slate-200/60 mt-0.5" onClick={(e) => e.stopPropagation()}>
+                                    <span className="text-blue-600 font-bold text-[9px]">Print Copies:</span>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      className="w-12 px-1.5 py-0.5 text-[10px] border border-blue-200 rounded text-center bg-blue-50/50"
+                                      value={printCopies[variant.id] || 1}
+                                      onChange={(e) => {
+                                        const val = Math.max(1, parseInt(e.target.value) || 1);
+                                        setPrintCopies(prev => ({ ...prev, [variant.id]: val }));
+                                      }}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Footer: Tips & Action */}
+                              <div className="flex justify-between items-center text-xs pt-1">
+                                <span className="text-[9px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded font-medium">
+                                  Tapping card edits details
+                                </span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteVariant(variant.id);
+                                  }}
+                                  className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
+                                  title="Delete Variant"
+                                >
+                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })
+                    )}
                   </div>
 
                 </div>
