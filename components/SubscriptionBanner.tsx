@@ -124,7 +124,7 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
         }
         @media (max-width: 767px) {
           body {
-            padding-top: 6.5rem !important;
+            padding-top: 5.5rem !important;
           }
           .mobile-header-fixed {
             top: 3rem !important;
@@ -146,16 +146,16 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: -48, opacity: 0 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className={`fixed left-0 md:left-72 right-0 h-12 z-[40] ${bgClass} flex items-center justify-between px-4 shadow-sm text-xs font-semibold sub-banner-position exclude-blur`}
+        className={`fixed left-0 md:left-72 right-0 h-10 md:h-12 z-[40] ${bgClass} flex items-center justify-between px-2.5 md:px-4 shadow-sm text-[10px] md:text-xs font-semibold sub-banner-position exclude-blur`}
       >
-        <div className="flex items-center gap-2 overflow-hidden mr-2 truncate">
-          <span className="text-base">{icon}</span>
+        <div className="flex items-center gap-1.5 md:gap-2 overflow-hidden mr-2 truncate min-w-0">
+          <span className="text-sm md:text-base shrink-0">{icon}</span>
           <span className="truncate">{text}</span>
         </div>
         
         <div className="flex items-center gap-3 shrink-0">
           <Link href={ctaLink}>
-            <button className="bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-3 py-1 rounded-md text-[11px] shadow-xs active:scale-[0.98] transition-all cursor-pointer">
+            <button className="bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-md text-[9px] md:text-[11px] shadow-xs active:scale-[0.98] transition-all cursor-pointer whitespace-nowrap">
               {ctaText}
             </button>
           </Link>

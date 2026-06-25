@@ -832,30 +832,38 @@ export default function SignupPage() {
         </div>
       </div>
 
-      {/* MOBILE LAYOUT (lg:hidden) */}
-      <div className="lg:hidden w-full min-h-screen flex flex-col bg-[#0050e8]">
-        {/* Top Header Section */}
-        <div className="pt-12 pb-8 px-6 flex flex-col items-center text-center">
-          {/* Logo */}
-          <div className="flex items-center gap-2 mb-3">
-            <img src="/trubill-logo.png" alt="TruBill Logo" className="w-7 h-7 object-contain brightness-0 invert" />
-            <span className="font-heading font-black text-2xl tracking-tight text-white">
+      {/* ==================== MOBILE LAYOUT ==================== */}
+      <div className="lg:hidden w-full min-h-screen flex flex-col bg-gradient-to-b from-[#0050e8] via-[#003bb5] to-[#001c66] relative overflow-hidden">
+        {/* Decorative blurred orbs */}
+        <div className="absolute top-[-15%] right-[-20%] w-80 h-80 rounded-full bg-blue-400/20 blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-[10%] left-[-15%] w-64 h-64 rounded-full bg-indigo-500/15 blur-[80px] pointer-events-none" />
+
+        {/* Top Branding */}
+        <div className="flex flex-col items-center text-center pt-12 pb-5 px-6 relative z-10">
+          <div className="flex items-center gap-2.5 mb-3">
+            <img src="/trubill-logo.png" alt="TruBill Logo" className="w-9 h-9 object-contain brightness-0 invert" />
+            <span className="font-heading font-black text-[26px] tracking-tight text-white">
               TruBill
             </span>
           </div>
-          {/* Slogan */}
-          <p className="text-[#e6efff] text-xs font-semibold max-w-[280px] leading-relaxed">
+          <p className="text-blue-200/80 text-[13px] font-semibold max-w-[280px] leading-relaxed">
             GST Invoicing made simple for Tamil Nadu retail.
           </p>
         </div>
 
-        {/* Card Section */}
-        <div className="flex-1 bg-white rounded-t-[32px] px-6 pt-7 pb-10 flex flex-col justify-between shadow-[0_-12px_24px_rgba(0,0,0,0.08)]">
-          <div className="w-full max-w-[460px] mx-auto space-y-5">
+        {/* Floating Card */}
+        <div className="flex-1 flex flex-col px-5 pb-6 relative z-10 overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="w-full max-w-[430px] mx-auto"
+          >
+          <div className="bg-white rounded-[26px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] p-6 space-y-5">
             {/* Back Home Link */}
             <Link 
               href="/" 
-              className="inline-flex items-center gap-1 text-[#0050e8] font-bold text-sm"
+              className="inline-flex items-center gap-1 text-[#0050e8] hover:text-[#0043c4] font-bold text-xs transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
                 <polyline points="15 18 9 12 15 6" />
@@ -1273,19 +1281,20 @@ export default function SignupPage() {
             </AnimatePresence>
 
             {/* Bottom text */}
-            <p className="text-center text-xs text-slate-500 font-medium">
+            <p className="text-center text-[11px] text-slate-500 font-semibold pt-1">
               Already have an account?{' '}
-              <Link href="/login" className="text-[#0050e8] font-bold hover:underline">
-                Sign in.
+              <Link href="/login" className="text-[#0050e8] font-black hover:underline">
+                Sign in
               </Link>
             </p>
           </div>
+          </motion.div>
 
-          {/* Footer Security logo */}
-          <div className="flex items-center justify-center gap-1.5 text-[9px] text-slate-400 mt-8 font-bold uppercase tracking-wider">
-            <svg className="w-3.5 h-3.5 text-slate-450" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+          {/* Footer Security badge */}
+          <div className="flex items-center justify-center gap-1.5 text-[9px] text-blue-200/50 mt-6 font-bold uppercase tracking-wider">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0110 0v4" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
             <span>Secured by TruBill • SSL Encrypted</span>
           </div>
@@ -1294,3 +1303,4 @@ export default function SignupPage() {
     </div>
   );
 }
+

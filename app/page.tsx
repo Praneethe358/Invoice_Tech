@@ -1046,25 +1046,25 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-2 sm:px-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-2 md:gap-x-4 gap-y-6 text-center items-start">
             {/* Quality 1 */}
-            <div className="flex flex-col items-center space-y-2 md:space-y-4">
+            <div className="flex flex-col items-center space-y-1.5 md:space-y-4">
               <div className="text-[#0050e8] flex items-center justify-center">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">
+                <h4 className="text-sm md:text-xl font-extrabold text-[#1a1d26]">
                   Under 20 Sec
                 </h4>
-                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">Per Invoice Generated</p>
+                <p className="text-[10px] md:text-xs text-[#6b7280] font-semibold">Per Invoice Generated</p>
               </div>
             </div>
 
             {/* Quality 2 */}
-            <div className="flex flex-col items-center space-y-2 md:space-y-4">
+            <div className="flex flex-col items-center space-y-1.5 md:space-y-4">
               <div className="text-[#0050e8] flex items-center justify-center">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                   <line x1="16" y1="2" x2="16" y2="6" />
                   <line x1="8" y1="2" x2="8" y2="6" />
@@ -1072,47 +1072,47 @@ export default function LandingPage() {
                 </svg>
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">7-Day</h4>
-                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">Free Trial, No Card Needed</p>
+                <h4 className="text-sm md:text-xl font-extrabold text-[#1a1d26]">7-Day</h4>
+                <p className="text-[10px] md:text-xs text-[#6b7280] font-semibold">Free Trial, No Card Needed</p>
               </div>
             </div>
 
             {/* Quality 3 */}
-            <div className="flex flex-col items-center space-y-2 md:space-y-4">
+            <div className="flex flex-col items-center space-y-1.5 md:space-y-4">
               <div className="text-[#0050e8] flex items-center justify-center">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
                   <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.78 4.78 4 4 0 0 1-6.74 0 4 4 0 0 1-4.78-4.78 4 4 0 0 1 0-6.74z" />
                   <path d="m9 12 2 2 4-4" />
                 </svg>
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">
+                <h4 className="text-sm md:text-xl font-extrabold text-[#1a1d26]">
                   MSME Registered
                 </h4>
-                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">UDYAM-TN-03-0331333</p>
+                <p className="text-[10px] md:text-xs text-[#6b7280] font-semibold">UDYAM-TN-03-0331333</p>
               </div>
             </div>
 
             {/* Quality 4 */}
-            <div className="flex flex-col items-center space-y-2 md:space-y-4">
+            <div className="flex flex-col items-center space-y-1.5 md:space-y-4">
               <div className="text-[#0050e8] flex items-center justify-center">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   <path d="m9 11 2 2 4-4" />
                 </svg>
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">
+                <h4 className="text-sm md:text-xl font-extrabold text-[#1a1d26]">
                   100% GST
                 </h4>
-                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">Compliant Invoicing</p>
+                <p className="text-[10px] md:text-xs text-[#6b7280] font-semibold">Compliant Invoicing</p>
               </div>
             </div>
 
             {/* Quality 5 */}
-            <div className="flex flex-col items-center space-y-2 md:space-y-4 col-span-2 sm:col-span-1">
+            <div className="flex flex-col items-center space-y-1.5 md:space-y-4 col-span-2 sm:col-span-1">
               <div className="text-[#0050e8] flex items-center justify-center">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
+                <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="#0050e8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-10 md:h-10">
                   <rect x="10" y="6" width="18" height="13" rx="2" />
                   <path d="M16 19v4m-3 0h6" />
                   <rect x="4" y="11" width="7" height="12" rx="1" fill="white" />
@@ -1121,10 +1121,10 @@ export default function LandingPage() {
                 </svg>
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-base md:text-xl font-extrabold text-[#1a1d26]">
+                <h4 className="text-sm md:text-xl font-extrabold text-[#1a1d26]">
                   Multi-<span className="text-[#0050e8]">Device</span>
                 </h4>
-                <p className="text-[11px] md:text-xs text-[#6b7280] font-semibold">Use on Mobile/Desktop</p>
+                <p className="text-[10px] md:text-xs text-[#6b7280] font-semibold">Use on Mobile/Desktop</p>
               </div>
             </div>
           </div>
