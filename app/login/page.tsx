@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -50,6 +51,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex relative">
+      {/* DESKTOP LAYOUT (lg:flex) */}
       {/* Left — Branding panel (hidden on mobile) */}
       <div className="hidden lg:flex lg:w-1/2 gradient-hero gradient-hero-mesh relative items-center justify-center p-12 overflow-hidden">
         {/* Back Link */}
@@ -83,29 +85,13 @@ export default function LoginPage() {
           <p className="text-[#e6efff]/80 text-base leading-relaxed">
             Professional WhatsApp invoicing built for supermarkets, retail shops, and freelancers.
           </p>
-
-
         </div>
       </div>
 
-      {/* Right — Login form */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 bg-[#f8fafc] bg-[radial-gradient(circle_at_top_right,rgba(0,80,232,0.06),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(0,80,232,0.04),transparent_45%)] relative overflow-hidden">
+      {/* Right — Login form (desktop only) */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center px-4 py-8 bg-[#f8fafc] bg-[radial-gradient(circle_at_top_right,rgba(0,80,232,0.06),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(0,80,232,0.04),transparent_45%)] relative overflow-hidden">
         {/* Glow backdrop for glassmorphism */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] rounded-full bg-gradient-to-tr from-[#0050e8]/15 to-blue-500/10 blur-[70px] pointer-events-none" />
-
-        {/* Mobile Header / Navigation */}
-        <div className="lg:hidden w-full max-w-[430px] flex items-center justify-start mb-4 z-20">
-          <Link 
-            href="/" 
-            className="flex items-center gap-1.5 text-slate-500 hover:text-slate-805 font-extrabold text-xs transition-colors group"
-          >
-            <svg className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-              <line x1="19" y1="12" x2="5" y2="12" />
-              <polyline points="12 19 5 12 12 5" />
-            </svg>
-            Home
-          </Link>
-        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -175,7 +161,7 @@ export default function LoginPage() {
                   <>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                      <path d="M7 11V7a5 5 0 0110 0v4" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                     </svg>
                     <span>Sign In</span>
                   </>
@@ -195,11 +181,164 @@ export default function LoginPage() {
           <div className="flex items-center justify-center gap-1.5 text-[9px] sm:text-[10px] text-[#8a99ad] mt-6 font-bold uppercase tracking-wider">
             <svg className="w-3.5 h-3.5 text-[#aebecf]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0110 0v4" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
             <span>Secured by TruBill • SSL Encrypted</span>
           </div>
         </motion.div>
+      </div>
+
+      {/* MOBILE LAYOUT (lg:hidden) */}
+      <div className="lg:hidden w-full min-h-screen flex flex-col bg-[#0050e8]">
+        {/* Top Header Section */}
+        <div className="pt-12 pb-8 px-6 flex flex-col items-center text-center">
+          {/* Logo */}
+          <div className="flex items-center gap-2 mb-3">
+            <img src="/trubill-logo.png" alt="TruBill Logo" className="w-7 h-7 object-contain brightness-0 invert" />
+            <span className="font-heading font-black text-2xl tracking-tight text-white">
+              TruBill
+            </span>
+          </div>
+          {/* Slogan */}
+          <p className="text-[#e6efff] text-xs font-semibold max-w-[280px] leading-relaxed">
+            GST Invoicing made simple for Tamil Nadu retail.
+          </p>
+        </div>
+
+        {/* Card Section */}
+        <div className="flex-1 bg-white rounded-t-[32px] px-6 pt-7 pb-10 flex flex-col justify-between shadow-[0_-12px_24px_rgba(0,0,0,0.08)]">
+          <div className="w-full max-w-[430px] mx-auto space-y-5">
+            {/* Back Home Link */}
+            <Link 
+              href="/" 
+              className="inline-flex items-center gap-1 text-[#0050e8] font-bold text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              Home
+            </Link>
+
+            {/* Title / Subtitle */}
+            <div className="space-y-1">
+              <h1 className="text-2xl font-extrabold text-[#1a1d26]">
+                Welcome back
+              </h1>
+              <p className="text-xs text-slate-400 font-medium">
+                Sign in to your account
+              </p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Email Input */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-extrabold text-slate-500 uppercase tracking-wide">
+                  Email address
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                    className="w-full rounded-xl border border-slate-250 bg-slate-50/50 pr-10 pl-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0050e8] focus:bg-white focus:ring-4 focus:ring-[#0050e8]/5"
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                      <rect width="20" height="16" x="2" y="4" rx="2" />
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Password Input */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-extrabold text-slate-500 uppercase tracking-wide">
+                  Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                    className="w-full rounded-xl border border-slate-250 bg-slate-50/50 pl-10 pr-10 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0050e8] focus:bg-white focus:ring-4 focus:ring-[#0050e8]/5"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    {showPassword ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                        <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                        <line x1="2" x2="22" y1="2" y2="22" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white font-bold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-blue-500/20 active:scale-[0.99] mt-2 text-sm"
+              >
+                {loading ? (
+                  <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                    <span>Secure Sign In</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Bottom text */}
+            <p className="text-center text-xs text-slate-500 font-medium">
+              Don&apos;t have an account?{' '}
+              <Link href="/signup" className="text-[#0050e8] font-bold hover:underline">
+                Create one free.
+              </Link>
+            </p>
+          </div>
+
+          {/* Footer Security logo */}
+          <div className="flex items-center justify-center gap-1.5 text-[9px] text-slate-400 mt-8 font-bold uppercase tracking-wider">
+            <svg className="w-3.5 h-3.5 text-slate-450" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0110 0v4" />
+            </svg>
+            <span>Secured by TruBill • SSL Encrypted</span>
+          </div>
+        </div>
       </div>
     </div>
   );
