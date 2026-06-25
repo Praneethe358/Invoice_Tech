@@ -324,9 +324,9 @@ export default function CreditDebitNotesClient({ shop, initialNotes }: Props) {
                     placeholder="Search note no., invoice, customer phone..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl md:rounded-none py-2.5 pl-10 pr-4 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#0050e8]"
+                    className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl md:rounded-none py-2.5 pl-9 md:pl-10 pr-4 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#0050e8]"
                   />
-                  <svg className="absolute left-3.5 top-3.5 text-[#9ca3af]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg className="absolute left-3 md:left-3.5 top-1/2 -translate-y-1/2 text-[#9ca3af] w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="11" cy="11" r="8" />
                     <line x1="21" y1="21" x2="16.65" y2="16.65" />
                   </svg>
@@ -751,7 +751,7 @@ export default function CreditDebitNotesClient({ shop, initialNotes }: Props) {
                     onChange={(e) => setInvoiceSearch(e.target.value)}
                     className="w-full bg-white border border-[#e5e7eb] rounded-xl py-2 pl-9 pr-3 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#0050e8]"
                   />
-                  <svg className="absolute left-3 top-3 text-[#9ca3af]" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af] w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="11" cy="11" r="8" />
                     <line x1="21" y1="21" x2="16.65" y2="16.65" />
                   </svg>

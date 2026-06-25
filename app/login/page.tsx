@@ -269,12 +269,6 @@ export default function LoginPage() {
                     Password
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-350">
-                      <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
-                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                      </svg>
-                    </div>
                     <input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
@@ -282,7 +276,7 @@ export default function LoginPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       autoComplete="current-password"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-10 pr-10 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0050e8] focus:bg-white focus:ring-4 focus:ring-[#0050e8]/5"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-4 pr-10 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0050e8] focus:bg-white focus:ring-4 focus:ring-[#0050e8]/5"
                     />
                     <button
                       type="button"
