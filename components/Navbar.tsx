@@ -460,27 +460,31 @@ export default function Navbar() {
                 </svg>
               </button>
 
-              <Link href="/dashboard" className="flex items-center gap-2">
-                <img src="/trubill-logo.png" alt="TruBill logo" className="w-8 h-8 object-contain shrink-0" loading="lazy" />
-                <span className="font-heading font-black text-sm">
-                  <span className="text-[#001048]">Tru</span>
-                  <span className="text-[#0050e8]">Bill</span>
+              <Link href="/dashboard" className="flex items-center gap-2 max-w-[180px] min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e8eaed] shrink-0">
+                  {shopInfo?.logo_url ? (
+                    <img src={shopInfo.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <span className="text-xs font-bold text-[#0050e8]">
+                      {(shopInfo?.name || 'AS').slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <span className="font-heading font-black text-sm text-[#1a1d26] truncate uppercase">
+                  {shopInfo?.name || 'Active Shop'}
                 </span>
               </Link>
             </div>
 
-            <div className="flex flex-col items-end justify-center">
-              <div className="text-[11px] font-bold text-gray-500 bg-[#f3f4f6] px-2.5 py-1 rounded-lg max-w-[150px] truncate">
-                {shopInfo?.name || 'Active Shop'}
-              </div>
-              {userRole !== 'owner' && (
-                <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-none uppercase text-white mt-0.5 ${
+            {userRole !== 'owner' && (
+              <div className="flex flex-col items-end justify-center">
+                <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-none uppercase text-white ${
                   userRole === 'admin' ? 'bg-[#16a34a]' : userRole === 'billing_staff' ? 'bg-[#2563eb]' : 'bg-[#6b7280]'
                 }`}>
                   {userRole === 'admin' ? 'Admin' : userRole === 'billing_staff' ? 'Billing' : 'View Only'}
                 </span>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </nav>
         {/* Bottom Accent Strip (Primary Blue) */}
