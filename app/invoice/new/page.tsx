@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { Product } from '@/lib/types';
@@ -37,7 +38,7 @@ export default async function NewInvoicePage({ searchParams }: PageProps) {
     .order('created_at', { ascending: true });
 
   let initialVariants: any[] = [];
-  if (shop.shop_type === 'clothing' && products && products.length > 0) {
+  if ((shop.shop_type === 'clothing' || shop.shop_type === 'footwear') && products && products.length > 0) {
     const { data: vars } = await supabase
       .from('product_variants')
       .select('*')
