@@ -138,7 +138,6 @@ export default function CatalogClient({
     const price = parseFloat(prodPrice);
     const hsn = prodHsn.trim();
     const gstRate = parseFloat(prodGst) || 0;
-    const desc = prodDescription.trim();
     const finalCategory = prodCategory.trim();
 
     if (!name) {
@@ -157,7 +156,6 @@ export default function CatalogClient({
       hsn_code: hsn || null,
       gst_rate: gstRate,
       category: finalCategory || null,
-      description: desc || null,
       track_inventory: true,
     };
 
