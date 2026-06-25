@@ -124,10 +124,10 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
         }
         @media (max-width: 767px) {
           body {
-            padding-top: 5.5rem !important;
+            padding-top: 6rem !important;
           }
           .mobile-header-fixed {
-            top: 3rem !important;
+            top: 2.5rem !important;
           }
           .sub-banner-position {
             top: 0px !important;
