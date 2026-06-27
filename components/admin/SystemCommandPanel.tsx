@@ -39,7 +39,7 @@ export const SystemCommandPanel = () => {
   const [freezeReason, setFreezeReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
 
-  const targetPin = process.env.NEXT_PUBLIC_ADMIN_COMMAND_PIN || '1234';
+  const targetPin = process.env.NEXT_PUBLIC_ADMIN_COMMAND_PIN || '689844';
 
   const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault();
