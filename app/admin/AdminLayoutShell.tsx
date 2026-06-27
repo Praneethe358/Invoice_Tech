@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
+import { StatusBadge } from '@/components/admin/StatusBadge';
+import { getSystemStatus } from '@/lib/adminSystemStatus';
 
 const navLinks = [
   { href: '/admin', label: 'Dashboard' },
