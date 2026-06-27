@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { verifyAdmin } from '@/lib/admin';
 import { isRateLimited } from '@/lib/rate-limit';
+import { autoExpireOutdatedSubscriptions } from '@/lib/subscription';
 
 export async function GET(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
@@ -14,6 +15,9 @@ export async function GET(request: NextRequest) {
   if (!isAdmin) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
+
+  // Auto-expire trials/subscriptions before fetching shops list
+  await autoExpireOutdatedSubscriptions();
 
   const { searchParams } = new URL(request.url);
   const search = searchParams.get('search') || '';

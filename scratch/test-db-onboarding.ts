@@ -63,7 +63,7 @@ async function runTest() {
         inventory_enabled: true,
         onboarding_completed: true,
         subscription_status: 'trial',
-        trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+        trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       })
       .select('id')
       .single();

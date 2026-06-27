@@ -171,3 +171,28 @@ export async function syncSubscriptionStatus(
     }
   }
 }
+
+export async function autoExpireOutdatedSubscriptions(): Promise<void> {
+  if (typeof window !== 'undefined') return;
+  try {
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const admin = createAdminClient();
+    const nowStr = new Date().toISOString();
+
+    // Expire trials that have ended
+    await admin
+      .from('shops')
+      .update({ subscription_status: 'expired' })
+      .eq('subscription_status', 'trial')
+      .lt('trial_ends_at', nowStr);
+
+    // Expire active subscriptions that have ended
+    await admin
+      .from('shops')
+      .update({ subscription_status: 'expired' })
+      .eq('subscription_status', 'active')
+      .lt('subscription_ends_at', nowStr);
+  } catch (e) {
+    console.error('autoExpireOutdatedSubscriptions error:', e);
+  }
+}

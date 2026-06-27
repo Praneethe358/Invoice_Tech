@@ -287,6 +287,29 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
         }
 
         if (shop) {
+          const now = new Date();
+          const trialEnds = shop.trial_ends_at ? new Date(shop.trial_ends_at) : null;
+          const subEnds = shop.subscription_ends_at ? new Date(shop.subscription_ends_at) : null;
+          
+          let shouldExpire = false;
+          if ((shop.subscription_status || 'trial') === 'trial' && trialEnds && trialEnds < now) {
+            shouldExpire = true;
+          } else if (shop.subscription_status === 'active' && subEnds && subEnds < now) {
+            shouldExpire = true;
+          }
+          
+          if (shouldExpire) {
+            shop.subscription_status = 'expired';
+            // Update database to expired (non-blocking client update)
+            supabase
+              .from('shops')
+              .update({ subscription_status: 'expired' })
+              .eq('id', shop.id)
+              .then((res: any) => {
+                if (res.error) console.error('Failed to auto-expire shop subscription in Navbar:', res.error);
+              });
+          }
+
           setShopInfo(shop as any);
           setUserRole(resolvedRole);
           setShopLoaded(true);

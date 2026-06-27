@@ -517,7 +517,7 @@ alter table shops
 
 -- Backfill trial_ends_at for existing shops
 update shops
-set trial_ends_at = created_at + interval '14 days'
+set trial_ends_at = created_at + interval '7 days'
 where trial_ends_at is null;
 
 -- ═══════════════════════════════════════════
