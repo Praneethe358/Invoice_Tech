@@ -19,6 +19,7 @@ interface ShopRow {
   created_at: string;
   owner_email: string;
   invoice_count: number;
+  auth_user_id: string;
 }
 
 interface AnalyticsData {
@@ -114,6 +115,25 @@ export default function AdminDashboardClient() {
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleImpersonate = async (targetOwnerId: string) => {
+    try {
+      const res = await fetch('/api/admin/impersonate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target_owner_id: targetOwnerId }),
+      });
+      const data = await res.json();
+      if (data.success && data.token) {
+        document.cookie = `impersonate_token=${data.token}; path=/; max-age=3600; SameSite=Lax`;
+        window.location.href = data.redirectUrl;
+      } else {
+        showToast(data.error || 'Failed to start impersonation');
+      }
+    } catch (e: any) {
+      showToast('An error occurred: ' + e.message);
+    }
   };
 
   const fetchGrowth = async (r: '1m' | '3m' | '6m') => {
@@ -700,9 +720,17 @@ export default function AdminDashboardClient() {
                         onClick={() => router.push(`/admin/shops/${shop.id}`)}
                         className="px-3 py-1.5 rounded-xl text-[10px] font-black bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all duration-300"
                       >Details</button>
+                      <button
+                        onClick={() => handleImpersonate(shop.auth_user_id)}
+                        className="px-3 py-1.5 rounded-xl text-[10px] font-black bg-amber-500 text-white hover:bg-amber-600 shadow-md shadow-amber-500/10 transition-all duration-300"
+                      >Impersonate</button>
                       <div className="relative group">
                         <button className="px-2.5 py-1.5 rounded-xl text-[10px] font-black bg-white text-slate-400 border border-slate-200 hover:bg-slate-50">⋯</button>
                         <div className="hidden group-hover:block absolute right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-20 min-w-[140px] py-1">
+                          <button
+                            onClick={() => handleImpersonate(shop.auth_user_id)}
+                            className="w-full text-left px-3.5 py-2.5 text-[10px] font-bold text-amber-600 hover:bg-amber-50 transition-colors border-b border-slate-100"
+                          >Impersonate Owner</button>
                           <button
                             onClick={() => setExpireTarget({ id: shop.id, name: shop.name, action: 'expire' })}
                             className="w-full text-left px-3.5 py-2.5 text-[10px] font-bold text-rose-600 hover:bg-rose-50 transition-colors"
@@ -851,6 +879,10 @@ export default function AdminDashboardClient() {
                 <div className="relative group">
                   <button className="px-3 py-2 rounded-xl text-xs font-black bg-white text-slate-400 border border-slate-200 hover:bg-slate-50">⋯</button>
                   <div className="hidden group-hover:block absolute right-0 bottom-full mb-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-20 min-w-[140px] py-1">
+                    <button
+                      onClick={() => handleImpersonate(shop.auth_user_id)}
+                      className="w-full text-left px-3.5 py-2.5 text-[10px] font-bold text-amber-600 hover:bg-amber-50 transition-colors border-b border-slate-100"
+                    >Impersonate Owner</button>
                     <button
                       onClick={() => setExpireTarget({ id: shop.id, name: shop.name, action: 'expire' })}
                       className="w-full text-left px-3.5 py-2.5 text-[10px] font-bold text-rose-600 hover:bg-rose-50 transition-colors"

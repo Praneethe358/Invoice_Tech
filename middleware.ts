@@ -38,6 +38,34 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  // ─── Write Guard for Impersonation ──────────────────────────
+  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
+    const impersonateToken = request.cookies.get('impersonate_token')?.value;
+    if (impersonateToken && !pathname.startsWith('/api/admin/impersonate')) {
+      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (serviceRoleKey) {
+        const { createClient: createSupabaseClient } = await import('@supabase/supabase-js');
+        const adminClient = createSupabaseClient(supabaseUrl, serviceRoleKey, {
+          auth: { autoRefreshToken: false, persistSession: false },
+        });
+
+        const { data: session } = await adminClient
+          .from('impersonation_sessions')
+          .select('id')
+          .eq('token', impersonateToken)
+          .gt('expires_at', new Date().toISOString())
+          .single();
+
+        if (session) {
+          return NextResponse.json(
+            { error: 'Write mutations are blocked during impersonation.' },
+            { status: 403 }
+          );
+        }
+      }
+    }
+  }
+
   // ─── Admin Route Protection (Level 1) ───────────────────────
   // Block /admin routes for non-admins. Check admins table via 
   // service role. Redirect silently to /dashboard.
@@ -100,6 +128,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|sw.js|icon-.*\\.png|manifest\\.webmanifest|api/).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sw.js|icon-.*\\.png|manifest\\.webmanifest).*)',
   ],
 };

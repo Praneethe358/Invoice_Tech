@@ -26,6 +26,7 @@ interface ShopDetail {
   created_at: string; subscription_status: string; trial_ends_at: string | null;
   subscription_ends_at: string | null; subscription_started_at: string | null;
   subscription_notes: string | null; owner_email: string;
+  auth_user_id: string;
 }
 
 export default function ShopDetailClient({ shopId }: { shopId: string }) {
@@ -47,6 +48,26 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
   const [toast, setToast] = useState<string | null>(null);
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
+
+  const handleImpersonate = async () => {
+    if (!shop?.auth_user_id) return;
+    try {
+      const res = await fetch('/api/admin/impersonate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target_owner_id: shop.auth_user_id }),
+      });
+      const data = await res.json();
+      if (data.success && data.token) {
+        document.cookie = `impersonate_token=${data.token}; path=/; max-age=3600; SameSite=Lax`;
+        window.location.href = data.redirectUrl;
+      } else {
+        showToast(data.error || 'Failed to start impersonation');
+      }
+    } catch (e: any) {
+      showToast('An error occurred: ' + e.message);
+    }
+  };
 
   const fetchVolume = async (r: '1m' | '3m' | '6m') => {
     setChartLoading(true);
@@ -187,6 +208,13 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
               <button onClick={() => setShowActivate(!showActivate)}
                 className="w-full py-2.5 rounded-xl text-xs font-black bg-blue-600 text-white hover:bg-blue-500 shadow-md shadow-blue-500/10 transition-all duration-300">
                 {status === 'active' ? 'Extend Subscription' : 'Activate Subscription'}
+              </button>
+
+              <button
+                onClick={handleImpersonate}
+                className="w-full mt-3 py-2.5 rounded-xl text-xs font-black bg-amber-500 text-white hover:bg-amber-600 shadow-md shadow-amber-500/10 transition-all duration-300 flex items-center justify-center gap-1.5"
+              >
+                <span>🕵️</span> Impersonate Owner
               </button>
 
               {showActivate && (

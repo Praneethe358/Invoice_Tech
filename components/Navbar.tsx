@@ -138,6 +138,10 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
   const [userRole, setUserRole] = useState<UserRole>(initialRole ?? 'owner');
   const [lowStockCount, setLowStockCount] = useState<number>(0);
 
+  const [impersonateToken, setImpersonateToken] = useState<string | null>(null);
+  const [targetEmail, setTargetEmail] = useState<string>('');
+  const [expiresInMinutes, setExpiresInMinutes] = useState<number>(60);
+
   const purchasesItem = {
     href: '/purchases',
     label: 'Purchase Management',
@@ -344,6 +348,79 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
     setMobileMenuOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokenFromUrl = urlParams.get('impersonate');
+      if (tokenFromUrl) {
+        document.cookie = `impersonate_token=${tokenFromUrl}; path=/; max-age=3600; SameSite=Lax`;
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, '', cleanUrl);
+      }
+    }
+
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+
+    const token = getCookie('impersonate_token');
+    setImpersonateToken(token || null);
+
+    if (token) {
+      fetch(`/api/admin/impersonate/status?token=${token}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setTargetEmail(data.email);
+            setExpiresInMinutes(Math.max(0, Math.round(data.expiresInSeconds / 60)));
+          } else {
+            document.cookie = 'impersonate_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            setImpersonateToken(null);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!impersonateToken || expiresInMinutes <= 0) return;
+
+    const interval = setInterval(() => {
+      setExpiresInMinutes((prev) => {
+        if (prev <= 1) {
+          document.cookie = 'impersonate_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+          setImpersonateToken(null);
+          window.location.reload();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [impersonateToken, expiresInMinutes]);
+
+  const handleEndImpersonation = async () => {
+    if (!impersonateToken) return;
+
+    try {
+      await fetch('/api/admin/impersonate/end', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: impersonateToken }),
+      });
+    } catch (e) {
+      console.error('Failed to end impersonation:', e);
+    }
+
+    document.cookie = 'impersonate_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    setImpersonateToken(null);
+    window.location.href = '/admin';
+  };
+
   const handleLogout = async () => {
     try {
       if (typeof window !== 'undefined') {
@@ -359,20 +436,41 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
 
   return (
     <>
+      {impersonateToken && (
+        <div className="fixed top-0 left-0 right-0 bg-amber-600 text-white text-xs md:text-sm font-semibold flex items-center justify-between px-6 py-2.5 z-[100] shadow-md">
+          <div className="flex items-center gap-2">
+            <span className="animate-pulse">🕵️</span>
+            <span>
+              Viewing as Owner <strong className="underline">{targetEmail || '...'}</strong> (Session expires in {expiresInMinutes} {expiresInMinutes === 1 ? 'minute' : 'minutes'})
+            </span>
+          </div>
+          <button
+            onClick={handleEndImpersonation}
+            className="bg-white text-amber-700 hover:bg-amber-50 transition-colors px-3 py-1 rounded-md text-xs font-bold shadow-sm"
+          >
+            End Session
+          </button>
+        </div>
+      )}
+
       {/* Global CSS Injector to offset pages on desktop and mobile view */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media (min-width: 768px) {
           body {
             padding-left: 18rem !important;
+            ${impersonateToken ? 'padding-top: 40px !important;' : ''}
+          }
+          .sidebar {
+            ${impersonateToken ? 'top: 40px !important;' : ''}
           }
         }
         @media (max-width: 767px) {
           body {
-            padding-top: 56px !important;
+            padding-top: ${impersonateToken ? '96px' : '56px'} !important;
           }
           .mobile-header-fixed {
             position: fixed !important;
-            top: 0;
+            top: ${impersonateToken ? '40px' : '0'};
             left: 0;
             right: 0;
             z-index: 50;
