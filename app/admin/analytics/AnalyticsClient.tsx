@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area, Cell } from 'recharts';
 import { toTitleCase } from '@/utils/format';
+import { SecurityAuditLedger } from '@/components/admin/SecurityAuditLedger';
 
 const SHOP_EMOJIS: Record<string, string> = {
   fertilizer: '🌱', clothing: '👗', grocery: '🛒', hardware: '🔧',
@@ -356,6 +357,9 @@ export default function AnalyticsClient() {
           </div>
         </div>
       </div>
+
+      {/* Security Audit Ledger */}
+      <SecurityAuditLedger />
     </div>
   );
 }
