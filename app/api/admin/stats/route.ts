@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   // Get all shops with counts
   const { data: shops, error: shopsErr } = await admin
     .from('shops')
-    .select('id, subscription_status, created_at');
+    .select('id, subscription_status, created_at, auth_user_id');
 
   if (shopsErr) {
     return NextResponse.json({ error: shopsErr.message }, { status: 500 });
@@ -33,12 +33,15 @@ export async function GET(request: NextRequest) {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const total_shops = shops?.length || 0;
-  const active = shops?.filter(s => s.subscription_status === 'active').length || 0;
-  const trial = shops?.filter(s => s.subscription_status === 'trial').length || 0;
-  const expired = shops?.filter(s => s.subscription_status === 'expired').length || 0;
-  const cancelled = shops?.filter(s => s.subscription_status === 'cancelled').length || 0;
-  const new_this_month = shops?.filter(s => new Date(s.created_at) >= monthStart).length || 0;
+  // Exclude the platform owner's admin shop from money/subscription calculations
+  const nonAdminShops = shops?.filter(s => s.auth_user_id !== 'a24f626f-c941-4759-b9d4-6e4f3039555e') || [];
+
+  const total_shops = nonAdminShops.length;
+  const active = nonAdminShops.filter(s => s.subscription_status === 'active').length || 0;
+  const trial = nonAdminShops.filter(s => s.subscription_status === 'trial').length || 0;
+  const expired = nonAdminShops.filter(s => s.subscription_status === 'expired').length || 0;
+  const cancelled = nonAdminShops.filter(s => s.subscription_status === 'cancelled').length || 0;
+  const new_this_month = nonAdminShops.filter(s => new Date(s.created_at) >= monthStart).length || 0;
 
   // Total invoices
   const { count: total_invoices } = await admin

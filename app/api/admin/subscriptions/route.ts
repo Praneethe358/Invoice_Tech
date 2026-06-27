@@ -24,12 +24,12 @@ export async function GET(request: NextRequest) {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
 
-  // All shops
+  // All shops (excluding the platform owner's admin account)
   const { data: allShops } = await admin
     .from('shops')
-    .select('id, name, shop_type, phone, subscription_status, subscription_ends_at, trial_ends_at, created_at');
+    .select('id, name, shop_type, phone, subscription_status, subscription_ends_at, trial_ends_at, created_at, auth_user_id');
 
-  const shops = allShops || [];
+  const shops = (allShops || []).filter(s => s.auth_user_id !== 'a24f626f-c941-4759-b9d4-6e4f3039555e');
 
   // Active subscriptions
   const active = shops.filter(s => s.subscription_status === 'active');

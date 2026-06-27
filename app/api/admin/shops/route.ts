@@ -30,10 +30,11 @@ export async function GET(request: NextRequest) {
 
   const admin = createAdminClient();
 
-  // Build query
+  // Build query (excluding the platform owner's admin account)
   let query = admin
     .from('shops')
-    .select('*', { count: 'exact' });
+    .select('*', { count: 'exact' })
+    .neq('auth_user_id', 'a24f626f-c941-4759-b9d4-6e4f3039555e');
 
   // Status filter
   if (status !== 'all') {
@@ -56,6 +57,31 @@ export async function GET(request: NextRequest) {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  // Query admin shop separately so it can be listed separately
+  let adminShop = null;
+  try {
+    const { data: adminShops } = await admin
+      .from('shops')
+      .select('*')
+      .eq('auth_user_id', 'a24f626f-c941-4759-b9d4-6e4f3039555e');
+
+    if (adminShops && adminShops.length > 0) {
+      const rawShop = adminShops[0];
+      const { count: invCount } = await admin
+        .from('invoices')
+        .select('id', { count: 'exact', head: true })
+        .eq('shop_id', rawShop.id);
+
+      adminShop = {
+        ...rawShop,
+        owner_email: 'praneethpraneeth8888@gmail.com',
+        invoice_count: invCount || 0
+      };
+    }
+  } catch (e) {
+    console.error('Failed to query admin shop separately:', e);
   }
 
   // Get owner emails via auth.users (service role)
@@ -99,6 +125,7 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     shops: shopsWithMeta,
+    adminShop,
     total: count || 0,
     page,
     totalPages: Math.ceil((count || 0) / limit),

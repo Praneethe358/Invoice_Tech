@@ -86,6 +86,7 @@ export default function AdminDashboardClient() {
   const [growthRange, setGrowthRange] = useState<'1m' | '3m' | '6m'>('1m');
   const [growthLoading, setGrowthLoading] = useState(false);
   const [shops, setShops] = useState<ShopRow[]>([]);
+  const [adminShop, setAdminShop] = useState<ShopRow | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -141,6 +142,7 @@ export default function AdminDashboardClient() {
       const res = await fetch(`/api/admin/shops?${params}`);
       const data = await res.json();
       setShops(data.shops || []);
+      setAdminShop(data.adminShop || null);
       setTotal(data.total || 0);
       setTotalPages(data.totalPages || 1);
     } catch { /* ignore */ }
@@ -571,6 +573,54 @@ export default function AdminDashboardClient() {
           <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </div>
       </div>
+
+      {/* Admin Shop Special Section */}
+      {adminShop && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-transparent border border-amber-350/40 rounded-2xl p-5 shadow-xs relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-450/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-550/20 border border-amber-400/30 flex items-center justify-center text-2xl shadow-inner shrink-0">
+              👑
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm font-black text-slate-800">{adminShop.name}</span>
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-500 text-white border border-amber-400 shadow-xs uppercase tracking-wider">
+                  Platform Owner (Admin)
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                  {SHOP_EMOJIS[adminShop.shop_type] || '🏪'} {adminShop.shop_type}
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-400 font-bold">
+                Email: <span className="text-slate-700 font-black">{adminShop.owner_email}</span> | Shop ID: <span className="text-slate-500 font-mono select-all">{adminShop.id}</span>
+              </p>
+              <div className="flex items-center gap-4 text-[10px] text-slate-500 font-bold pt-1">
+                <span>Invoices: <span className="text-slate-800 font-black">{adminShop.invoice_count}</span></span>
+                <span>•</span>
+                <span>Subscription: <span className="text-emerald-600 font-black uppercase">PERMANENT FREE ACCESS</span></span>
+                <span>•</span>
+                <span>Joined: <span className="text-slate-700 font-extrabold">{formatDate(adminShop.created_at)}</span></span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => router.push(`/admin/shops/${adminShop.id}`)}
+              className="px-4 py-2 rounded-xl text-xs font-black bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shadow-xs transition-all duration-300"
+            >
+              View Developer Dashboard
+            </button>
+            <span className="px-3 py-2 rounded-xl text-[10px] font-black bg-amber-500/10 text-amber-700 border border-amber-300/30">
+              Money Calc Bypassed
+            </span>
+          </div>
+        </motion.div>
+      )}
 
       {/* Shops Table */}
       <div className="hidden md:block bg-white border border-slate-250/80 rounded-2xl shadow-xs overflow-x-auto">

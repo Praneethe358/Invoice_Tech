@@ -16,9 +16,24 @@ export function getSubscriptionAccess(
   shop: Pick<Shop,
     'subscription_status' |
     'trial_ends_at' |
-    'subscription_ends_at'>
+    'subscription_ends_at'> & { auth_user_id?: string | null }
 ): SubscriptionAccess {
   const now = new Date();
+
+  // Admin permanent active check
+  if (
+    shop.auth_user_id === 'a24f626f-c941-4759-b9d4-6e4f3039555e' ||
+    shop.subscription_status === 'lifetime'
+  ) {
+    return {
+      canSendInvoices: true,
+      status: 'active',
+      daysRemaining: null,
+      trialActive: false,
+      message: 'Permanent Free Admin Account',
+      urgency: 'none'
+    };
+  }
 
   // If status is empty, default to trial
   const status = (shop.subscription_status || 'trial') as SubscriptionStatus;
