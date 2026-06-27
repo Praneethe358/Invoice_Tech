@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
 import { toTitleCase } from '@/utils/format';
+import { StatusBadge } from '@/components/admin/StatusBadge';
 
 interface ShopRow {
   id: string;
@@ -616,9 +617,7 @@ export default function AdminDashboardClient() {
             >
               View Developer Dashboard
             </button>
-            <span className="px-3 py-2 rounded-xl text-[10px] font-black bg-amber-500/10 text-amber-700 border border-amber-300/30">
-              Money Calc Bypassed
-            </span>
+            <StatusBadge label="Sandbox Mode" variant="yellow" icon="🟡" />
           </div>
         </motion.div>
       )}

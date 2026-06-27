@@ -54,6 +54,8 @@ export default function AdminLayoutShell({
     return pathname.startsWith(href);
   };
 
+  const status = getSystemStatus();
+
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 relative overflow-x-clip font-sans select-none">
       {/* Soft elegant background glow shapes for premium light depth */}
@@ -142,6 +144,21 @@ export default function AdminLayoutShell({
           ))}
         </div>
       </header>
+
+      {/* System Status Banner */}
+      <div className="flex items-center gap-2 px-6 py-2 bg-slate-50 border-b border-slate-200 text-xs">
+        <span className="text-slate-400 mr-2">System:</span>
+        <StatusBadge
+          label={status.billing}
+          variant={status.billingVariant}
+          icon={status.billingVariant === 'green' ? '🔒' : '🟡'}
+        />
+        <StatusBadge
+          label={status.gst}
+          variant={status.gstVariant}
+          icon={status.gstVariant === 'green' ? '✓' : '⚠️'}
+        />
+      </div>
 
       {/* Main Content */}
       <main className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8 py-8 relative z-10">
