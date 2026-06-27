@@ -5,7 +5,7 @@ import { createBrowserClient } from '@supabase/ssr';
 let client: ReturnType<typeof createBrowserClient> | null = null;
 
 export function createClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  let url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
@@ -14,8 +14,12 @@ export function createClient() {
     );
   }
 
-  // Singleton pattern — reuse the same client
-  if (!client) {
+  if (typeof window !== 'undefined' && document.cookie.includes('impersonate_token=')) {
+    url = `${window.location.origin}/api/supabase`;
+  }
+
+  // Singleton pattern — reuse the same client, but recreate if the target URL changed
+  if (!client || (client as any).supabaseUrl !== url) {
     client = createBrowserClient(url, key);
   }
 
