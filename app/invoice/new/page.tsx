@@ -66,6 +66,7 @@ export default async function NewInvoicePage({ searchParams }: PageProps) {
       initialDraft={initialDraft}
       userRole={context.role}
       userId={context.userId}
+      userName={context.name}
     />
   );
 }

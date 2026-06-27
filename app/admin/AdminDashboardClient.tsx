@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
 import { toTitleCase } from '@/utils/format';
 import { StatusBadge } from '@/components/admin/StatusBadge';
+import { LivePlatformPulse } from '@/components/admin/LivePlatformPulse';
 
 interface ShopRow {
   id: string;
@@ -384,6 +385,9 @@ export default function AdminDashboardClient() {
           </motion.div>
         ))}
       </div>
+
+      {/* Live Platform Pulse */}
+      <LivePlatformPulse />
 
       {/* Visual Insights Section */}
       {analytics && (

@@ -41,17 +41,34 @@ interface Props {
     subscription_status?: string | null;
     trial_ends_at?: string | null;
     subscription_ends_at?: string | null;
+    address?: string | null;
   };
   initialDraft?: any;
   userRole: string;
   userId: string;
+  userName?: string | null;
 }
 
-export default function InvoiceBuilderClient({ products: initialProducts, initialVariants = [], shopId, shop, initialDraft, userRole, userId }: Props) {
+export default function InvoiceBuilderClient({ products: initialProducts, initialVariants = [], shopId, shop, initialDraft, userRole, userId, userName }: Props) {
   const supabase = createClient();
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [variants, setVariants] = useState<ProductVariant[]>(initialVariants);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+
+  const fireEvent = async (type: string, metadata: Record<string, any>) => {
+    try {
+      const city = shop.address ? shop.address.split(',').pop()?.trim() || 'Unknown' : 'Unknown';
+      await supabase.from('platform_events').insert({
+        event_type: type,
+        business_id: shop.id,
+        business_name: shop.name,
+        city,
+        metadata,
+      });
+    } catch (e) {
+      console.error('Failed to fire platform event:', e);
+    }
+  };
 
   const refreshCatalog = useCallback(async () => {
     try {
@@ -715,31 +732,49 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
       const id = isEditingDraft ? initialDraft.id : resData.id;
       const invoice_number = isEditingDraft ? initialDraft.invoice_number : resData.invoice_number;
 
+      // Fire INVOICE_CREATED platform event
+      await fireEvent('INVOICE_CREATED', {
+        invoice_no: invoice_number,
+        amount: total,
+        customer_name: customerName.trim().toUpperCase() || 'Unknown Customer',
+      });
+
       // Log silent override or approved override
       if (itemsBelowMsp.length > 0) {
-        const isSilent = userRole === 'owner' || userRole === 'admin';
-        await fetch('/api/audit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: isSilent ? 'MSP_OVERRIDE_SILENT' : 'MSP_OVERRIDE_AUTHORIZED',
-            entity_type: 'invoice',
-            entity_id: id,
-            entity_label: invoice_number,
-            details: {
-              cashier: isSilent ? null : { role: userRole, userId: userId },
-              authorized_by: managerApproval || { name: 'Owner/Manager', role: userRole },
-              items: itemsBelowMsp.map(i => {
-                const v = variants.find(val => val.id === i.variant_id);
-                return {
-                  name: i.name,
-                  price: i.price,
-                  msp: v ? Number(v.min_selling_price) : 0
-                };
-              })
-            }
-          })
-        }).catch(e => console.error(e));
+        for (const i of itemsBelowMsp) {
+          const v = variants.find(val => val.id === i.variant_id);
+          const minSellingPrice = v ? Number(v.min_selling_price) : 0;
+
+          // Fire MSP_OVERRIDE audit log
+          await fetch('/api/audit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'MSP_OVERRIDE',
+              entity_type: 'invoice',
+              entity_id: id,
+              entity_label: invoice_number,
+              details: {
+                product_name: i.name,
+                override_price: i.price,
+                min_selling_price: minSellingPrice,
+                cashier_name: userName || 'Cashier',
+                cashier_role: userRole,
+                authorized_by: managerApproval?.name || 'Owner/Manager',
+              }
+            })
+          }).catch(e => console.error(e));
+
+          // Fire MSP_OVERRIDE platform event
+          await fireEvent('MSP_OVERRIDE', {
+            product_name: i.name,
+            override_price: i.price,
+            min_selling_price: minSellingPrice,
+            cashier_name: userName || 'Cashier',
+            cashier_role: userRole,
+            authorized_by: managerApproval?.name || 'Owner/Manager',
+          });
+        }
       }
       setManagerApproval(null);
 

@@ -29,6 +29,21 @@ export default function CatalogClient({
   const supabase = useMemo(() => createClient(), []);
   const { showToast } = useToast();
 
+  const fireEvent = async (type: string, metadata: Record<string, any>) => {
+    try {
+      const city = shop.address ? shop.address.split(',').pop()?.trim() || 'Unknown' : 'Unknown';
+      await supabase.from('platform_events').insert({
+        event_type: type,
+        business_id: shop.id,
+        business_name: shop.name,
+        city,
+        metadata,
+      });
+    } catch (e) {
+      console.error('Failed to fire platform event:', e);
+    }
+  };
+
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
@@ -424,6 +439,13 @@ export default function CatalogClient({
             new_qty: stockVal,
             reason: stockDiff > 0 ? 'restock' : 'reconciliation',
           });
+          if (stockDiff > 0) {
+            await fireEvent('STOCK_ADDED', {
+              product_name: variantsProduct.name,
+              units_added: stockDiff,
+              variant: `${color} / Size ${size}`,
+            });
+          }
         }
         showToast('Variant updated successfully', 'success');
         handleCancelEdit();
@@ -464,6 +486,11 @@ export default function CatalogClient({
             previous_qty: 0,
             new_qty: stockVal,
             reason: 'restock',
+          });
+          await fireEvent('STOCK_ADDED', {
+            product_name: variantsProduct.name,
+            units_added: stockVal,
+            variant: `${color} / Size ${size}`,
           });
         }
         showToast('Variant added successfully', 'success');
@@ -509,6 +536,12 @@ export default function CatalogClient({
         previous_qty: currentStock,
         new_qty: newQty,
         reason: 'restock',
+      });
+
+      await fireEvent('STOCK_ADDED', {
+        product_name: variantsProduct?.name || 'Product',
+        units_added: qty,
+        variant: `${variant.color} / Size ${variant.size}`,
       });
 
       setVariantStockAddId(null);

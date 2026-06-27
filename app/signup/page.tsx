@@ -269,6 +269,19 @@ export default function SignupPage() {
         return;
       }
 
+      // Fire platform event for new signup
+      try {
+        await supabase.from('platform_events').insert({
+          event_type: 'NEW_SIGNUP',
+          business_id: newShop.id,
+          business_name: shopName.trim(),
+          city: 'Unknown',
+          metadata: { plan: 'trial' },
+        });
+      } catch (e) {
+        console.error('Failed to fire new signup event:', e);
+      }
+
       // Send welcome WhatsApp message (non-blocking)
       try {
         await fetch('/api/signup/welcome', {
