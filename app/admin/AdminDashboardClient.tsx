@@ -7,6 +7,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { toTitleCase } from '@/utils/format';
 import { StatusBadge } from '@/components/admin/StatusBadge';
 import { LivePlatformPulse } from '@/components/admin/LivePlatformPulse';
+import { SystemCommandPanel } from '@/components/admin/SystemCommandPanel';
 
 interface ShopRow {
   id: string;
@@ -131,6 +132,42 @@ export default function AdminDashboardClient() {
         window.location.href = data.redirectUrl;
       } else {
         showToast(data.error || 'Failed to start impersonation');
+      }
+    } catch (e: any) {
+      showToast('An error occurred: ' + e.message);
+    }
+  };
+
+  const handleFreezeShop = async (shopId: string, reason: string) => {
+    try {
+      const res = await fetch(`/api/admin/shops/${shopId}/freeze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('Shop frozen successfully');
+        fetchShops();
+      } else {
+        showToast(data.error || 'Failed to freeze shop');
+      }
+    } catch (e: any) {
+      showToast('An error occurred: ' + e.message);
+    }
+  };
+
+  const handleUnfreezeShop = async (shopId: string) => {
+    try {
+      const res = await fetch(`/api/admin/shops/${shopId}/unfreeze`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('Shop unfrozen successfully');
+        fetchShops();
+      } else {
+        showToast(data.error || 'Failed to unfreeze shop');
       }
     } catch (e: any) {
       showToast('An error occurred: ' + e.message);
@@ -388,6 +425,9 @@ export default function AdminDashboardClient() {
 
       {/* Live Platform Pulse */}
       <LivePlatformPulse />
+
+      {/* System Command Panel */}
+      <SystemCommandPanel />
 
       {/* Visual Insights Section */}
       {analytics && (
@@ -741,8 +781,24 @@ export default function AdminDashboardClient() {
                           >Expire Now</button>
                           <button
                             onClick={() => setExpireTarget({ id: shop.id, name: shop.name, action: 'cancel' })}
-                            className="w-full text-left px-3.5 py-2.5 text-[10px] font-bold text-slate-500 hover:bg-slate-50 transition-colors"
+                            className="w-full text-left px-3.5 py-2.5 text-[10px] font-bold text-slate-500 hover:bg-slate-50 transition-colors border-b border-slate-100"
                           >Cancel Subscription</button>
+                          {(shop as any).is_frozen ? (
+                            <button
+                              onClick={() => handleUnfreezeShop(shop.id)}
+                              className="w-full text-left px-3.5 py-2.5 text-[10px] font-bold text-emerald-600 hover:bg-emerald-50 transition-colors"
+                            >Unfreeze Shop</button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                const reason = prompt(`Enter reason for freezing "${shop.name}":`);
+                                if (reason !== null && reason.trim()) {
+                                  handleFreezeShop(shop.id, reason);
+                                }
+                              }}
+                              className="w-full text-left px-3.5 py-2.5 text-[10px] font-bold text-rose-600 hover:bg-rose-50 transition-colors"
+                            >Freeze Shop</button>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -141,6 +141,7 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
   const [impersonateToken, setImpersonateToken] = useState<string | null>(null);
   const [targetEmail, setTargetEmail] = useState<string>('');
   const [expiresInMinutes, setExpiresInMinutes] = useState<number>(60);
+  const [announcement, setAnnouncement] = useState<string | null>(null);
 
   const purchasesItem = {
     href: '/purchases',
@@ -250,10 +251,24 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
+        // Fetch active announcement
+        const { data: activeAnns } = await supabase
+          .from('system_announcements')
+          .select('message')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (activeAnns && activeAnns.length > 0) {
+          setAnnouncement(activeAnns[0].message);
+        } else {
+          setAnnouncement(null);
+        }
+
         // Try owner first
         let { data: shop } = await supabase
           .from('shops')
-          .select('id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at, whatsapp_invoices_sent')
+          .select('id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at, whatsapp_invoices_sent, is_frozen, frozen_reason')
           .eq('auth_user_id', user.id)
           .single();
 
@@ -265,7 +280,7 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
           // Check if they are a staff member
           const { data: staff } = await supabase
             .from('staff')
-            .select('role, shop_id, shops(id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at, whatsapp_invoices_sent)')
+            .select('role, shop_id, shops(id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at, whatsapp_invoices_sent, is_frozen, frozen_reason)')
             .eq('auth_user_id', user.id)
             .eq('status', 'active')
             .single();
@@ -285,6 +300,8 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
                 trial_ends_at: staffShop.trial_ends_at,
                 subscription_ends_at: staffShop.subscription_ends_at,
                 whatsapp_invoices_sent: staffShop.whatsapp_invoices_sent,
+                is_frozen: staffShop.is_frozen,
+                frozen_reason: staffShop.frozen_reason,
               } as any;
             }
           }
@@ -436,6 +453,48 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
 
   return (
     <>
+      {shopInfo?.is_frozen && (
+        <div className="fixed inset-0 bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center text-white z-[99999] p-6 text-center select-none">
+          <div className="max-w-md w-full bg-slate-800/80 border border-slate-700/50 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-rose-650" />
+            <div className="w-16 h-16 bg-rose-500/10 border border-rose-500/30 text-rose-500 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6">
+              🔒
+            </div>
+            <h2 className="text-xl font-black tracking-tight text-white mb-2">
+              Account Temporarily Frozen
+            </h2>
+            <p className="text-sm text-slate-400 leading-relaxed mb-6">
+              Your business account for <strong className="text-slate-100 font-extrabold">{shopInfo.name}</strong> has been temporarily frozen by platform administration.
+            </p>
+            {shopInfo.frozen_reason && (
+              <div className="bg-slate-900/50 border border-slate-700/30 p-4 rounded-2xl mb-8">
+                <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1.5">
+                  Reason for Freeze
+                </p>
+                <p className="text-xs font-semibold text-slate-300 italic">
+                  "{shopInfo.frozen_reason}"
+                </p>
+              </div>
+            )}
+            <div className="space-y-3">
+              <a
+                href={`https://wa.me/${process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || '919080689844'}?text=My%20account%20for%20${encodeURIComponent(shopInfo.name)}%20is%2520frozen.%20Please%20help.`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-2xl shadow-lg shadow-emerald-600/15 hover:shadow-emerald-600/25 transition-all duration-300"
+              >
+                💬 Contact Support on WhatsApp
+              </a>
+              <button
+                onClick={handleLogout}
+                className="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs py-3 rounded-2xl transition-all duration-300"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {impersonateToken && (
         <div className="fixed top-0 left-0 right-0 bg-amber-600 text-white text-xs md:text-sm font-semibold flex items-center justify-between px-6 py-2.5 z-[100] shadow-md">
           <div className="flex items-center gap-2">
@@ -453,24 +512,34 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
         </div>
       )}
 
+      {announcement && (
+        <div 
+          className="fixed left-0 right-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs md:text-sm font-semibold flex items-center justify-center gap-2 px-6 py-2.5 z-[99] shadow-md h-[40px]"
+          style={{ top: impersonateToken ? '40px' : '0' }}
+        >
+          <span className="animate-bounce">📢</span>
+          <span>{announcement}</span>
+        </div>
+      )}
+
       {/* Global CSS Injector to offset pages on desktop and mobile view */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media (min-width: 768px) {
           body {
             padding-left: 18rem !important;
-            ${impersonateToken ? 'padding-top: 40px !important;' : ''}
+            ${(impersonateToken || announcement) ? `padding-top: ${(impersonateToken ? 40 : 0) + (announcement ? 40 : 0)}px !important;` : ''}
           }
           .sidebar {
-            ${impersonateToken ? 'top: 40px !important;' : ''}
+            ${(impersonateToken || announcement) ? `top: ${(impersonateToken ? 40 : 0) + (announcement ? 40 : 0)}px !important;` : ''}
           }
         }
         @media (max-width: 767px) {
           body {
-            padding-top: ${impersonateToken ? '96px' : '56px'} !important;
+            padding-top: ${(impersonateToken ? 40 : 0) + (announcement ? 40 : 0) + 56}px !important;
           }
           .mobile-header-fixed {
             position: fixed !important;
-            top: ${impersonateToken ? '40px' : '0'};
+            top: ${(impersonateToken ? 40 : 0) + (announcement ? 40 : 0)}px;
             left: 0;
             right: 0;
             z-index: 50;

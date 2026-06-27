@@ -26,6 +26,10 @@ export interface Shop {
   credit_note_prefix?: string;
   debit_note_prefix?: string;
   whatsapp_invoices_sent?: number;
+  is_frozen?: boolean;
+  frozen_reason?: string | null;
+  frozen_at?: string | null;
+  frozen_by?: string | null;
 }
 
 export type CustomerTag = 'regular' | 'vip';
