@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Fragment } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
+import { toTitleCase } from '@/utils/format';
 
 interface ShopRow {
   id: string;
@@ -588,7 +589,7 @@ export default function AdminDashboardClient() {
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-black text-slate-800">{adminShop.name}</span>
+                <span className="text-sm font-black text-slate-800">{toTitleCase(adminShop.name)}</span>
                 <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-500 text-white border border-amber-400 shadow-xs uppercase tracking-wider">
                   Platform Owner (Admin)
                 </span>
@@ -661,7 +662,7 @@ export default function AdminDashboardClient() {
                 >
                   <td className="py-4 px-5">
                     <button onClick={() => router.push(`/admin/shops/${shop.id}`)} className="font-extrabold text-slate-900 hover:text-blue-600 transition-colors text-left">
-                      {shop.name}
+                      {toTitleCase(shop.name)}
                     </button>
                   </td>
                   <td className="py-4 px-5 text-slate-600 font-semibold whitespace-nowrap">
@@ -795,7 +796,7 @@ export default function AdminDashboardClient() {
               <div className="flex items-start justify-between">
                 <div>
                   <button onClick={() => router.push(`/admin/shops/${shop.id}`)} className="text-sm font-black text-slate-900 hover:text-blue-600 transition-colors text-left leading-tight">
-                    {shop.name}
+                    {toTitleCase(shop.name)}
                   </button>
                   <p className="text-[10px] text-slate-400 font-bold mt-0.5 uppercase tracking-wider">{shop.owner_email}</p>
                 </div>

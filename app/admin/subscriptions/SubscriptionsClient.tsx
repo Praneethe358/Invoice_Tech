@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { toTitleCase } from '@/utils/format';
 
 const STATUS_COLORS: Record<string, string> = {
   trial: 'bg-blue-50 text-blue-700 border-blue-200 shadow-[0_0_12px_rgba(59,130,246,0.05)]',
@@ -174,7 +175,7 @@ export default function SubscriptionsClient() {
             <tbody className="divide-y divide-slate-100">
               {data.renewals_due.map(shop => (
                 <tr key={shop.id} className="hover:bg-slate-50/30 transition-colors">
-                  <td className="py-4 px-5 font-bold text-slate-900 cursor-pointer hover:text-blue-600" onClick={() => router.push(`/admin/shops/${shop.id}`)}>{shop.name}</td>
+                  <td className="py-4 px-5 font-bold text-slate-900 cursor-pointer hover:text-blue-600" onClick={() => router.push(`/admin/shops/${shop.id}`)}>{toTitleCase(shop.name)}</td>
                   <td className="py-4 px-5 text-slate-500 font-semibold">{formatDate(shop.subscription_ends_at)}</td>
                   <td className="py-4 px-5">
                     <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-black border ${
@@ -217,7 +218,7 @@ export default function SubscriptionsClient() {
             <tbody className="divide-y divide-slate-100">
               {data.trials_ending_soon.map(shop => (
                 <tr key={shop.id} className="hover:bg-slate-50/30 transition-colors">
-                  <td className="py-4 px-5 font-bold text-slate-900 cursor-pointer hover:text-blue-600" onClick={() => router.push(`/admin/shops/${shop.id}`)}>{shop.name}</td>
+                  <td className="py-4 px-5 font-bold text-slate-900 cursor-pointer hover:text-blue-600" onClick={() => router.push(`/admin/shops/${shop.id}`)}>{toTitleCase(shop.name)}</td>
                   <td className="py-4 px-5 text-slate-500 font-semibold">{formatDate(shop.trial_ends_at)}</td>
                   <td className="py-4 px-5">
                     <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-black border ${
@@ -257,7 +258,7 @@ export default function SubscriptionsClient() {
             <tbody className="divide-y divide-slate-100">
               {data.expired_this_month.map(shop => (
                 <tr key={shop.id} className="hover:bg-slate-50/30 transition-colors">
-                  <td className="py-4 px-5 font-bold text-slate-900">{shop.name}</td>
+                  <td className="py-4 px-5 font-bold text-slate-900">{toTitleCase(shop.name)}</td>
                   <td className="py-4 px-5">
                     <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-black border capitalize ${STATUS_COLORS[shop.subscription_status] || STATUS_COLORS.cancelled}`}>
                       {shop.subscription_status}

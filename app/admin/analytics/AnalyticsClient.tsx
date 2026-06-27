@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area, Cell } from 'recharts';
+import { toTitleCase } from '@/utils/format';
 
 const SHOP_EMOJIS: Record<string, string> = {
   fertilizer: '🌱', clothing: '👗', grocery: '🛒', hardware: '🔧',
@@ -215,7 +216,7 @@ export default function AnalyticsClient() {
             },
             {
               l: 'Most Active Shop',
-              v: data.usage.most_active.name,
+              v: toTitleCase(data.usage.most_active.name),
               desc: `${data.usage.most_active.count} invoices this month`,
               icon: (
                 <svg className="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
@@ -345,8 +346,14 @@ export default function AnalyticsClient() {
             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Adoption Rate</p>
           </div>
         </div>
-        <div className="bg-slate-100 rounded-full h-2.5 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full transition-all duration-500" style={{ width: `${data.gst.percentage}%` }} />
+        <div className="px-6">
+          <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full transition-all duration-300" style={{ width: `${data.gst.percentage}%` }} />
+          </div>
+          <div className="flex justify-between text-xs text-gray-500 mt-1.5">
+            <span>{data.gst.registered} registered</span>
+            <span>{data.gst.percentage}%</span>
+          </div>
         </div>
       </div>
     </div>
