@@ -381,23 +381,22 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
       `}} />
 
       {/* ─── DESKTOP LEFT SIDEBAR (>= 768px) ─── */}
-      <aside className="hidden md:flex flex-col w-72 bg-white border-r border-[#e8eaed] fixed left-0 top-0 bottom-0 z-40 p-6 shadow-sm">
+      <aside className="hidden md:flex flex-col w-72 bg-[#1E3A8A] fixed left-0 top-0 bottom-0 z-40 p-6 sidebar">
         {/* Brand Logo */}
         <div className="flex items-center gap-3 mb-8">
-          <img src="/trubill-logo.png" alt="TruBill logo" className="w-10 h-10 object-contain shrink-0" loading="lazy" />
+          <img src="/trubill-logo.png" alt="TruBill logo" className="w-10 h-10 object-contain shrink-0 brightness-0 invert" loading="lazy" />
           <div>
-            <span className="font-heading font-black text-base leading-none block">
-              <span className="text-[#001048]">Tru</span>
-              <span className="text-[#0050e8]">Bill</span>
+            <span className="font-heading font-black text-base leading-none block text-white">
+              TruBill
             </span>
-            <span className="text-[10px] font-bold text-[#0050e8] uppercase tracking-wider mt-0.5 block">Sales Invoice</span>
+            <span className="text-[10px] font-bold text-white/70 uppercase tracking-wider mt-0.5 block">Sales Invoice</span>
           </div>
         </div>
 
         {/* Quick Action: New Sales Invoice */}
         <Link href="/invoice/new" className="mb-6 block">
-          <button className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white rounded-xl py-3 px-4 flex items-center justify-center gap-2.5 font-bold text-sm shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <button className="bg-white text-[#1E3A8A] font-semibold hover:bg-white/90 transition-colors flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-[#1E3A8A]">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
@@ -415,13 +414,13 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all relative ${
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors duration-150 border-l-4 ${
                     isActive
-                      ? 'bg-[#0050e8]/10 text-[#0050e8]'
-                      : 'text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#1a1d26]'
+                      ? 'bg-white/10 border-white text-white font-medium'
+                      : 'border-transparent text-white/60 hover:bg-white/10 hover:text-white'
                   }`}
                 >
-                  <span className={isActive ? 'text-[#0050e8]' : 'text-[#9ca3af]'}>
+                  <span className={isActive ? 'text-white' : 'text-white/60'}>
                     {item.icon}
                   </span>
                   {item.label}
@@ -436,17 +435,14 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
         </nav>
 
         {/* Sidebar Footer with Logout */}
-        <div className="border-t border-[#e8eaed] pt-4 mt-auto">
+        <div className="border-t border-white/20 pt-4 mt-auto">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-full bg-[#0050e8]/10 flex items-center justify-center text-[#0050e8] shrink-0">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
+            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm shrink-0">
+              {(shopInfo?.name || 'AS').slice(0, 2).toUpperCase()}
             </div>
              <div className="truncate flex-1">
-              <p className="text-xs font-bold text-[#1a1d26] truncate">{shopInfo?.name || 'Active Shop'}</p>
-              <p className="text-[10px] text-[#9ca3af] font-semibold uppercase tracking-wider truncate">
+              <p className="text-xs font-medium text-white truncate">{shopInfo?.name || 'Active Shop'}</p>
+              <p className="text-xs text-white/60 font-semibold uppercase tracking-wider truncate">
                 {shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Tamil Nadu, IN'}
               </p>
               {userRole !== 'owner' && (
@@ -460,7 +456,7 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+            className="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-white/60 hover:text-white transition-colors cursor-pointer"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
