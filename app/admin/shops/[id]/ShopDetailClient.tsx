@@ -118,7 +118,7 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
             ) : shop.name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h1 className="text-lg font-black text-slate-900 leading-tight">{shop.name}</h1>
+            <h1 className="text-lg font-black text-slate-900 leading-tight">{toTitleCase(shop.name)}</h1>
             <div className="flex items-center gap-2.5 mt-1.5">
               <span className="text-xs font-bold text-slate-400">{SHOP_EMOJIS[shop.shop_type] || '🏪'} {shop.shop_type}</span>
               <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-black border capitalize ${STATUS_COLORS[status] || STATUS_COLORS.cancelled}`}>{status}</span>
