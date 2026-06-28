@@ -56,7 +56,7 @@ are available after trial. Contact trubillapp@gmail.com for pricing.
 
 ## Legal
 
-- Privacy Policy: https://trubill.in/privacy-policy
+- Privacy Policy: https://trubill.in/privacy
 - Terms of Service: https://trubill.in/terms
 - GST Filing Disclaimer: TruBill is a billing tool and does not provide
   chartered accountant services. Users are responsible for verifying their

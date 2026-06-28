@@ -10,7 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "https://trubill.in/solutions/footwear",     lastModified: "2026-06-28", changeFrequency: "monthly", priority: 0.9 },
     { url: "https://trubill.in/solutions/textile",      lastModified: "2026-06-28", changeFrequency: "monthly", priority: 0.8 },
     { url: "https://trubill.in/solutions/juice-shops",  lastModified: "2026-06-28", changeFrequency: "monthly", priority: 0.8 },
-    { url: "https://trubill.in/privacy-policy",         lastModified: "2026-05-01", changeFrequency: "yearly",  priority: 0.3 },
+    { url: "https://trubill.in/privacy",                lastModified: "2026-05-01", changeFrequency: "yearly",  priority: 0.3 },
     { url: "https://trubill.in/terms",                  lastModified: "2026-05-01", changeFrequency: "yearly",  priority: 0.3 },
   ];
 }
