@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   },
 
   description:
-    "TruBill is a GST invoicing SaaS for Tamil Nadu retailers, restaurants, juice shops, footwear and textile traders. Create GST bills, manage inventory, file GSTR-1 — all in one place.",
+    "TruBill helps Tamil Nadu retailers, restaurants, juice shops and footwear traders create GST invoices, manage inventory and file GSTR-1 — free 14-day trial.",
 
   keywords: [
     "GST billing software Tamil Nadu",
