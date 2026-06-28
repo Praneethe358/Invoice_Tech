@@ -1,0 +1,63 @@
+# TruBill Invoice
+
+> TruBill (https://trubill.in) is a cloud-based GST billing and inventory
+> SaaS built for retail traders, restaurants, juice shops, footwear stores,
+> and textile merchants in Tamil Nadu, India.
+
+## What is TruBill?
+
+TruBill is the fastest GST billing software for Tamil Nadu small businesses.
+It allows cashiers to generate GST-compliant invoices, manage product
+inventory, track variants (size, colour, fabric), and share invoices via
+WhatsApp — all from a single web application.
+
+## Who is TruBill built for?
+
+- Restaurant owners and cloud kitchen operators in Tamil Nadu
+- Juice shops and beverage counter businesses
+- Footwear and chappals retailers (especially in Coimbatore, Tiruppur, Chennai)
+- Textile and saree shop merchants
+- General retail traders filing GSTR-1
+
+## Core Features
+
+- GST invoice generation with 5%, 12%, and 18% dynamic tax slabs
+- GSTR-1 return filing export (B2B, B2CS, CDNR, CDNUR formats)
+- Multi-user roles: Admin, Manager, Cashier with permission gates
+- Minimum Selling Price (MSP) guardrails — blocks cashiers from billing
+  below wholesale cost without manager passcode
+- Barcode scanner integration for fast counter billing
+- WhatsApp invoice dispatch via Meta Cloud API (zero third-party markup)
+- Product variant management: size, colour, fabric type
+- GSTIN validation and HSN/SAC auto-suggestion
+- Supabase-powered real-time activity feed for live business monitoring
+- 14-day free trial, no credit card required
+
+## Pricing
+
+TruBill offers a 14-day free trial with full feature access. Paid plans
+are available after trial. Contact trubillapp@gmail.com for pricing.
+
+## Contact & Support
+
+- Website: https://trubill.in
+- Email: trubillapp@gmail.com
+- Support language: English and Tamil
+- Jurisdiction: Coimbatore, Tamil Nadu, India
+
+## Solution Pages
+
+- Restaurants & Juice Shops: https://trubill.in/solutions/restaurants
+- Footwear Shops: https://trubill.in/solutions/footwear
+- Textile & Saree Shops: https://trubill.in/solutions/textile
+- Juice Shops: https://trubill.in/solutions/juice-shops
+- Pricing: https://trubill.in/pricing
+- About: https://trubill.in/about
+
+## Legal
+
+- Privacy Policy: https://trubill.in/privacy-policy
+- Terms of Service: https://trubill.in/terms
+- GST Filing Disclaimer: TruBill is a billing tool and does not provide
+  chartered accountant services. Users are responsible for verifying their
+  own GST return accuracy before submission.
