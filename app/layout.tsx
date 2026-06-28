@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://trubill.in"),
 
   title: {
-    default: "TruBill Invoice — GST Billing Software for Tamil Nadu Businesses",
+    default: "GST Billing Software for Tamil Nadu Shops & Restaurants | TruBill Invoice",
     template: "%s | TruBill Invoice",
   },
 
