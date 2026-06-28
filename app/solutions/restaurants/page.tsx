@@ -21,6 +21,11 @@ export const metadata: Metadata = {
     title: "Restaurant & Food Business Billing — TruBill",
     images: [{ url: "/og-restaurants.png", width: 1200, height: 630 }],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Restaurant & Food Business Billing — TruBill",
+    images: ["/og-restaurants.png"],
+  },
 };
 
 const breadcrumbJsonLd = {
@@ -146,44 +151,160 @@ export default function RestaurantsPage() {
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-8">
                 Key Features TruBill Offers for Restaurants and Food Counters
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[
-                  { icon: "🍽️", title: "Dine-in, parcel, and delivery billing from one dashboard" },
-                  { icon: "🏷️", title: "SAC code 996331 auto-suggestion for food services" },
-                  { icon: "💬", title: "WhatsApp invoice sharing via Meta Cloud API" },
-                  { icon: "📊", title: "Daily order summary and sales reports" },
-                  { icon: "👥", title: "Multi-cashier roles with MSP guardrails" },
-                  { icon: "🎁", title: "7-day free trial, no credit card required" },
+                  {
+                    icon: "🍽️",
+                    title: "Dine-in, Parcel & Delivery",
+                    description: "Manage seating layouts, takeaway orders, and third-party delivery dispatch from a unified interface, eliminating order confusion and terminal clutter."
+                  },
+                  {
+                    icon: "🏷️",
+                    title: "SAC 996331 Compliance",
+                    description: "The billing engine automatically locks in the correct 5% or 18% splits based on AC or Non-AC seating parameters, keeping your books audit-ready without manual calculations."
+                  },
+                  {
+                    icon: "💬",
+                    title: "Official Meta API WhatsApp Invoicing",
+                    description: "Instantly dispatch thermal-styled digital bills directly to customer WhatsApp numbers via the official Meta API, cutting your paper roll and hardware maintenance costs down to absolute zero."
+                  },
+                  {
+                    icon: "📊",
+                    title: "Real-Time Sales Analytics",
+                    description: "Track net revenue, tax splits, and payment types instantly. Generate automated GSTR-1 ready reports at the end of each shift with zero manual entry."
+                  },
+                  {
+                    icon: "👥",
+                    title: "Multi-Staff Guardrails",
+                    description: "Establish dedicated cashier profiles with custom roles and permission limits to prevent unauthorized discounts, voided items, or cash drawer access."
+                  },
+                  {
+                    icon: "🎁",
+                    title: "Risk-Free Onboarding",
+                    description: "Get started immediately with our full-featured 7-day free trial. No credit card, no complex integration, and no setup fees required."
+                  },
                 ].map((feature) => (
                   <div
                     key={feature.title}
-                    className="flex items-start gap-3 p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:border-[#1E3A8A]/20 hover:bg-blue-50/30 transition-all"
+                    className="flex items-start gap-4 p-6 rounded-2xl border border-slate-100 bg-slate-50/30 hover:border-[#1E3A8A]/20 hover:bg-blue-50/30 hover:shadow-md hover:translate-y-[-2px] transition-all duration-300"
                   >
-                    <span className="text-2xl shrink-0">{feature.icon}</span>
-                    <span className="text-slate-700 font-medium">{feature.title}</span>
+                    <span className="text-3xl shrink-0 p-3 bg-white rounded-xl shadow-xs border border-slate-100">{feature.icon}</span>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900 mb-1.5">{feature.title}</h3>
+                      <p className="text-slate-650 text-sm leading-relaxed">{feature.description}</p>
+                    </div>
                   </div>
                 ))}
+              </div>
+
+              {/* Mid-Page Call-To-Action (CTA) */}
+              <div className="mt-12 bg-gradient-to-r from-slate-900 to-[#1E3A8A] rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-lg border border-slate-850">
+                <div className="text-center md:text-left">
+                  <h3 className="text-xl sm:text-2xl font-bold text-white">Streamline Your Restaurant Billing Today</h3>
+                  <p className="text-blue-100 text-sm mt-2 max-w-xl">
+                    Deploy TruBill's automated compliance and direct WhatsApp invoicing to improve checkout speeds and eliminate paper costs.
+                  </p>
+                </div>
+                <Link
+                  href="/signup"
+                  className="inline-flex items-center gap-2 bg-white text-[#1E3A8A] font-bold text-base px-6 py-3.5 rounded-xl hover:bg-blue-50 transition-colors shadow-md hover:shadow-lg shrink-0"
+                >
+                  Start Free 7-Day Trial
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  </svg>
+                </Link>
               </div>
             </div>
 
             {/* Trust Section */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 sm:p-10 border border-blue-100">
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
-                TruBill Is Trusted by Tamil Nadu Food Businesses
-              </h2>
-              <p className="text-lg text-slate-600 leading-relaxed max-w-3xl">
-                TruBill is trusted by restaurants, cloud kitchens, tiffin centres, and juice shops across Tamil Nadu — from Coimbatore and Chennai to Tiruppur and Madurai. TruBill simplifies GST billing so food business owners can focus on their customers, not tax calculations.
-              </p>
+            <div className="bg-gradient-to-br from-slate-50 to-blue-50/50 rounded-3xl p-8 sm:p-12 border border-slate-100 shadow-sm">
+              <div className="max-w-3xl mb-10">
+                <span className="text-blue-600 font-semibold text-xs tracking-wider uppercase">Regional Enterprise Presence</span>
+                <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 mt-2 mb-4">
+                  TruBill Is Trusted by Tamil Nadu Food Businesses
+                </h2>
+                <p className="text-lg text-slate-655 leading-relaxed">
+                  Simplifying operations and compliance for leading cloud kitchens, dine-in restaurants, sweet stalls, and beverage counters across Tamil Nadu's prime business regions.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  {
+                    city: "Chennai",
+                    badge: "Metro Region",
+                    description: "Powering fast-paced cloud kitchens and multi-chain restaurants in Adyar, Anna Nagar, and Velachery."
+                  },
+                  {
+                    city: "Coimbatore",
+                    badge: "Industrial Hub",
+                    description: "Optimizing table-wise billing and daily ingredient registers for bakeries and dining rooms in RS Puram."
+                  },
+                  {
+                    city: "Madurai",
+                    badge: "Cultural Center",
+                    description: "Ensuring offline-first stability and swift token printouts for traditional messes and tiffin counters."
+                  },
+                  {
+                    city: "Tiruppur",
+                    badge: "Textile Belt",
+                    description: "Supporting food counters with multi-cashier shifts, manager approval gates, and precise tax audits."
+                  }
+                ].map((region) => (
+                  <div
+                    key={region.city}
+                    className="p-6 rounded-2xl bg-white border border-slate-100 shadow-xs hover:shadow-md hover:border-blue-100/55 transition-all duration-300 flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="font-extrabold text-slate-800 text-lg">{region.city}</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full border border-blue-100/40">
+                          {region.badge}
+                        </span>
+                      </div>
+                      <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">{region.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* CTA Section */}
             <div className="text-center pt-4">
               <Link
                 href="/signup"
-                className="inline-flex items-center gap-2 bg-[#1E3A8A] text-white font-bold text-lg px-6 py-3 rounded-lg hover:bg-[#1e3a8a]/90 transition-colors shadow-md hover:shadow-lg"
+                className="inline-flex items-center gap-2 bg-[#1E3A8A] text-white font-bold text-lg px-6 py-4 rounded-xl hover:bg-[#1e3a8a]/90 transition-colors shadow-md hover:shadow-lg"
               >
                 Start Free 7-Day Trial
               </Link>
+            </div>
+
+            {/* Multi-Vertical Context Navigation */}
+            <div className="mt-16 pt-8 border-t border-slate-100 text-center">
+              <div className="inline-flex flex-col sm:flex-row items-center gap-2 sm:gap-3 bg-slate-50 border border-slate-200/60 px-6 py-3.5 rounded-2xl text-xs sm:text-sm text-slate-650 max-w-3xl mx-auto shadow-2xs">
+                <span className="font-bold text-slate-800 flex items-center gap-1.5 shrink-0">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h2.25M9 13.5h.008v.008H9v-.008zm0 3h.008v.008H9v-.008zm0 3h.008v.008H9v-.008zm3-6h.008v.008H12v-.008zm0 3h.008v.008H12v-.008zm0 3h.008v.008H12v-.008zm3-6h.008v.008H15v-.008zm0 3h.008v.008H15v-.008z" />
+                  </svg>
+                  Not a food business?
+                </span>
+                <span>
+                  Check out TruBill for{" "}
+                  <Link href="/solutions/textile" className="font-extrabold text-[#1E3A8A] hover:underline">
+                    Apparel
+                  </Link>
+                  ,{" "}
+                  <Link href="/solutions/footwear" className="font-extrabold text-[#1E3A8A] hover:underline">
+                    Footwear
+                  </Link>
+                  , or{" "}
+                  <Link href="/solutions/textile" className="font-extrabold text-[#1E3A8A] hover:underline">
+                    Textile
+                  </Link>{" "}
+                  retail stores.
+                </span>
+              </div>
             </div>
           </div>
         </section>
