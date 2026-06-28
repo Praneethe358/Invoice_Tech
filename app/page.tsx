@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import MarketingNavbar from '@/components/MarketingNavbar';
+import MarketingFooter from '@/components/MarketingFooter';
 
 const features = [
   {
@@ -270,7 +272,6 @@ const faqs = [
 ];
 
 export default function LandingPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [simulatorStep, setSimulatorStep] = useState(0);
   const [activeSector, setActiveSector] = useState(0);
@@ -297,182 +298,7 @@ export default function LandingPage() {
 
   return (
     <div className="landing-page min-h-screen bg-[#f5f6fa] text-[#1a1d26]">
-      {/* ─── Navbar ───────────────────────────────────────────── */}
-      <div className="sticky top-0 z-50 w-full">
-        {/* Dark Top Strip (Navy Blue matching logo) */}
-        <div className="bg-[#001048] h-1 w-full" />
-        
-        <nav className="bg-white/95 backdrop-blur-xl border-b border-[#e8eaed]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 md:h-24 flex items-center justify-between">
-            
-            {/* Desktop Left: Logo */}
-            <Link href="/" className="hidden md:flex items-center gap-3">
-              <img src="/trubill-logo.png" alt="TruBill Logo" className="w-14 h-14 object-contain shrink-0" />
-              <span className="font-heading font-black text-2xl tracking-tight">
-                <span className="text-[#001048]">Tru</span>
-                <span className="text-[#0050e8]">Bill</span>
-              </span>
-            </Link>
-
-            {/* Mobile Left: Hamburger + Logo (aligned left) */}
-            <div className="flex md:hidden items-center gap-3">
-              {/* Hamburger Toggle */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 text-[#4b5563] hover:text-[#1a1d26] rounded-lg hover:bg-[#f3f4f6] transition-all"
-                aria-label="Toggle menu"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  {mobileMenuOpen ? (
-                    <>
-                      <line x1="18" y1="6" x2="6" y2="18" />
-                      <line x1="6" y1="6" x2="18" y2="18" />
-                    </>
-                  ) : (
-                    <>
-                      <line x1="3" y1="12" x2="21" y2="12" />
-                      <line x1="3" y1="6" x2="21" y2="6" />
-                      <line x1="3" y1="18" x2="21" y2="18" />
-                    </>
-                  )}
-                </svg>
-              </button>
-
-              {/* Logo next to Hamburger */}
-              <Link href="/" className="flex items-center gap-2">
-                <img src="/trubill-logo.png" alt="TruBill Logo" className="w-12 h-12 object-contain shrink-0" />
-                <span className="font-heading font-black text-xl tracking-tight">
-                  <span className="text-[#001048]">Tru</span>
-                  <span className="text-[#0050e8]">Bill</span>
-                </span>
-              </Link>
-            </div>
-
-          {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-8">
-            <a
-              href="#features"
-              className="text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] transition-colors"
-            >
-              Features
-            </a>
-            <a
-              href="#how-it-works"
-              className="text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] transition-colors"
-            >
-              How It Works
-            </a>
-            <a
-              href="#faq"
-              className="text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] transition-colors"
-            >
-              FAQ
-            </a>
-          </div>
-
-          {/* Desktop Actions */}
-          <div className="hidden md:flex items-center gap-4">
-            <Link
-              href="/login"
-              className="text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] transition-colors px-3 py-2"
-            >
-              Log in
-            </Link>
-            <Link
-              href="/signup"
-              className="text-sm font-bold text-white bg-[#0050e8] hover:bg-[#0043c4] px-5 py-2.5 rounded-xl transition-colors shadow-sm"
-            >
-              Start Free
-            </Link>
-          </div>
-
-          {/* Mobile Right: Login */}
-          <div className="flex md:hidden items-center">
-            <Link
-              href="/login"
-              className="text-xs font-bold text-[#0050e8] border border-[#0050e8]/20 bg-emerald-50/50 hover:bg-emerald-50 px-3.5 py-1.5 rounded-lg transition-colors"
-            >
-              Log in
-            </Link>
-          </div>
-        </div>
-      </nav>
-    </div>
-
-      {/* ─── Mobile Dropdown Overlay (Vyapar Style) ────────────── */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            {/* Backdrop overlay below header */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 top-14 md:top-16 z-40 bg-black/40 backdrop-blur-sm md:hidden"
-            />
-
-            {/* Dropdown container */}
-            <motion.div
-              initial={{ opacity: 0, y: -16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="fixed top-14 md:top-16 left-0 right-0 z-50 w-full bg-white border-b border-[#e8eaed] shadow-2xl flex flex-col md:hidden overflow-y-auto max-h-[calc(100vh-56px)] md:max-h-[calc(100vh-64px)]"
-            >
-              {/* Vertical Links */}
-              <div className="flex flex-col space-y-3 px-5 pt-4">
-                <a
-                  href="#features"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] py-1 border-b border-slate-100/50 transition-colors"
-                >
-                  Features
-                </a>
-                <a
-                  href="#how-it-works"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] py-1 border-b border-slate-100/50 transition-colors"
-                >
-                  How It Works
-                </a>
-                <a
-                  href="#faq"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] py-1 border-b border-slate-100/50 transition-colors"
-                >
-                  FAQ
-                </a>
-                <Link
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-sm font-semibold text-[#4b5563] hover:text-[#1a1d26] py-1 border-b border-slate-100/50 transition-colors"
-                >
-                  Login
-                </Link>
-              </div>
-
-              {/* Description Text */}
-              <div className="px-5 pt-4">
-                <p className="text-[11px] text-[#6b7280] leading-relaxed">
-                  Easy WhatsApp billing, manage customer payments, track outstanding balances, control inventory, and simplify accounting with TruBill - Tamil Nadu&apos;s best lightweight billing software. Start billing free today.
-                </p>
-              </div>
-
-              {/* Download / Start Free Action Button */}
-              <div className="px-5 py-4 pb-6">
-                <Link
-                  href="/signup"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full bg-[#0050e8] hover:bg-[#0043c4] text-white text-center font-extrabold text-sm py-3 px-4 rounded-xl transition-colors shadow-sm"
-                >
-                  Start Billing Free Now!
-                </Link>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <MarketingNavbar />
 
       {/* ─── Hero Section ─────────────────────────────────────── */}
       <section className="relative bg-[#fafbfe] pt-8 sm:pt-16 lg:pt-20 pb-12 sm:pb-16 lg:pb-20 overflow-hidden border-b border-[#e8eaed]">
@@ -1565,73 +1391,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className="bg-white border-t border-[#e8eaed] text-sm text-[#4b5563]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 pb-8 md:pb-12 border-b border-[#e8eaed]">
-            {/* Logo/Info column */}
-            <div className="col-span-2 md:col-span-1 space-y-3">
-              <div className="flex items-center gap-2.5">
-                <img src="/trubill-logo.png" alt="TruBill Logo" className="w-8 h-8 object-contain shrink-0" />
-                <span className="font-heading font-black text-base">
-                  <span className="text-[#001048]">Tru</span>
-                  <span className="text-[#0050e8]">Bill</span>
-                  <span className="text-[#1a1d26]"> Invoice</span>
-                </span>
-              </div>
-              <p className="text-xs text-[#6b7280] leading-relaxed">
-                Simple, lightweight billing software designed for small businesses, supermarkets, and freelancers in Tamil Nadu.
-              </p>
-            </div>
-
-            {/* Product column */}
-            <div className="space-y-3">
-              <h4 className="font-bold text-[#1a1d26] text-xs uppercase tracking-wider">Product</h4>
-              <ul className="space-y-2 text-xs">
-                <li><a href="#features" className="hover:text-[#1a1d26] transition-colors">Features</a></li>
-                <li><a href="#how-it-works" className="hover:text-[#1a1d26] transition-colors">How it Works</a></li>
-                <li><Link href="/login" className="hover:text-[#1a1d26] transition-colors">Sandbox Login</Link></li>
-                <li><Link href="/signup" className="hover:text-[#1a1d26] transition-colors">Create Account</Link></li>
-              </ul>
-            </div>
-
-            {/* Resources column */}
-            <div className="space-y-3">
-              <h4 className="font-bold text-[#1a1d26] text-xs uppercase tracking-wider">Resources</h4>
-              <ul className="space-y-2 text-xs">
-                <li><a href="#faq" className="hover:text-[#1a1d26] transition-colors">FAQ</a></li>
-                <li><span className="text-[#9ca3af]">A4 PDF Format</span></li>
-                <li><span className="text-[#9ca3af]">A5 PDF Format</span></li>
-                <li><span className="text-[#9ca3af]">Tax Calculator</span></li>
-              </ul>
-            </div>
-
-            {/* Address column */}
-            <div className="space-y-3">
-              <h4 className="font-bold text-[#1a1d26] text-xs uppercase tracking-wider">HQ Address</h4>
-              <p className="text-xs text-[#6b7280] leading-relaxed">
-                TruBill Invoice<br />
-                Coimbatore, Tamil Nadu<br />
-                trubillapp@gmail.com
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col lg:flex-row items-center justify-between pt-6 md:pt-8 text-[11px] sm:text-xs text-[#6b7280] gap-3">
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-3 gap-y-1">
-              <span>© {new Date().getFullYear()} TruBill. All rights reserved.</span>
-              <span className="hidden sm:inline text-slate-300">•</span>
-              <span>MSME Registered — UDYAM-TN-03-0331333</span>
-              <span className="hidden sm:inline text-slate-300">•</span>
-              <Link href="/privacy" className="hover:text-[#1a1d26] transition-colors">Privacy Policy</Link>
-              <span className="hidden sm:inline text-slate-300">•</span>
-              <Link href="/terms" className="hover:text-[#1a1d26] transition-colors">Terms of Service</Link>
-            </div>
-            <div className="flex gap-4">
-              <span>Made for Shopkeepers in Tamil Nadu 🇮🇳</span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <MarketingFooter />
     </div>
   );
 }

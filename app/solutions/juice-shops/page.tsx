@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import MarketingNavbar from "@/components/MarketingNavbar";
+import MarketingFooter from "@/components/MarketingFooter";
 
 export const metadata: Metadata = {
   title: "GST Billing App for Juice Shops & Beverage Businesses — TruBill",
@@ -80,8 +82,10 @@ export default function JuiceShopsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
 
-      <div className="min-h-screen bg-white">
-        {/* Hero Section */}
+      <div className="min-h-screen flex flex-col justify-between bg-white">
+        <div>
+          <MarketingNavbar />
+          {/* Hero Section */}
         <section className="relative bg-gradient-to-br from-[#1E3A8A] via-[#1e40af] to-[#0ea5e9] text-white overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
@@ -167,11 +171,12 @@ export default function JuiceShopsPage() {
               >
                 Try TruBill Free
               </Link>
-              <p className="mt-3 text-sm text-slate-500">No credit card required · Full features for 7 days</p>
             </div>
           </div>
         </section>
       </div>
+      <MarketingFooter />
+    </div>
     </>
   );
 }
