@@ -78,10 +78,6 @@ export const metadata: Metadata = {
   },
 
   manifest: "/manifest.json",
-
-  verification: {
-    google: "REPLACE_WITH_GSC_TOKEN",
-  },
 };
 
 export const viewport: Viewport = {
