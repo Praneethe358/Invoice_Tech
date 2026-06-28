@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   },
 
   description:
-    "TruBill helps Tamil Nadu retailers, restaurants, juice shops and footwear traders create GST invoices, manage inventory and file GSTR-1 — free 14-day trial.",
+    "TruBill helps Tamil Nadu retailers, restaurants, juice shops and footwear traders create GST invoices, manage inventory and file GSTR-1 — free 7-day trial.",
 
   keywords: [
     "GST billing software Tamil Nadu",
@@ -131,7 +131,7 @@ const softwareAppJsonLd = {
     "@type": "Offer",
     "price": "0",
     "priceCurrency": "INR",
-    "description": "14-day free trial, no credit card required",
+    "description": "7-day free trial, no credit card required",
   },
   "description":
     "GST invoicing and billing software for Tamil Nadu retailers, restaurants, juice shops, footwear and textile traders.",

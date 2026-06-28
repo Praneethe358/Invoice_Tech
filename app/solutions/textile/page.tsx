@@ -171,7 +171,7 @@ export default function TextilePage() {
               >
                 Start Free Trial
               </Link>
-              <p className="mt-3 text-sm text-slate-500">No credit card required · Full features for 14 days</p>
+              <p className="mt-3 text-sm text-slate-500">No credit card required · Full features for 7 days</p>
             </div>
           </div>
         </section>

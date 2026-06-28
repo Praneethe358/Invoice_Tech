@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Simple & Transparent Pricing Plans — TruBill",
   description:
-    "Choose the best plan for your business. TruBill offers a 14-day free trial with full access to GST billing, variant inventory, and GSTR-1 exports.",
+    "Choose the best plan for your business. TruBill offers a 7-day free trial with limited WhatsApp invoices, a Standard plan at ₹349/month, and an Annual saver plan.",
   keywords: [
     "TruBill pricing",
     "GST billing software price",
@@ -25,7 +25,7 @@ export default function PricingPage() {
           Simple, Transparent Pricing
         </h1>
         <p className="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto">
-          Start billing in minutes with our 14-day free trial. No credit card required, cancel anytime.
+          Start billing in minutes with our 7-day free trial. No credit card required, cancel anytime.
         </p>
       </section>
 
@@ -36,17 +36,17 @@ export default function PricingPage() {
           <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
             <div>
               <h3 className="text-xl font-bold text-slate-800">Free Trial</h3>
-              <p className="text-sm text-slate-500 mt-1">Perfect for exploring the platform</p>
+              <p className="text-sm text-slate-500 mt-1">Explore the platform features</p>
               <div className="mt-6 flex items-baseline">
                 <span className="text-4xl font-extrabold text-slate-900">₹0</span>
-                <span className="text-slate-500 ml-1">/ 14 days</span>
+                <span className="text-slate-500 ml-1">/ 7 days</span>
               </div>
               <ul className="mt-8 space-y-4 text-slate-600 text-sm">
                 <li className="flex items-center gap-2">
                   <span className="text-green-500 font-bold">✓</span> Create GST Invoices
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-green-500 font-bold">✓</span> WhatsApp Integration (50 free bills)
+                  <span className="text-green-500 font-bold">✓</span> Limited WhatsApp Invoices
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-500 font-bold">✓</span> Basic Inventory Tracking
@@ -68,9 +68,9 @@ export default function PricingPage() {
             </span>
             <div>
               <h3 className="text-xl font-bold text-slate-800">Standard Plan</h3>
-              <p className="text-sm text-slate-500 mt-1">Best for restaurants, retailers, and shops</p>
+              <p className="text-sm text-slate-500 mt-1">Almost all features available</p>
               <div className="mt-6 flex items-baseline">
-                <span className="text-4xl font-extrabold text-slate-900">₹499</span>
+                <span className="text-4xl font-extrabold text-slate-900">₹349</span>
                 <span className="text-slate-500 ml-1">/ month</span>
               </div>
               <ul className="mt-8 space-y-4 text-slate-600 text-sm">
@@ -78,7 +78,7 @@ export default function PricingPage() {
                   <span className="text-green-500 font-bold">✓</span> Unlimited GST Invoices
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-green-500 font-bold">✓</span> Unlimited WhatsApp invoice dispatch
+                  <span className="text-green-500 font-bold">✓</span> WhatsApp Invoice Dispatch
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-500 font-bold">✓</span> Variant inventory (size, color, design)
@@ -104,11 +104,11 @@ export default function PricingPage() {
             <div>
               <h3 className="text-xl font-bold text-slate-800">Annual Saver</h3>
               <p className="text-sm text-slate-500 mt-1">For long term growth and savings</p>
-              <div className="mt-6 flex items-baseline">
-                <span className="text-4xl font-extrabold text-slate-900">₹3,999</span>
+              <div className="mt-6 flex items-baseline flex-wrap">
+                <span className="text-4xl font-extrabold text-slate-900">₹4,188</span>
                 <span className="text-slate-500 ml-1">/ year</span>
+                <span className="text-xs text-slate-400 w-full mt-1">(billed as ₹349 × 12 months)</span>
               </div>
-              <p className="text-xs text-green-600 font-semibold mt-1">Save over 30% compared to monthly</p>
               <ul className="mt-8 space-y-4 text-slate-600 text-sm">
                 <li className="flex items-center gap-2">
                   <span className="text-green-500 font-bold">✓</span> Everything in Standard Plan
@@ -141,7 +141,7 @@ export default function PricingPage() {
           </div>
           <div>
             <h4 className="font-semibold text-slate-800 text-lg">Do I need a credit card to start the trial?</h4>
-            <p className="text-slate-600 mt-1 text-sm">No credit card is required to sign up for the free trial. You can test out all features for 14 days completely free.</p>
+            <p className="text-slate-600 mt-1 text-sm">No credit card is required to sign up for the free trial. You can test out the platform for 7 days completely free.</p>
           </div>
           <div>
             <h4 className="font-semibold text-slate-800 text-lg">Can I cancel my plan at any time?</h4>

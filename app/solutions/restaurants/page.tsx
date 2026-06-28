@@ -115,7 +115,7 @@ export default function RestaurantsPage() {
                 href="/signup"
                 className="inline-flex items-center gap-2 bg-white text-[#1E3A8A] font-bold text-base px-6 py-3 rounded-lg hover:bg-blue-50 transition-colors shadow-lg hover:shadow-xl"
               >
-                Start Free 14-Day Trial
+                Start Free 7-Day Trial
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                 </svg>
@@ -149,7 +149,7 @@ export default function RestaurantsPage() {
                   { icon: "💬", title: "WhatsApp invoice sharing via Meta Cloud API" },
                   { icon: "📊", title: "Daily order summary and sales reports" },
                   { icon: "👥", title: "Multi-cashier roles with MSP guardrails" },
-                  { icon: "🎁", title: "14-day free trial, no credit card required" },
+                  { icon: "🎁", title: "7-day free trial, no credit card required" },
                 ].map((feature) => (
                   <div
                     key={feature.title}
@@ -178,9 +178,9 @@ export default function RestaurantsPage() {
                 href="/signup"
                 className="inline-flex items-center gap-2 bg-[#1E3A8A] text-white font-bold text-lg px-6 py-3 rounded-lg hover:bg-[#1e3a8a]/90 transition-colors shadow-md hover:shadow-lg"
               >
-                Start Free 14-Day Trial
+                Start Free 7-Day Trial
               </Link>
-              <p className="mt-3 text-sm text-slate-500">No credit card required · Full features for 14 days</p>
+              <p className="mt-3 text-sm text-slate-500">No credit card required · Full features for 7 days</p>
             </div>
           </div>
         </section>

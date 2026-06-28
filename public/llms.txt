@@ -31,12 +31,11 @@ WhatsApp — all from a single web application.
 - Product variant management: size, colour, fabric type
 - GSTIN validation and HSN/SAC auto-suggestion
 - Supabase-powered real-time activity feed for live business monitoring
-- 14-day free trial, no credit card required
+- 7-day free trial with limited WhatsApp invoices, no credit card required
 
 ## Pricing
 
-TruBill offers a 14-day free trial with full feature access. Paid plans
-are available after trial. Contact trubillapp@gmail.com for pricing.
+TruBill offers a 7-day free trial with limited WhatsApp invoices. The Standard plan is ₹349/month (or ₹4,188/year) with almost all features available.
 
 ## Contact & Support
 
