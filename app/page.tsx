@@ -381,7 +381,7 @@ export default function LandingPage() {
 
                               <button
                                 onClick={() => setSimulatorStep(1)}
-                                className="w-auto mx-auto px-3.5 py-0.5 bg-[#0050e8] hover:bg-[#0043c4] text-white rounded-full text-[6px] font-extrabold shadow-xs mt-1 flex items-center justify-center transition-all whitespace-nowrap"
+                                className="w-auto mx-auto px-2.5 py-[1px] bg-[#0050e8] hover:bg-[#0043c4] text-white rounded-full text-[5px] font-extrabold shadow-3xs mt-1 flex items-center justify-center transition-all whitespace-nowrap"
                               >
                                 Preview →
                               </button>
@@ -422,9 +422,9 @@ export default function LandingPage() {
 
                               <button
                                 onClick={() => setSimulatorStep(2)}
-                                className="w-auto mx-auto px-3 py-0.5 bg-[#16a34a] hover:bg-emerald-600 text-white rounded-full text-[6px] font-extrabold shadow-xs mt-1 flex items-center justify-center gap-1 transition-all whitespace-nowrap"
+                                className="w-auto mx-auto px-2 py-[1px] bg-[#16a34a] hover:bg-emerald-600 text-white rounded-full text-[5px] font-extrabold shadow-3xs mt-1 flex items-center justify-center gap-0.5 transition-all whitespace-nowrap"
                               >
-                                <svg width="7" height="7" viewBox="0 0 24 24" fill="currentColor">
+                                <svg width="5" height="5" viewBox="0 0 24 24" fill="currentColor">
                                   <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.97-1.862-1.868-4.339-2.898-6.977-2.899-5.437 0-9.862 4.37-9.866 9.8.001 2.028.531 4.008 1.547 5.753l-.979 3.578 3.676-.965zm10.741-6.733c-.292-.146-1.727-.852-1.992-.949-.264-.096-.456-.146-.649.146-.193.291-.747.949-.916 1.144-.168.193-.336.218-.629.072-1.879-.942-3.137-1.624-4.385-3.76-.328-.562.328-.521.939-1.74.101-.203.051-.38-.025-.527-.076-.146-.649-1.564-.89-2.144-.233-.563-.473-.487-.649-.496-.168-.008-.36-.01-.553-.01-.193 0-.507.073-.772.361-.264.292-1.011.99-1.011 2.414s1.036 2.796 1.18 2.99c.145.195 2.036 3.111 4.934 4.364.689.299 1.228.479 1.648.613.693.22 1.324.19 1.822.115.556-.083 1.727-.706 1.97-.1.388 2.443.264 4.542.074 5.097-.091.264-.265.457-.557.603z" />
                                 </svg>
                                 <span>Send via WhatsApp</span>
