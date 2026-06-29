@@ -68,6 +68,7 @@ export interface Product {
   use_count?: number;
   wholesale_price?: number | null;
   season_tag?: string | null;
+  unit?: string | null;
 }
 
 export type PaymentStatus = 'unpaid' | 'partial' | 'paid';

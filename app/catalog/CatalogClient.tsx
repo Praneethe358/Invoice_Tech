@@ -78,6 +78,7 @@ export default function CatalogClient({
   const [newInlineCategoryName, setNewInlineCategoryName] = useState('');
   const [prodWholesalePrice, setProdWholesalePrice] = useState('');
   const [gstManuallySet, setGstManuallySet] = useState(false);
+  const [prodUnit, setProdUnit] = useState('Piece');
 
   // Form states for Add Variant in Modal
   const [newVarSize, setNewVarSize] = useState('');
@@ -98,20 +99,39 @@ export default function CatalogClient({
   const [bulkStocks, setBulkStocks] = useState<Record<string, string>>({});
   const [bulkSaving, setBulkSaving] = useState(false);
 
-  // Compute combinations dynamically
+  // Unit-aware: metre-type products don't need sizes
+  const METRE_UNITS = ['Metre', 'Meter', 'Kg', 'Kilogram', 'Litre', 'Liter', 'Gram', 'Quintal'];
+  const isMetreUnit = (unit?: string | null) => {
+    if (!unit) return false;
+    return METRE_UNITS.some((m) => m.toLowerCase() === unit.toLowerCase());
+  };
+
+  // Compute combinations dynamically (unit-aware: Metre = color-only, Piece = size x color)
   const generatedCombinations = useMemo(() => {
-    if (!bulkSizes.trim() && !bulkColors.trim()) return [];
-    
-    const sizesArr = bulkSizes
-      .split(',')
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
-      
+    const productUnit = variantsProduct?.unit || 'Piece';
+    const metreMode = isMetreUnit(productUnit);
+
     const colorsArr = bulkColors
       .split(',')
       .map((c) => c.trim())
       .filter((c) => c.length > 0);
-      
+
+    if (metreMode) {
+      // Metre-type: color-only variants (no sizes)
+      if (colorsArr.length === 0) return [];
+      return colorsArr.map((c) => ({
+        size: '-',
+        color: c,
+        id: `color-${c}`
+      }));
+    }
+
+    // Piece-type: Size × Color matrix
+    const sizesArr = bulkSizes
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+
     if (sizesArr.length === 0 || colorsArr.length === 0) return [];
     
     const combos: { size: string; color: string; id: string }[] = [];
@@ -125,7 +145,7 @@ export default function CatalogClient({
       });
     });
     return combos;
-  }, [bulkSizes, bulkColors]);
+  }, [bulkSizes, bulkColors, variantsProduct]);
 
   // Reset bulk variant states when variants modal opens or closes
   useEffect(() => {
@@ -280,6 +300,7 @@ export default function CatalogClient({
       category: finalCategory || null,
       track_inventory: true,
       wholesale_price: wholesalePrice,
+      unit: prodUnit || 'Piece',
     };
 
     if (editingProduct) {
@@ -326,6 +347,7 @@ export default function CatalogClient({
         setProdHsn('');
         setProdGst('0');
         setProdDescription('');
+        setProdUnit('Piece');
         setProdCategory('');
         setVariantsProduct(data as Product);
       }
@@ -360,6 +382,7 @@ export default function CatalogClient({
     setProdGst('12');
     setProdDescription('');
     setProdCategory('');
+    setProdUnit('Piece');
     setAddingProduct(true);
   };
 
@@ -374,6 +397,7 @@ export default function CatalogClient({
     setProdHsn(product.hsn_code || '');
     setProdGst(String(product.gst_rate || 0));
     setProdDescription((product as any).description || '');
+    setProdUnit(product.unit || 'Piece');
     setAddingProduct(true);
   };
 
@@ -440,10 +464,11 @@ export default function CatalogClient({
   // Unified Variant Add/Update Handler
   const handleAddVariant = async () => {
     if (!variantsProduct) return;
-    const size = sanitizeVariantField(newVarSize);
+    const metreMode = isMetreUnit(variantsProduct.unit);
+    const size = metreMode ? '-' : sanitizeVariantField(newVarSize);
     const color = sanitizeVariantField(newVarColor);
-    if (!size || !color) {
-      showToast('Size and Color are required', 'error');
+    if ((!metreMode && !size) || !color) {
+      showToast(metreMode ? 'Color is required' : 'Size and Color are required', 'error');
       return;
     }
 
@@ -567,18 +592,26 @@ export default function CatalogClient({
   const handleBulkAddVariants = async () => {
     if (!variantsProduct) return;
     
-    const sizesArr = bulkSizes
-      .split(',')
-      .map((s) => sanitizeVariantField(s))
-      .filter((s) => s.length > 0);
-      
+    const metreMode = isMetreUnit(variantsProduct.unit);
+    
     const colorsArr = bulkColors
       .split(',')
       .map((c) => sanitizeVariantField(c))
       .filter((c) => c.length > 0);
 
-    if (sizesArr.length === 0 || colorsArr.length === 0) {
-      showToast('Sizes and Colors lists cannot be empty', 'error');
+    if (!metreMode) {
+      const sizesArr = bulkSizes
+        .split(',')
+        .map((s) => sanitizeVariantField(s))
+        .filter((s) => s.length > 0);
+      if (sizesArr.length === 0) {
+        showToast('Sizes list cannot be empty', 'error');
+        return;
+      }
+    }
+
+    if (colorsArr.length === 0) {
+      showToast('Colors list cannot be empty', 'error');
       return;
     }
 
@@ -603,7 +636,11 @@ export default function CatalogClient({
 
       combos.forEach((combo) => {
         const stockVal = parseInt(bulkStocks[combo.id]) || 0;
-        const generatedSku = `${variantsProduct.name.replace(/\s+/g, '-')}-${combo.size.toUpperCase()}-${combo.color.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+        const skuParts = [variantsProduct.name.replace(/\s+/g, '-')];
+        if (combo.size !== '-') skuParts.push(combo.size.toUpperCase());
+        skuParts.push(combo.color.toUpperCase());
+        skuParts.push(String(Math.floor(1000 + Math.random() * 9000)));
+        const generatedSku = skuParts.join('-');
 
         payloads.push({
           product_id: variantsProduct.id,
@@ -1593,6 +1630,34 @@ export default function CatalogClient({
                     )}
                   </div>
 
+                  {/* Unit Selector */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                      Unit *
+                    </label>
+                    <select
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+                      value={prodUnit}
+                      onChange={(e) => setProdUnit(e.target.value)}
+                    >
+                      <option value="Piece">Piece (Pcs)</option>
+                      <option value="Metre">Metre (Mtr)</option>
+                      <option value="Kg">Kilogram (Kg)</option>
+                      <option value="Litre">Litre (Ltr)</option>
+                      <option value="Box">Box</option>
+                      <option value="Dozen">Dozen</option>
+                      <option value="Set">Set</option>
+                      <option value="Pair">Pair</option>
+                      <option value="Gram">Gram (g)</option>
+                      <option value="Quintal">Quintal</option>
+                    </select>
+                    {isMetreUnit(prodUnit) && (
+                      <p className="text-[9px] text-blue-600 mt-1 font-medium bg-blue-50/50 px-2 py-1 rounded-md border border-blue-100">
+                        Fabric / bulk unit detected — variants will use <strong>Color only</strong> (no sizes)
+                      </p>
+                    )}
+                  </div>
+
                   {/* Pricing and GST rates */}
                   <div className="grid grid-cols-2 gap-4">
                     
@@ -1804,14 +1869,16 @@ export default function CatalogClient({
                       ) : (
                         <div className="flex items-center justify-between w-full">
                           <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-wider">
-                            {isBulkMode ? 'BULK VARIANT GENERATOR (SIZE × COLOR)' : 'ADD NEW VARIANT'}
+                            {isBulkMode
+                              ? (isMetreUnit(variantsProduct?.unit) ? 'BULK VARIANT GENERATOR (COLOR)' : 'BULK VARIANT GENERATOR (SIZE × COLOR)')
+                              : 'ADD NEW VARIANT'}
                           </h4>
                           <button
                             type="button"
                             onClick={() => setIsBulkMode(!isBulkMode)}
                             className="text-[10px] font-black text-blue-600 hover:text-blue-800 hover:underline cursor-pointer flex items-center gap-1 bg-blue-50 px-2.5 py-1 rounded-md transition-colors"
                           >
-                            {isBulkMode ? '← Single Variant Mode' : '⚡ Bulk Size × Color Generator'}
+                            {isBulkMode ? '← Single Variant Mode' : (isMetreUnit(variantsProduct?.unit) ? '⚡ Bulk Color Generator' : '⚡ Bulk Size × Color Generator')}
                           </button>
                         </div>
                       )}
@@ -1819,21 +1886,23 @@ export default function CatalogClient({
                     
                     {isBulkMode ? (
                       <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {/* Sizes input */}
-                          <div>
-                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                              Sizes (comma-separated) *
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="e.g. S, M, L, XL, XXL"
-                              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 font-bold"
-                              value={bulkSizes}
-                              onChange={(e) => setBulkSizes(e.target.value)}
-                            />
-                            <p className="text-[9px] text-slate-400 mt-1">Separate sizes with commas (e.g. S,M,L)</p>
-                          </div>
+                        <div className={`grid gap-4 ${isMetreUnit(variantsProduct?.unit) ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+                          {/* Sizes input — hidden for Metre-type products */}
+                          {!isMetreUnit(variantsProduct?.unit) && (
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                                Sizes (comma-separated) *
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="e.g. S, M, L, XL, XXL"
+                                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 font-bold"
+                                value={bulkSizes}
+                                onChange={(e) => setBulkSizes(e.target.value)}
+                              />
+                              <p className="text-[9px] text-slate-400 mt-1">Separate sizes with commas (e.g. S,M,L)</p>
+                            </div>
+                          )}
 
                           {/* Colors input */}
                           <div>
@@ -1847,7 +1916,7 @@ export default function CatalogClient({
                               value={bulkColors}
                               onChange={(e) => setBulkColors(e.target.value)}
                             />
-                            <p className="text-[9px] text-slate-400 mt-1">Separate colors with commas (e.g. Red,Blue)</p>
+                            <p className="text-[9px] text-slate-400 mt-1">Separate colors with commas (e.g. Red,Blue,Gold)</p>
                           </div>
                         </div>
 
@@ -1907,8 +1976,8 @@ export default function CatalogClient({
                                 return (
                                   <div key={combo.id} className="bg-white p-2.5 border border-slate-200 rounded-lg flex flex-col gap-1.5 shadow-3xs hover:border-slate-300 transition-colors">
                                     <div className="min-w-0">
-                                      <p className="text-[10px] font-bold text-slate-700 truncate">{combo.size} / {combo.color}</p>
-                                      <p className="text-[8px] text-slate-400 font-mono truncate">SKU: {variantsProduct.name.replace(/\s+/g, '-')}-{combo.size.toUpperCase()}-{combo.color.toUpperCase()}</p>
+                                      <p className="text-[10px] font-bold text-slate-700 truncate">{combo.size === '-' ? combo.color : `${combo.size} / ${combo.color}`}</p>
+                                      <p className="text-[8px] text-slate-400 font-mono truncate">SKU: {variantsProduct.name.replace(/\s+/g, '-')}-{combo.size === '-' ? '' : `${combo.size.toUpperCase()}-`}{combo.color.toUpperCase()}</p>
                                     </div>
                                     <input
                                       type="number"
@@ -1955,20 +2024,22 @@ export default function CatalogClient({
                       </div>
                     ) : (
                       <>
-                        <div className="grid grid-cols-2 sm:grid-cols-7 gap-3 items-end">
+                        <div className={`grid grid-cols-2 gap-3 items-end ${isMetreUnit(variantsProduct?.unit) ? 'sm:grid-cols-6' : 'sm:grid-cols-7'}`}>
                           
-                          {/* Size */}
-                          <div className="col-span-1">
-                            <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Size *</label>
-                            <input
-                              type="text"
-                              placeholder="e.g. 7, 8, 9, UK8"
-                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
-                              value={newVarSize}
-                              onChange={(e) => setNewVarSize(e.target.value)}
-                              onBlur={(e) => setNewVarSize(sanitizeVariantField(e.target.value))}
-                            />
-                          </div>
+                          {/* Size — hidden for Metre-type products */}
+                          {!isMetreUnit(variantsProduct?.unit) && (
+                            <div className="col-span-1">
+                              <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Size *</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. 7, 8, 9, UK8"
+                                className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+                                value={newVarSize}
+                                onChange={(e) => setNewVarSize(e.target.value)}
+                                onBlur={(e) => setNewVarSize(sanitizeVariantField(e.target.value))}
+                              />
+                            </div>
+                          )}
 
                           {/* Color */}
                           <div className="col-span-1">
