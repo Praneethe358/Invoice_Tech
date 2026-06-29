@@ -30,11 +30,11 @@ export default async function CatalogPage() {
     .order('created_at', { ascending: true });
 
   let initialVariants: any[] = [];
-  if (products && products.length > 0 && (shop.shop_type === 'clothing' || shop.shop_type === 'footwear')) {
+  if (products && products.length > 0) {
     const { data: variants } = await supabase
       .from('product_variants')
       .select('*')
-      .in('product_id', products.map((p) => p.id));
+      .in('product_id', products.map((p: any) => p.id));
     initialVariants = variants || [];
   }
 
