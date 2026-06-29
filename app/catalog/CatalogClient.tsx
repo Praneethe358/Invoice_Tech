@@ -941,9 +941,9 @@ export default function CatalogClient({
     <div className="min-h-screen bg-[#f5f6fa] text-slate-900">
       <Navbar initialShop={shop} />
 
-      <PageTransition className="w-full px-4 md:px-8 pt-6 md:pt-0 pb-24">
+      <PageTransition className="w-full px-3 md:px-6 pt-4 md:pt-0 pb-16">
         {/* Header with greeting - Desktop only */}
-        <div className="hidden md:flex bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-xs items-center justify-between mb-6 md:sticky md:top-0 md:z-30">
+        <div className="hidden md:flex bg-white border border-[#e5e7eb] -mx-3 md:-mx-6 px-5 md:px-8 py-3.5 shadow-xs items-center justify-between mb-4 md:sticky md:top-0 md:z-30">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-none bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
               {shop.logo_url ? (
@@ -989,7 +989,7 @@ export default function CatalogClient({
         <div className="max-w-7xl mx-auto pt-2">
           
           {/* Header Area & Action - Desktop/Tablet view */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div className="hidden md:block">
               <h2 className="text-lg font-bold text-[#111827]">Catalog Items</h2>
               <p className="text-xs text-slate-500">Manage your product models, categories, pricing, and variants for billing.</p>
@@ -1002,7 +1002,7 @@ export default function CatalogClient({
               <Button
                 onClick={openNewProductModal}
                 variant="primary"
-                className="shadow-xs font-semibold text-xs px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+                className="shadow-xs font-semibold text-xs px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
               >
                 + New Product
               </Button>
@@ -1010,24 +1010,16 @@ export default function CatalogClient({
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex border-b border-slate-200 mb-6 gap-6">
+          <div className="flex border-b border-slate-200 mb-4 gap-6">
             <button
               onClick={() => setActiveTab('products')}
-              className={`pb-3 text-sm font-bold border-b-2 transition-all cursor-pointer ${
-                activeTab === 'products'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-400 hover:text-slate-600'
-              }`}
+              className="pb-2 text-sm font-bold border-b-2 transition-all cursor-pointer border-blue-600 text-blue-600"
             >
               Products
             </button>
             <button
               onClick={() => setActiveTab('categories')}
-              className={`pb-3 text-sm font-bold border-b-2 transition-all cursor-pointer ${
-                activeTab === 'categories'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-400 hover:text-slate-600'
-              }`}
+              className="pb-2 text-sm font-bold border-b-2 transition-all cursor-pointer border-transparent text-slate-400 hover:text-slate-600"
             >
               Categories
             </button>
@@ -1053,10 +1045,10 @@ export default function CatalogClient({
                 </div>
               ) : (
                 /* Products list with Search and Filter */
-                <div className="space-y-4">
+                <div className="space-y-3">
                   
                   {/* Search and Category Filter Bar */}
-                  <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs">
+                  <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs">
                     
                     {/* Search Field */}
                     <div className="relative w-full sm:max-w-md">
@@ -1100,14 +1092,14 @@ export default function CatalogClient({
                       <table className="w-full text-left border-collapse text-xs">
                         <thead>
                           <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                            <th className="py-3.5 px-4 w-10 text-center">☆</th>
-                            <th className="py-3.5 px-4">Product Name</th>
-                            <th className="py-3.5 px-4">Category</th>
-                            <th className="py-3.5 px-4 text-center">Total Variants</th>
-                            <th className="py-3.5 px-4 text-right">Sale Price</th>
-                            <th className="py-3.5 px-4 text-right">Total Stock</th>
-                            <th className="py-3.5 px-4 text-center">Stock Status</th>
-                            <th className="py-3.5 px-4 text-right w-32">Actions</th>
+                            <th className="py-2.5 px-3 w-10 text-center">☆</th>
+                            <th className="py-2.5 px-3">Product Name</th>
+                            <th className="py-2.5 px-3">Category</th>
+                            <th className="py-2.5 px-3 text-center">Total Variants</th>
+                            <th className="py-2.5 px-3 text-right">Sale Price</th>
+                            <th className="py-2.5 px-3 text-right">Total Stock</th>
+                            <th className="py-2.5 px-3 text-center">Stock Status</th>
+                            <th className="py-2.5 px-3 text-right w-32">Actions</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -1126,7 +1118,7 @@ export default function CatalogClient({
                                 }`}
                               >
                                 {/* Favorite Star */}
-                                <td className="py-3 px-4 text-center">
+                                <td className="py-2 px-3 text-center">
                                   <button
                                     onClick={() => handleToggleFavorite(p)}
                                     className={`transition-all hover:scale-110 cursor-pointer ${
@@ -1138,7 +1130,7 @@ export default function CatalogClient({
                                 </td>
 
                                 {/* Product Name */}
-                                <td className="py-3 px-4 font-semibold text-[#111827]">
+                                <td className="py-2 px-3 font-semibold text-[#111827]">
                                   <div>
                                     {p.name}
                                     {p.hsn_code && (
@@ -1150,7 +1142,7 @@ export default function CatalogClient({
                                 </td>
 
                                 {/* Category pill */}
-                                <td className="py-3 px-4">
+                                <td className="py-2 px-3">
                                   {p.category ? (
                                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
                                       {p.category}
@@ -1161,22 +1153,22 @@ export default function CatalogClient({
                                 </td>
 
                                 {/* Total Variants */}
-                                <td className="py-3 px-4 text-center font-medium text-slate-600">
+                                <td className="py-2 px-3 text-center font-medium text-slate-600">
                                   {p.totalVariants} variants
                                 </td>
 
                                 {/* Sale Price */}
-                                <td className="py-3 px-4 text-right font-medium text-[#111827]">
+                                <td className="py-2 px-3 text-right font-medium text-[#111827]">
                                   ₹{p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                 </td>
 
                                 {/* Total Stock */}
-                                <td className="py-3 px-4 text-right font-bold text-slate-700">
+                                <td className="py-2 px-3 text-right font-bold text-slate-700">
                                   {p.totalStock} units
                                 </td>
 
                                 {/* Stock Status Badge */}
-                                <td className="py-3 px-4 text-center">
+                                <td className="py-2 px-3 text-center">
                                   {p.stockStatus === 'out' ? (
                                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-100">
                                       <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
@@ -1196,7 +1188,7 @@ export default function CatalogClient({
                                 </td>
 
                                 {/* Actions */}
-                                <td className="py-3 px-4 text-right">
+                                <td className="py-2 px-3 text-right">
                                   <div className="flex items-center justify-end gap-1">
                                     <button
                                       onClick={() => setVariantsProduct(p)}
