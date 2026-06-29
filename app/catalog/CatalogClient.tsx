@@ -941,9 +941,9 @@ export default function CatalogClient({
     <div className="min-h-screen bg-[#f5f6fa] text-slate-900">
       <Navbar initialShop={shop} />
 
-      <PageTransition className="w-full px-3 md:px-6 pt-4 md:pt-0 pb-16">
+      <PageTransition className="w-full px-4 md:px-8 pt-6 md:pt-0 pb-24">
         {/* Header with greeting - Desktop only */}
-        <div className="hidden md:flex bg-white border border-[#e5e7eb] -mx-3 md:-mx-6 px-5 md:px-8 py-3.5 shadow-xs items-center justify-between mb-4 md:sticky md:top-0 md:z-30">
+        <div className="hidden md:flex bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-xs items-center justify-between mb-6 md:sticky md:top-0 md:z-30">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-none bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
               {shop.logo_url ? (
@@ -986,7 +986,7 @@ export default function CatalogClient({
         </div>
 
         {/* Content Wrapper */}
-        <div className="max-w-7xl mx-auto pt-2">
+        <div className="pt-2">
           
           {/* Header Area & Action - Desktop/Tablet view */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
