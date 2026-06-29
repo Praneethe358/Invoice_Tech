@@ -1,0 +1,5 @@
+-- Add city, state, and pincode columns to shops table
+ALTER TABLE shops
+ADD COLUMN IF NOT EXISTS city TEXT DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS state TEXT DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS pincode TEXT DEFAULT NULL;

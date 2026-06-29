@@ -15,6 +15,7 @@ import { Shop } from '@/lib/types';
 import { SHOP_CONFIG } from '@/lib/shop-config';
 import { ShopType } from '@/lib/starter-catalogs';
 import { hasPermission, UserRole } from '@/lib/permissions';
+import { GST_STATES } from '@/lib/gstin-states';
 
 interface Props {
   shop: Shop;
@@ -44,6 +45,20 @@ export default function SettingsClient({
   const [gstRegistered, setGstRegistered] = useState(shop.gst_registered || false);
   const [gstin, setGstin] = useState(shop.gstin || '');
   const [passcode, setPasscode] = useState((shop as any).passcode || '');
+  const [city, setCity] = useState((shop as any).city || '');
+  const [state, setState] = useState((shop as any).state || '');
+  const [pincode, setPincode] = useState((shop as any).pincode || '');
+
+  // Auto-detect State from GSTIN prefix (Indian State Codes)
+  useEffect(() => {
+    if (gstRegistered && gstin && gstin.trim().length >= 2) {
+      const code = gstin.trim().slice(0, 2);
+      const stateName = GST_STATES[code];
+      if (stateName) {
+        setState(`${code} - ${stateName}`);
+      }
+    }
+  }, [gstin, gstRegistered]);
 
   const config = SHOP_CONFIG[shop.shop_type as ShopType] || SHOP_CONFIG.other;
   const isInventoryAllowed = config.inventoryEnabled || shop.shop_type === 'other';
@@ -189,6 +204,9 @@ export default function SettingsClient({
         gstin: gstRegistered ? gstin.trim().toUpperCase() : null,
         inventory_enabled: inventoryEnabledGlobal,
         passcode: passcode.trim() || null,
+        city: city.trim() || null,
+        state: state.trim() || null,
+        pincode: pincode.trim() || null,
       })
       .eq('id', shop.id);
 
@@ -392,6 +410,29 @@ export default function SettingsClient({
               onChange={(e) => setShopAddress(e.target.value)}
               disabled={!canEditShop}
             />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Input
+                label="City"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="e.g. Coimbatore"
+                disabled={!canEditShop}
+              />
+              <Input
+                label="State"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                placeholder="e.g. 33 - Tamil Nadu"
+                disabled={!canEditShop}
+              />
+              <Input
+                label="Pincode"
+                value={pincode}
+                onChange={(e) => setPincode(e.target.value)}
+                placeholder="e.g. 641001"
+                disabled={!canEditShop}
+              />
+            </div>
             <Input
               label="Phone"
               value={shopPhone}

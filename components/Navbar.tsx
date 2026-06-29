@@ -268,7 +268,7 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
         // Try owner first
         let { data: shop } = await supabase
           .from('shops')
-          .select('id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at, whatsapp_invoices_sent, is_frozen, frozen_reason')
+          .select('id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at, whatsapp_invoices_sent, is_frozen, frozen_reason, state')
           .eq('auth_user_id', user.id)
           .single();
 
@@ -280,7 +280,7 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
           // Check if they are a staff member
           const { data: staff } = await supabase
             .from('staff')
-            .select('role, shop_id, shops(id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at, whatsapp_invoices_sent, is_frozen, frozen_reason)')
+            .select('role, shop_id, shops(id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at, whatsapp_invoices_sent, is_frozen, frozen_reason, state)')
             .eq('auth_user_id', user.id)
             .eq('status', 'active')
             .single();
@@ -302,6 +302,7 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
                 whatsapp_invoices_sent: staffShop.whatsapp_invoices_sent,
                 is_frozen: staffShop.is_frozen,
                 frozen_reason: staffShop.frozen_reason,
+                state: staffShop.state,
               } as any;
             }
           }
@@ -610,7 +611,7 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
              <div className="truncate flex-1">
               <p className="text-xs font-medium text-white truncate">{shopInfo?.name || 'Active Shop'}</p>
               <p className="text-xs text-white/60 font-semibold uppercase tracking-wider truncate">
-                {shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Tamil Nadu, IN'}
+                {shopInfo?.state || (shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Tamil Nadu, IN')}
               </p>
               {userRole !== 'owner' && (
                 <span className={`inline-block text-[8px] font-bold px-1.5 py-0.5 rounded-none uppercase text-white mt-1 ${
@@ -828,7 +829,7 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
                   <div className="truncate flex-1">
                     <p className="text-xs font-bold text-[#1a1d26] truncate">{shopInfo?.name || 'Active Shop'}</p>
                     <p className="text-[10px] text-[#9ca3af] font-semibold uppercase tracking-wider truncate">
-                      {shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Tamil Nadu, IN'}
+                      {shopInfo?.state || (shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Tamil Nadu, IN')}
                     </p>
                   </div>
                 </div>

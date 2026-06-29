@@ -30,6 +30,9 @@ export interface Shop {
   frozen_reason?: string | null;
   frozen_at?: string | null;
   frozen_by?: string | null;
+  city?: string | null;
+  state?: string | null;
+  pincode?: string | null;
 }
 
 export type CustomerTag = 'regular' | 'vip';

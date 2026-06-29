@@ -9,6 +9,7 @@ import Input from '@/components/Input';
 import { useToast } from '@/components/Toast';
 import { validateEmail, validatePhone, validateGSTIN } from '@/lib/validators';
 import { STARTER_CATALOGS, ShopType } from '@/lib/starter-catalogs';
+import { GST_STATES } from '@/lib/gstin-states';
 
 const stepTitles = [
   'Basic Information',
@@ -324,9 +325,19 @@ export default function SignupPage() {
         return;
       }
 
-      // Step 2: Create Shop row
+      // Extract state code if GSTIN is registered
+      let autoState = null;
+      if (gstRegistered && gstin && gstin.trim().length >= 2) {
+        const code = gstin.trim().slice(0, 2);
+        const stateName = GST_STATES[code];
+        if (stateName) {
+          autoState = `${code} - ${stateName}`;
+        }
+      }
+
       const bType = getBusinessType(shopType);
       const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
       const { data: newShop, error: shopError } = await supabase
         .from('shops')
         .insert({
@@ -341,6 +352,7 @@ export default function SignupPage() {
           onboarding_completed: true,
           subscription_status: 'trial',
           trial_ends_at: trialEndsAt,
+          state: autoState,
         })
         .select('id')
         .single();
