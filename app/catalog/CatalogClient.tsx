@@ -88,6 +88,56 @@ export default function CatalogClient({
   const [newVarCostPrice, setNewVarCostPrice] = useState('');
   const [newVarMinSellingPrice, setNewVarMinSellingPrice] = useState('');
 
+  // Bulk variant generator states
+  const [isBulkMode, setIsBulkMode] = useState(false);
+  const [bulkSizes, setBulkSizes] = useState('');
+  const [bulkColors, setBulkColors] = useState('');
+  const [bulkCostPrice, setBulkCostPrice] = useState('');
+  const [bulkMinSellingPrice, setBulkMinSellingPrice] = useState('');
+  const [bulkLowStockThreshold, setBulkLowStockThreshold] = useState('5');
+  const [bulkStocks, setBulkStocks] = useState<Record<string, string>>({});
+  const [bulkSaving, setBulkSaving] = useState(false);
+
+  // Compute combinations dynamically
+  const generatedCombinations = useMemo(() => {
+    if (!bulkSizes.trim() && !bulkColors.trim()) return [];
+    
+    const sizesArr = bulkSizes
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+      
+    const colorsArr = bulkColors
+      .split(',')
+      .map((c) => c.trim())
+      .filter((c) => c.length > 0);
+      
+    if (sizesArr.length === 0 || colorsArr.length === 0) return [];
+    
+    const combos: { size: string; color: string; id: string }[] = [];
+    sizesArr.forEach((s) => {
+      colorsArr.forEach((c) => {
+        combos.push({
+          size: s,
+          color: c,
+          id: `${s}-${c}`
+        });
+      });
+    });
+    return combos;
+  }, [bulkSizes, bulkColors]);
+
+  // Reset bulk variant states when variants modal opens or closes
+  useEffect(() => {
+    setIsBulkMode(false);
+    setBulkSizes('');
+    setBulkColors('');
+    setBulkCostPrice('');
+    setBulkMinSellingPrice('');
+    setBulkLowStockThreshold('5');
+    setBulkStocks({});
+  }, [variantsProduct]);
+
   // Inline stock adjustment state inside Variants Modal
   const [variantStockAddId, setVariantStockAddId] = useState<string | null>(null);
   const [variantStockAddQty, setVariantStockAddQty] = useState('10');
@@ -506,6 +556,115 @@ export default function CatalogClient({
         
         await refetchVariants();
       }
+    }
+  };
+
+  // Bulk Variant Generation Handler
+  const handleBulkAddVariants = async () => {
+    if (!variantsProduct) return;
+    
+    const sizesArr = bulkSizes
+      .split(',')
+      .map((s) => sanitizeVariantField(s))
+      .filter((s) => s.length > 0);
+      
+    const colorsArr = bulkColors
+      .split(',')
+      .map((c) => sanitizeVariantField(c))
+      .filter((c) => c.length > 0);
+
+    if (sizesArr.length === 0 || colorsArr.length === 0) {
+      showToast('Sizes and Colors lists cannot be empty', 'error');
+      return;
+    }
+
+    const costVal = bulkCostPrice ? parseFloat(bulkCostPrice) : null;
+    const mspVal = bulkMinSellingPrice ? parseFloat(bulkMinSellingPrice) : null;
+    const thresholdVal = parseInt(bulkLowStockThreshold) || 5;
+
+    if (costVal !== null && (isNaN(costVal) || costVal < 0)) {
+      showToast('Enter a valid cost price', 'error');
+      return;
+    }
+    if (mspVal !== null && (isNaN(mspVal) || mspVal < 0)) {
+      showToast('Enter a valid minimum selling price', 'error');
+      return;
+    }
+
+    setBulkSaving(true);
+
+    try {
+      const payloads: any[] = [];
+      const combos = generatedCombinations;
+
+      combos.forEach((combo) => {
+        const stockVal = parseInt(bulkStocks[combo.id]) || 0;
+        const generatedSku = `${variantsProduct.name.replace(/\s+/g, '-')}-${combo.size.toUpperCase()}-${combo.color.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+        payloads.push({
+          product_id: variantsProduct.id,
+          size: combo.size,
+          color: combo.color,
+          sku: generatedSku,
+          stock_qty: stockVal,
+          low_stock_threshold: thresholdVal,
+          barcode: generatedSku,
+          barcode_source: 'generated',
+          cost_price: costVal,
+          min_selling_price: mspVal,
+        });
+      });
+
+      const { data, error } = await supabase
+        .from('product_variants')
+        .insert(payloads)
+        .select();
+
+      if (error || !data) {
+        showToast(`Failed to add variants: ${error?.message}`, 'error');
+      } else {
+        // Insert inventory logs for all inserted variants that have stock > 0
+        const logsPayload = (data as any[])
+          .filter((v: any) => (v.stock_qty || 0) > 0)
+          .map((v: any) => ({
+            shop_id: shop.id,
+            product_id: variantsProduct.id,
+            variant_id: v.id,
+            change_qty: v.stock_qty,
+            previous_qty: 0,
+            new_qty: v.stock_qty,
+            reason: 'restock',
+          }));
+
+        if (logsPayload.length > 0) {
+          await supabase.from('inventory_logs').insert(logsPayload);
+          
+          // Fire event for total units added
+          const totalUnitsAdded = logsPayload.reduce((sum: number, log: any) => sum + log.change_qty, 0);
+          await fireEvent('STOCK_ADDED', {
+            product_name: variantsProduct.name,
+            units_added: totalUnitsAdded,
+            variant: `Bulk added ${logsPayload.length} variants`,
+          });
+        }
+
+        showToast(`Successfully created ${payloads.length} variants!`, 'success');
+        
+        // Reset states
+        setBulkSizes('');
+        setBulkColors('');
+        setBulkCostPrice('');
+        setBulkMinSellingPrice('');
+        setBulkLowStockThreshold('5');
+        setBulkStocks({});
+        setIsBulkMode(false);
+
+        await refetchVariants();
+      }
+    } catch (err: any) {
+      showToast(`Error during bulk variant creation: ${err.message}`, 'error');
+    } finally {
+      setBulkSaving(false);
     }
   };
 
@@ -1624,7 +1783,7 @@ export default function CatalogClient({
                   
                   {/* ADD/EDIT VARIANT section */}
                   <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between mb-3 border-b border-slate-200/50 pb-2">
                       {editingVariant ? (
                         <div className="flex items-center gap-2">
                           <span className="text-amber-800 font-extrabold text-xs flex items-center gap-1">
@@ -1639,135 +1798,283 @@ export default function CatalogClient({
                           </button>
                         </div>
                       ) : (
-                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-wider">
-                          ADD NEW VARIANT
-                        </h4>
+                        <div className="flex items-center justify-between w-full">
+                          <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                            {isBulkMode ? 'BULK VARIANT GENERATOR (SIZE × COLOR)' : 'ADD NEW VARIANT'}
+                          </h4>
+                          <button
+                            type="button"
+                            onClick={() => setIsBulkMode(!isBulkMode)}
+                            className="text-[10px] font-black text-blue-600 hover:text-blue-800 hover:underline cursor-pointer flex items-center gap-1 bg-blue-50 px-2.5 py-1 rounded-md transition-colors"
+                          >
+                            {isBulkMode ? '← Single Variant Mode' : '⚡ Bulk Size × Color Generator'}
+                          </button>
+                        </div>
                       )}
                     </div>
                     
-                    <div className="grid grid-cols-2 sm:grid-cols-7 gap-3 items-end">
-                      
-                      {/* Size */}
-                      <div className="col-span-1">
-                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Size *</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. 7, 8, 9, UK8"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
-                          value={newVarSize}
-                          onChange={(e) => setNewVarSize(e.target.value)}
-                          onBlur={(e) => setNewVarSize(sanitizeVariantField(e.target.value))}
-                        />
-                      </div>
+                    {isBulkMode ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* Sizes input */}
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                              Sizes (comma-separated) *
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="e.g. S, M, L, XL, XXL"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 font-bold"
+                              value={bulkSizes}
+                              onChange={(e) => setBulkSizes(e.target.value)}
+                            />
+                            <p className="text-[9px] text-slate-400 mt-1">Separate sizes with commas (e.g. S,M,L)</p>
+                          </div>
 
-                      {/* Color */}
-                      <div className="col-span-1">
-                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Color *</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Black, Brown"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
-                          value={newVarColor}
-                          onChange={(e) => setNewVarColor(e.target.value)}
-                          onBlur={(e) => setNewVarColor(sanitizeVariantField(e.target.value))}
-                        />
-                      </div>
+                          {/* Colors input */}
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                              Colors (comma-separated) *
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="e.g. White, Light Blue, Grey, Black"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 font-bold"
+                              value={bulkColors}
+                              onChange={(e) => setBulkColors(e.target.value)}
+                            />
+                            <p className="text-[9px] text-slate-400 mt-1">Separate colors with commas (e.g. Red,Blue)</p>
+                          </div>
+                        </div>
 
-                      {/* SKU / Barcode */}
-                      <div className="col-span-2 sm:col-span-1">
-                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">
-                          SKU / Barcode
-                        </label>
-                        <div className="flex gap-1">
-                          <input
-                            type="text"
-                            placeholder="Auto-generated"
-                            className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] focus:outline-hidden focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-400"
-                            value={newVarSku}
-                            onChange={(e) => setNewVarSku(e.target.value)}
-                            disabled={!!editingVariant}
-                          />
+                        <div className="grid grid-cols-3 gap-3">
+                          {/* Cost Price */}
+                          <div>
+                            <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Cost Price ₹</label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="0.00"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 font-semibold"
+                              value={bulkCostPrice}
+                              onChange={(e) => setBulkCostPrice(e.target.value)}
+                            />
+                          </div>
+
+                          {/* Min Selling Price */}
+                          <div>
+                            <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Min Price ₹</label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="0.00"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 font-semibold"
+                              value={bulkMinSellingPrice}
+                              onChange={(e) => setBulkMinSellingPrice(e.target.value)}
+                            />
+                          </div>
+
+                          {/* Low Stock Alert */}
+                          <div>
+                            <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Low Alert</label>
+                            <input
+                              type="number"
+                              min="1"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 font-semibold"
+                              value={bulkLowStockThreshold}
+                              onChange={(e) => setBulkLowStockThreshold(e.target.value)}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Generated Combinations Stock Entry Matrix */}
+                        {generatedCombinations.length > 0 && (
+                          <div className="border-t border-slate-200/80 pt-3 mt-3">
+                            <div className="flex justify-between items-center mb-2">
+                              <label className="block text-[10px] font-black text-[#111827] uppercase tracking-wider">
+                                Combinations List ({generatedCombinations.length})
+                              </label>
+                              <span className="text-[9px] text-slate-400 italic">Enter stock quantity for combinations to be created</span>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-h-[220px] overflow-y-auto pr-1">
+                              {generatedCombinations.map((combo) => {
+                                return (
+                                  <div key={combo.id} className="bg-white p-2.5 border border-slate-200 rounded-lg flex flex-col gap-1.5 shadow-3xs hover:border-slate-300 transition-colors">
+                                    <div className="min-w-0">
+                                      <p className="text-[10px] font-bold text-slate-700 truncate">{combo.size} / {combo.color}</p>
+                                      <p className="text-[8px] text-slate-400 font-mono truncate">SKU: {variantsProduct.name.replace(/\s+/g, '-')}-{combo.size.toUpperCase()}-{combo.color.toUpperCase()}</p>
+                                    </div>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      placeholder="Stock (0)"
+                                      className="w-full bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 text-xs focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-blue-500 text-center font-bold"
+                                      value={bulkStocks[combo.id] || ''}
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        setBulkStocks((prev) => ({
+                                          ...prev,
+                                          [combo.id]: val
+                                        }));
+                                      }}
+                                    />
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="mt-3 flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
                           <button
                             type="button"
-                            onClick={() => setIsNewVarSkuScannerOpen(true)}
-                            className="bg-slate-100 hover:bg-slate-200 border rounded-lg px-2 flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-xs"
-                            title="Scan Barcode"
-                            disabled={!!editingVariant}
+                            onClick={() => {
+                              setBulkSizes('');
+                              setBulkColors('');
+                              setBulkStocks({});
+                            }}
+                            className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700 font-semibold border rounded-lg bg-white hover:bg-slate-50 cursor-pointer"
                           >
-                            📸
+                            Clear
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleBulkAddVariants}
+                            disabled={bulkSaving || generatedCombinations.length === 0}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-lg shadow-xs cursor-pointer text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {bulkSaving ? 'Saving...' : `Generate ${generatedCombinations.length || 0} Variants`}
                           </button>
                         </div>
                       </div>
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-2 sm:grid-cols-7 gap-3 items-end">
+                          
+                          {/* Size */}
+                          <div className="col-span-1">
+                            <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Size *</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. 7, 8, 9, UK8"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+                              value={newVarSize}
+                              onChange={(e) => setNewVarSize(e.target.value)}
+                              onBlur={(e) => setNewVarSize(sanitizeVariantField(e.target.value))}
+                            />
+                          </div>
 
-                      {/* Cost Price */}
-                      <div className="col-span-1">
-                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Cost Price ₹</label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 font-semibold"
-                          value={newVarCostPrice}
-                          onChange={(e) => setNewVarCostPrice(e.target.value)}
-                        />
-                      </div>
+                          {/* Color */}
+                          <div className="col-span-1">
+                            <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Color *</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Black, Brown"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+                              value={newVarColor}
+                              onChange={(e) => setNewVarColor(e.target.value)}
+                              onBlur={(e) => setNewVarColor(sanitizeVariantField(e.target.value))}
+                            />
+                          </div>
 
-                      {/* Min Selling Price */}
-                      <div className="col-span-1">
-                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Min Price ₹</label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 font-semibold"
-                          value={newVarMinSellingPrice}
-                          onChange={(e) => setNewVarMinSellingPrice(e.target.value)}
-                        />
-                      </div>
+                          {/* SKU / Barcode */}
+                          <div className="col-span-2 sm:col-span-1">
+                            <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">
+                              SKU / Barcode
+                            </label>
+                            <div className="flex gap-1">
+                              <input
+                                type="text"
+                                placeholder="Auto-generated"
+                                className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] focus:outline-hidden focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-400"
+                                value={newVarSku}
+                                onChange={(e) => setNewVarSku(e.target.value)}
+                                disabled={!!editingVariant}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setIsNewVarSkuScannerOpen(true)}
+                                className="bg-slate-100 hover:bg-slate-200 border rounded-lg px-2 flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                                title="Scan Barcode"
+                                disabled={!!editingVariant}
+                              >
+                                📸
+                              </button>
+                            </div>
+                          </div>
 
-                      {/* Initial/Current Stock */}
-                      <div className="col-span-1">
-                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">
-                          {editingVariant ? 'Stock Qty' : 'Init Stock'}
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
-                          value={newVarStockQty}
-                          onChange={(e) => setNewVarStockQty(e.target.value)}
-                        />
-                      </div>
+                          {/* Cost Price */}
+                          <div className="col-span-1">
+                            <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Cost Price ₹</label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="0.00"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 font-semibold"
+                              value={newVarCostPrice}
+                              onChange={(e) => setNewVarCostPrice(e.target.value)}
+                            />
+                          </div>
 
-                      {/* Low Stock Alert */}
-                      <div className="col-span-1">
-                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Low Alert</label>
-                        <input
-                          type="number"
-                          min="1"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
-                          value={newVarLowStockThreshold}
-                          onChange={(e) => setNewVarLowStockThreshold(e.target.value)}
-                        />
-                      </div>
+                          {/* Min Selling Price */}
+                          <div className="col-span-1">
+                            <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Min Price ₹</label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="0.00"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 font-semibold"
+                              value={newVarMinSellingPrice}
+                              onChange={(e) => setNewVarMinSellingPrice(e.target.value)}
+                            />
+                          </div>
 
-                    </div>
+                          {/* Initial/Current Stock */}
+                          <div className="col-span-1">
+                            <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">
+                              {editingVariant ? 'Stock Qty' : 'Init Stock'}
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+                              value={newVarStockQty}
+                              onChange={(e) => setNewVarStockQty(e.target.value)}
+                            />
+                          </div>
 
-                    <div className="mt-3 flex items-center justify-between gap-3 text-[10px]">
-                      <span className="text-slate-400 italic break-all text-[9px] max-w-[60%] sm:max-w-none">
-                        {editingVariant ? 'SKU is locked and immutable' : `Preview SKU: ${generatedSkuPreview}`}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={handleAddVariant}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-lg shadow-xs cursor-pointer text-xs shrink-0"
-                      >
-                        {editingVariant ? 'Save Changes' : '+ Add Variant'}
-                      </button>
-                    </div>
+                          {/* Low Stock Alert */}
+                          <div className="col-span-1">
+                            <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Low Alert</label>
+                            <input
+                              type="number"
+                              min="1"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+                              value={newVarLowStockThreshold}
+                              onChange={(e) => setNewVarLowStockThreshold(e.target.value)}
+                            />
+                          </div>
 
+                        </div>
+
+                        <div className="mt-3 flex items-center justify-between gap-3 text-[10px]">
+                          <span className="text-slate-400 italic break-all text-[9px] max-w-[60%] sm:max-w-none">
+                            {editingVariant ? 'SKU is locked and immutable' : `Preview SKU: ${generatedSkuPreview}`}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleAddVariant}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-lg shadow-xs cursor-pointer text-xs shrink-0"
+                          >
+                            {editingVariant ? 'Save Changes' : '+ Add Variant'}
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* BULK ACTIONS BAR */}
