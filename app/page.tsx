@@ -975,11 +975,11 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10 md:space-y-12 lg:space-y-16">
 
           {/* Feature 1: GST Billing & WhatsApp Sharing */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-12 lg:gap-16 items-center">
             {/* Left Graphic */}
-            <div className="lg:col-span-6 relative flex justify-center py-6 sm:py-10">
+            <div className="lg:col-span-6 relative flex justify-center py-4 sm:py-10">
               {/* Vyapar-style circular backdrop and floating elements */}
-              <div className="absolute inset-0 -z-10 select-none pointer-events-none flex items-center justify-center">
+              <div className="absolute inset-0 -z-10 select-none pointer-events-none hidden sm:flex items-center justify-center">
                 {/* Large offset soft-colored circle */}
                 <div className="w-[260px] h-[260px] sm:w-[350px] sm:h-[350px] rounded-full bg-[#fce7f3] opacity-80 translate-x-2 translate-y-2" />
                 
@@ -1038,13 +1038,13 @@ export default function LandingPage() {
               <img
                 src="/billing_whatsapp.png"
                 alt="GST billing and WhatsApp sharing"
-                className="w-full max-w-[280px] sm:max-w-[380px] md:max-w-[420px] h-auto object-contain drop-shadow-2xl relative z-10"
+                className="w-full max-w-[200px] sm:max-w-[380px] md:max-w-[420px] h-auto object-contain drop-shadow-xl sm:drop-shadow-2xl relative z-10 rounded-2xl"
                 loading="lazy"
               />
             </div>
 
             {/* Right Content */}
-            <div className="lg:col-span-6 space-y-3 sm:space-y-4 md:space-y-6">
+            <div className="lg:col-span-6 space-y-3 sm:space-y-4 md:space-y-6 text-center sm:text-left">
               <span className="inline-block text-[9px] sm:text-[10px] bg-emerald-50 text-[#0050e8] font-extrabold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full uppercase tracking-wider border border-emerald-100/50">
                 WhatsApp-Native Delivery
               </span>
@@ -1074,9 +1074,9 @@ export default function LandingPage() {
           </div>
 
           {/* Feature 2: Payment Tracking & UPI Reminders (Alternating) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-12 lg:gap-16 items-center">
             {/* Left Content (order-2 on mobile, order-1 on desktop) */}
-            <div className="lg:col-span-6 lg:order-1 space-y-3 sm:space-y-4 md:space-y-6">
+            <div className="lg:col-span-6 lg:order-1 space-y-3 sm:space-y-4 md:space-y-6 text-center sm:text-left">
               <span className="inline-block text-[9px] sm:text-[10px] bg-blue-50 text-blue-700 font-extrabold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full uppercase tracking-wider border border-blue-100/50">
                 Payment Status &amp; UPI
               </span>
@@ -1105,9 +1105,9 @@ export default function LandingPage() {
             </div>
 
             {/* Right Graphic (order-1 on mobile, order-2 on desktop) */}
-            <div className="lg:col-span-6 lg:order-2 relative flex justify-center py-6 sm:py-10">
+            <div className="lg:col-span-6 lg:order-2 relative flex justify-center py-4 sm:py-10">
               {/* Vyapar-style circular backdrop and floating elements */}
-              <div className="absolute inset-0 -z-10 select-none pointer-events-none flex items-center justify-center">
+              <div className="absolute inset-0 -z-10 select-none pointer-events-none hidden sm:flex items-center justify-center">
                 {/* Large offset soft-colored circle */}
                 <div className="w-[260px] h-[260px] sm:w-[350px] sm:h-[350px] rounded-full bg-[#dcfce7] opacity-80 -translate-x-2 translate-y-2" />
                 
@@ -1150,7 +1150,7 @@ export default function LandingPage() {
               <img
                 src="/payments_reminders.png"
                 alt="UPI payment status and reminders"
-                className="w-full max-w-[260px] sm:max-w-[340px] md:max-w-[380px] h-auto object-contain drop-shadow-2xl relative z-10"
+                className="w-full max-w-[200px] sm:max-w-[340px] md:max-w-[380px] h-auto object-contain drop-shadow-xl sm:drop-shadow-2xl relative z-10 rounded-2xl"
                 loading="lazy"
               />
             </div>
