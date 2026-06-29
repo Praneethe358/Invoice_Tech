@@ -177,45 +177,10 @@ const steps = [
 
 const industries = [
   {
-    name: 'Retail Stores',
-    desc: 'Perfect for grocery, apparel, and hardware shops looking to move from paper billbooks to digital WhatsApp receipts.',
-    highlights: ['Instant PDF Sharing', 'Custom GST Billing', 'Offline Bill Drafts'],
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4 8L6 22C6 24.2091 7.79086 26 10 26H22C24.2091 26 26 24.2091 26 22L28 8H4Z" fill="url(#retailGrad)" />
-        <path d="M8 8V6C8 4.89543 8.89543 4 10 4H22C23.1046 4 24 4.89543 24 6V8" stroke="#0060f0" strokeWidth="2" />
-        <circle cx="16" cy="17" r="3" fill="white" />
-        <defs>
-          <linearGradient id="retailGrad" x1="4" y1="4" x2="28" y2="26" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#34d399" />
-            <stop offset="1" stopColor="#059669" />
-          </linearGradient>
-        </defs>
-      </svg>
-    ),
-  },
-  {
-    name: 'Pharmacies & Chemists',
-    desc: 'Add medicines to your bill quickly, recognize repeat customers instantly, and apply the correct GST tax rate every time.',
-    highlights: ['Expiry Tracking', 'Quick Search', 'Tax Code Presets'],
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="8" y="10" width="16" height="16" rx="3" fill="url(#pharmGrad)" />
-        <path d="M16 6V10M16 26V30M6 16H10M22 16H26" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
-        <path d="M12 18H20M16 14V22" stroke="white" strokeWidth="3" strokeLinecap="round" />
-        <defs>
-          <linearGradient id="pharmGrad" x1="8" y1="10" x2="24" y2="26" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#f87171" />
-            <stop offset="1" stopColor="#dc2626" />
-          </linearGradient>
-        </defs>
-      </svg>
-    ),
-  },
-  {
     name: 'Restaurants & Cafes',
-    desc: 'Send instant digital receipts to diners over WhatsApp instead of printed bills — faster checkout, zero printer costs.',
-    highlights: ['Table-wise Billing', 'KOT Printing', 'Zero Paper Cost'],
+    desc: 'Dispatch thermal-styled digital bills directly to customer WhatsApp. Auto-apply AC/Non-AC GST splits (5% or 18%) under SAC 996331 — zero paper, zero hardware costs.',
+    highlights: ['WhatsApp Receipts', 'AC/Non-AC GST Splits', 'Table-wise Billing'],
+    href: '/solutions/restaurants',
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M6 18H26C26 22.4183 22.4183 26 18 26H14C9.58172 26 6 22.4183 6 18Z" fill="url(#restGrad)" />
@@ -232,19 +197,59 @@ const industries = [
     ),
   },
   {
-    name: 'Freelancers & Agencies',
-    desc: 'Send professional GST invoices for your services over WhatsApp and track exactly which clients still owe payment.',
-    highlights: ['Quotations & Estimates', 'One-click Reminders', 'UPI Pre-fill'],
+    name: 'Footwear Shops',
+    desc: 'Bill by brand, size, and variant with built-in HSN 6403/6404 tax mapping. Track seasonal inventory, manage returns, and share branded PDF invoices instantly.',
+    highlights: ['Size & Variant Billing', 'HSN Auto-mapping', 'Return Tracking'],
+    href: '/solutions/footwear',
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="16" cy="16" r="12" fill="url(#freeGrad)" />
-        <path d="M12 13.5H16.5C17.8807 13.5 19 14.6193 19 16C19 17.3807 17.8807 18.5 16.5 18.5H12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M15 13.5V11.5M15 20.5V18.5" stroke="white" strokeWidth="2" strokeLinecap="round" />
-        <path d="M12 18.5H18" stroke="white" strokeWidth="2" strokeLinecap="round" />
+        <path d="M4 22C4 20 6 18 10 17L14 16C16 15.5 18 14 20 13C22 12 26 12 28 14V20C28 22.2091 26.2091 24 24 24H8C5.79086 24 4 22.2091 4 20V22Z" fill="url(#footGrad)" />
+        <path d="M10 17L8 12C8 10 10 8 12 8" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="22" cy="18" r="2" fill="white" fillOpacity="0.4" />
         <defs>
-          <linearGradient id="freeGrad" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#60a5fa" />
-            <stop offset="1" stopColor="#2563eb" />
+          <linearGradient id="footGrad" x1="4" y1="8" x2="28" y2="24" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#a78bfa" />
+            <stop offset="1" stopColor="#7c3aed" />
+          </linearGradient>
+        </defs>
+      </svg>
+    ),
+  },
+  {
+    name: 'Juice & Beverage Shops',
+    desc: 'Lightning-fast counter billing for high-volume juice bars. Pre-set combo items, apply food-grade GST rates, and send receipts via WhatsApp before the customer leaves.',
+    highlights: ['Quick Counter Mode', 'Combo Item Presets', 'Instant WhatsApp Bills'],
+    href: '/solutions/juice-shops',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 8H22L20 26H12L10 8Z" fill="url(#juiceGrad)" />
+        <path d="M8 8H24" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M14 12V22M18 12V22" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2 2" />
+        <circle cx="22" cy="6" r="2" fill="#34d399" />
+        <path d="M22 6L24 4" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" />
+        <defs>
+          <linearGradient id="juiceGrad" x1="10" y1="8" x2="22" y2="26" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#34d399" />
+            <stop offset="1" stopColor="#059669" />
+          </linearGradient>
+        </defs>
+      </svg>
+    ),
+  },
+  {
+    name: 'Textile & Readymade',
+    desc: 'Handle complex saree bundles, meter-based fabric billing, and readymade garment invoicing with automatic HSN 6205/6206 tax codes and multi-item discount stacking.',
+    highlights: ['Meter & Piece Billing', 'Bundle Discounts', 'HSN 6205/6206 Codes'],
+    href: '/solutions/textile',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="6" width="20" height="20" rx="3" fill="url(#textGrad)" />
+        <path d="M10 10L16 16L22 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M10 16L16 22L22 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.5" />
+        <defs>
+          <linearGradient id="textGrad" x1="6" y1="6" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#f472b6" />
+            <stop offset="1" stopColor="#db2777" />
           </linearGradient>
         </defs>
       </svg>
@@ -379,12 +384,15 @@ export default function LandingPage() {
                                 </div>
                               </div>
 
-                              <button
-                                onClick={() => setSimulatorStep(1)}
-                                className="w-auto mx-auto px-2.5 py-[1px] bg-[#0050e8] hover:bg-[#0043c4] text-white rounded-full text-[5px] font-extrabold shadow-3xs mt-1 flex items-center justify-center transition-all whitespace-nowrap"
-                              >
-                                Preview →
-                              </button>
+                              <div className="flex justify-center mt-0.5">
+                                <button
+                                  onClick={() => setSimulatorStep(1)}
+                                  style={{ transform: 'scale(0.55)', transformOrigin: 'center' }}
+                                  className="bg-[#0050e8] hover:bg-[#0043c4] text-white px-3 py-1 rounded-full text-[7px] font-extrabold shadow-sm flex items-center justify-center transition-all whitespace-nowrap"
+                                >
+                                  Preview →
+                                </button>
+                              </div>
                             </motion.div>
                           )}
 
@@ -420,15 +428,15 @@ export default function LandingPage() {
                                 </div>
                               </div>
 
-                              <button
-                                onClick={() => setSimulatorStep(2)}
-                                className="w-auto mx-auto px-2 py-[1px] bg-[#16a34a] hover:bg-emerald-600 text-white rounded-full text-[5px] font-extrabold shadow-3xs mt-1 flex items-center justify-center gap-0.5 transition-all whitespace-nowrap"
-                              >
-                                <svg width="5" height="5" viewBox="0 0 24 24" fill="currentColor">
-                                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.97-1.862-1.868-4.339-2.898-6.977-2.899-5.437 0-9.862 4.37-9.866 9.8.001 2.028.531 4.008 1.547 5.753l-.979 3.578 3.676-.965zm10.741-6.733c-.292-.146-1.727-.852-1.992-.949-.264-.096-.456-.146-.649.146-.193.291-.747.949-.916 1.144-.168.193-.336.218-.629.072-1.879-.942-3.137-1.624-4.385-3.76-.328-.562.328-.521.939-1.74.101-.203.051-.38-.025-.527-.076-.146-.649-1.564-.89-2.144-.233-.563-.473-.487-.649-.496-.168-.008-.36-.01-.553-.01-.193 0-.507.073-.772.361-.264.292-1.011.99-1.011 2.414s1.036 2.796 1.18 2.99c.145.195 2.036 3.111 4.934 4.364.689.299 1.228.479 1.648.613.693.22 1.324.19 1.822.115.556-.083 1.727-.706 1.97-.1.388 2.443.264 4.542.074 5.097-.091.264-.265.457-.557.603z" />
-                                </svg>
-                                <span>Send via WhatsApp</span>
-                              </button>
+                              <div className="flex justify-center mt-0.5">
+                                <button
+                                  onClick={() => setSimulatorStep(2)}
+                                  style={{ transform: 'scale(0.55)', transformOrigin: 'center' }}
+                                  className="bg-[#16a34a] hover:bg-emerald-600 text-white px-3 py-1 rounded-full text-[7px] font-extrabold shadow-sm flex items-center justify-center gap-1 transition-all whitespace-nowrap"
+                                >
+                                  Send via WhatsApp
+                                </button>
+                              </div>
                             </motion.div>
                           )}
 
@@ -1290,20 +1298,20 @@ export default function LandingPage() {
               {/* CTA Link */}
               <div className="mt-4">
                 <Link
-                  href="/signup"
+                  href={industries[activeSector].href || '/signup'}
                   className="block w-full text-center bg-gradient-to-r from-[#0050e8] to-[#0058e8] hover:from-[#0043c4] hover:to-[#0050e8] text-white py-3 rounded-xl text-[11px] font-extrabold transition-all shadow-md shadow-[#0050e8]/15 hover:shadow-lg hover:shadow-[#0050e8]/20"
                 >
-                  Start {industries[activeSector].name} Billing Free →
+                  Explore {industries[activeSector].name} Billing →
                 </Link>
               </div>
             </div>
           </div>
 
-          {/* Desktop Sectors Grid (Hidden on mobile) */}
           <div className="hidden md:grid grid-cols-1 md:grid-cols-2 gap-8">
             {industries.map((ind, idx) => (
-              <div
+              <Link
                 key={idx}
+                href={ind.href || '/signup'}
                 className="bg-white p-6 rounded-2xl border border-[#e8eaed] flex gap-5 hover:shadow-md hover:border-[#0050e8]/20 transition-all group"
               >
                 <div className="w-14 h-14 rounded-xl bg-[#fafafa] flex items-center justify-center shrink-0 shadow-sm border border-neutral-100 group-hover:scale-105 transition-transform">
@@ -1313,7 +1321,7 @@ export default function LandingPage() {
                   <h4 className="text-base font-bold text-[#1a1d26] group-hover:text-[#0050e8] transition-colors">{ind.name}</h4>
                   <p className="text-sm text-[#4b5563] leading-relaxed">{ind.desc}</p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
