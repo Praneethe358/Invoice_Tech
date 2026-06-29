@@ -977,7 +977,7 @@ export default function LandingPage() {
           {/* Feature 1: GST Billing & WhatsApp Sharing */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-12 lg:gap-16 items-center">
             {/* Left Graphic */}
-            <div className="lg:col-span-6 relative flex justify-center py-4 sm:py-10">
+            <div className="lg:col-span-6 relative flex justify-center py-4 sm:py-10 order-2 lg:order-1">
               {/* Vyapar-style circular backdrop and floating elements */}
               <div className="absolute inset-0 -z-10 select-none pointer-events-none hidden sm:flex items-center justify-center">
                 {/* Large offset soft-colored circle */}
@@ -1044,7 +1044,7 @@ export default function LandingPage() {
             </div>
 
             {/* Right Content */}
-            <div className="lg:col-span-6 space-y-3 sm:space-y-4 md:space-y-6 text-center sm:text-left">
+            <div className="lg:col-span-6 space-y-3 sm:space-y-4 md:space-y-6 text-center sm:text-left order-1 lg:order-2">
               <span className="inline-block text-[9px] sm:text-[10px] bg-emerald-50 text-[#0050e8] font-extrabold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full uppercase tracking-wider border border-emerald-100/50">
                 WhatsApp-Native Delivery
               </span>
