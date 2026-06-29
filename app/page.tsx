@@ -475,10 +475,10 @@ export default function LandingPage() {
                 </div>
 
                 {/* Compact Premium Pill Switcher */}
-                <div className="flex gap-1 p-0.5 bg-slate-200/60 backdrop-blur-md rounded-lg w-full max-w-[210px] text-[9.5px] font-extrabold shadow-2xs border border-slate-200/60">
+                <div className="flex gap-0.5 p-[2px] bg-slate-200/60 backdrop-blur-md rounded-md w-full max-w-[160px] text-[7px] font-extrabold shadow-2xs border border-slate-200/60">
                   <button
                     onClick={() => setSimulatorStep(0)}
-                    className={`flex-1 py-1.5 rounded-md transition-all text-center flex items-center justify-center gap-0.5 ${
+                    className={`flex-1 py-1 rounded-sm transition-all text-center flex items-center justify-center ${
                       simulatorStep === 0 
                         ? 'bg-[#0050e8] text-white shadow-sm' 
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
@@ -488,7 +488,7 @@ export default function LandingPage() {
                   </button>
                   <button
                     onClick={() => setSimulatorStep(1)}
-                    className={`flex-1 py-1.5 rounded-md transition-all text-center flex items-center justify-center gap-0.5 ${
+                    className={`flex-1 py-1 rounded-sm transition-all text-center flex items-center justify-center ${
                       simulatorStep === 1 
                         ? 'bg-[#0050e8] text-white shadow-sm' 
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
@@ -498,7 +498,7 @@ export default function LandingPage() {
                   </button>
                   <button
                     onClick={() => setSimulatorStep(2)}
-                    className={`flex-1 py-1.5 rounded-md transition-all text-center flex items-center justify-center gap-0.5 ${
+                    className={`flex-1 py-1 rounded-sm transition-all text-center flex items-center justify-center ${
                       simulatorStep === 2 
                         ? 'bg-[#0050e8] text-white shadow-sm' 
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
