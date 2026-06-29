@@ -35,6 +35,8 @@ export async function GET(request: NextRequest) {
 
   // Exclude the platform owner's admin shop from money/subscription calculations
   const nonAdminShops = shops?.filter(s => s.auth_user_id !== 'a24f626f-c941-4759-b9d4-6e4f3039555e') || [];
+  const adminShop = shops?.find(s => s.auth_user_id === 'a24f626f-c941-4759-b9d4-6e4f3039555e');
+  const adminShopId = adminShop?.id;
 
   const total_shops = nonAdminShops.length;
   const active = nonAdminShops.filter(s => s.subscription_status === 'active').length || 0;
@@ -44,16 +46,26 @@ export async function GET(request: NextRequest) {
   const new_this_month = nonAdminShops.filter(s => new Date(s.created_at) >= monthStart).length || 0;
 
   // Total invoices
-  const { count: total_invoices } = await admin
+  let invoicesQuery = admin
     .from('invoices')
     .select('*', { count: 'exact', head: true });
 
+  if (adminShopId) {
+    invoicesQuery = invoicesQuery.neq('shop_id', adminShopId);
+  }
+  const { count: total_invoices } = await invoicesQuery;
+
   // Total manual full data exports in the last 30 days
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const { count: exports_count } = await admin
+  let exportsQuery = admin
     .from('data_exports')
     .select('*', { count: 'exact', head: true })
     .gte('created_at', thirtyDaysAgo);
+
+  if (adminShopId) {
+    exportsQuery = exportsQuery.neq('shop_id', adminShopId);
+  }
+  const { count: exports_count } = await exportsQuery;
 
   // MRR = active shops × 349
   const mrr = active * 349;

@@ -24,12 +24,15 @@ export async function GET(request: NextRequest) {
   const monthStart = new Date(year, month - 1, 1).toISOString();
   const monthEnd = new Date(year, month, 1).toISOString();
 
-  // All shops
+  // All shops (including auth_user_id to filter out platform owner admin shop)
   const { data: allShops } = await admin
     .from('shops')
-    .select('id, shop_type, subscription_status, gst_registered, created_at');
+    .select('id, shop_type, subscription_status, gst_registered, created_at, auth_user_id');
 
-  const shops = allShops || [];
+  const adminShop = (allShops || []).find(s => s.auth_user_id === 'a24f626f-c941-4759-b9d4-6e4f3039555e');
+  const adminShopId = adminShop?.id;
+
+  const shops = (allShops || []).filter(s => s.auth_user_id !== 'a24f626f-c941-4759-b9d4-6e4f3039555e');
 
   // New shops this month
   const newShops = shops.filter(s =>
@@ -44,29 +47,44 @@ export async function GET(request: NextRequest) {
   // Active shops
   const activeShops = shops.filter(s => s.subscription_status === 'active');
 
-  // Invoices this month
-  const { count: invoicesThisMonth } = await admin
+  // Invoices this month (excluding admin shop invoices)
+  let invoicesThisMonthQuery = admin
     .from('invoices')
     .select('*', { count: 'exact', head: true })
     .gte('created_at', monthStart)
     .lt('created_at', monthEnd);
 
-  // Total invoices platform-wide
-  const { count: totalInvoices } = await admin
+  if (adminShopId) {
+    invoicesThisMonthQuery = invoicesThisMonthQuery.neq('shop_id', adminShopId);
+  }
+  const { count: invoicesThisMonth } = await invoicesThisMonthQuery;
+
+  // Total invoices platform-wide (excluding admin shop invoices)
+  let totalInvoicesQuery = admin
     .from('invoices')
     .select('*', { count: 'exact', head: true });
+
+  if (adminShopId) {
+    totalInvoicesQuery = totalInvoicesQuery.neq('shop_id', adminShopId);
+  }
+  const { count: totalInvoices } = await totalInvoicesQuery;
 
   // Average invoices per shop
   const avgPerShop = shops.length > 0
     ? Math.round((invoicesThisMonth || 0) / shops.length * 10) / 10
     : 0;
 
-  // Most active shop this month
-  const { data: mostActiveData } = await admin
+  // Most active shop this month (excluding admin shop)
+  let mostActiveQuery = admin
     .from('invoices')
     .select('shop_id')
     .gte('created_at', monthStart)
     .lt('created_at', monthEnd);
+
+  if (adminShopId) {
+    mostActiveQuery = mostActiveQuery.neq('shop_id', adminShopId);
+  }
+  const { data: mostActiveData } = await mostActiveQuery;
 
   let mostActiveShop = { name: '—', count: 0 };
   if (mostActiveData && mostActiveData.length > 0) {
