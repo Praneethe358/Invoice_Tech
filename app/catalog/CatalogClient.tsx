@@ -171,7 +171,7 @@ export default function CatalogClient({
     localStorage.setItem(`custom_categories_${shop.id}`, JSON.stringify(merged));
   }, [products, shop.id]);
 
-  // Fetch variants from Supabase
+  // Fetch variants from Supabase (merges into existing state to preserve other products' data)
   const fetchVariants = async (productId: string) => {
     const { data, error } = await supabase
       .from('product_variants')
@@ -182,7 +182,11 @@ export default function CatalogClient({
     if (error) {
       showToast('Failed to fetch variants', 'error');
     } else if (data) {
-      setVariants(data as ProductVariant[]);
+      setVariants((prev) => {
+        // Remove old entries for this product, then append fresh data
+        const others = prev.filter((v) => v.product_id !== productId);
+        return [...others, ...(data as ProductVariant[])];
+      });
     }
   };
 
