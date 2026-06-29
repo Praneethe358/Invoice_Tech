@@ -474,38 +474,40 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                {/* Compact Premium Pill Switcher */}
-                <div className="flex gap-0.5 p-[2px] bg-slate-200/60 backdrop-blur-md rounded-md w-full max-w-[160px] text-[7px] font-extrabold shadow-2xs border border-slate-200/60">
-                  <button
-                    onClick={() => setSimulatorStep(0)}
-                    className={`flex-1 py-1 rounded-sm transition-all text-center flex items-center justify-center ${
-                      simulatorStep === 0 
-                        ? 'bg-[#0050e8] text-white shadow-sm' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-                    }`}
-                  >
-                    <span>1. Entry</span>
-                  </button>
-                  <button
-                    onClick={() => setSimulatorStep(1)}
-                    className={`flex-1 py-1 rounded-sm transition-all text-center flex items-center justify-center ${
-                      simulatorStep === 1 
-                        ? 'bg-[#0050e8] text-white shadow-sm' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-                    }`}
-                  >
-                    <span>2. Preview</span>
-                  </button>
-                  <button
-                    onClick={() => setSimulatorStep(2)}
-                    className={`flex-1 py-1 rounded-sm transition-all text-center flex items-center justify-center ${
-                      simulatorStep === 2 
-                        ? 'bg-[#0050e8] text-white shadow-sm' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-                    }`}
-                  >
-                    <span>3. Send</span>
-                  </button>
+                {/* Minimal Step Indicator */}
+                <div className="flex items-center gap-0 mt-1">
+                  {[
+                    { label: 'Entry', step: 0 },
+                    { label: 'Preview', step: 1 },
+                    { label: 'Send', step: 2 },
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex items-center">
+                      <button
+                        onClick={() => setSimulatorStep(item.step)}
+                        className="flex flex-col items-center gap-[2px] group"
+                      >
+                        <div
+                          className={`w-[14px] h-[14px] rounded-full flex items-center justify-center text-[6px] font-black transition-all ${
+                            simulatorStep === item.step
+                              ? 'bg-[#0050e8] text-white shadow-[0_0_6px_rgba(0,80,232,0.4)]'
+                              : 'bg-slate-200 text-slate-500 group-hover:bg-slate-300'
+                          }`}
+                        >
+                          {idx + 1}
+                        </div>
+                        <span className={`text-[5.5px] font-bold transition-colors ${
+                          simulatorStep === item.step ? 'text-[#0050e8]' : 'text-slate-400'
+                        }`}>
+                          {item.label}
+                        </span>
+                      </button>
+                      {idx < 2 && (
+                        <div className={`w-5 h-[1.5px] mx-[2px] -mt-2 transition-colors ${
+                          simulatorStep > idx ? 'bg-[#0050e8]' : 'bg-slate-200'
+                        }`} />
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
 
