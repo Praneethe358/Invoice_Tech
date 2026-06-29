@@ -1013,13 +1013,21 @@ export default function CatalogClient({
           <div className="flex border-b border-slate-200 mb-6 gap-6">
             <button
               onClick={() => setActiveTab('products')}
-              className="pb-3 text-sm font-bold border-b-2 transition-all cursor-pointer border-blue-600 text-blue-600"
+              className={`pb-3 text-sm font-bold border-b-2 transition-all cursor-pointer ${
+                activeTab === 'products'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-400 hover:text-slate-600'
+              }`}
             >
               Products
             </button>
             <button
               onClick={() => setActiveTab('categories')}
-              className="pb-3 text-sm font-bold border-b-2 transition-all cursor-pointer border-transparent text-slate-400 hover:text-slate-600"
+              className={`pb-3 text-sm font-bold border-b-2 transition-all cursor-pointer ${
+                activeTab === 'categories'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-400 hover:text-slate-600'
+              }`}
             >
               Categories
             </button>
