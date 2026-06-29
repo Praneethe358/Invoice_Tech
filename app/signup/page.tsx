@@ -26,6 +26,89 @@ interface CatalogItemState {
   category?: string;
 }
 
+function CategoryIcon({ type, active }: { type: ShopType; active: boolean }) {
+  const colorClass = active ? 'text-[#0050e8]' : 'text-slate-400 group-hover:text-slate-600 transition-colors';
+  switch (type) {
+    case 'clothing':
+      return (
+        <svg className={`w-5 h-5 ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l1.08 5.4A2 2 0 005.3 13H9v7.5A1.5 1.5 0 0010.5 22h3a1.5 1.5 0 001.5-1.5V13h3.7a2 2 0 001.94-1.91l1.08-5.4a2 2 0 00-1.34-2.23z"/>
+        </svg>
+      );
+    case 'footwear':
+      return (
+        <svg className={`w-5 h-5 ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3v-2a3 3 0 00-3-3H5a2 2 0 00-2 2v4a2 2 0 002 2z"/>
+        </svg>
+      );
+    case 'tailoring':
+      return (
+        <svg className={`w-5 h-5 ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="6" cy="6" r="3"/>
+          <circle cx="6" cy="18" r="3"/>
+          <line x1="9.8" y1="8.2" x2="20" y2="17"/>
+          <line x1="9.8" y1="15.8" x2="20" y2="7"/>
+        </svg>
+      );
+    case 'fertilizer':
+      return (
+        <svg className={`w-5 h-5 ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 22V12M12 12c4 0 7-3 7-7 0 0-3 0-7 4M12 12C8 12 5 9 5 5c0 0 3 0 7 4"/>
+        </svg>
+      );
+    case 'grocery':
+      return (
+        <svg className={`w-5 h-5 ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="9" cy="21" r="1"/>
+          <circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+        </svg>
+      );
+    case 'pharmacy':
+      return (
+        <svg className={`w-5 h-5 ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <line x1="12" y1="8" x2="12" y2="16"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+      );
+    case 'hardware':
+      return (
+        <svg className={`w-5 h-5 ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+        </svg>
+      );
+    case 'food':
+      return (
+        <svg className={`w-5 h-5 ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+        </svg>
+      );
+    case 'electronics':
+      return (
+        <svg className={`w-5 h-5 ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+          <line x1="12" y1="18" x2="12.01" y2="18"/>
+        </svg>
+      );
+    case 'salon':
+      return (
+        <svg className={`w-5 h-5 ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 22V4c0-.5.2-1 .6-1.4C5 2.2 5.5 2 6 2s1 .2 1.4.6c.4.4.6.9.6 1.4v18M11 22V4c0-.5.2-1 .6-1.4.4-.4.9-.6 1.4-.6s1 .2 1.4.6c.4.4.6.9.6 1.4v18M18 22V4c0-.5.2-1 .6-1.4C19 2.2 19.5 2 20 2s1 .2 1.4.6c.4.4.6.9.6 1.4v18"/>
+        </svg>
+      );
+    case 'other':
+    default:
+      return (
+        <svg className={`w-5 h-5 ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+          <line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+      );
+  }
+}
+
 export default function SignupPage() {
   const router = useRouter();
   const { showToast } = useToast();
@@ -502,29 +585,29 @@ export default function SignupPage() {
                     
                     <div className="grid grid-cols-2 gap-2.5 max-h-[300px] overflow-y-auto pr-1">
                       {([
-                        { type: 'clothing', label: 'Clothing / Textiles', emoji: '👗' },
-                        { type: 'footwear', label: 'Footwear Shop', emoji: '👟' },
-                        { type: 'tailoring', label: 'Tailoring Shop', emoji: '🪡' },
-                        { type: 'fertilizer', label: 'Agri / Fertilizer', emoji: '🌱' },
-                        { type: 'grocery', label: 'Grocery / Kirana', emoji: '🛒' },
-                        { type: 'pharmacy', label: 'Medical / Pharmacy', emoji: '💊' },
-                        { type: 'hardware', label: 'Hardware Store', emoji: '🔨' },
-                        { type: 'food', label: 'Food / Restaurant', emoji: '🍳' },
-                        { type: 'electronics', label: 'Mobile / Electronics', emoji: '⚡' },
-                        { type: 'salon', label: 'Salon / Beauty', emoji: '💈' },
-                        { type: 'other', label: 'Other Business', emoji: '📦' }
+                        { type: 'clothing', label: 'Clothing / Textiles' },
+                        { type: 'footwear', label: 'Footwear Shop' },
+                        { type: 'tailoring', label: 'Tailoring Shop' },
+                        { type: 'fertilizer', label: 'Agri / Fertilizer' },
+                        { type: 'grocery', label: 'Grocery / Kirana' },
+                        { type: 'pharmacy', label: 'Medical / Pharmacy' },
+                        { type: 'hardware', label: 'Hardware Store' },
+                        { type: 'food', label: 'Food / Restaurant' },
+                        { type: 'electronics', label: 'Mobile / Electronics' },
+                        { type: 'salon', label: 'Salon / Beauty' },
+                        { type: 'other', label: 'Other Business' }
                       ] as const).map((opt) => (
                         <button
                           key={opt.type}
                           type="button"
                           onClick={() => setShopType(opt.type)}
-                          className={`p-2.5 sm:p-3 rounded-2xl border text-left flex flex-col justify-between h-20 sm:h-24 transition-all active:scale-[0.97] ${
+                          className={`p-2.5 sm:p-3 rounded-2xl border text-left flex flex-col justify-between h-20 sm:h-24 transition-all active:scale-[0.97] group cursor-pointer ${
                             shopType === opt.type
                               ? 'border-[#0050e8] bg-gradient-to-br from-blue-50/70 to-indigo-50/20 shadow-xs ring-1 ring-[#0050e8]/30'
                               : 'border-slate-150 bg-white hover:bg-[#f9fafb]'
                           }`}
                         >
-                          <span className="text-xl sm:text-2xl">{opt.emoji}</span>
+                          <CategoryIcon type={opt.type} active={shopType === opt.type} />
                           <span className="text-[10px] sm:text-xs font-black text-slate-850 leading-tight">{opt.label}</span>
                         </button>
                       ))}
@@ -852,27 +935,27 @@ export default function SignupPage() {
         <div className="absolute bottom-[10%] left-[-15%] w-64 h-64 rounded-full bg-indigo-500/15 blur-[80px] pointer-events-none" />
 
         {/* Top Branding */}
-        <div className="flex flex-col items-center text-center pt-12 pb-5 px-6 relative z-10">
-          <div className="flex items-center gap-2.5 mb-3">
-            <img src="/trubill-logo.png" alt="TruBill Logo" className="w-9 h-9 object-contain brightness-0 invert" />
-            <span className="font-heading font-black text-[26px] tracking-tight text-white">
+        <div className="flex flex-col items-center text-center pt-5 pb-2 px-6 relative z-10">
+          <div className="flex items-center gap-2 mb-1">
+            <img src="/trubill-logo.png" alt="TruBill Logo" className="w-7 h-7 object-contain brightness-0 invert" />
+            <span className="font-heading font-black text-xl tracking-tight text-white">
               TruBill
             </span>
           </div>
-          <p className="text-blue-200/80 text-[13px] font-semibold max-w-[280px] leading-relaxed">
+          <p className="text-blue-200/80 text-[11px] font-semibold max-w-[280px]">
             GST Invoicing made simple for Tamil Nadu retail.
           </p>
         </div>
 
         {/* Floating Card */}
-        <div className="flex-1 flex flex-col px-5 pb-6 relative z-10 overflow-y-auto">
+        <div className="flex-1 flex flex-col px-4 pb-4 relative z-10 overflow-y-auto">
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="w-full max-w-[430px] mx-auto"
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="w-full max-w-[400px] mx-auto my-auto"
           >
-          <div className="bg-white rounded-[26px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] p-6 space-y-5">
+          <div className="bg-white rounded-2xl shadow-[0_12px_40px_-12px_rgba(0,0,0,0.25)] p-5 space-y-4">
             {/* Back Home Link */}
             <Link 
               href="/" 
@@ -1007,29 +1090,29 @@ export default function SignupPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-2.5 max-h-[260px] overflow-y-auto pr-1">
                       {([
-                        { type: 'clothing', label: 'Clothing / Textiles', emoji: '👗' },
-                        { type: 'footwear', label: 'Footwear Shop', emoji: '👟' },
-                        { type: 'tailoring', label: 'Tailoring Shop', emoji: '🪡' },
-                        { type: 'fertilizer', label: 'Agri / Fertilizer', emoji: '🌱' },
-                        { type: 'grocery', label: 'Grocery / Kirana', emoji: '🛒' },
-                        { type: 'pharmacy', label: 'Medical / Pharmacy', emoji: '💊' },
-                        { type: 'hardware', label: 'Hardware Store', emoji: '🔨' },
-                        { type: 'food', label: 'Food / Restaurant', emoji: '🍳' },
-                        { type: 'electronics', label: 'Mobile / Electronics', emoji: '⚡' },
-                        { type: 'salon', label: 'Salon / Beauty', emoji: '💈' },
-                        { type: 'other', label: 'Other Business', emoji: '📦' }
+                        { type: 'clothing', label: 'Clothing / Textiles' },
+                        { type: 'footwear', label: 'Footwear Shop' },
+                        { type: 'tailoring', label: 'Tailoring Shop' },
+                        { type: 'fertilizer', label: 'Agri / Fertilizer' },
+                        { type: 'grocery', label: 'Grocery / Kirana' },
+                        { type: 'pharmacy', label: 'Medical / Pharmacy' },
+                        { type: 'hardware', label: 'Hardware Store' },
+                        { type: 'food', label: 'Food / Restaurant' },
+                        { type: 'electronics', label: 'Mobile / Electronics' },
+                        { type: 'salon', label: 'Salon / Beauty' },
+                        { type: 'other', label: 'Other Business' }
                       ] as const).map((opt) => (
                         <button
                           key={opt.type}
                           type="button"
                           onClick={() => setShopType(opt.type)}
-                          className={`p-2.5 rounded-2xl border text-left flex flex-col justify-between h-20 transition-all active:scale-[0.97] cursor-pointer ${
+                          className={`p-2.5 rounded-2xl border text-left flex flex-col justify-between h-20 transition-all active:scale-[0.97] group cursor-pointer ${
                             shopType === opt.type
                               ? 'border-[#0050e8] bg-gradient-to-br from-blue-50/70 to-indigo-50/20 ring-1 ring-[#0050e8]/30'
                               : 'border-slate-150 bg-white hover:bg-[#f9fafb]'
                           }`}
                         >
-                          <span className="text-xl">{opt.emoji}</span>
+                          <CategoryIcon type={opt.type} active={shopType === opt.type} />
                           <span className="text-[10px] font-black text-slate-800 leading-tight">{opt.label}</span>
                         </button>
                       ))}
