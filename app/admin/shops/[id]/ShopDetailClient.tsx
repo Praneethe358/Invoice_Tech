@@ -26,7 +26,7 @@ interface ShopDetail {
   created_at: string; subscription_status: string; trial_ends_at: string | null;
   subscription_ends_at: string | null; subscription_started_at: string | null;
   subscription_notes: string | null; owner_email: string;
-  auth_user_id: string;
+  auth_user_id: string; passcode?: string | null;
 }
 
 export default function ShopDetailClient({ shopId }: { shopId: string }) {
@@ -36,6 +36,7 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
   const [monthlyVolume, setMonthlyVolume] = useState<Array<{ month: string; count: number }>>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [volumeRange, setVolumeRange] = useState<'1m' | '3m' | '6m'>('1m');
   const [chartLoading, setChartLoading] = useState(false);
@@ -90,6 +91,7 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
       setMonthlyVolume(data.monthly_volume || []);
       setPayments(data.payments || []);
       setAuditLogs(data.audit_logs || []);
+      setStaff(data.staff || []);
     } catch { /* ignore */ }
     setLoading(false);
   };
@@ -247,6 +249,74 @@ export default function ShopDetailClient({ shopId }: { shopId: string }) {
                   </button>
                 </motion.div>
               )}
+            </div>
+
+            {/* Staff & Employees Card */}
+            <div className="bg-white border border-slate-200/85 rounded-2xl p-5 shadow-xs">
+              <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center justify-between">
+                <span>👥 Staff & Employees</span>
+                <span className="text-[8px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-100 font-bold uppercase tracking-wider">{1 + staff.filter(s => s.status === 'active').length} Active</span>
+              </h2>
+              
+              <div className="space-y-4">
+                {/* Owner Row */}
+                <div className="border-b border-slate-100 pb-3 last:border-0 last:pb-0 text-xs">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-extrabold text-slate-800">Shop Owner</p>
+                      <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{shop.owner_email}</p>
+                    </div>
+                    <span className="inline-flex px-2 py-0.5 rounded-md text-[8px] font-black uppercase border bg-amber-50 text-amber-700 border-amber-200">
+                      👑 Owner
+                    </span>
+                  </div>
+                  <div className="mt-2.5 space-y-1.5 text-[10px] text-slate-500 font-semibold bg-slate-50 p-2.5 rounded-xl border border-slate-100/70">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">User ID:</span>
+                      <span className="font-mono text-slate-700 select-all break-all ml-2">{shop.auth_user_id}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-t border-slate-200/40 pt-1.5">
+                      <span className="text-slate-400">Passcode:</span>
+                      <span className="font-mono text-[#0050e8] font-bold select-all">{shop.passcode || '123456 (default)'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Staff Rows */}
+                {staff.map((member) => (
+                  <div key={member.id} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0 text-xs">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-extrabold text-slate-800">{member.name}</p>
+                        <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{member.email}</p>
+                      </div>
+                      <span className={`inline-flex px-2 py-0.5 rounded-md text-[8px] font-black uppercase border ${
+                        member.role === 'admin' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                        member.role === 'billing_staff' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                        'bg-slate-50 text-slate-500 border-slate-200'
+                      }`}>
+                        {member.role === 'billing_staff' ? 'Billing' : member.role}
+                      </span>
+                    </div>
+                    
+                    <div className="mt-2.5 space-y-1.5 text-[10px] text-slate-500 font-semibold bg-slate-50 p-2.5 rounded-xl border border-slate-100/70">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400">User ID:</span>
+                        <span className="font-mono text-slate-700 select-all break-all ml-2">{member.auth_user_id || 'Pending Acceptance'}</span>
+                      </div>
+                      <div className="flex justify-between items-center border-t border-slate-200/40 pt-1.5">
+                        <span className="text-slate-400">Passcode:</span>
+                        <span className="font-mono text-[#0050e8] font-bold select-all">{member.passcode || '123456 (default)'}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-2 flex justify-between items-center text-[9px] text-slate-400 font-medium">
+                      <span>Status: <span className={`font-black uppercase ${member.status === 'active' ? 'text-emerald-600' : 'text-amber-500'}`}>{member.status}</span></span>
+                      <span>Joined: {formatDate(member.created_at)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

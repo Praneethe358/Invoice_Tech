@@ -163,6 +163,13 @@ export async function GET(
     if (user) lastSignIn = user.last_sign_in_at || null;
   } catch { /* ignore */ }
 
+  // Get staff/employees
+  const { data: staff } = await admin
+    .from('staff')
+    .select('id, name, email, role, status, auth_user_id, passcode, created_at')
+    .eq('shop_id', id)
+    .order('created_at', { ascending: true });
+
   return NextResponse.json({
     shop: { ...shop, owner_email: ownerEmail },
     stats: {
@@ -178,5 +185,6 @@ export async function GET(
     monthly_volume: monthlyVolume,
     payments: payments || [],
     audit_logs: auditLogs || [],
+    staff: staff || [],
   });
 }
