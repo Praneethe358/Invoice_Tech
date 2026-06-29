@@ -6,7 +6,7 @@
 
 ## What is TruBill?
 
-TruBill is the fastest GST billing software for Tamil Nadu small businesses.
+TruBill is the fastest GST billing software for Tamil Nadu growing businesses.
 It allows cashiers to generate GST-compliant invoices, manage product
 inventory, track variants (size, colour, fabric), and share invoices via
 WhatsApp — all from a single web application.

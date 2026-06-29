@@ -16,7 +16,7 @@ export default function MarketingFooter() {
               </span>
             </div>
             <p className="text-xs text-[#6b7280] leading-relaxed">
-              Simple, lightweight billing software designed for small businesses, supermarkets, and freelancers in Tamil Nadu.
+              Simple, lightweight billing software designed for growing businesses, supermarkets, and freelancers in Tamil Nadu.
             </p>
           </div>
 

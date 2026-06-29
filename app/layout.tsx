@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     "GST billing software Tamil Nadu",
     "GST invoice app for restaurants",
     "juice shop billing software",
-    "GST software for small business India",
+    "GST software for growing business India",
     "TruBill invoice",
     "GSTR-1 filing software",
     "footwear billing software Coimbatore",

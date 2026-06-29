@@ -5,7 +5,7 @@ import MarketingFooter from "@/components/MarketingFooter";
 export const metadata: Metadata = {
   title: "About TruBill — Our Story & Mission",
   description:
-    "TruBill is a GST billing and inventory platform built specifically for small businesses, restaurants, and retail merchants in Tamil Nadu, India.",
+    "TruBill is a GST billing and inventory platform built specifically for growing businesses, restaurants, and retail merchants in Tamil Nadu, India.",
   keywords: [
     "about TruBill",
     "Tamil Nadu GST billing company",
@@ -36,7 +36,7 @@ export default function AboutPage() {
           <div>
             <h2 className="text-2xl font-bold text-slate-900 mb-4">Our Mission</h2>
             <p>
-              TruBill was founded with a single purpose: to make GST billing and store inventory management simple, accessible, and fast for small and medium businesses in Tamil Nadu. We believe that shopkeepers shouldn't need a degree in finance or complex, heavy ERP systems just to create a correct tax invoice and file GSTR-1 returns.
+              TruBill was founded with a single purpose: to make GST billing and store inventory management simple, accessible, and fast for growing businesses in Tamil Nadu. We believe that shopkeepers shouldn't need a degree in finance or complex, heavy ERP systems just to create a correct tax invoice and file GSTR-1 returns.
             </p>
           </div>
 

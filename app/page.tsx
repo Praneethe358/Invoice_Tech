@@ -512,7 +512,7 @@ export default function LandingPage() {
               </div>
 
               <h1 className="text-[1.8rem] sm:text-[2.25rem] md:text-5xl lg:text-6xl font-black text-[#1a1d26] tracking-tight leading-[1.2] max-w-2xl lg:max-w-none">
-                Best <span className="bg-gradient-to-r from-[#001048] to-[#0050e8] bg-clip-text text-transparent">WhatsApp Billing</span> Software for Small Business
+                Best <span className="bg-gradient-to-r from-[#001048] to-[#0050e8] bg-clip-text text-transparent">WhatsApp Billing</span> Software for Growing Business
               </h1>
 
               <p className="text-[13px] sm:text-base md:text-lg text-[#525f7a] leading-relaxed max-w-xl">
