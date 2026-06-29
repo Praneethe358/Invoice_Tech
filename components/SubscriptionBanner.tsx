@@ -58,21 +58,21 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
   };
 
   // Banner styles based on urgency
-  let bgClass = 'bg-blue-50 border-b-2 border-blue-500 text-blue-900';
+  let bgClass = 'bg-blue-50 border-b border-blue-200 text-blue-900';
   let icon = '🎉';
   let text = '';
-  let ctaText = 'Upgrade — ₹349/month';
+  let ctaText = 'Upgrade — ₹349';
   let ctaLink = '/upgrade';
 
   if (status === 'trial') {
     if (daysRemaining !== null && daysRemaining <= 0) {
-      bgClass = 'bg-[#fef2f2] border-b-2 border-[#ef4444] text-[#991b1b]';
+      bgClass = 'bg-[#fef2f2] border-b border-rose-200 text-[#991b1b]';
       icon = '🔒';
       text = `Your free trial has ended. Upgrade to continue sending invoices.`;
-      ctaText = 'Upgrade Now — ₹349/month';
+      ctaText = 'Upgrade Now — ₹349';
       ctaLink = '/upgrade';
     } else if (isWhatsappCapHit) {
-      bgClass = 'bg-[#fffbeb] border-b-2 border-[#f59e0b] text-[#78350f]';
+      bgClass = 'bg-[#fffbeb] border-b border-amber-200 text-[#78350f]';
       icon = '⚠️';
       text = `WhatsApp limit reached — Upgrade now`;
       ctaText = 'Upgrade Now';
@@ -80,30 +80,30 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
     } else {
       const daysLeft = daysRemaining ?? 7;
       if (daysLeft <= 3) {
-        bgClass = 'bg-[#fffbeb] border-b-2 border-[#f59e0b] text-[#78350f]';
+        bgClass = 'bg-[#fffbeb] border-b border-amber-200 text-[#78350f]';
         icon = '⚠️';
         text = `Trial ends in ${daysLeft} day${daysLeft === 1 ? '' : 's'}! Upgrade now to avoid interruption.`;
         ctaText = 'Upgrade Now';
       } else {
-        bgClass = 'bg-[#eff6ff] border-b-2 border-[#3b82f6] text-[#1e3a8a]';
+        bgClass = 'bg-[#eff6ff] border-b border-blue-150 text-[#1e3a8a]';
         icon = '🎉';
-        text = `Free trial — ${daysLeft} days remaining. Upgrade to keep sending invoices after your trial.`;
-        ctaText = 'Upgrade — ₹349/month';
+        text = `Free trial — ${daysLeft} days remaining. Upgrade to keep sending invoices.`;
+        ctaText = 'Upgrade — ₹349';
       }
       ctaLink = '/upgrade';
     }
   } else if (urgency === 'warning' && status === 'active') {
-    bgClass = 'bg-[#fffbeb] border-b-2 border-[#f59e0b] text-[#78350f]';
+    bgClass = 'bg-[#fffbeb] border-b border-amber-200 text-[#78350f]';
     icon = '🔔';
-    text = `Subscription renews in ${daysRemaining} days. Pay ₹349 to continue uninterrupted.`;
+    text = `Subscription renews in ${daysRemaining} days. Pay ₹349 to continue.`;
     ctaText = 'Pay Now';
     ctaLink = '/upgrade';
   } else if (urgency === 'blocked') {
-    bgClass = 'bg-[#fef2f2] border-b-2 border-[#ef4444] text-[#991b1b]';
+    bgClass = 'bg-[#fef2f2] border-b border-rose-200 text-[#991b1b]';
     icon = '🔒';
     const subType = status === 'cancelled' ? 'subscription' : 'free trial';
     text = `Your ${subType} has ended. Upgrade to continue sending invoices.`;
-    ctaText = 'Upgrade Now — ₹349/month';
+    ctaText = 'Upgrade Now — ₹349';
     ctaLink = '/upgrade';
   }
 
@@ -113,21 +113,21 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
       <style dangerouslySetInnerHTML={{ __html: `
         @media (min-width: 768px) {
           body {
-            padding-top: 3rem !important;
+            padding-top: 2.25rem !important;
           }
           .sub-banner-position {
             top: 0px !important;
           }
           .md\\:sticky.md\\:top-0 {
-            top: 3rem !important;
+            top: 2.25rem !important;
           }
         }
         @media (max-width: 767px) {
           body {
-            padding-top: 6rem !important;
+            padding-top: 5rem !important;
           }
           .mobile-header-fixed {
-            top: 2.5rem !important;
+            top: 2rem !important;
           }
           .sub-banner-position {
             top: 0px !important;
@@ -142,20 +142,20 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
       `}} />
 
       <motion.div
-        initial={{ y: -48, opacity: 0 }}
+        initial={{ y: -36, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        exit={{ y: -48, opacity: 0 }}
+        exit={{ y: -36, opacity: 0 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className={`fixed left-0 md:left-72 right-0 h-10 md:h-12 z-[40] ${bgClass} flex items-center justify-between px-2.5 md:px-4 shadow-sm text-[10px] md:text-xs font-semibold sub-banner-position exclude-blur`}
+        className={`fixed left-0 md:left-72 right-0 h-8 md:h-9 z-[40] ${bgClass} flex items-center justify-between px-3 md:px-5 shadow-xs text-[9px] md:text-xs font-semibold sub-banner-position exclude-blur`}
       >
         <div className="flex items-center gap-1.5 md:gap-2 overflow-hidden mr-2 truncate min-w-0">
-          <span className="text-sm md:text-base shrink-0">{icon}</span>
-          <span className="truncate">{text}</span>
+          <span className="text-xs md:text-sm shrink-0">{icon}</span>
+          <span className="truncate tracking-wide">{text}</span>
         </div>
         
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
           <Link href={ctaLink}>
-            <button className="bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-md text-[9px] md:text-[11px] shadow-xs active:scale-[0.98] transition-all cursor-pointer whitespace-nowrap">
+            <button className="bg-[#16a34a] hover:bg-[#15803d] text-white font-extrabold px-2.5 py-0.5 rounded-full text-[8px] md:text-[10px] shadow-xs active:scale-[0.98] transition-all cursor-pointer whitespace-nowrap">
               {ctaText}
             </button>
           </Link>
@@ -163,10 +163,10 @@ export default function SubscriptionBanner({ shop }: SubscriptionBannerProps) {
           {isDismissible && (
             <button
               onClick={handleDismiss}
-              className="text-current opacity-60 hover:opacity-100 p-1 cursor-pointer"
+              className="text-current opacity-60 hover:opacity-100 p-0.5 cursor-pointer"
               aria-label="Dismiss banner"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
