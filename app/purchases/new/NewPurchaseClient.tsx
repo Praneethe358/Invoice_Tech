@@ -151,6 +151,8 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           supplier_id: supplierId,
+          supplier_name: selectedSupplier?.name,
+          supplier_gstin: selectedSupplier?.gstin,
           purchase_invoice_number: invoiceNumber.trim().toUpperCase(),
           purchase_date: purchaseDate,
           itc_eligible: itcEligible,
