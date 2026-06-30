@@ -68,7 +68,7 @@ create policy "own credit debit notes" on credit_debit_notes for all
 -- Recreate policies for cdn_items
 drop policy if exists "own cdn items" on cdn_items;
 create policy "own cdn items" on cdn_items for all
-  using (note_id in (select id from credit_debit_notes where shop_id in (select get_user_shop_ids())));
+  using (cdn_id in (select id from credit_debit_notes where shop_id in (select get_user_shop_ids())));
 
 -- Recreate policies for data_exports
 drop policy if exists "own exports" on data_exports;
