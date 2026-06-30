@@ -127,7 +127,7 @@ export default function BarcodeScannerModal({
             Html5QrcodeSupportedFormats.UPC_E,
             Html5QrcodeSupportedFormats.UPC_EAN_EXTENSION
           ],
-          useBarCodeDetectorIfSupported: true
+          useBarCodeDetectorIfSupported: false
         });
         html5QrcodeRef.current = html5QrCode;
 
@@ -168,7 +168,7 @@ export default function BarcodeScannerModal({
               height: Math.floor(height * 0.32)
             };
           },
-          useBarCodeDetectorIfSupported: true,
+          useBarCodeDetectorIfSupported: false,
         };
 
         // 2. Start the selected/default camera
@@ -295,7 +295,7 @@ export default function BarcodeScannerModal({
               height: Math.floor(height * 0.32)
             };
           },
-          useBarCodeDetectorIfSupported: true,
+          useBarCodeDetectorIfSupported: false,
         };
 
         const onScanSuccess = (decodedText: string) => {
