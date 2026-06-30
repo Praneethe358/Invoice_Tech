@@ -38,8 +38,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   barcode: {
-    width: 135,
-    height: 40,
+    width: 145,
+    height: 38,
+  },
+  qrCode: {
+    width: 42,
+    height: 42,
   },
   skuText: {
     fontSize: 7,
@@ -65,12 +69,15 @@ const LabelsPDFDocument = ({ shopName, labels }: LabelPDFProps) => {
       <Page size="A4" style={styles.page}>
         <View style={styles.grid}>
           {labels.map((item, idx) => {
-            // Encode SKU for Code 128 barcode generation
-            const barcodeUrl = `https://quickchart.io/barcode?type=code128&text=${encodeURIComponent(item.sku)}&height=35`;
+            const isLongSku = item.sku.length > 12;
+            const barcodeUrl = isLongSku
+              ? `https://quickchart.io/qr?text=${encodeURIComponent(item.sku)}&size=60`
+              : `https://quickchart.io/barcode?type=code128&text=${encodeURIComponent(item.sku)}&height=35`;
+
             return (
               <View key={idx} style={styles.labelCard}>
                 <Text style={styles.shopName}>{shopName.slice(0, 20)}</Text>
-                <Image src={barcodeUrl} style={styles.barcode} />
+                <Image src={barcodeUrl} style={isLongSku ? styles.qrCode : styles.barcode} />
                 <Text style={styles.skuText}>{item.sku}</Text>
               </View>
             );
