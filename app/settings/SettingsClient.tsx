@@ -44,7 +44,6 @@ export default function SettingsClient({
   // GST State Details
   const [gstRegistered, setGstRegistered] = useState(shop.gst_registered || false);
   const [gstin, setGstin] = useState(shop.gstin || '');
-  const [passcode, setPasscode] = useState((shop as any).passcode || '');
   const [city, setCity] = useState((shop as any).city || '');
   const [state, setState] = useState((shop as any).state || '');
   const [pincode, setPincode] = useState((shop as any).pincode || '');
@@ -203,7 +202,6 @@ export default function SettingsClient({
         gst_registered: gstRegistered,
         gstin: gstRegistered ? gstin.trim().toUpperCase() : null,
         inventory_enabled: inventoryEnabledGlobal,
-        passcode: passcode.trim() || null,
         city: city.trim() || null,
         state: state.trim() || null,
         pincode: pincode.trim() || null,
@@ -440,14 +438,7 @@ export default function SettingsClient({
               type="tel"
               disabled={!canEditShop}
             />
-            <Input
-              label="Manager Approval Passcode (6 digits, defaults to 123456)"
-              value={passcode}
-              onChange={(e) => setPasscode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              placeholder="e.g. 123456"
-              maxLength={6}
-              disabled={!canEditShop}
-            />
+
 
             {/* GST Compliant Billing details */}
             <div className="border-t border-[#f3f4f6] pt-4 space-y-4">
