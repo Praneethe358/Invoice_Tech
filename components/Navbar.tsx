@@ -124,9 +124,10 @@ const ALLOWED_NAV_BY_ROLE: Record<UserRole, string[]> = {
 interface NavbarProps {
   initialShop?: Shop | null;
   initialRole?: UserRole;
+  initialUserName?: string;
 }
 
-export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
+export default function Navbar({ initialShop, initialRole, initialUserName }: NavbarProps = {}) {
   const [showProfile, setShowProfile] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -136,6 +137,7 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
   const [shopInfo, setShopInfo] = useState<Shop | null>(initialShop ?? null);
   const [shopLoaded, setShopLoaded] = useState(!!initialShop);
   const [userRole, setUserRole] = useState<UserRole>(initialRole ?? 'owner');
+  const [userName, setUserName] = useState<string>(initialUserName ?? '');
   const [lowStockCount, setLowStockCount] = useState<number>(0);
 
   const [impersonateToken, setImpersonateToken] = useState<string | null>(null);
@@ -221,8 +223,12 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
       try {
         localStorage.setItem('trubill_navbar_shop_info', JSON.stringify(initialShop));
         if (initialRole) localStorage.setItem('trubill_navbar_role', initialRole);
+        if (initialUserName) localStorage.setItem('trubill_navbar_user_name', initialUserName);
       } catch {}
-      return; // Skip the Supabase fetch entirely
+      
+      if (initialUserName || (typeof window !== 'undefined' && localStorage.getItem('trubill_navbar_user_name'))) {
+        return; // Skip the Supabase fetch entirely
+      }
     }
 
     // Hydrate state from localStorage immediately on mount (client-side only)
@@ -235,6 +241,10 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
         const storedRole = localStorage.getItem('trubill_navbar_role');
         if (storedRole) {
           setUserRole(storedRole as UserRole);
+        }
+        const storedUserName = localStorage.getItem('trubill_navbar_user_name');
+        if (storedUserName) {
+          setUserName(storedUserName);
         }
         const storedLowStock = localStorage.getItem('trubill_navbar_low_stock');
         if (storedLowStock) {
@@ -273,6 +283,7 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
           .single();
 
         let resolvedRole: UserRole = 'owner';
+        let resolvedName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Owner';
 
         if (shop) {
           resolvedRole = 'owner';
@@ -280,13 +291,14 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
           // Check if they are a staff member
           const { data: staff } = await supabase
             .from('staff')
-            .select('role, shop_id, shops(id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at, whatsapp_invoices_sent, is_frozen, frozen_reason, state)')
+            .select('name, role, shop_id, shops(id, name, shop_type, gst_registered, inventory_enabled, logo_url, subscription_status, trial_ends_at, subscription_ends_at, whatsapp_invoices_sent, is_frozen, frozen_reason, state)')
             .eq('auth_user_id', user.id)
             .eq('status', 'active')
             .single();
 
           if (staff) {
             resolvedRole = staff.role as UserRole;
+            resolvedName = staff.name || user.email?.split('@')[0] || 'Staff';
             const staffShop = staff.shops as any;
             if (staffShop) {
               shop = {
@@ -334,10 +346,12 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
 
           setShopInfo(shop as any);
           setUserRole(resolvedRole);
+          setUserName(resolvedName);
           setShopLoaded(true);
           if (typeof window !== 'undefined') {
             localStorage.setItem('trubill_navbar_shop_info', JSON.stringify(shop));
             localStorage.setItem('trubill_navbar_role', resolvedRole);
+            localStorage.setItem('trubill_navbar_user_name', resolvedName);
           }
           
           if (shop.inventory_enabled) {
@@ -444,6 +458,7 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('trubill_navbar_shop_info');
         localStorage.removeItem('trubill_navbar_role');
+        localStorage.removeItem('trubill_navbar_user_name');
         localStorage.removeItem('trubill_navbar_low_stock');
       }
       const supabase = createClient();
@@ -613,6 +628,12 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
               <p className="text-xs text-white/60 font-semibold uppercase tracking-wider truncate">
                 {shopInfo?.state || (shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Tamil Nadu, IN')}
               </p>
+              {userName && (
+                <p className="text-[10px] text-white/80 font-bold truncate mt-0.5 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+                  {userName}
+                </p>
+              )}
               {userRole !== 'owner' && (
                 <span className={`inline-block text-[8px] font-bold px-1.5 py-0.5 rounded-none uppercase text-white mt-1 ${
                   userRole === 'admin' ? 'bg-[#16a34a]' : userRole === 'billing_staff' ? 'bg-[#2563eb]' : 'bg-[#6b7280]'
@@ -754,6 +775,12 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
                     <span className="text-[9px] font-bold text-[#0050e8] uppercase tracking-wider mt-0.5 block truncate">
                       {shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Sales Invoice'}
                     </span>
+                    {userName && (
+                      <p className="text-[9px] text-gray-500 font-bold truncate mt-0.5 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                        {userName}
+                      </p>
+                    )}
                     {userRole !== 'owner' && (
                       <span className={`inline-block text-[8px] font-bold px-1.5 py-0.5 rounded-none uppercase text-white mt-1 ${
                         userRole === 'admin' ? 'bg-[#16a34a]' : userRole === 'billing_staff' ? 'bg-[#2563eb]' : 'bg-[#6b7280]'
@@ -831,6 +858,12 @@ export default function Navbar({ initialShop, initialRole }: NavbarProps = {}) {
                     <p className="text-[10px] text-[#9ca3af] font-semibold uppercase tracking-wider truncate">
                       {shopInfo?.state || (shopInfo?.shop_type ? shopInfo.shop_type.replace('_', ' ') : 'Tamil Nadu, IN')}
                     </p>
+                    {userName && (
+                      <p className="text-[9px] text-gray-550 font-bold truncate mt-0.5 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                        {userName}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <button
