@@ -47,8 +47,23 @@ export default function CatalogClient({
   };
 
   const [mounted, setMounted] = useState(false);
+  const [userName, setUserName] = useState('');
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== 'undefined') {
+      const storedName = localStorage.getItem('trubill_navbar_user_name');
+      if (storedName) {
+        setUserName(storedName);
+      } else {
+        const supabaseClient = createClient();
+        supabaseClient.auth.getUser().then(({ data: { user } }) => {
+          if (user) {
+            const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+            setUserName(name);
+          }
+        });
+      }
+    }
   }, []);
 
   // Active Tab
@@ -971,7 +986,10 @@ export default function CatalogClient({
           </div>
           <div className="text-right">
             <span className="text-[10px] font-bold text-[#6b7280] uppercase tracking-wider block">Logged In As</span>
-            <p className="text-xs font-bold text-slate-800 mt-1">
+            <p className="text-xs font-black text-[#0050e8] mt-0.5 truncate max-w-[180px]">
+              {userName || 'User'}
+            </p>
+            <p className="text-[10px] text-gray-500 font-semibold mt-0.5">
               Good {mounted ? (new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening') : 'day'}!
             </p>
           </div>
