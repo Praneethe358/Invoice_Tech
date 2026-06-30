@@ -162,12 +162,6 @@ export default function BarcodeScannerModal({
 
         const config = {
           fps: 20,
-          qrbox: (width: number, height: number) => {
-            return {
-              width: Math.floor(width * 0.85),
-              height: Math.floor(height * 0.32)
-            };
-          },
           useBarCodeDetectorIfSupported: false,
         };
 
@@ -289,12 +283,6 @@ export default function BarcodeScannerModal({
 
         const config = {
           fps: 20,
-          qrbox: (width: number, height: number) => {
-            return {
-              width: Math.floor(width * 0.85),
-              height: Math.floor(height * 0.32)
-            };
-          },
           useBarCodeDetectorIfSupported: false,
         };
 

@@ -189,7 +189,8 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
         setActiveUserName(storedName);
       } else {
         const supabaseClient = createClient();
-        supabaseClient.auth.getUser().then(async ({ data: { user } }) => {
+        supabaseClient.auth.getUser().then(async (res: any) => {
+          const user = res.data?.user;
           if (user) {
             const { data: staff } = await supabaseClient
               .from('staff')
