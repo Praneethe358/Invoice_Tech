@@ -106,7 +106,29 @@ export default function BarcodeScannerModal({
         if (!active) return;
 
         // Create the instance first on our container (guaranteed to be in the DOM)
-        const html5QrCode = new Html5Qrcode('reader-container');
+        const html5QrCode = new Html5Qrcode('reader-container', {
+          verbose: false,
+          formatsToSupport: [
+            Html5QrcodeSupportedFormats.QR_CODE,
+            Html5QrcodeSupportedFormats.AZTEC,
+            Html5QrcodeSupportedFormats.CODABAR,
+            Html5QrcodeSupportedFormats.CODE_39,
+            Html5QrcodeSupportedFormats.CODE_93,
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.DATA_MATRIX,
+            Html5QrcodeSupportedFormats.MAXICODE,
+            Html5QrcodeSupportedFormats.ITF,
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.EAN_8,
+            Html5QrcodeSupportedFormats.PDF_417,
+            Html5QrcodeSupportedFormats.RSS_14,
+            Html5QrcodeSupportedFormats.RSS_EXPANDED,
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E,
+            Html5QrcodeSupportedFormats.UPC_EAN_EXTENSION
+          ],
+          useBarCodeDetectorIfSupported: true
+        });
         html5QrcodeRef.current = html5QrCode;
 
         // 1. Request camera list
@@ -139,16 +161,13 @@ export default function BarcodeScannerModal({
         };
 
         const config = {
-          fps: 12,
-          formatsToSupport: [
-            Html5QrcodeSupportedFormats.EAN_13,
-            Html5QrcodeSupportedFormats.EAN_8,
-            Html5QrcodeSupportedFormats.UPC_A,
-            Html5QrcodeSupportedFormats.UPC_E,
-            Html5QrcodeSupportedFormats.CODE_128,
-            Html5QrcodeSupportedFormats.CODE_39,
-            Html5QrcodeSupportedFormats.QR_CODE
-          ],
+          fps: 20,
+          qrbox: (width: number, height: number) => {
+            return {
+              width: Math.floor(width * 0.85),
+              height: Math.floor(height * 0.32)
+            };
+          },
           useBarCodeDetectorIfSupported: true,
         };
 
@@ -269,16 +288,13 @@ export default function BarcodeScannerModal({
         const { Html5QrcodeSupportedFormats } = await import('html5-qrcode');
 
         const config = {
-          fps: 12,
-          formatsToSupport: [
-            Html5QrcodeSupportedFormats.EAN_13,
-            Html5QrcodeSupportedFormats.EAN_8,
-            Html5QrcodeSupportedFormats.UPC_A,
-            Html5QrcodeSupportedFormats.UPC_E,
-            Html5QrcodeSupportedFormats.CODE_128,
-            Html5QrcodeSupportedFormats.CODE_39,
-            Html5QrcodeSupportedFormats.QR_CODE
-          ],
+          fps: 20,
+          qrbox: (width: number, height: number) => {
+            return {
+              width: Math.floor(width * 0.85),
+              height: Math.floor(height * 0.32)
+            };
+          },
           useBarCodeDetectorIfSupported: true,
         };
 
@@ -663,6 +679,9 @@ export default function BarcodeScannerModal({
         }
         .pb-safe {
           padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        #qr-shaded-region {
+          display: none !important;
         }
       `}</style>
     </>
