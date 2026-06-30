@@ -61,7 +61,37 @@ export async function GET(request: NextRequest) {
     // Active Invoice IDs
     const activeInvoiceIds = activeInvoices.map(i => i.id);
 
-    // 2. Previous Month Invoices
+    // Fetch ALL payments ever recorded for this month's active invoices
+    // (regardless of paid_at date — some payments may land in a different date window)
+    let allInvoicePayments: Array<{ amount: string | number; payment_method: string; invoice_id: string }> = [];
+    if (activeInvoiceIds.length > 0) {
+      const { data: invPayments } = await supabase
+        .from('payments')
+        .select('amount, payment_method, invoice_id')
+        .in('invoice_id', activeInvoiceIds);
+      allInvoicePayments = invPayments || [];
+    }
+
+    // --- Section 1: Sales Summary ---
+    const totalInvoicesSent = activeInvoices.length;
+
+    // totalBilled = gross invoice face value (before credit/debit adjustments)
+    const totalBilledGross = activeInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0);
+    // Adjust for credit/debit notes issued this month
+    const totalBilled = Math.max(0, totalBilledGross + currentDebitBilled - currentCreditBilled);
+
+    // totalCollected = sum of ALL payments for this month's invoices (keyed by invoice, not payment date)
+    // For invoices using the payments table → use payments rows
+    // For legacy invoices NOT using payments table → use amount_paid field (no double-count)
+    const paymentsTableTotal = allInvoicePayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+    const legacyAmountPaidTotal = activeInvoices
+      .filter(inv => !inv.uses_payments_table)
+      .reduce((sum, inv) => sum + Number(inv.amount_paid || 0), 0);
+    const totalCollected = Math.max(0, paymentsTableTotal + legacyAmountPaidTotal);
+
+    const outstanding = Math.max(0, totalBilled - totalCollected);
+    const collectionRate = totalBilled > 0 ? Math.min(100, (totalCollected / totalBilled) * 100) : 0;
+
     const { data: prevInvoices } = await supabase
       .from('invoices')
       .select('total, amount_paid, status, uses_payments_table')
@@ -131,25 +161,25 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // --- Section 1: Sales Summary ---
-    const totalInvoicesSent = activeInvoices.length;
-    const totalBilled = Math.max(0, activeInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0) + currentDebitBilled - currentCreditBilled);
-    // Total collected includes payments received this month or amount_paid for active invoices this month, adjusted for refunded money (credit notes)
-    const totalCollected = Math.max(0,
-      (payments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0) +
-      activeInvoices.filter(inv => !inv.uses_payments_table).reduce((sum, inv) => sum + Number(inv.amount_paid || 0), 0) -
-      currentCreditBilled
-    );
-    const outstanding = Math.max(0, totalBilled - totalCollected);
-    const collectionRate = totalBilled > 0 ? Math.min(100, (totalCollected / totalBilled) * 100) : 0;
+    // (Section 1 computed above after fetching allInvoicePayments)
 
     // --- Section 8: Comparison ---
     const prevInvoicesCount = prevActiveInvoices.length;
     const prevBilled = Math.max(0, prevActiveInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0) + prevDebitBilled - prevCreditBilled);
+
+    // Fetch ALL payments for prev month's active invoices (invoice-keyed, not date-keyed)
+    const prevActiveInvoiceIds = prevActiveInvoices.map((i: any) => (i as any).id);
+    let prevAllInvoicePayments: Array<{ amount: string | number }> = [];
+    if (prevActiveInvoiceIds.length > 0) {
+      const { data: prevInvPayments } = await supabase
+        .from('payments')
+        .select('amount')
+        .in('invoice_id', prevActiveInvoiceIds);
+      prevAllInvoicePayments = prevInvPayments || [];
+    }
     const prevCollected = Math.max(0,
-      (prevPayments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0) +
-      prevActiveInvoices.filter(inv => !inv.uses_payments_table).reduce((sum, inv) => sum + Number(inv.amount_paid || 0), 0) -
-      prevCreditBilled
+      prevAllInvoicePayments.reduce((sum, p) => sum + Number(p.amount || 0), 0) +
+      prevActiveInvoices.filter(inv => !inv.uses_payments_table).reduce((sum, inv) => sum + Number(inv.amount_paid || 0), 0)
     );
     const prevOutstanding = Math.max(0, prevBilled - prevCollected);
 
@@ -276,11 +306,10 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Add payments received this month to customers
-    if (payments && payments.length > 0) {
-      payments.forEach(p => {
-        // find invoice customer phone
-        const inv = activeInvoices.find(i => i.id === p.invoice_id);
+    // Add ALL payments for this month's invoices to customer totals
+    if (allInvoicePayments.length > 0) {
+      allInvoicePayments.forEach(p => {
+        const inv = activeInvoices.find(i => i.id === (p as any).invoice_id);
         if (inv) {
           const phone = inv.customer_phone;
           if (customerMap[phone]) {
@@ -332,8 +361,8 @@ export async function GET(request: NextRequest) {
     }
 
     const paymentMethods: Record<string, number> = { Cash: 0, UPI: 0, 'Bank Transfer': 0, Other: 0 };
-    (payments || []).forEach(p => {
-      const method = (p.payment_method || 'other').toLowerCase();
+    allInvoicePayments.forEach(p => {
+      const method = ((p as any).payment_method || 'other').toLowerCase();
       if (method === 'cash') {
         paymentMethods['Cash'] += Number(p.amount || 0);
       } else if (method === 'upi') {
@@ -345,10 +374,9 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Also include payments from active invoices this month that do not use the payments table
+    // Include legacy payments from invoices NOT using the payments table (default to Cash)
     activeInvoices.forEach(inv => {
-      if (!inv.uses_payments_table && inv.amount_paid > 0) {
-        // default to Cash or fallback
+      if (!inv.uses_payments_table && Number(inv.amount_paid) > 0) {
         paymentMethods['Cash'] += Number(inv.amount_paid);
       }
     });
