@@ -65,26 +65,6 @@ export async function GET(request: NextRequest) {
       allInvoicePayments = invPayments || [];
     }
 
-    // --- Section 1: Sales Summary ---
-    const totalInvoicesSent = activeInvoices.length;
-
-    // totalBilled = gross invoice face value (before credit/debit adjustments)
-    const totalBilledGross = activeInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0);
-    // Adjust for credit/debit notes issued this month
-    const totalBilled = Math.max(0, totalBilledGross + currentDebitBilled - currentCreditBilled);
-
-    // totalCollected = sum of ALL payments for this month's invoices (keyed by invoice, not payment date)
-    // For invoices using the payments table → use payments rows
-    // For legacy invoices NOT using payments table → use amount_paid field (no double-count)
-    const paymentsTableTotal = allInvoicePayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
-    const legacyAmountPaidTotal = activeInvoices
-      .filter(inv => !inv.uses_payments_table)
-      .reduce((sum, inv) => sum + Number(inv.amount_paid || 0), 0);
-    const totalCollected = Math.max(0, paymentsTableTotal + legacyAmountPaidTotal);
-
-    const outstanding = Math.max(0, totalBilled - totalCollected);
-    const collectionRate = totalBilled > 0 ? Math.min(100, (totalCollected / totalBilled) * 100) : 0;
-
     const { data: prevInvoices } = await supabase
       .from('invoices')
       .select('id, total, amount_paid, status, uses_payments_table')
@@ -148,7 +128,23 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // (Section 1 computed above after fetching allInvoicePayments)
+    // --- Section 1: Sales Summary ---
+    const totalInvoicesSent = activeInvoices.length;
+
+    // totalBilled = gross invoice face value + debit notes - credit notes
+    const totalBilledGross = activeInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0);
+    const totalBilled = Math.max(0, totalBilledGross + currentDebitBilled - currentCreditBilled);
+
+    // totalCollected = sum of ALL payments for this month's invoices (keyed by invoice, not payment date)
+    const paymentsTableTotal = allInvoicePayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+    const legacyAmountPaidTotal = activeInvoices
+      .filter(inv => !inv.uses_payments_table)
+      .reduce((sum, inv) => sum + Number(inv.amount_paid || 0), 0);
+    const totalCollected = Math.max(0, paymentsTableTotal + legacyAmountPaidTotal);
+
+    const outstanding = Math.max(0, totalBilled - totalCollected);
+    const collectionRate = totalBilled > 0 ? Math.min(100, (totalCollected / totalBilled) * 100) : 0;
+
 
     // --- Section 8: Comparison ---
     const prevInvoicesCount = prevActiveInvoices.length;
