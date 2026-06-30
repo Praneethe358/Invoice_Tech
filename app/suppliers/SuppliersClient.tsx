@@ -9,6 +9,7 @@ import Button from '@/components/Button';
 import Input from '@/components/Input';
 import { useToast } from '@/components/Toast';
 import { Supplier, Shop } from '@/lib/types';
+import { getShopPlaceholders } from '@/lib/starter-catalogs';
 
 interface Props {
   shop: Shop;
@@ -18,6 +19,7 @@ interface Props {
 export default function SuppliersClient({ shop, initialSuppliers }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
+  const placeholders = getShopPlaceholders(shop.shop_type);
 
   const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
   const [searchQuery, setSearchQuery] = useState('');
@@ -389,7 +391,7 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. TAMIL NADU FERTILIZERS"
+                    placeholder={placeholders.supplierName}
                     value={name}
                     onChange={(e) => setName(e.target.value.toUpperCase())}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#0050e8] focus:ring-1 focus:ring-[#0050e8]/20 transition-all"

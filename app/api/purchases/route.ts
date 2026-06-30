@@ -1,24 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { sanitizeText } from '@/lib/sanitize';
+import { getCurrentUserContext } from '@/lib/current-user';
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const context = await getCurrentUserContext(supabase);
 
-    if (authError || !user) {
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { data: shop, error: shopError } = await supabase
       .from('shops')
       .select('id')
-      .eq('auth_user_id', user.id)
+      .eq('id', context.shopId)
       .single();
 
     if (shopError || !shop) {
@@ -67,19 +65,16 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const context = await getCurrentUserContext(supabase);
 
-    if (authError || !user) {
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { data: shop, error: shopError } = await supabase
       .from('shops')
       .select('id, inventory_enabled, gst_registered')
-      .eq('auth_user_id', user.id)
+      .eq('id', context.shopId)
       .single();
 
     if (shopError || !shop) {

@@ -12,13 +12,9 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
 
-    // Authenticate
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const context = await getCurrentUserContext(supabase);
 
-    if (authError || !user) {
+    if (!context) {
       return NextResponse.json(
         { error: 'Unauthorized' } satisfies ApiError,
         { status: 401 }
@@ -48,7 +44,7 @@ export async function POST(request: NextRequest) {
     const { data: shop, error: shopError } = await supabase
       .from('shops')
       .select('id, invoice_prefix, next_invoice_number, gst_registered, subscription_status, trial_ends_at, subscription_ends_at, shop_type')
-      .eq('auth_user_id', user.id)
+      .eq('id', context.shopId)
       .single();
 
     if (shopError || !shop) {
@@ -171,7 +167,7 @@ export async function POST(request: NextRequest) {
       p_total_gst: Number(totalGst.toFixed(2)),
       p_total: Number(total.toFixed(2)),
       p_status: status,
-      p_user_id: user.id,
+      p_user_id: context.userId,
     });
 
     if (rpcError) {

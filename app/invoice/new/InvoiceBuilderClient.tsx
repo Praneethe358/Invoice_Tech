@@ -361,7 +361,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
     setItems((prev) =>
       prev.map((item) => {
         let finalPrice = item.price;
-        const isWholesale = pricingMode === 'wholesale' || selectedCustomer?.price_tier === 'wholesale';
+        const isWholesale = pricingMode === 'wholesale';
         
         if (item.variant_id) {
           const v = variants.find((val) => val.id === item.variant_id);
@@ -415,7 +415,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
   const addOrIncrement = useCallback(
     (name: string, price: number, hsn_code?: string | null, gst_rate?: number, variant_id?: string | null) => {
       let finalPrice = price;
-      const isWholesale = pricingMode === 'wholesale' || selectedCustomer?.price_tier === 'wholesale';
+      const isWholesale = pricingMode === 'wholesale';
       if (isWholesale) {
         if (variant_id) {
           const v = variants.find((val) => val.id === variant_id);
@@ -951,9 +951,9 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* LEFT COLUMN: Catalog / Item Selector */}
-          <div className={`lg:col-span-6 xl:col-span-7 space-y-6 ${mobileActiveTab === 'catalog' ? 'block' : 'hidden lg:block'}`}>
+          <div className={`lg:col-span-6 xl:col-span-7 space-y-6 ${mobileActiveTab === 'catalog' ? 'block' : 'hidden lg:block'} lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-2`}>
             {/* Products Header & Search */}
             <div className="space-y-4">
               <h2 className="text-xs font-black text-slate-500 uppercase tracking-wider">
@@ -1625,7 +1625,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
           </div>
 
           {/* RIGHT COLUMN: Invoice Builder Panel */}
-          <div className={`lg:col-span-6 xl:col-span-5 space-y-6 ${mobileActiveTab === 'checkout' ? 'block' : 'hidden lg:block'}`}>
+          <div className={`lg:col-span-6 xl:col-span-5 space-y-6 ${mobileActiveTab === 'checkout' ? 'block' : 'hidden lg:block'} lg:sticky lg:top-24 lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-2`}>
             {/* Customer Details Form */}
             <section className="bg-white rounded-2xl border border-[#e5e7eb] p-4 space-y-4 shadow-2xs">
               <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide">

@@ -153,6 +153,22 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined' && window.performance && window.performance.measure) {
+                const originalMeasure = window.performance.measure;
+                window.performance.measure = function (measureName, startMark, endMark) {
+                  try {
+                    return originalMeasure.call(window.performance, measureName, startMark, endMark);
+                  } catch (e) {
+                    return null;
+                  }
+                };
+              }
+            `,
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

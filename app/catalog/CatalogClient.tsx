@@ -14,6 +14,7 @@ import { Shop, Product, ProductVariant } from '@/lib/types';
 import BarcodeScannerModal from '@/components/BarcodeScannerModal';
 import { playBeep, triggerHaptic } from '@/lib/sound';
 import { sanitizeVariantField } from '@/lib/sanitize';
+import { getShopPlaceholders } from '@/lib/starter-catalogs';
 
 interface Props {
   shop: Shop;
@@ -28,6 +29,7 @@ export default function CatalogClient({
 }: Props) {
   const supabase = useMemo(() => createClient(), []);
   const { showToast } = useToast();
+  const placeholders = getShopPlaceholders(shop.shop_type);
 
   const fireEvent = async (type: string, metadata: Record<string, any>) => {
     try {
@@ -1359,7 +1361,7 @@ export default function CatalogClient({
               {/* Add category form */}
               <div className="flex gap-2 mb-6 max-w-md">
                 <Input
-                  placeholder="e.g. Sandals, Sports Shoes"
+                  placeholder={placeholders.categoryName}
                   value={newCategoryInput}
                   onChange={(e) => setNewCategoryInput(e.target.value)}
                   className="text-xs"
@@ -1569,7 +1571,7 @@ export default function CatalogClient({
                       Product Name *
                     </label>
                     <Input
-                      placeholder="e.g. MEN'S SPORTS RUNNING SHOES"
+                      placeholder={placeholders.productName}
                       required
                       value={prodName}
                       onChange={(e) => setProdName(e.target.value)}
@@ -1756,7 +1758,7 @@ export default function CatalogClient({
                       </span>
                     </label>
                     <Input
-                      placeholder="e.g. 6403 (Footwear HSN)"
+                      placeholder={placeholders.hsnCode}
                       value={prodHsn}
                       onChange={(e) => setProdHsn(e.target.value)}
                       className="text-xs"
@@ -1895,7 +1897,7 @@ export default function CatalogClient({
                               </label>
                               <input
                                 type="text"
-                                placeholder="e.g. S, M, L, XL, XXL"
+                                placeholder={placeholders.variantSize}
                                 className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 font-bold"
                                 value={bulkSizes}
                                 onChange={(e) => setBulkSizes(e.target.value)}
@@ -1911,7 +1913,7 @@ export default function CatalogClient({
                             </label>
                             <input
                               type="text"
-                              placeholder="e.g. White, Light Blue, Grey, Black"
+                              placeholder={placeholders.variantColor}
                               className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500 font-bold"
                               value={bulkColors}
                               onChange={(e) => setBulkColors(e.target.value)}
@@ -2032,7 +2034,7 @@ export default function CatalogClient({
                               <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Size *</label>
                               <input
                                 type="text"
-                                placeholder="e.g. 7, 8, 9, UK8"
+                                placeholder={placeholders.variantSize}
                                 className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
                                 value={newVarSize}
                                 onChange={(e) => setNewVarSize(e.target.value)}
@@ -2046,7 +2048,7 @@ export default function CatalogClient({
                             <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Color *</label>
                             <input
                               type="text"
-                              placeholder="e.g. Black, Brown"
+                              placeholder={placeholders.variantColor}
                               className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-hidden focus:ring-1 focus:ring-blue-500"
                               value={newVarColor}
                               onChange={(e) => setNewVarColor(e.target.value)}

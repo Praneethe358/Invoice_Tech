@@ -116,12 +116,13 @@ export default function SignupPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  // Redirect to dashboard if user is logged in and already has a shop
+  // Redirect to dashboard if user is logged in and already has a shop or is active staff
   useEffect(() => {
-    const checkExistingShop = async () => {
+    const checkExistingShopOrStaff = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        // Check if owner
         const { data: shop } = await supabase
           .from('shops')
           .select('id')
@@ -129,10 +130,22 @@ export default function SignupPage() {
           .single();
         if (shop) {
           router.push('/dashboard');
+          return;
+        }
+
+        // Check if active staff
+        const { data: staff } = await supabase
+          .from('staff')
+          .select('id')
+          .eq('auth_user_id', user.id)
+          .eq('status', 'active')
+          .single();
+        if (staff) {
+          router.push('/dashboard');
         }
       }
     };
-    checkExistingShop();
+    checkExistingShopOrStaff();
   }, [router]);
 
   // Step 1: Basic Info

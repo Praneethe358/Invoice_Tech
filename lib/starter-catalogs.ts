@@ -232,3 +232,121 @@ export const FOOTWEAR_STARTER_VARIANTS: StarterVariant[] = [
   { product_name: 'Shoe Accessories', size: 'Universal', color: 'Black', sku: 'A-ACC-BLK-U', stock_qty: 25 },
   { product_name: 'Shoe Accessories', size: 'Universal', color: 'White', sku: 'A-ACC-WHT-U', stock_qty: 25 },
 ];
+
+export interface ShopPlaceholderConfig {
+  productName: string;
+  hsnCode: string;
+  categoryName: string;
+  supplierName: string;
+  variantSize: string;
+  variantColor: string;
+  returnRemarks: string;
+}
+
+export const SHOP_PLACEHOLDERS: Record<ShopType, ShopPlaceholderConfig> = {
+  clothing: {
+    productName: "e.g. COTTON SAREE",
+    hsnCode: "e.g. 5208 (Cotton Fabric)",
+    categoryName: "e.g. Sarees, Shirts",
+    supplierName: "e.g. SURAT TEXTILES MILL",
+    variantSize: "e.g. S, M, L, XL, XXL",
+    variantColor: "e.g. Red, Blue, Green",
+    returnRemarks: "e.g. Return of 2 metres damaged fabric"
+  },
+  footwear: {
+    productName: "e.g. MEN'S SPORTS RUNNING SHOES",
+    hsnCode: "e.g. 6403 (Footwear HSN)",
+    categoryName: "e.g. Sandals, Sports Shoes",
+    supplierName: "e.g. BALAJI LEATHER CO.",
+    variantSize: "e.g. 7, 8, 9, UK8",
+    variantColor: "e.g. Black, Brown",
+    returnRemarks: "e.g. Return of 1 pair defective shoes"
+  },
+  food: {
+    productName: "e.g. CHICKEN BIRYANI",
+    hsnCode: "e.g. 9963 (Restaurant HSN)",
+    categoryName: "e.g. Starters, Main Course",
+    supplierName: "e.g. METRO CASH & CARRY",
+    variantSize: "e.g. Regular, Large, Family Pack",
+    variantColor: "e.g. Spicy, Medium, Mild",
+    returnRemarks: "e.g. Return of stale ingredient supplies"
+  },
+  grocery: {
+    productName: "e.g. BASMATI RICE 5KG",
+    hsnCode: "e.g. 1006 (Rice HSN)",
+    categoryName: "e.g. Rice, Grains, Oils",
+    supplierName: "e.g. WHOLESALE FOOD DISTRIBUTORS",
+    variantSize: "e.g. 1kg, 5kg, 10kg",
+    variantColor: "e.g. Standard",
+    returnRemarks: "e.g. Return of expired bags"
+  },
+  pharmacy: {
+    productName: "e.g. PARACETAMOL 650MG",
+    hsnCode: "e.g. 3004 (Medicines HSN)",
+    categoryName: "e.g. Tablets, Syrups, First Aid",
+    supplierName: "e.g. SUN PHARMA DISTRIBUTORS",
+    variantSize: "e.g. 10 Tablets, 100ml",
+    variantColor: "e.g. Standard",
+    returnRemarks: "e.g. Return of expired batch"
+  },
+  hardware: {
+    productName: "e.g. PVC PIPE 3 INCH",
+    hsnCode: "e.g. 3917 (PVC HSN)",
+    categoryName: "e.g. Pipes, Cement, Tools",
+    supplierName: "e.g. SHREE CEMENT LTD",
+    variantSize: "e.g. 10ft, 20ft",
+    variantColor: "e.g. Grey, White",
+    returnRemarks: "e.g. Return of cracked pipes"
+  },
+  electronics: {
+    productName: "e.g. USB TYPE-C CABLE",
+    hsnCode: "e.g. 8544 (Cables HSN)",
+    categoryName: "e.g. Accessories, Chargers",
+    supplierName: "e.g. REDMI DISTRIBUTORS",
+    variantSize: "e.g. 1m, 2m",
+    variantColor: "e.g. Black, White, Red",
+    returnRemarks: "e.g. Return of non-functional charger"
+  },
+  salon: {
+    productName: "e.g. HAIR CUT & STYLING",
+    hsnCode: "e.g. 9982 (Salon Services)",
+    categoryName: "e.g. Hair Care, Skin Care",
+    supplierName: "e.g. LOREAL PROFESSIONNEL",
+    variantSize: "e.g. Short, Medium, Long",
+    variantColor: "e.g. Natural Black, Brown",
+    returnRemarks: "e.g. Return of unused cosmetic kits"
+  },
+  tailoring: {
+    productName: "e.g. SUIT STITCHING SERVICE",
+    hsnCode: "e.g. 9988 (Tailoring HSN)",
+    categoryName: "e.g. Stitching, Alterations",
+    supplierName: "e.g. BOMBAY DYEING MILL",
+    variantSize: "e.g. Standard Fit, Custom Fit",
+    variantColor: "e.g. Black, Blue, Grey",
+    returnRemarks: "e.g. Return of extra unused threads"
+  },
+  fertilizer: {
+    productName: "e.g. UREA 50KG",
+    hsnCode: "e.g. 3102 (Urea HSN)",
+    categoryName: "e.g. Fertilizers, Pesticides",
+    supplierName: "e.g. IFFCO FERTILIZERS LTD",
+    variantSize: "e.g. 50kg, 10kg",
+    variantColor: "e.g. Standard",
+    returnRemarks: "e.g. Return of 2 bags Urea"
+  },
+  other: {
+    productName: "e.g. GENERAL ITEM",
+    hsnCode: "e.g. 0000",
+    categoryName: "e.g. General",
+    supplierName: "e.g. APEX SUPPLIERS",
+    variantSize: "e.g. S, M, L",
+    variantColor: "e.g. Standard",
+    returnRemarks: "e.g. Return of damaged goods"
+  }
+};
+
+export function getShopPlaceholders(shopType?: string): ShopPlaceholderConfig {
+  const type = (shopType || 'other') as ShopType;
+  return SHOP_PLACEHOLDERS[type] || SHOP_PLACEHOLDERS.other;
+}
+

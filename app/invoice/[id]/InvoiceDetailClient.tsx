@@ -9,6 +9,7 @@ import Button from '@/components/Button';
 import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
 import { Invoice, Shop, PaymentStatus, Payment } from '@/lib/types';
+import { getShopPlaceholders } from '@/lib/starter-catalogs';
 
 interface Props {
   invoice: Invoice;
@@ -19,6 +20,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { showToast } = useToast();
+  const placeholders = getShopPlaceholders(shop.shop_type);
   const [inv, setInv] = useState<Invoice>(invoice);
 
   const [resending, setResending] = useState(false);
@@ -942,7 +944,7 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
                           type="text"
                           value={noteRemarks}
                           onChange={(e) => setNoteRemarks(e.target.value)}
-                          placeholder="e.g. Return of 2 bags Urea"
+                          placeholder={placeholders.returnRemarks}
                           className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-xl px-3 py-2 text-xs font-medium text-[#111827] focus:outline-none"
                         />
                       </div>

@@ -43,30 +43,61 @@ export async function POST(
       );
     }
 
-    // Create Supabase auth user
-    const { data: authData, error: authError } = await admin.auth.admin.createUser({
-      email: staff.email,
-      password,
-      email_confirm: true,
-      user_metadata: {
-        name: name?.trim() || staff.name,
-        is_staff: true,
-      },
-    });
+    let authUserId: string;
 
-    if (authError) {
-      // If user already exists, try to find them
-      if (authError.message?.includes('already been registered') || authError.message?.includes('already exists')) {
+    // Check if user already exists in auth
+    const { data: existingAuthData } = await admin.auth.admin.getUserByEmail(staff.email);
+    const existingAuthUser = existingAuthData?.user;
+
+    if (existingAuthUser) {
+      // User exists, verify password using a standard client
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+      const { createClient: createSupabaseClient } = await import('@supabase/supabase-js');
+      const verifyClient = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+
+      const { error: signInError } = await verifyClient.auth.signInWithPassword({
+        email: staff.email,
+        password,
+      });
+
+      if (signInError) {
         return NextResponse.json(
-          { error: 'An account with this email already exists. Please use "Sign In with Existing Account" instead.' },
-          { status: 409 }
+          { error: 'Invalid password for this account. Please verify your credentials.' },
+          { status: 401 }
         );
       }
-      console.error('Create user error:', authError);
-      return NextResponse.json({ error: authError.message }, { status: 500 });
-    }
 
-    const authUserId = authData.user.id;
+      authUserId = existingAuthUser.id;
+
+      // Update their metadata to set is_staff: true
+      await admin.auth.admin.updateUserById(authUserId, {
+        user_metadata: {
+          ...existingAuthUser.user_metadata,
+          name: name?.trim() || staff.name,
+          is_staff: true,
+        }
+      });
+    } else {
+      // Create Supabase auth user
+      const { data: authData, error: authError } = await admin.auth.admin.createUser({
+        email: staff.email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          name: name?.trim() || staff.name,
+          is_staff: true,
+        },
+      });
+
+      if (authError) {
+        console.error('Create user error:', authError);
+        return NextResponse.json({ error: authError.message }, { status: 500 });
+      }
+      authUserId = authData.user.id;
+    }
 
     // Check if this user is already staff at another shop
     const { data: existingStaff } = await admin

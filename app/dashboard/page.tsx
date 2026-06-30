@@ -1,24 +1,22 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { Invoice, Shop } from '@/lib/types';
+import { getCurrentUserContext } from '@/lib/current-user';
 import DashboardClient from './DashboardClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
+  const context = await getCurrentUserContext(supabase);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect('/login');
+  if (!context) redirect('/login');
 
   // Fetch shop
   const { data: shop } = await supabase
     .from('shops')
     .select('*')
-    .eq('auth_user_id', user.id)
+    .eq('id', context.shopId)
     .single();
 
   if (!shop) redirect('/signup');
