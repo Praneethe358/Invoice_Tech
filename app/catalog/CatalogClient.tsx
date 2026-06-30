@@ -2105,7 +2105,7 @@ export default function CatalogClient({
                               <button
                                 type="button"
                                 onClick={() => setIsNewVarSkuScannerOpen(true)}
-                                className="bg-slate-100 hover:bg-slate-200 border rounded-lg px-2 flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                                className="md:hidden bg-slate-100 hover:bg-slate-200 border rounded-lg px-2 flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-xs"
                                 title="Scan Barcode"
                                 disabled={!!editingVariant}
                               >
