@@ -10,6 +10,7 @@ import {
   renderToBuffer,
 } from '@react-pdf/renderer';
 import { createClient } from '@/lib/supabase/server';
+import { getCurrentUserContext } from '@/lib/current-user';
 
 // ─── Styles matching brand theme ──────────────────────────────
 const GREEN = '#0050e8';
@@ -376,12 +377,8 @@ export async function GET(
     const endDateParam = searchParams.get('end_date');
 
     // 1. Authenticate user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const context = await getCurrentUserContext(supabase);
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -396,8 +393,7 @@ export async function GET(
       return NextResponse.json({ error: 'Customer not found' }, { status: 404 });
     }
 
-    const shopOwnerId = (customer.shops as any)?.auth_user_id;
-    if (shopOwnerId !== user.id) {
+    if (customer.shop_id !== context.shopId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

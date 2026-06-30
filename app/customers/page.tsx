@@ -1,23 +1,21 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { Customer, Shop } from '@/lib/types';
+import { getCurrentUserContext } from '@/lib/current-user';
 import CustomersClient from './CustomersClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function CustomersPage() {
   const supabase = await createClient();
+  const context = await getCurrentUserContext(supabase);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect('/login');
+  if (!context) redirect('/login');
 
   const { data: shop } = await supabase
     .from('shops')
     .select('*')
-    .eq('auth_user_id', user.id)
+    .eq('id', context.shopId)
     .single();
 
   if (!shop) redirect('/signup');

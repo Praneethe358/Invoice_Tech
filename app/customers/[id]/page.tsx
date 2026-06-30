@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { Customer, Invoice, Shop } from '@/lib/types';
+import { getCurrentUserContext } from '@/lib/current-user';
 import CustomerDetailClient from './CustomerDetailClient';
 import { Metadata } from 'next';
 
@@ -34,12 +35,9 @@ export default async function CustomerDetailPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
+  const context = await getCurrentUserContext(supabase);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect('/login');
+  if (!context) redirect('/login');
 
   const { data: customer } = await supabase
     .from('customers')
@@ -55,7 +53,7 @@ export default async function CustomerDetailPage({
     .eq('id', customer.shop_id)
     .single();
 
-  if (!shop || shop.auth_user_id !== user.id) {
+  if (!shop || shop.id !== context.shopId) {
     redirect('/customers');
   }
 
