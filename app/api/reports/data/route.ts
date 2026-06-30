@@ -42,13 +42,6 @@ export async function GET(request: NextRequest) {
     const activeInvoices = (invoices || []).filter(inv => ['saved', 'sent'].includes(inv.status));
     const failedInvoices = (invoices || []).filter(inv => inv.status === 'failed');
 
-    // Payments current month
-    const { data: payments } = await supabase
-      .from('payments')
-      .select('amount, payment_method, invoice_id')
-      .eq('shop_id', shop.id)
-      .gte('paid_at', startDateStr)
-      .lte('paid_at', endDateStr);
 
     // Fetch Credit & Debit Notes for the current month
     const { data: cdNotes } = await supabase
@@ -94,20 +87,14 @@ export async function GET(request: NextRequest) {
 
     const { data: prevInvoices } = await supabase
       .from('invoices')
-      .select('total, amount_paid, status, uses_payments_table')
+      .select('id, total, amount_paid, status, uses_payments_table')
       .eq('shop_id', shop.id)
       .gte('created_at', prevStartDateStr)
       .lte('created_at', prevEndDateStr);
 
     const prevActiveInvoices = (prevInvoices || []).filter(inv => ['saved', 'sent'].includes(inv.status));
 
-    // Previous month payments
-    const { data: prevPayments } = await supabase
-      .from('payments')
-      .select('amount')
-      .eq('shop_id', shop.id)
-      .gte('paid_at', prevStartDateStr)
-      .lte('paid_at', prevEndDateStr);
+
 
     // Fetch Credit & Debit Notes for the previous month
     const { data: prevCdNotes } = await supabase
@@ -168,7 +155,7 @@ export async function GET(request: NextRequest) {
     const prevBilled = Math.max(0, prevActiveInvoices.reduce((sum, inv) => sum + Number(inv.total || 0), 0) + prevDebitBilled - prevCreditBilled);
 
     // Fetch ALL payments for prev month's active invoices (invoice-keyed, not date-keyed)
-    const prevActiveInvoiceIds = prevActiveInvoices.map((i: any) => (i as any).id);
+    const prevActiveInvoiceIds = prevActiveInvoices.map((i: any) => i.id);
     let prevAllInvoicePayments: Array<{ amount: string | number }> = [];
     if (prevActiveInvoiceIds.length > 0) {
       const { data: prevInvPayments } = await supabase

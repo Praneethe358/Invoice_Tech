@@ -422,6 +422,22 @@ export default function ReportsClient({ shop, userName }: ReportsClientProps) {
             </div>
             <div className="bg-white border border-[#e5e7eb] rounded-none p-6 h-96 animate-pulse" />
           </div>
+        ) : !data ? (
+          <div className="bg-white border border-[#e5e7eb] rounded-none p-10 text-center">
+            <svg className="mx-auto mb-4 text-slate-300" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <p className="text-sm font-bold text-slate-700 mb-1">Failed to load report data</p>
+            <p className="text-xs text-slate-400 mb-4">Please check your connection and try again.</p>
+            <button
+              onClick={fetchReportData}
+              className="bg-[#0050e8] hover:bg-[#0043c4] text-white text-xs font-bold px-5 py-2 rounded-lg transition-all"
+            >
+              Retry
+            </button>
+          </div>
         ) : (
           <div className="space-y-8">
             {/* SECTION 1 — Sales Summary */}
