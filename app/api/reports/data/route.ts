@@ -11,6 +11,9 @@ export async function GET(request: NextRequest) {
   try {
     const context = await getCurrentUserContext(supabase);
     if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (context.role !== 'owner' && context.role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     const { data: shop } = await supabase.from('shops').select('*').eq('id', context.shopId).single();
     if (!shop) return NextResponse.json({ error: 'Shop not found' }, { status: 404 });

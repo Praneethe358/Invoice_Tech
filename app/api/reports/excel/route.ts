@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getCurrentUserContext } from '@/lib/current-user';
 import * as XLSX from 'xlsx';
 
 const MONTHS = [
@@ -14,10 +15,13 @@ export async function GET(request: NextRequest) {
   const year = parseInt(searchParams.get('year') || String(new Date().getFullYear()), 10);
 
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const context = await getCurrentUserContext(supabase);
+    if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (context.role !== 'owner' && context.role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
-    const { data: shop } = await supabase.from('shops').select('*').eq('auth_user_id', user.id).single();
+    const { data: shop } = await supabase.from('shops').select('*').eq('id', context.shopId).single();
     if (!shop) return NextResponse.json({ error: 'Shop not found' }, { status: 404 });
 
     // Call local server endpoint to fetch the reports JSON data directly

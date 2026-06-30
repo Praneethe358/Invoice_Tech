@@ -11,6 +11,11 @@ export default async function GstHubPage() {
     redirect('/login');
   }
 
+  // Only owner and admin can access GST Compliance
+  if (context.role !== 'owner' && context.role !== 'admin') {
+    redirect('/dashboard');
+  }
+
   const { data: shop } = await supabase
     .from('shops')
     .select('*')

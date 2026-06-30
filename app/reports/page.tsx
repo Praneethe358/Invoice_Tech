@@ -13,6 +13,11 @@ export default async function ReportsPage() {
     redirect('/login');
   }
 
+  // Only owner and admin can access Reports
+  if (context.role !== 'owner' && context.role !== 'admin') {
+    redirect('/dashboard');
+  }
+
   const { data: shop } = await supabase
     .from('shops')
     .select('*')
