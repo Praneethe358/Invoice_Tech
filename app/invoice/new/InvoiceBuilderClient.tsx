@@ -552,6 +552,11 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
     let lastKeyTime = 0;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Filter out modifier keys explicitly at the very top of listener
+      if (e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt') {
+        return; // Skip modifier keys, wait for the actual alphanumeric value
+      }
+
       const target = e.target as HTMLElement;
       const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
 
@@ -559,13 +564,27 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
       const delay = currentTime - lastKeyTime;
       lastKeyTime = currentTime;
 
-      if (delay > 50) {
+      // Fix: If it's the first character in a while, don't wipe it; start the buffer!
+      if (buffer.length > 0 && delay > 75) {
         buffer = '';
       }
 
       // Block scanner keystrokes from polluting inputs
-      if (isInput && delay < 50 && e.key.length === 1) {
+      if (isInput && (delay < 75 || buffer.length > 0) && e.key.length === 1) {
         e.preventDefault();
+
+        // If this is the second character and it arrived fast, the first character must have leaked.
+        // Let's remove the leaked first character from the input element value.
+        if (delay < 75 && buffer.length === 1) {
+          const input = target as HTMLInputElement | HTMLTextAreaElement;
+          const val = input.value;
+          const firstChar = buffer[0];
+          if (val && val.endsWith(firstChar)) {
+            input.value = val.slice(0, -1);
+            // Dispatch input event to ensure React state updates correctly
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        }
       }
 
       if (e.key === 'Enter') {
