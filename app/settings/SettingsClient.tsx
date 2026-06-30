@@ -31,6 +31,7 @@ export default function SettingsClient({
   const { showToast } = useToast();
 
   // ─── Shop Details ─────────────────────────────────────────
+  const [ownerName, setOwnerName] = useState('');
   const [shopName, setShopName] = useState(shop.name);
   const [shopAddress, setShopAddress] = useState(
     shop.address || ''
@@ -58,6 +59,17 @@ export default function SettingsClient({
       }
     }
   }, [gstin, gstRegistered]);
+
+  // Load owner details on mount
+  useEffect(() => {
+    const fetchOwnerDetails = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setOwnerName(user.user_metadata?.owner_name || user.user_metadata?.full_name || user.email?.split('@')[0] || '');
+      }
+    };
+    fetchOwnerDetails();
+  }, [supabase]);
 
   const config = SHOP_CONFIG[shop.shop_type as ShopType] || SHOP_CONFIG.other;
   const isInventoryAllowed = config.inventoryEnabled || shop.shop_type === 'other';
@@ -211,6 +223,16 @@ export default function SettingsClient({
     if (error) {
       showToast('Failed to update shop details', 'error');
     } else {
+      if (canEditShop && ownerName.trim()) {
+        const { error: authError } = await supabase.auth.updateUser({
+          data: { owner_name: ownerName.trim() }
+        });
+        if (authError) {
+          console.error('Failed to update owner name in Auth:', authError);
+        } else {
+          localStorage.setItem('trubill_navbar_user_name', ownerName.trim());
+        }
+      }
       showToast('Shop details updated', 'success');
       router.refresh();
     }
@@ -388,6 +410,13 @@ export default function SettingsClient({
               </div>
             </div>
 
+            <Input
+              label="Owner Name"
+              value={ownerName}
+              onChange={(e) => setOwnerName(e.target.value)}
+              required
+              disabled={!canEditShop}
+            />
             <Input
               label="Shop Name"
               value={shopName}
