@@ -46,8 +46,8 @@ export async function POST(
     let authUserId: string;
 
     // Check if user already exists in auth
-    const { data: existingAuthData } = await admin.auth.admin.getUserByEmail(staff.email);
-    const existingAuthUser = existingAuthData?.user;
+    const { data: { users } } = await admin.auth.admin.listUsers({ perPage: 1000 });
+    const existingAuthUser = users?.find((u) => u.email?.toLowerCase() === staff.email.toLowerCase());
 
     if (existingAuthUser) {
       // User exists, verify password using a standard client
