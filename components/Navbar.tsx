@@ -283,7 +283,7 @@ export default function Navbar({ initialShop, initialRole, initialUserName }: Na
           .single();
 
         let resolvedRole: UserRole = 'owner';
-        let resolvedName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Owner';
+        let resolvedName = user.user_metadata?.owner_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Owner';
 
         if (shop) {
           resolvedRole = 'owner';
@@ -298,7 +298,7 @@ export default function Navbar({ initialShop, initialRole, initialUserName }: Na
 
           if (staff) {
             resolvedRole = staff.role as UserRole;
-            resolvedName = staff.name || user.email?.split('@')[0] || 'Staff';
+            resolvedName = staff.name || user.user_metadata?.owner_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Staff';
             const staffShop = staff.shops as any;
             if (staffShop) {
               shop = {

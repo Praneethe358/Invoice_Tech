@@ -66,7 +66,7 @@ export default function DashboardClient({
               .eq('auth_user_id', user.id)
               .eq('status', 'active')
               .single();
-            const name = staff?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+            const name = staff?.name || user.user_metadata?.owner_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
             setUserNameState(name);
             localStorage.setItem('trubill_navbar_user_name', name);
           }

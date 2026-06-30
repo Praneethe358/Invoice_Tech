@@ -43,7 +43,7 @@ export async function getCurrentUserContext(
         userId: user.id,
         shopId: shop.id,
         role: 'owner',
-        name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Owner',
+        name: user.user_metadata?.owner_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Owner',
         isOwner: true,
       };
     }
@@ -61,7 +61,7 @@ export async function getCurrentUserContext(
         userId: user.id,
         shopId: staff.shop_id,
         role: staff.role as UserRole,
-        name: staff.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Staff',
+        name: staff.name || user.user_metadata?.owner_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Staff',
         isOwner: false,
         staffId: staff.id,
       };
