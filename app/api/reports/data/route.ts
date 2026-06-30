@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getCurrentUserContext } from '@/lib/current-user';
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -8,10 +9,10 @@ export async function GET(request: NextRequest) {
   const year = parseInt(searchParams.get('year') || String(new Date().getFullYear()), 10);
 
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const context = await getCurrentUserContext(supabase);
+    if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { data: shop } = await supabase.from('shops').select('*').eq('auth_user_id', user.id).single();
+    const { data: shop } = await supabase.from('shops').select('*').eq('id', context.shopId).single();
     if (!shop) return NextResponse.json({ error: 'Shop not found' }, { status: 404 });
 
     // Calculate dates

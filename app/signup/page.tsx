@@ -127,7 +127,7 @@ export default function SignupPage() {
           .from('shops')
           .select('id')
           .eq('auth_user_id', user.id)
-          .single();
+          .maybeSingle();
         if (shop) {
           router.push('/dashboard');
           return;
@@ -139,7 +139,7 @@ export default function SignupPage() {
           .select('id')
           .eq('auth_user_id', user.id)
           .eq('status', 'active')
-          .single();
+          .maybeSingle();
         if (staff) {
           router.push('/dashboard');
         }

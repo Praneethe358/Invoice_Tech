@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from '@react-pdf/renderer';
-
+import { getCurrentUserContext } from '@/lib/current-user';
 const GREEN = '#0050e8';
 const LIGHT_GREEN = '#e6efff';
 const TEXT_DARK = '#1f2937';
@@ -124,10 +124,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const endDate = searchParams.get('end_date');
 
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const context = await getCurrentUserContext(supabase);
+    if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { data: shop } = await supabase.from('shops').select('*').eq('auth_user_id', user.id).single();
+    const { data: shop } = await supabase.from('shops').select('*').eq('id', context.shopId).single();
     if (!shop) return NextResponse.json({ error: 'Shop not found' }, { status: 404 });
 
     const { data: supplier } = await supabase.from('suppliers').select('*').eq('id', id).eq('shop_id', shop.id).single();

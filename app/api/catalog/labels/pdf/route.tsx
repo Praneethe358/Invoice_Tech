@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import React from 'react';
 import { Document, Page, Text, View, Image, StyleSheet, renderToBuffer } from '@react-pdf/renderer';
+import { getCurrentUserContext } from '@/lib/current-user';
 
 const styles = StyleSheet.create({
   page: {
@@ -87,10 +88,10 @@ export async function GET(request: NextRequest) {
   const copiesParam = searchParams.get('copies') || '';
 
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const context = await getCurrentUserContext(supabase);
+    if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { data: shop } = await supabase.from('shops').select('*').eq('auth_user_id', user.id).single();
+    const { data: shop } = await supabase.from('shops').select('*').eq('id', context.shopId).single();
     if (!shop) return NextResponse.json({ error: 'Shop not found' }, { status: 404 });
 
     const variantIds = variantIdsParam.split(',').filter(Boolean);

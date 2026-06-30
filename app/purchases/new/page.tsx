@@ -1,26 +1,24 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { getCurrentUserContext } from '@/lib/current-user';
 import NewPurchaseClient from './NewPurchaseClient';
 
 export default async function NewPurchasePage() {
   const supabase = await createClient();
+  const context = await getCurrentUserContext(supabase);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  if (!context) {
     redirect('/login');
   }
 
   const { data: shop } = await supabase
     .from('shops')
     .select('*')
-    .eq('auth_user_id', user.id)
+    .eq('id', context.shopId)
     .single();
 
   if (!shop) {
-    redirect('/settings');
+    redirect('/signup');
   }
 
   // Fetch suppliers list
