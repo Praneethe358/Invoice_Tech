@@ -456,11 +456,46 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
     <div className="min-h-screen bg-[#f9fafb]">
       <Navbar initialShop={shop} />
 
-      <PageTransition className="w-full px-4 md:px-8 py-6 pb-24">
-        {/* Header / Back */}
+      <PageTransition className="w-full px-4 md:px-8 pt-6 md:pt-0 pb-24">
+        {/* Header with back button - Desktop only */}
+        <div className="hidden md:flex bg-white border border-[#e5e7eb] -mx-4 md:-mx-8 px-6 md:px-10 py-5 shadow-xs items-center justify-between mb-6 md:sticky md:top-0 md:z-30">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="flex items-center gap-2 text-sm font-semibold text-[#6b7280] hover:text-[#111827] transition-colors mr-2"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+              Back
+            </button>
+            <div className="w-10 h-10 rounded-none bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e5e7eb]">
+              {shop.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={shop.logo_url} alt="Shop Logo" className="w-full h-full object-cover" loading="lazy" />
+              ) : (
+                <div className="w-full h-full bg-[#0050e8] flex items-center justify-center text-white">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                </div>
+              )}
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 leading-tight">{shop.name}</h1>
+              <p className="text-[#6b7280] text-[10px] mt-0.5 font-medium">
+                Invoice Detail · {inv.invoice_number}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Header / Back - Mobile only */}
         <button
           onClick={() => router.push('/dashboard')}
-          className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#6b7280] hover:text-[#111827] transition-colors"
+          className="mb-6 md:hidden flex items-center gap-2 text-sm font-semibold text-[#6b7280] hover:text-[#111827] transition-colors"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="19" y1="12" x2="5" y2="12" />
