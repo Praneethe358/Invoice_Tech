@@ -20,12 +20,14 @@ interface Props {
   shop: Shop;
   initialProducts: Product[];
   initialVariants?: ProductVariant[];
+  userName?: string;
 }
 
 export default function CatalogClient({
   shop,
   initialProducts,
   initialVariants = [],
+  userName,
 }: Props) {
   const supabase = useMemo(() => createClient(), []);
   const { showToast } = useToast();
@@ -47,24 +49,36 @@ export default function CatalogClient({
   };
 
   const [mounted, setMounted] = useState(false);
-  const [userName, setUserName] = useState('');
+  const [userNameState, setUserNameState] = useState(userName || '');
   useEffect(() => {
     setMounted(true);
-    if (typeof window !== 'undefined') {
+    if (userName) {
+      setUserNameState(userName);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('trubill_navbar_user_name', userName);
+      }
+    } else if (typeof window !== 'undefined') {
       const storedName = localStorage.getItem('trubill_navbar_user_name');
       if (storedName) {
-        setUserName(storedName);
+        setUserNameState(storedName);
       } else {
         const supabaseClient = createClient();
-        supabaseClient.auth.getUser().then(({ data: { user } }) => {
+        supabaseClient.auth.getUser().then(async ({ data: { user } }) => {
           if (user) {
-            const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
-            setUserName(name);
+            const { data: staff } = await supabaseClient
+              .from('staff')
+              .select('name')
+              .eq('auth_user_id', user.id)
+              .eq('status', 'active')
+              .single();
+            const name = staff?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+            setUserNameState(name);
+            localStorage.setItem('trubill_navbar_user_name', name);
           }
         });
       }
     }
-  }, []);
+  }, [userName]);
 
   // Active Tab
   const [activeTab, setActiveTab] = useState<'products' | 'categories'>('products');
@@ -987,7 +1001,7 @@ export default function CatalogClient({
           <div className="text-right">
             <span className="text-[10px] font-bold text-[#6b7280] uppercase tracking-wider block">Logged In As</span>
             <p className="text-xs font-black text-[#0050e8] mt-0.5 truncate max-w-[180px]">
-              {userName || 'User'}
+              {userNameState || 'User'}
             </p>
             <p className="text-[10px] text-gray-500 font-semibold mt-0.5">
               Good {mounted ? (new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening') : 'day'}!

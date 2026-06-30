@@ -41,6 +41,7 @@ export default async function CatalogPage() {
       shop={shop as Shop}
       initialProducts={(products ?? []) as Product[]}
       initialVariants={initialVariants}
+      userName={context.name}
     />
   );
 }

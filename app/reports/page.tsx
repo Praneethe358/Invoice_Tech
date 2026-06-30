@@ -23,5 +23,5 @@ export default async function ReportsPage() {
     redirect('/signup');
   }
 
-  return <ReportsClient shop={shop} />;
+  return <ReportsClient shop={shop} userName={context.name} />;
 }

@@ -184,16 +184,28 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
 
   useEffect(() => {
     setMounted(true);
-    if (!activeUserName && typeof window !== 'undefined') {
+    if (userName) {
+      setActiveUserName(userName);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('trubill_navbar_user_name', userName);
+      }
+    } else if (typeof window !== 'undefined') {
       const storedName = localStorage.getItem('trubill_navbar_user_name');
       if (storedName) {
         setActiveUserName(storedName);
       } else {
         const supabaseClient = createClient();
-        supabaseClient.auth.getUser().then(({ data: { user } }) => {
+        supabaseClient.auth.getUser().then(async ({ data: { user } }) => {
           if (user) {
-            const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+            const { data: staff } = await supabaseClient
+              .from('staff')
+              .select('name')
+              .eq('auth_user_id', user.id)
+              .eq('status', 'active')
+              .single();
+            const name = staff?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
             setActiveUserName(name);
+            localStorage.setItem('trubill_navbar_user_name', name);
           }
         });
       }

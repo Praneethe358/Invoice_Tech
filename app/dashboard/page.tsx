@@ -84,6 +84,7 @@ export default async function DashboardPage() {
     <DashboardClient
       shop={typedShop}
       invoices={typedInvoices}
+      userName={context.name}
       stats={{
         totalInvoices,
         thisMonth,
