@@ -30,6 +30,20 @@ export function resolveBarcode(
     );
   }
 
+  // 2. Check product-level HSN code fallback for variants
+  if (!matchedVariant) {
+    const matchedProductByHsn = products.find(
+      (p) => p.hsn_code && p.hsn_code.replace(/[\s-]/g, '').toLowerCase() === trimmed
+    );
+
+    if (matchedProductByHsn) {
+      const defaultVariant = variants.find((v) => v.product_id === matchedProductByHsn.id);
+      if (defaultVariant) {
+        matchedVariant = defaultVariant;
+      }
+    }
+  }
+
   if (matchedVariant) {
     const parentProduct = products.find((p) => p.id === matchedVariant!.product_id);
     if (parentProduct) {
@@ -41,10 +55,16 @@ export function resolveBarcode(
     }
   }
 
-  // 2. Check base products directly by SKU/barcode
-  const matchedProduct = products.find(
+  // 3. Check base products directly by SKU/barcode or HSN code fallback
+  let matchedProduct = products.find(
     (p) => (p as any).sku && (p as any).sku.toLowerCase() === trimmed
   );
+
+  if (!matchedProduct) {
+    matchedProduct = products.find(
+      (p) => p.hsn_code && p.hsn_code.replace(/[\s-]/g, '').toLowerCase() === trimmed
+    );
+  }
 
   if (matchedProduct) {
     return {
