@@ -444,59 +444,59 @@ function InvoicePDF({
                   <Text>{item.name.toUpperCase()}</Text>
                   {itemDiscount > 0 ? (
                     <Text style={{ fontSize: 7, color: '#16a34a', fontFamily: 'Helvetica-Bold', marginTop: 1 }}>
-                      DISCOUNT: -₹{itemDiscount.toFixed(2)}
+                      DISCOUNT: -Rs. {itemDiscount.toFixed(2)}
                     </Text>
                   ) : null}
                 </View>
                 <Text style={styles.colQty}>{item.quantity}</Text>
-                <Text style={styles.colRate}>₹{Number(item.price).toFixed(2)}</Text>
-                <Text style={styles.colAmount}>₹{lineTotal.toFixed(2)}</Text>
+                <Text style={styles.colRate}>Rs. {Number(item.price).toFixed(2)}</Text>
+                <Text style={styles.colAmount}>Rs. {lineTotal.toFixed(2)}</Text>
               </View>
             );
           })}
         </View>
 
-        {/* Totals Summary */}
+         {/* Totals Summary */}
         <View style={styles.summaryContainer}>
           <View style={styles.summaryCard}>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Subtotal</Text>
-              <Text style={styles.summaryValue}>₹{baseSubtotalVal.toFixed(2)}</Text>
+              <Text style={styles.summaryValue}>Rs. {baseSubtotalVal.toFixed(2)}</Text>
             </View>
             {totalItemDiscountVal > 0 && (
               <View style={styles.summaryRow}>
                 <Text style={[styles.summaryLabel, { color: '#16a34a' }]}>Items Discount</Text>
-                <Text style={[styles.summaryValue, { color: '#16a34a' }]}>-₹{totalItemDiscountVal.toFixed(2)}</Text>
+                <Text style={[styles.summaryValue, { color: '#16a34a' }]}>-Rs. {totalItemDiscountVal.toFixed(2)}</Text>
               </View>
             )}
             {gstRegistered ? (
               <>
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>Taxable Subtotal</Text>
-                  <Text style={styles.summaryValue}>₹{subtotalVal.toFixed(2)}</Text>
+                  <Text style={styles.summaryValue}>Rs. {subtotalVal.toFixed(2)}</Text>
                 </View>
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>GST</Text>
-                  <Text style={styles.summaryValue}>₹{totalGstVal.toFixed(2)}</Text>
+                  <Text style={styles.summaryValue}>Rs. {totalGstVal.toFixed(2)}</Text>
                 </View>
               </>
             ) : (
               <>
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>GST (Inclusive)</Text>
-                  <Text style={styles.summaryValue}>₹0.00</Text>
+                  <Text style={styles.summaryValue}>Rs. 0.00</Text>
                 </View>
               </>
             )}
             {discount > 0 && (
               <View style={styles.summaryRow}>
                 <Text style={[styles.summaryLabel, { color: '#16a34a' }]}>Overall Discount</Text>
-                <Text style={[styles.summaryValue, { color: '#16a34a' }]}>-₹{discount.toFixed(2)}</Text>
+                <Text style={[styles.summaryValue, { color: '#16a34a' }]}>-Rs. {discount.toFixed(2)}</Text>
               </View>
             )}
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>Total Amount</Text>
-              <Text style={styles.totalValue}>₹{total.toFixed(2)}</Text>
+              <Text style={styles.totalValue}>Rs. {total.toFixed(2)}</Text>
             </View>
             {paymentStatus === 'paid' ? (
               <View style={styles.stampContainer}>
@@ -506,18 +506,18 @@ function InvoicePDF({
               <View style={{ marginTop: 8, borderTopWidth: 1, borderTopColor: '#e5e7eb', paddingTop: 6 }}>
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>Amount Paid</Text>
-                  <Text style={styles.summaryValue}>₹{amountPaidVal.toFixed(2)}</Text>
+                  <Text style={styles.summaryValue}>Rs. {amountPaidVal.toFixed(2)}</Text>
                 </View>
                 <View style={styles.summaryRow}>
                   <Text style={[styles.summaryLabel, { color: '#dc2626', fontFamily: 'Helvetica-Bold' }]}>Balance Due</Text>
-                  <Text style={[styles.summaryValue, { color: '#dc2626', fontFamily: 'Helvetica-Bold' }]}>₹{balanceVal.toFixed(2)}</Text>
+                  <Text style={[styles.summaryValue, { color: '#dc2626', fontFamily: 'Helvetica-Bold' }]}>Rs. {balanceVal.toFixed(2)}</Text>
                 </View>
               </View>
             ) : (
               <View style={{ marginTop: 8, borderTopWidth: 1, borderTopColor: '#e5e7eb', paddingTop: 6 }}>
                 <View style={styles.summaryRow}>
                   <Text style={[styles.summaryLabel, { color: '#dc2626', fontFamily: 'Helvetica-Bold' }]}>Balance Due</Text>
-                  <Text style={[styles.summaryValue, { color: '#dc2626', fontFamily: 'Helvetica-Bold' }]}>₹{total.toFixed(2)}</Text>
+                  <Text style={[styles.summaryValue, { color: '#dc2626', fontFamily: 'Helvetica-Bold' }]}>Rs. {total.toFixed(2)}</Text>
                 </View>
               </View>
             )}
