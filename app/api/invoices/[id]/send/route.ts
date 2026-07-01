@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { generateInvoicePDF } from '@/lib/pdf';
 import {
-  uploadMediaToWhatsApp,
-  sendDocumentMessage,
   sendInvoiceTemplateMessage,
-  WhatsAppTemplateNotApprovedError,
 } from '@/lib/whatsapp';
 import { Invoice, Shop, ApiError } from '@/lib/types';
 import { syncCustomerOutstanding } from '@/lib/payments';
@@ -151,112 +147,23 @@ export async function POST(
       );
     }
 
-    // Fetch and convert logo
-    let logoBase64 = null;
-    if (typedShop.logo_url) {
-      try {
-        const logoRes = await fetch(typedShop.logo_url);
-        if (logoRes.ok) {
-          const arrayBuffer = await logoRes.arrayBuffer();
-          const buffer = Buffer.from(arrayBuffer);
-          const ext = typedShop.logo_url.split('.').pop()?.split('?')[0] || 'png';
-          logoBase64 = `data:image/${ext};base64,${buffer.toString('base64')}`;
-        }
-      } catch (e) {
-        console.error('Failed to load shop logo:', e);
-      }
-    }
+    const total = Number(typedInvoice.total);
+    const amountPaid = Number(typedInvoice.amount_paid || 0);
+    const balanceDue = Math.max(0, total - amountPaid);
+    const customerName = typedInvoice.customer_name ? typedInvoice.customer_name.trim() : 'Customer';
 
-    const balanceDue = typedInvoice.payment_status === 'unpaid' ? Number(typedInvoice.total) : 0;
-    const customerName = typedInvoice.customer_name ? typedInvoice.customer_name.trim().toUpperCase() : '';
-
-    // Step 1: Generate PDF
-    const pdfBuffer = await generateInvoicePDF({
-      shopName: typedShop.name,
-      shopAddress: typedShop.address || '',
-      invoiceNumber: typedInvoice.invoice_number,
-      date: new Date(typedInvoice.created_at).toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      }),
-      items: invoiceItems,
-      total: Number(typedInvoice.total),
+    // Step 2: Send WhatsApp Template Notification
+    await sendInvoiceTemplateMessage({
       customerPhone: typedInvoice.customer_phone,
-      customerName: typedInvoice.customer_name,
-      paymentStatus: typedInvoice.payment_status,
-      amountPaid: Number(typedInvoice.amount_paid || 0),
-      shopPhone: typedShop.phone,
-      logoBase64,
-      gstRegistered: typedShop.gst_registered,
-      gstin: typedShop.gstin,
-      customerGstin: typedInvoice.customer_gstin,
-      discount: Number(typedInvoice.discount || 0),
+      customerName: customerName,
+      invoiceNumber: typedInvoice.invoice_number,
+      invoiceAmount: total,
+      balanceDue: balanceDue,
+      invoiceId: typedInvoice.public_token,
+      shopName: typedShop.name,
     });
 
-    const filename = `${typedInvoice.invoice_number}_${typedShop.name.replace(/\s+/g, '_')}.pdf`;
-
-    // Step 2: Upload to WhatsApp
-    const mediaId = await uploadMediaToWhatsApp(pdfBuffer, filename);
-
-    // Step 3: Send template message with fallback to free-form document message
-    const greetingName = customerName ? ` ${customerName}` : '';
-    const reqUrl = new URL(request.url);
-    const origin = reqUrl.origin;
-    const trackingLink = `${origin}/status/${typedInvoice.public_token}`;
-
-    const caption = [
-      `Hey${greetingName} ,`,
-      '',
-      'Thank you for your business',
-      '',
-      'Your Sales Invoice is ready! Check the details below',
-      '',
-      `Sales Invoice No: ${typedInvoice.invoice_number}`,
-      `Invoice Amount: ₹${Number(typedInvoice.total).toFixed(1)}`,
-      `Balance Due: ₹${balanceDue.toFixed(1)}`,
-      '',
-      `Track status & download PDF here: ${trackingLink}`,
-      '',
-      'Happy to serve you',
-      `${typedShop.name.toUpperCase()}.`,
-    ].join('\n');
-
-    let waMessageId: string | null = null;
-    let templateFailed = false;
-
-    try {
-      waMessageId = await sendInvoiceTemplateMessage({
-        customerPhone: typedInvoice.customer_phone,
-        customerName: typedInvoice.customer_name || 'Valued Customer',
-        invoiceNumber: typedInvoice.invoice_number,
-        invoiceAmount: Number(typedInvoice.total),
-        balanceDue: balanceDue,
-        invoiceId: typedInvoice.public_token,
-        shopName: typedShop.name,
-      });
-    } catch (err: any) {
-      if (
-        err instanceof WhatsAppTemplateNotApprovedError ||
-        (err instanceof Error && err.message.includes('Template not found or not approved yet'))
-      ) {
-        console.warn('Template not approved, falling back to session message');
-        templateFailed = true;
-      } else {
-        throw err;
-      }
-    }
-
-    if (templateFailed || !waMessageId) {
-      await sendDocumentMessage(
-        typedInvoice.customer_phone,
-        mediaId,
-        filename,
-        caption
-      );
-    }
-
-    // Step 4: Update status to sent, record timestamps and delivery status
+    // Step 3: Update status to sent, record timestamps and delivery status
     await supabase
       .from('invoices')
       .update({ 

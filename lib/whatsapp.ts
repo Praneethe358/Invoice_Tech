@@ -192,8 +192,8 @@ export async function sendInvoiceTemplateMessage(params: {
         to: formattedPhone,
         type: 'template',
         template: {
-          name: 'invoice_notification',
-          language: { code: 'en' },
+          name: 'sales_invoice_delivery',
+          language: { code: 'en_US' },
           components: [
             {
               type: 'body',
@@ -220,7 +220,7 @@ export async function sendInvoiceTemplateMessage(params: {
 
     if (errorCode === 132000) {
       throw new WhatsAppTemplateNotApprovedError(
-        errorMessage || 'Template not found or not approved yet. Submit invoice_notification template in Meta Business Manager first.'
+        errorMessage || 'Template not found or not approved yet. Submit sales_invoice_delivery template in Meta Business Manager first.'
       );
     }
     if (errorCode === 131030) {
