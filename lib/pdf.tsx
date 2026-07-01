@@ -424,85 +424,33 @@ function InvoicePDF({
         <View style={styles.table}>
           {/* Table Header */}
           <View style={styles.tableHeader}>
-            {gstRegistered ? (
-              <>
-                <Text style={[styles.tableHeaderText, styles.colItemGst]}>Description</Text>
-                <Text style={[styles.tableHeaderText, styles.colHsnGst]}>HSN</Text>
-                <Text style={[styles.tableHeaderText, styles.colQtyGst]}>Qty</Text>
-                <Text style={[styles.tableHeaderText, styles.colRateGst]}>Rate</Text>
-                <Text style={[styles.tableHeaderText, styles.colGstPctGst]}>GST%</Text>
-                {isInterState ? (
-                  <Text style={[styles.tableHeaderText, styles.colIgstGst]}>IGST</Text>
-                ) : (
-                  <>
-                    <Text style={[styles.tableHeaderText, styles.colCgstGst]}>CGST</Text>
-                    <Text style={[styles.tableHeaderText, styles.colSgstGst]}>SGST</Text>
-                  </>
-                )}
-                <Text style={[styles.tableHeaderText, styles.colAmountGst]}>Amount</Text>
-              </>
-            ) : (
-              <>
-                <Text style={[styles.tableHeaderText, styles.colItem]}>Description</Text>
-                <Text style={[styles.tableHeaderText, styles.colQty]}>Qty</Text>
-                <Text style={[styles.tableHeaderText, styles.colRate]}>Rate</Text>
-                <Text style={[styles.tableHeaderText, styles.colAmount]}>Amount</Text>
-              </>
-            )}
+            <Text style={[styles.tableHeaderText, styles.colItem]}>Description</Text>
+            <Text style={[styles.tableHeaderText, styles.colQty]}>Qty</Text>
+            <Text style={[styles.tableHeaderText, styles.colRate]}>Rate</Text>
+            <Text style={[styles.tableHeaderText, styles.colAmount]}>Amount</Text>
           </View>
 
-          {/* Table Body */}
           {items.map((item, i) => {
             const baseAmount = Number(item.price) * item.quantity;
             const itemDiscount = Number(item.discount || 0);
             const taxableValue = Math.max(0, baseAmount - itemDiscount);
             const gstRate = item.gst_rate || 0;
             const gstAmount = taxableValue * (gstRate / 100);
-            const cgst = gstAmount / 2;
-            const sgst = gstAmount / 2;
-            const lineTotal = taxableValue + gstAmount;
+            const lineTotal = gstRegistered ? (taxableValue + gstAmount) : baseAmount;
 
             return (
               <View key={i} style={styles.tableRow}>
-                {gstRegistered ? (
-                  <>
-                    <View style={styles.colItemGst}>
-                      <Text>{item.name.toUpperCase()}</Text>
-                      {itemDiscount > 0 ? (
-                        <Text style={{ fontSize: 7, color: '#16a34a', fontFamily: 'Helvetica-Bold', marginTop: 1 }}>
-                          DISCOUNT: -₹{itemDiscount.toFixed(2)}
-                        </Text>
-                      ) : null}
-                    </View>
-                    <Text style={styles.colHsnGst}>{item.hsn_code || '—'}</Text>
-                    <Text style={styles.colQtyGst}>{item.quantity}</Text>
-                    <Text style={styles.colRateGst}>₹{Number(item.price).toFixed(2)}</Text>
-                    <Text style={styles.colGstPctGst}>{gstRate}%</Text>
-                    {isInterState ? (
-                      <Text style={styles.colIgstGst}>₹{gstAmount.toFixed(2)}</Text>
-                    ) : (
-                      <>
-                        <Text style={styles.colCgstGst}>₹{cgst.toFixed(2)}</Text>
-                        <Text style={styles.colSgstGst}>₹{sgst.toFixed(2)}</Text>
-                      </>
-                    )}
-                    <Text style={styles.colAmountGst}>₹{lineTotal.toFixed(2)}</Text>
-                  </>
-                ) : (
-                  <>
-                    <View style={styles.colItem}>
-                      <Text>{item.name.toUpperCase()}</Text>
-                      {itemDiscount > 0 ? (
-                        <Text style={{ fontSize: 7, color: '#16a34a', fontFamily: 'Helvetica-Bold', marginTop: 1 }}>
-                          DISCOUNT: -₹{itemDiscount.toFixed(2)}
-                        </Text>
-                      ) : null}
-                    </View>
-                    <Text style={styles.colQty}>{item.quantity}</Text>
-                    <Text style={styles.colRate}>₹{Number(item.price).toFixed(2)}</Text>
-                    <Text style={styles.colAmount}>₹{baseAmount.toFixed(2)}</Text>
-                  </>
-                )}
+                <View style={styles.colItem}>
+                  <Text>{item.name.toUpperCase()}</Text>
+                  {itemDiscount > 0 ? (
+                    <Text style={{ fontSize: 7, color: '#16a34a', fontFamily: 'Helvetica-Bold', marginTop: 1 }}>
+                      DISCOUNT: -₹{itemDiscount.toFixed(2)}
+                    </Text>
+                  ) : null}
+                </View>
+                <Text style={styles.colQty}>{item.quantity}</Text>
+                <Text style={styles.colRate}>₹{Number(item.price).toFixed(2)}</Text>
+                <Text style={styles.colAmount}>₹{lineTotal.toFixed(2)}</Text>
               </View>
             );
           })}
@@ -527,23 +475,10 @@ function InvoicePDF({
                   <Text style={styles.summaryLabel}>Taxable Subtotal</Text>
                   <Text style={styles.summaryValue}>₹{subtotalVal.toFixed(2)}</Text>
                 </View>
-                {isInterState ? (
-                  <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>IGST</Text>
-                    <Text style={styles.summaryValue}>₹{totalGstVal.toFixed(2)}</Text>
-                  </View>
-                ) : (
-                  <>
-                    <View style={styles.summaryRow}>
-                      <Text style={styles.summaryLabel}>CGST</Text>
-                      <Text style={styles.summaryValue}>₹{cgstVal.toFixed(2)}</Text>
-                    </View>
-                    <View style={styles.summaryRow}>
-                      <Text style={styles.summaryLabel}>SGST</Text>
-                      <Text style={styles.summaryValue}>₹{sgstVal.toFixed(2)}</Text>
-                    </View>
-                  </>
-                )}
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>GST</Text>
+                  <Text style={styles.summaryValue}>₹{totalGstVal.toFixed(2)}</Text>
+                </View>
               </>
             ) : (
               <>
