@@ -18,6 +18,27 @@ function getAccessToken(): string {
 }
 
 /**
+ * Sanitize the customer phone number for WhatsApp API:
+ * - Remove spaces, dashes, brackets
+ * - If starts with 0, replace with 91
+ * - If already has 91 prefix, return as is
+ * - Otherwise add 91
+ */
+export function formatWhatsAppNumber(phone: string): string {
+  const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  if (cleaned.startsWith('0')) return '91' + cleaned.slice(1);
+  if (cleaned.startsWith('91')) return cleaned;
+  return '91' + cleaned;
+}
+
+export class WhatsAppTemplateNotApprovedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'WhatsAppTemplateNotApprovedError';
+  }
+}
+
+/**
  * Upload a PDF to WhatsApp media endpoint.
  * Returns the media_id to use when sending the document.
  */
@@ -70,6 +91,7 @@ export async function sendDocumentMessage(
 ): Promise<void> {
   const phoneNumberId = getPhoneNumberId();
   const accessToken = getAccessToken();
+  const formattedPhone = formatWhatsAppNumber(to);
 
   const response = await fetch(
     `${GRAPH_API_BASE}/${phoneNumberId}/messages`,
@@ -81,7 +103,7 @@ export async function sendDocumentMessage(
       },
       body: JSON.stringify({
         messaging_product: 'whatsapp',
-        to: `91${to}`,
+        to: formattedPhone,
         type: 'document',
         document: {
           id: mediaId,
@@ -109,6 +131,7 @@ export async function sendTextMessage(
 ): Promise<void> {
   const phoneNumberId = getPhoneNumberId();
   const accessToken = getAccessToken();
+  const formattedPhone = formatWhatsAppNumber(to);
 
   const response = await fetch(
     `${GRAPH_API_BASE}/${phoneNumberId}/messages`,
@@ -120,7 +143,7 @@ export async function sendTextMessage(
       },
       body: JSON.stringify({
         messaging_product: 'whatsapp',
-        to: `91${to}`,
+        to: formattedPhone,
         type: 'text',
         text: {
           body: bodyText,
@@ -135,4 +158,80 @@ export async function sendTextMessage(
       `WhatsApp text send failed: ${err.error?.message || response.statusText}`
     );
   }
+}
+
+/**
+ * Send a template message via WhatsApp Cloud API for TruBill invoice notifications.
+ */
+export async function sendInvoiceTemplateMessage(params: {
+  customerPhone: string;
+  customerName: string;
+  invoiceNumber: string;
+  invoiceAmount: number;
+  balanceDue: number;
+  invoiceId: string;
+  shopName: string;
+}): Promise<string> {
+  const phoneNumberId = getPhoneNumberId();
+  const accessToken = getAccessToken();
+  const formattedPhone = formatWhatsAppNumber(params.customerPhone);
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://trubill.in';
+  const statusUrl = `${baseUrl}/status/${params.invoiceId}`;
+
+  const response = await fetch(
+    `${GRAPH_API_BASE}/${phoneNumberId}/messages`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to: formattedPhone,
+        type: 'template',
+        template: {
+          name: 'invoice_notification',
+          language: { code: 'en' },
+          components: [
+            {
+              type: 'body',
+              parameters: [
+                { type: 'text', text: params.customerName },
+                { type: 'text', text: params.invoiceNumber },
+                { type: 'text', text: params.invoiceAmount.toString() },
+                { type: 'text', text: params.balanceDue.toString() },
+                { type: 'text', text: statusUrl },
+                { type: 'text', text: params.shopName },
+              ],
+            },
+          ],
+        },
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    const errorCode = data?.error?.code;
+    const errorMessage = data?.error?.message;
+
+    if (errorCode === 132000) {
+      throw new WhatsAppTemplateNotApprovedError(
+        errorMessage || 'Template not found or not approved yet. Submit invoice_notification template in Meta Business Manager first.'
+      );
+    }
+    if (errorCode === 131030) {
+      throw new Error(`Phone number ${formattedPhone} is not a valid WhatsApp number.`);
+    }
+    if (errorCode === 131047) {
+      throw new Error('Message failed — customer may have blocked the business number.');
+    }
+
+    throw new Error(`WhatsApp API error ${errorCode}: ${errorMessage}`);
+  }
+
+  return data.messages?.[0]?.id || 'unknown_wa_msg_id';
 }

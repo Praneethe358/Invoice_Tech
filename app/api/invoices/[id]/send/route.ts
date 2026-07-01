@@ -4,6 +4,8 @@ import { generateInvoicePDF } from '@/lib/pdf';
 import {
   uploadMediaToWhatsApp,
   sendDocumentMessage,
+  sendInvoiceTemplateMessage,
+  WhatsAppTemplateNotApprovedError,
 } from '@/lib/whatsapp';
 import { Invoice, Shop, ApiError } from '@/lib/types';
 import { syncCustomerOutstanding } from '@/lib/payments';
@@ -197,7 +199,7 @@ export async function POST(
     // Step 2: Upload to WhatsApp
     const mediaId = await uploadMediaToWhatsApp(pdfBuffer, filename);
 
-    // Step 3: Send document message
+    // Step 3: Send template message with fallback to free-form document message
     const greetingName = customerName ? ` ${customerName}` : '';
     const reqUrl = new URL(request.url);
     const origin = reqUrl.origin;
@@ -220,12 +222,39 @@ export async function POST(
       `${typedShop.name.toUpperCase()}.`,
     ].join('\n');
 
-    await sendDocumentMessage(
-      typedInvoice.customer_phone,
-      mediaId,
-      filename,
-      caption
-    );
+    let waMessageId: string | null = null;
+    let templateFailed = false;
+
+    try {
+      waMessageId = await sendInvoiceTemplateMessage({
+        customerPhone: typedInvoice.customer_phone,
+        customerName: typedInvoice.customer_name || 'Valued Customer',
+        invoiceNumber: typedInvoice.invoice_number,
+        invoiceAmount: Number(typedInvoice.total),
+        balanceDue: balanceDue,
+        invoiceId: typedInvoice.public_token,
+        shopName: typedShop.name,
+      });
+    } catch (err: any) {
+      if (
+        err instanceof WhatsAppTemplateNotApprovedError ||
+        (err instanceof Error && err.message.includes('Template not found or not approved yet'))
+      ) {
+        console.warn('Template not approved, falling back to session message');
+        templateFailed = true;
+      } else {
+        throw err;
+      }
+    }
+
+    if (templateFailed || !waMessageId) {
+      await sendDocumentMessage(
+        typedInvoice.customer_phone,
+        mediaId,
+        filename,
+        caption
+      );
+    }
 
     // Step 4: Update status to sent, record timestamps and delivery status
     await supabase
