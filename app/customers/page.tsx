@@ -14,7 +14,7 @@ export default async function CustomersPage() {
 
   const { data: shop } = await supabase
     .from('shops')
-    .select('id, name, logo_url')
+    .select('id, name, logo_url, shop_type, gst_registered, inventory_enabled, subscription_status, trial_ends_at, subscription_ends_at, whatsapp_invoices_sent, is_frozen, frozen_reason, state, gstin, phone, address, created_at, auth_user_id')
     .eq('id', context.shopId)
     .single();
 

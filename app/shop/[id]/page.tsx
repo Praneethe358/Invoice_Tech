@@ -12,7 +12,7 @@ interface PageProps {
 async function getShopData(id: string) {
   if (!id) return null;
 
-  const supabaseAdmin = createAdminClient();
+  const supabaseAdmin = createAdminClient() as any;
 
   const { data: shop } = await supabaseAdmin
     .from('shops')
