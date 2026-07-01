@@ -18,6 +18,12 @@ envContent.split('\n').forEach(line => {
 const supabaseUrl = envVars.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = envVars.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
+const admin = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
 
 function assert(condition: boolean, message: string) {
   if (!condition) {
@@ -50,7 +56,7 @@ async function runTest() {
 
   try {
     // 2. Insert Shop row
-    const { data: newShop, error: shopError } = await supabase
+    const { data: newShop, error: shopError } = await admin
       .from('shops')
       .insert({
         auth_user_id: userId,
@@ -86,7 +92,7 @@ async function runTest() {
       track_inventory: true,
     }));
 
-    const { data: insertedProducts, error: productsError } = await supabase
+    const { data: insertedProducts, error: productsError } = await admin
       .from('products')
       .insert(productsToInsert)
       .select('id, name');
@@ -115,7 +121,7 @@ async function runTest() {
       };
     }).filter((v) => !!v.product_id);
 
-    const { error: variantsError } = await supabase
+    const { error: variantsError } = await admin
       .from('product_variants')
       .insert(variantsToInsert);
 
@@ -125,7 +131,7 @@ async function runTest() {
 
     // 5. Query back and verify database state
     // Verify Products
-    const { data: dbProducts, error: queryProdError } = await supabase
+    const { data: dbProducts, error: queryProdError } = await admin
       .from('products')
       .select('*')
       .eq('shop_id', shopId);
@@ -153,7 +159,7 @@ async function runTest() {
 
     // Verify Variants
     const productIds = dbProducts.map(p => p.id);
-    const { data: dbVariants, error: queryVarError } = await supabase
+    const { data: dbVariants, error: queryVarError } = await admin
       .from('product_variants')
       .select('*')
       .in('product_id', productIds);
@@ -175,7 +181,7 @@ async function runTest() {
     console.log('\nDatabase integration validation succeeded! Cleaning up test data...');
 
     // 6. Cleanup (Cascade delete handles products and variants when deleting shop)
-    await supabase.from('shops').delete().eq('id', shopId);
+    await admin.from('shops').delete().eq('id', shopId);
     console.log(`Deleted shop ${shopId}`);
     
     // Delete user
@@ -190,9 +196,9 @@ async function runTest() {
   } catch (err) {
     console.error('❌ Test failed with error:', err);
     // Cleanup if shop was created
-    const { data: shop } = await supabase.from('shops').select('id').eq('auth_user_id', userId).single();
+    const { data: shop } = await admin.from('shops').select('id').eq('auth_user_id', userId).maybeSingle();
     if (shop) {
-      await supabase.from('shops').delete().eq('id', shop.id);
+      await admin.from('shops').delete().eq('id', shop.id);
     }
     await supabase.auth.admin.deleteUser(userId);
     process.exit(1);

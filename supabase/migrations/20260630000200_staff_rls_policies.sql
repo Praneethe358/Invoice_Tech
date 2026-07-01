@@ -12,7 +12,17 @@ $$;
 
 -- Recreate policies for shops
 drop policy if exists "own shop" on shops;
-create policy "own shop" on shops for all
+
+create policy "select own shop" on shops for select
+  using (id in (select get_user_shop_ids()));
+
+create policy "insert own shop" on shops for insert
+  with check (auth.uid() = auth_user_id);
+
+create policy "update own shop" on shops for update
+  using (id in (select get_user_shop_ids()));
+
+create policy "delete own shop" on shops for delete
   using (id in (select get_user_shop_ids()));
 
 -- Recreate policies for products
