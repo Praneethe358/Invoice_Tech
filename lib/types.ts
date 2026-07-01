@@ -113,6 +113,7 @@ export interface Invoice {
   cancelled_at?: string | null;
   cancelled_reason?: string | null;
   public_token?: string | null;
+  discount?: number;
 }
 
 export type InvoiceStatus = 'draft' | 'saved' | 'sent' | 'cancelled' | 'failed';
@@ -129,6 +130,7 @@ export interface InvoiceItem {
   sgst?: number;
   line_total?: number;
   variant_id?: string | null;
+  discount?: number;
 }
 
 // ─── API Request/Response Types ───────────────────────────────
@@ -143,6 +145,7 @@ export interface CreateInvoicePayload {
   payment_note?: string;
   amount_paid?: number;
   status?: InvoiceStatus;
+  discount?: number;
 }
 
 export interface CreateInvoiceResponse {

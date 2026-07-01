@@ -273,6 +273,7 @@ interface InvoicePDFProps {
   gstRegistered?: boolean;
   gstin?: string | null;
   customerGstin?: string | null;
+  discount?: number;
 }
 
 function InvoicePDF({
@@ -291,6 +292,7 @@ function InvoicePDF({
   gstRegistered = false,
   gstin = null,
   customerGstin = null,
+  discount = 0,
 }: InvoicePDFProps) {
   const formattedPhone = customerPhone
     ? customerPhone.startsWith('+')
@@ -321,12 +323,17 @@ function InvoicePDF({
   const isInterState = custState !== shopState;
 
   // Pre-calculate sums for summary
-  const subtotalVal = gstRegistered
-    ? items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0)
-    : total;
+  const baseSubtotalVal = items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
+  const totalItemDiscountVal = items.reduce((sum, item) => sum + Number(item.discount || 0), 0);
+  const subtotalVal = baseSubtotalVal - totalItemDiscountVal;
 
   const totalGstVal = gstRegistered
-    ? items.reduce((sum, item) => sum + (Number(item.price) * item.quantity) * ((item.gst_rate || 0) / 100), 0)
+    ? items.reduce((sum, item) => {
+        const baseAmount = Number(item.price) * item.quantity;
+        const itemDisc = Number(item.discount || 0);
+        const taxableVal = Math.max(0, baseAmount - itemDisc);
+        return sum + taxableVal * ((item.gst_rate || 0) / 100);
+      }, 0)
     : 0;
 
   const cgstVal = isInterState ? 0 : totalGstVal / 2;
@@ -340,15 +347,17 @@ function InvoicePDF({
     items.forEach((item) => {
       const hsn = item.hsn_code || 'Other';
       const baseAmount = Number(item.price) * item.quantity;
+      const itemDiscount = Number(item.discount || 0);
+      const taxableValue = Math.max(0, baseAmount - itemDiscount);
       const rate = item.gst_rate || 0;
-      const gstAmount = baseAmount * (rate / 100);
+      const gstAmount = taxableValue * (rate / 100);
       const cgst = gstAmount / 2;
       const sgst = gstAmount / 2;
 
       if (!groups[hsn]) {
         groups[hsn] = { taxable: 0, cgst: 0, sgst: 0, rate };
       }
-      groups[hsn].taxable += baseAmount;
+      groups[hsn].taxable += taxableValue;
       groups[hsn].cgst += cgst;
       groups[hsn].sgst += sgst;
     });
@@ -445,17 +454,26 @@ function InvoicePDF({
           {/* Table Body */}
           {items.map((item, i) => {
             const baseAmount = Number(item.price) * item.quantity;
+            const itemDiscount = Number(item.discount || 0);
+            const taxableValue = Math.max(0, baseAmount - itemDiscount);
             const gstRate = item.gst_rate || 0;
-            const gstAmount = baseAmount * (gstRate / 100);
+            const gstAmount = taxableValue * (gstRate / 100);
             const cgst = gstAmount / 2;
             const sgst = gstAmount / 2;
-            const lineTotal = baseAmount + gstAmount;
+            const lineTotal = taxableValue + gstAmount;
 
             return (
               <View key={i} style={styles.tableRow}>
                 {gstRegistered ? (
                   <>
-                    <Text style={styles.colItemGst}>{item.name.toUpperCase()}</Text>
+                    <View style={styles.colItemGst}>
+                      <Text>{item.name.toUpperCase()}</Text>
+                      {itemDiscount > 0 ? (
+                        <Text style={{ fontSize: 7, color: '#16a34a', fontFamily: 'Helvetica-Bold', marginTop: 1 }}>
+                          DISCOUNT: -₹{itemDiscount.toFixed(2)}
+                        </Text>
+                      ) : null}
+                    </View>
                     <Text style={styles.colHsnGst}>{item.hsn_code || '—'}</Text>
                     <Text style={styles.colQtyGst}>{item.quantity}</Text>
                     <Text style={styles.colRateGst}>₹{Number(item.price).toFixed(2)}</Text>
@@ -472,7 +490,14 @@ function InvoicePDF({
                   </>
                 ) : (
                   <>
-                    <Text style={styles.colItem}>{item.name.toUpperCase()}</Text>
+                    <View style={styles.colItem}>
+                      <Text>{item.name.toUpperCase()}</Text>
+                      {itemDiscount > 0 ? (
+                        <Text style={{ fontSize: 7, color: '#16a34a', fontFamily: 'Helvetica-Bold', marginTop: 1 }}>
+                          DISCOUNT: -₹{itemDiscount.toFixed(2)}
+                        </Text>
+                      ) : null}
+                    </View>
                     <Text style={styles.colQty}>{item.quantity}</Text>
                     <Text style={styles.colRate}>₹{Number(item.price).toFixed(2)}</Text>
                     <Text style={styles.colAmount}>₹{baseAmount.toFixed(2)}</Text>
@@ -486,10 +511,20 @@ function InvoicePDF({
         {/* Totals Summary */}
         <View style={styles.summaryContainer}>
           <View style={styles.summaryCard}>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Subtotal</Text>
+              <Text style={styles.summaryValue}>₹{baseSubtotalVal.toFixed(2)}</Text>
+            </View>
+            {totalItemDiscountVal > 0 && (
+              <View style={styles.summaryRow}>
+                <Text style={[styles.summaryLabel, { color: '#16a34a' }]}>Items Discount</Text>
+                <Text style={[styles.summaryValue, { color: '#16a34a' }]}>-₹{totalItemDiscountVal.toFixed(2)}</Text>
+              </View>
+            )}
             {gstRegistered ? (
               <>
                 <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>Subtotal</Text>
+                  <Text style={styles.summaryLabel}>Taxable Subtotal</Text>
                   <Text style={styles.summaryValue}>₹{subtotalVal.toFixed(2)}</Text>
                 </View>
                 {isInterState ? (
@@ -513,14 +548,16 @@ function InvoicePDF({
             ) : (
               <>
                 <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>Subtotal</Text>
-                  <Text style={styles.summaryValue}>₹{total.toFixed(2)}</Text>
-                </View>
-                <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>GST (Inclusive)</Text>
                   <Text style={styles.summaryValue}>₹0.00</Text>
                 </View>
               </>
+            )}
+            {discount > 0 && (
+              <View style={styles.summaryRow}>
+                <Text style={[styles.summaryLabel, { color: '#16a34a' }]}>Overall Discount</Text>
+                <Text style={[styles.summaryValue, { color: '#16a34a' }]}>-₹{discount.toFixed(2)}</Text>
+              </View>
             )}
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>Total Amount</Text>

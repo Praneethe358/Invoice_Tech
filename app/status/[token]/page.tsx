@@ -201,9 +201,14 @@ export default async function PublicStatusPage({ params }: PageProps) {
                   <tr key={item.id} className="text-gray-850 font-semibold">
                     <td className="py-3">
                       <span className="block font-bold text-gray-900">{item.name}</span>
-                      {item.hsn_code && (
-                        <span className="text-[9px] text-gray-400 font-medium">HSN: {item.hsn_code}</span>
-                      )}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {item.hsn_code && (
+                          <span className="text-[9px] text-gray-400 font-medium">HSN: {item.hsn_code}</span>
+                        )}
+                        {item.discount && Number(item.discount) > 0 ? (
+                          <span className="text-[9px] text-emerald-600 font-bold bg-emerald-50 px-1 py-0.5 rounded border border-emerald-100">Disc: -₹{Number(item.discount).toFixed(2)}</span>
+                        ) : null}
+                      </div>
                     </td>
                     <td className="py-3 text-center text-gray-700">{item.qty}</td>
                     <td className="py-3 text-right text-gray-700">₹{Number(item.price).toLocaleString('en-IN')}</td>
@@ -215,32 +220,54 @@ export default async function PublicStatusPage({ params }: PageProps) {
           </div>
 
           {/* Totals Summary */}
-          <div className="border-t border-[#e5e7eb] pt-4 space-y-2 text-xs font-semibold text-gray-600">
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span className="text-gray-900">₹{Number(invoice.subtotal || invoice.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-            </div>
-            {shop.gst_registered && Number(invoice.total_gst || 0) > 0 && (
-              <>
-                <div className="flex justify-between text-[11px]">
-                  <span>CGST</span>
-                  <span>₹{Number(invoice.total_cgst || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+          {(() => {
+            const baseSubtotal = items.reduce((sum, i) => sum + (Number(i.price) * Number(i.qty)), 0);
+            const totalItemDiscount = items.reduce((sum, i) => sum + Number(i.discount || 0), 0);
+            return (
+              <div className="border-t border-[#e5e7eb] pt-4 space-y-2 text-xs font-semibold text-gray-600">
+                <div className="flex justify-between">
+                  <span>Items Subtotal</span>
+                  <span className="text-gray-900">₹{baseSubtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                 </div>
-                <div className="flex justify-between text-[11px]">
-                  <span>SGST</span>
-                  <span>₹{Number(invoice.total_sgst || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                {totalItemDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-600 font-bold">
+                    <span>Items Discount</span>
+                    <span>-₹{totalItemDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                )}
+                {shop.gst_registered && (
+                  <>
+                    <div className="flex justify-between">
+                      <span>Taxable Subtotal</span>
+                      <span className="text-gray-900">₹{Number(invoice.subtotal || invoice.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="flex justify-between text-[11px]">
+                      <span>CGST</span>
+                      <span>₹{Number(invoice.total_cgst || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="flex justify-between text-[11px]">
+                      <span>SGST</span>
+                      <span>₹{Number(invoice.total_sgst || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="flex justify-between text-[11px] border-b border-[#f3f4f6] pb-2">
+                      <span>Total GST</span>
+                      <span>₹{Number(invoice.total_gst || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  </>
+                )}
+                {invoice.discount && Number(invoice.discount) > 0 ? (
+                  <div className="flex justify-between text-emerald-600 font-bold">
+                    <span>Overall Discount</span>
+                    <span>-₹{Number(invoice.discount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                ) : null}
+                <div className="flex justify-between text-sm font-black text-gray-900 pt-2 border-t border-dashed border-[#e5e7eb]">
+                  <span>Total Payable</span>
+                  <span>₹{Number(invoice.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                 </div>
-                <div className="flex justify-between text-[11px] border-b border-[#f3f4f6] pb-2">
-                  <span>Total GST</span>
-                  <span>₹{Number(invoice.total_gst || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-                </div>
-              </>
-            )}
-            <div className="flex justify-between text-sm font-black text-gray-900 pt-1">
-              <span>Total Amount</span>
-              <span>₹{Number(invoice.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-            </div>
-          </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Footer info */}

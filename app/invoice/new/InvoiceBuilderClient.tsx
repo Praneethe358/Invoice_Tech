@@ -121,10 +121,13 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
         sgst: Number(item.sgst || 0),
         line_total: Number(item.line_total || 0),
         variant_id: item.variant_id || null,
+        discount: Number(item.discount || 0),
       }));
     }
     return [];
   });
+  const [invoiceDiscount, setInvoiceDiscount] = useState<number>(initialDraft?.discount || 0);
+  const [localInvoiceDiscount, setLocalInvoiceDiscount] = useState((initialDraft?.discount || 0).toString());
   const [phone, setPhone] = useState(initialDraft?.customer_phone || '');
   const [phoneError, setPhoneError] = useState('');
   const [customerName, setCustomerName] = useState(initialDraft?.customer_name || '');
@@ -502,6 +505,20 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
     [shop.shop_type]
   );
 
+  const updateDiscount = useCallback(
+    (name: string, discount: number, variant_id?: string | null) => {
+      setItems((prev) =>
+        prev.map((i) => {
+          if (i.name === name && i.variant_id === variant_id) {
+            return { ...i, discount };
+          }
+          return i;
+        })
+      );
+    },
+    []
+  );
+
   const getItemQty = (name: string): number => {
     return items
       .filter((i) => i.name === name || i.name.startsWith(name + ' ('))
@@ -659,18 +676,23 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
 
   // ─── Total Calculations ────────────────────────────────────
   const calculations = useMemo(() => {
-    let subtotal = 0;
+    let baseSubtotal = 0;
+    let totalItemDiscount = 0;
     let totalCgst = 0;
     let totalSgst = 0;
     let totalGst = 0;
 
     items.forEach((item) => {
       const baseAmount = item.price * item.quantity;
-      subtotal += baseAmount;
+      baseSubtotal += baseAmount;
+      const itemDisc = item.discount || 0;
+      totalItemDiscount += itemDisc;
+
+      const taxableValue = Math.max(0, baseAmount - itemDisc);
 
       if (shop.gst_registered) {
         const gstRate = item.gst_rate || 0;
-        const gstAmount = baseAmount * (gstRate / 100);
+        const gstAmount = taxableValue * (gstRate / 100);
         const cgst = gstAmount / 2;
         const sgst = gstAmount / 2;
 
@@ -680,16 +702,20 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
       }
     });
 
-    const total = subtotal + totalGst;
+    const subtotal = baseSubtotal - totalItemDiscount;
+    const totalBeforeInvoiceDiscount = subtotal + totalGst;
+    const finalTotal = Math.max(0, totalBeforeInvoiceDiscount - invoiceDiscount);
 
     return {
+      baseSubtotal,
+      totalItemDiscount,
       subtotal,
       cgst: totalCgst,
       sgst: totalSgst,
       totalGst,
-      total,
+      total: finalTotal,
     };
-  }, [items, shop.gst_registered]);
+  }, [items, shop.gst_registered, invoiceDiscount]);
 
   const total = calculations.total;
 
@@ -740,6 +766,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
           hsn_code: item.hsn_code || null,
           gst_rate: item.gst_rate || 0,
           variant_id: item.variant_id || null,
+          discount: item.discount || 0,
         })),
         customer_phone: phone.trim(),
         customer_name: customerName.trim().toUpperCase() || undefined,
@@ -749,6 +776,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
         payment_note: (paymentStatus === 'paid' || paymentStatus === 'partial') ? (paymentNote.trim() || undefined) : undefined,
         amount_paid: paymentStatus === 'partial' ? Number(partialAmount) : undefined,
         status: (initialDraft && initialDraft.status !== 'draft') ? initialDraft.status : (isEditingDraft ? 'draft' : dbStatus),
+        discount: invoiceDiscount,
       };
 
       const res = await fetch(url, {
@@ -1804,6 +1832,9 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
                         onPriceChange={(price) =>
                           updatePrice(item.name, price, item.variant_id)
                         }
+                        onDiscountChange={(discount) =>
+                          updateDiscount(item.name, discount, item.variant_id)
+                        }
                         gstRegistered={shop.gst_registered}
                       />
                     ))}
@@ -1817,31 +1848,77 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
               )}
             </section>
 
-            {/* Tax Breakdown Summary (only if gst_registered) */}
-            {shop.gst_registered && items.length > 0 && (
-              <section className="bg-white rounded-2xl border border-[#e5e7eb] p-4 space-y-2 text-sm shadow-2xs">
-                <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-2 flex items-center justify-between flex-wrap gap-2">
-                  <span>Tax Summary</span>
-                  {shop.shop_type === 'footwear' && (
+            {/* Bill Summary & Discounts */}
+            {items.length > 0 && (
+              <section className="bg-white rounded-2xl border border-[#e5e7eb] p-4 space-y-2.5 text-sm shadow-2xs">
+                <h2 className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-1 flex items-center justify-between flex-wrap gap-2">
+                  <span>Bill Summary</span>
+                  {shop.gst_registered && shop.shop_type === 'footwear' && (
                     <span className="text-[10px] text-blue-600 font-semibold bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md normal-case">
                       ℹ️ GST slab auto-detected based on MRP per pair
                     </span>
                   )}
                 </h2>
+                
                 <div className="flex justify-between text-[#6b7280]">
-                  <span>Subtotal (Base Value)</span>
-                  <span className="tabular-nums">₹{calculations.subtotal.toFixed(2)}</span>
+                  <span>Items Subtotal</span>
+                  <span className="tabular-nums">₹{calculations.baseSubtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-[#6b7280]">
-                  <span>CGST</span>
-                  <span className="tabular-nums">₹{calculations.cgst.toFixed(2)}</span>
+
+                {calculations.totalItemDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-600 font-medium">
+                    <span>Items Discount</span>
+                    <span className="tabular-nums">-₹{calculations.totalItemDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+
+                {shop.gst_registered && (
+                  <>
+                    <div className="flex justify-between text-[#6b7280]">
+                      <span>Taxable Subtotal</span>
+                      <span className="tabular-nums">₹{calculations.subtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-[#6b7280]">
+                      <span>CGST</span>
+                      <span className="tabular-nums">₹{calculations.cgst.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-[#6b7280]">
+                      <span>SGST</span>
+                      <span className="tabular-nums">₹{calculations.sgst.toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
+
+                {/* Overall Invoice Discount Input */}
+                <div className="flex items-center justify-between pt-2 border-t border-dashed border-slate-100">
+                  <span className="text-[#4b5563] font-medium">Overall Discount (₹)</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={localInvoiceDiscount}
+                    onChange={(e) => {
+                      const valStr = e.target.value;
+                      if (valStr === '' || /^\d*\.?\d*$/.test(valStr)) {
+                        setLocalInvoiceDiscount(valStr);
+                        const parsed = parseFloat(valStr);
+                        if (!isNaN(parsed)) {
+                          const maxDisc = calculations.subtotal + (shop.gst_registered ? (calculations.cgst + calculations.sgst) : 0);
+                          setInvoiceDiscount(Math.min(parsed, maxDisc));
+                        } else {
+                          setInvoiceDiscount(0);
+                        }
+                      }
+                    }}
+                    onBlur={() => {
+                      setLocalInvoiceDiscount(invoiceDiscount.toString());
+                    }}
+                    className="w-24 h-7 text-xs font-bold bg-slate-50 hover:bg-slate-100 focus:bg-white border border-[#e5e7eb] rounded-lg px-2 focus:outline-none focus:border-[#0050e8] focus:ring-0 text-slate-800 transition-colors text-right"
+                    placeholder="0"
+                  />
                 </div>
-                <div className="flex justify-between text-[#6b7280]">
-                  <span>SGST</span>
-                  <span className="tabular-nums">₹{calculations.sgst.toFixed(2)}</span>
-                </div>
+
                 <div className="flex justify-between font-bold text-[#111827] border-t border-[#f3f4f6] pt-2 mt-1">
-                  <span>Total (GST Inclusive)</span>
+                  <span>Total Payable</span>
                   <span className="tabular-nums">₹{calculations.total.toFixed(2)}</span>
                 </div>
               </section>

@@ -50,7 +50,7 @@ export async function PUT(
     // Get existing invoice details
     const { data: invoice, error: invoiceError } = await supabase
       .from('invoices')
-      .select('id, status, shop_id, invoice_number, customer_phone, customer_name, customer_gstin, total, payment_status, amount_paid')
+      .select('id, status, shop_id, invoice_number, customer_phone, customer_name, customer_gstin, total, payment_status, amount_paid, discount')
       .eq('id', id)
       .eq('shop_id', ctx.shopId)
       .single();
@@ -102,11 +102,13 @@ export async function PUT(
 
     const processedItems = body.items.map((item) => {
       const baseAmount = item.price * item.quantity;
-      subtotal += baseAmount;
+      const discount = Number(item.discount || 0);
+      const taxableValue = Math.max(0, baseAmount - discount);
+      subtotal += taxableValue;
 
       let cgst = 0;
       let sgst = 0;
-      let lineTotal = baseAmount;
+      let lineTotal = taxableValue;
 
       if (shop.gst_registered) {
         let gstRate = item.gst_rate || 0;
@@ -115,10 +117,10 @@ export async function PUT(
         } else if (shop.shop_type === 'footwear') {
           gstRate = getFootwearGstRate(item.price, item.hsn_code);
         }
-        const gstAmount = baseAmount * (gstRate / 100);
+        const gstAmount = taxableValue * (gstRate / 100);
         cgst = Number((gstAmount / 2).toFixed(2));
         sgst = Number((gstAmount / 2).toFixed(2));
-        lineTotal = Number((baseAmount + gstAmount).toFixed(2));
+        lineTotal = Number((taxableValue + gstAmount).toFixed(2));
         totalCgst += cgst;
         totalSgst += sgst;
         totalGst += gstAmount;
@@ -128,6 +130,7 @@ export async function PUT(
           cgst,
           sgst,
           line_total: lineTotal,
+          discount,
         };
       }
 
@@ -136,10 +139,11 @@ export async function PUT(
         cgst,
         sgst,
         line_total: lineTotal,
+        discount,
       };
     });
 
-    const total = subtotal + totalGst;
+    const total = Number(Math.max(0, subtotal + totalGst - (body.discount || 0)).toFixed(2));
     const payment_status = body.payment_status || 'paid';
     
     if (payment_status === 'partial') {
@@ -266,6 +270,7 @@ export async function PUT(
         total_cgst: Number(totalCgst.toFixed(2)),
         total_sgst: Number(totalSgst.toFixed(2)),
         total_gst: Number(totalGst.toFixed(2)),
+        discount: Number(body.discount || 0),
       })
       .eq('id', id);
 
@@ -298,6 +303,7 @@ export async function PUT(
       sgst: item.sgst,
       line_total: item.line_total,
       variant_id: item.variant_id || null,
+      discount: item.discount || 0,
     }));
 
     const { error: itemsInsertError } = await supabase

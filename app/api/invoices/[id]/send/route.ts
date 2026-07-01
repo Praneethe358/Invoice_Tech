@@ -136,6 +136,7 @@ export async function POST(
           cgst: Number(item.cgst),
           sgst: Number(item.sgst),
           line_total: Number(item.line_total),
+          discount: Number(item.discount || 0),
         }));
       }
     }
@@ -188,6 +189,7 @@ export async function POST(
       gstRegistered: typedShop.gst_registered,
       gstin: typedShop.gstin,
       customerGstin: typedInvoice.customer_gstin,
+      discount: Number(typedInvoice.discount || 0),
     });
 
     const filename = `${typedInvoice.invoice_number}_${typedShop.name.replace(/\s+/g, '_')}.pdf`;

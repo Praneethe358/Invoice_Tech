@@ -92,11 +92,13 @@ export async function POST(request: NextRequest) {
 
     const processedItems = body.items.map((item) => {
       const baseAmount = item.price * item.quantity;
-      subtotal += baseAmount;
+      const discount = Number(item.discount || 0);
+      const taxableValue = Math.max(0, baseAmount - discount);
+      subtotal += taxableValue;
 
       let cgst = 0;
       let sgst = 0;
-      let lineTotal = baseAmount;
+      let lineTotal = taxableValue;
 
       if (shop.gst_registered) {
         let gstRate = item.gst_rate || 0;
@@ -105,10 +107,10 @@ export async function POST(request: NextRequest) {
         } else if (shop.shop_type === 'footwear') {
           gstRate = getFootwearGstRate(item.price, item.hsn_code);
         }
-        const gstAmount = baseAmount * (gstRate / 100);
+        const gstAmount = taxableValue * (gstRate / 100);
         cgst = Number((gstAmount / 2).toFixed(2));
         sgst = Number((gstAmount / 2).toFixed(2));
-        lineTotal = Number((baseAmount + gstAmount).toFixed(2));
+        lineTotal = Number((taxableValue + gstAmount).toFixed(2));
         totalCgst += cgst;
         totalSgst += sgst;
         totalGst += gstAmount;
@@ -118,6 +120,7 @@ export async function POST(request: NextRequest) {
           cgst,
           sgst,
           line_total: lineTotal,
+          discount,
         };
       }
 
@@ -126,10 +129,11 @@ export async function POST(request: NextRequest) {
         cgst,
         sgst,
         line_total: lineTotal,
+        discount,
       };
     });
 
-    const total = subtotal + totalGst;
+    const total = Number(Math.max(0, subtotal + totalGst - (body.discount || 0)).toFixed(2));
     const payment_status = body.payment_status || 'paid';
     
     if (payment_status === 'partial') {
@@ -168,6 +172,7 @@ export async function POST(request: NextRequest) {
       p_total: Number(total.toFixed(2)),
       p_status: status,
       p_user_id: context.userId,
+      p_discount: Number(body.discount || 0),
     });
 
     if (rpcError) {
