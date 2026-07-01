@@ -280,7 +280,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
       }
     }
 
-    showToast(`${successCount} reminder${successCount !== 1 ? 's' : ''} sent ✓`, 'success');
+    showToast(`${successCount} reminder${successCount !== 1 ? 's' : ''} sent`, 'success');
     setBulkSending(false);
     setBulkProgress('');
     router.refresh();
@@ -451,7 +451,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
                 : 'bg-[#f3f4f6] text-[#6b7280] hover:bg-[#e5e7eb]'
             }`}
           >
-            {savingTag ? 'Saving...' : customer.tag === 'vip' ? '★ VIP — Tap to make Regular' : 'Regular — Tap to make VIP ★'}
+            {savingTag ? 'Saving...' : customer.tag === 'vip' ? 'VIP — Tap to make Regular' : 'Regular — Tap to make VIP'}
           </button>
         </div>
             {/* Tab Selection Row */}
@@ -557,7 +557,7 @@ export default function CustomerDetailClient({ customer: initial, shop, invoices
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
-                    All paid ✓ — No outstanding balance
+                    All paid — No outstanding balance
                   </p>
                 </div>
               )}

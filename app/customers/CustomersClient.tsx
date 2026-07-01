@@ -394,7 +394,7 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
             }
           />
         ) : (
-          <div className="bg-white border border-[#e5e7eb] rounded-none overflow-hidden mb-6 shadow-xs">
+          <div className="md:bg-white md:border md:border-[#e5e7eb] md:rounded-none md:overflow-hidden mb-6 md:shadow-xs">
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full border-collapse text-left">
@@ -481,69 +481,84 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
             </div>
 
             {/* Mobile View */}
-            <div className="md:hidden flex flex-col gap-0 divide-y divide-[#f3f4f6]">
-              {customers.map((customer) => (
-                <div
-                  key={customer.id}
-                  onClick={() => router.push(`/customers/${customer.id}`)}
-                  className="bg-white p-4 cursor-pointer hover:bg-gray-50/50 transition-colors"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-none flex items-center justify-center text-sm font-bold ${
-                        customer.tag === 'vip'
-                          ? 'bg-[#fef3c7] text-[#b45309]'
-                          : 'bg-[#0050e8]/10 text-[#0050e8]'
-                      }`}>
-                        {customer.name.charAt(0).toUpperCase()}
+            <div className="md:hidden flex flex-col gap-3">
+              {customers.map((customer) => {
+                const balance = Number(customer.outstanding_balance || 0);
+                return (
+                  <div
+                    key={customer.id}
+                    onClick={() => router.push(`/customers/${customer.id}`)}
+                    className="bg-white border border-[#e5e7eb] rounded-2xl p-4 cursor-pointer hover:bg-gray-50/50 transition-all shadow-xs"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold border ${
+                          customer.tag === 'vip'
+                            ? 'bg-amber-50 border-amber-200 text-amber-700'
+                            : 'bg-[#0050e8]/10 border-[#0050e8]/20 text-[#0050e8]'
+                        }`}>
+                          {customer.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-900 uppercase">{customer.name}</p>
+                          <p className="text-xs text-gray-400 font-medium">+91 {customer.phone.slice(-10)}</p>
+                          {customer.gstin && (
+                            <span className="text-[9px] text-blue-600 font-bold block uppercase">GSTIN: {customer.gstin}</span>
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-bold text-gray-900 uppercase">{customer.name}</p>
-                        <p className="text-xs text-gray-400 font-medium">+91 {customer.phone.slice(-10)}</p>
-                        {customer.gstin && (
-                          <span className="text-[9px] text-blue-600 font-bold block uppercase">GSTIN: {customer.gstin}</span>
+                      <div className="flex flex-col items-end gap-1.5">
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
+                          customer.tag === 'vip'
+                            ? 'bg-amber-50 text-amber-700 border-amber-200'
+                            : 'bg-slate-50 text-slate-600 border-slate-200'
+                        }`}>
+                          {customer.tag}
+                        </span>
+                        {balance > 0 && (
+                          <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-red-50 text-red-700 border border-red-200">
+                            Due: ₹{balance.toLocaleString('en-IN')}
+                          </span>
                         )}
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1.5">
-                      <span className={`px-2 py-0.5 rounded-none text-[10px] font-bold uppercase tracking-wider ${
-                        customer.tag === 'vip'
-                          ? 'bg-[#fef3c7] text-[#b45309]'
-                          : 'bg-gray-100 text-gray-600 border border-gray-200'
-                      }`}>
-                        {customer.tag}
-                      </span>
-                      {Number(customer.outstanding_balance || 0) > 0 && (
-                        <span className="px-2 py-0.5 rounded-none text-[9px] font-bold uppercase bg-amber-50 text-amber-700 border border-amber-200">
-                          Due: ₹{Number(customer.outstanding_balance).toLocaleString('en-IN')}
+                    <div className="flex items-center justify-between text-[11px] text-[#9ca3af] font-semibold pt-2 border-t border-[#f3f4f6]">
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center gap-1">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-slate-400">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                          </svg>
+                          {customer.total_invoices} invoice{customer.total_invoices !== 1 ? 's' : ''}
                         </span>
-                      )}
+                        <span className="flex items-center gap-1">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-slate-400">
+                            <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="2" y1="10" x2="22" y2="10"></line>
+                          </svg>
+                          ₹{Number(customer.total_spent).toLocaleString('en-IN')} spent
+                        </span>
+                      </div>
+                      <span>Last active: {timeAgo(customer.created_at)}</span>
+                    </div>
+                    {/* Action buttons for mobile */}
+                    <div className="flex justify-end gap-4 mt-2 pt-2 border-t border-dashed border-gray-100" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => openEditModal(customer)}
+                        className="text-xs font-bold text-amber-600"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => openDeleteModal(customer)}
+                        className="text-xs font-bold text-red-600"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-[#9ca3af] font-semibold pt-2 border-t border-[#f3f4f6]">
-                    <div className="flex items-center gap-3">
-                      <span>📂 {customer.total_invoices} invoice{customer.total_invoices !== 1 ? 's' : ''}</span>
-                      <span>💰 ₹{Number(customer.total_spent).toLocaleString('en-IN')} spent</span>
-                    </div>
-                    <span>Last active: {timeAgo(customer.created_at)}</span>
-                  </div>
-                  {/* Action buttons for mobile */}
-                  <div className="flex justify-end gap-4 mt-2 pt-2 border-t border-dashed border-gray-100" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      onClick={() => openEditModal(customer)}
-                      className="text-xs font-bold text-amber-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => openDeleteModal(customer)}
-                      className="text-xs font-bold text-red-600"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {totalCountState > pageSize && (
@@ -576,7 +591,7 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
         <form onSubmit={handleAddSubmit} className="space-y-4 pt-2">
           {formError && (
             <div className="p-3 bg-red-50 text-red-600 text-xs font-semibold rounded-none border border-red-200">
-              ⚠️ {formError}
+              {formError}
             </div>
           )}
 
@@ -675,7 +690,7 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
         <form onSubmit={handleEditSubmit} className="space-y-4 pt-2">
           {formError && (
             <div className="p-3 bg-red-50 text-red-600 text-xs font-semibold rounded-none border border-red-200">
-              ⚠️ {formError}
+              {formError}
             </div>
           )}
 
