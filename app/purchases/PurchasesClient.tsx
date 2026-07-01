@@ -167,9 +167,6 @@ export default function PurchasesClient({ shop, initialPurchases }: Props) {
             <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
               Purchases Log
             </h1>
-            <p className="text-[10px] text-gray-500 font-semibold mt-1">
-              Record inward supplies, track bills & manage Input Tax Credit (ITC).
-            </p>
           </div>
           <button
             onClick={() => router.push('/purchases/new')}

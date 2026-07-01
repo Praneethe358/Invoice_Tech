@@ -240,9 +240,6 @@ export default function CreditDebitNotesClient({ shop, initialNotes }: Props) {
             <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
               Credit & Debit Notes
             </h1>
-            <p className="text-[10px] text-gray-500 font-semibold mt-1">
-              Issue and track credit/debit notes for GST compliance.
-            </p>
           </div>
           {shop.gst_registered && (
             <button

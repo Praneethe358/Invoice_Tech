@@ -312,9 +312,6 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
             <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
               Customer Ledger
             </h1>
-            <p className="text-[10px] text-gray-500 font-semibold mt-1">
-              Manage accounts, track balances, and view transaction history.
-            </p>
           </div>
           
           <div className="flex gap-2">

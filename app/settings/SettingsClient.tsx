@@ -277,9 +277,6 @@ export default function SettingsClient({
           <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
             Settings
           </h1>
-          <p className="text-[10px] text-gray-500 font-semibold mt-1">
-            Manage business profile, tax configurations, and system preferences.
-          </p>
         </div>
 
         {/* Shop Administration - Owner & Admin Only */}

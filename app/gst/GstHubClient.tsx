@@ -492,9 +492,6 @@ export default function GstHubClient({ shop, invoices, purchases, creditDebitNot
             <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
               GST Hub
             </h1>
-            <p className="text-[10px] text-gray-500 font-semibold mt-1">
-              GST Compliance Hub · GSTIN: <span className="font-mono font-bold text-[#0050e8]">{shop.gstin}</span>
-            </p>
           </div>
 
           <div className="flex gap-2">

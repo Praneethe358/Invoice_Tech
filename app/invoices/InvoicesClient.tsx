@@ -159,9 +159,6 @@ export default function InvoicesClient({ shop, initialInvoices }: Props) {
           <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
             All Invoices
           </h1>
-          <p className="text-[10px] text-gray-500 font-semibold mt-1">
-            Filter sales records by status & date range.
-          </p>
         </div>
 
         {/* Search & Filter Section */}

@@ -193,9 +193,6 @@ export default function ReportsClient({ shop, userName }: ReportsClientProps) {
               <h1 className="text-xl font-black text-slate-800 tracking-tight font-heading uppercase">
                 Business Reports
               </h1>
-              <p className="text-[10px] text-slate-400 font-semibold mt-1">
-                Monthly summary & metrics
-              </p>
             </div>
             <span className="bg-[#0050e8]/10 text-[#0050e8] px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold border border-[#0050e8]/10 shrink-0">
               {getFYContext(month, year)}

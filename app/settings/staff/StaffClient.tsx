@@ -156,7 +156,6 @@ export default function StaffClient({ staff: initialStaff, ownerName, shopName }
         <div className="mb-6 md:hidden flex justify-between items-center">
           <div>
             <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">Team Members</h1>
-            <p className="text-[10px] text-gray-500 font-semibold mt-1">Add staff who help run your shop</p>
           </div>
           <button
             onClick={() => { setShowInviteForm(!showInviteForm); setGeneratedLink(null); }}

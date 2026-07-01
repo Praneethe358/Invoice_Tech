@@ -115,9 +115,6 @@ export default function PurchaseDetailClient({ shop, purchase, items }: Props) {
               <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
                 Purchase Invoice
               </h1>
-              <p className="text-[10px] text-gray-500 font-semibold mt-1">
-                Inward Purchase Invoice details · #{purchase.purchase_invoice_number}
-              </p>
             </div>
           </div>
           <button

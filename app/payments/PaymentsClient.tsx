@@ -175,9 +175,6 @@ export default function PaymentsClient({ shop, payments: initialPayments }: Prop
             <h1 className="text-xl font-black text-slate-800 tracking-tight font-heading uppercase">
               Collections Feed
             </h1>
-            <p className="text-[10px] text-slate-400 font-semibold mt-1">
-              Transaction history & ledger
-            </p>
           </div>
           <div className="bg-[#0050e8]/10 text-[#0050e8] text-[10px] font-bold px-3 py-1.5 rounded-lg border border-[#0050e8]/20 shrink-0">
             {payments.length} txn{payments.length !== 1 ? 's' : ''}

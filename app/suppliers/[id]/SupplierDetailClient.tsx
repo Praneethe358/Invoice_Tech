@@ -291,9 +291,6 @@ export default function SupplierDetailClient({
               <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
                 Supplier Ledger
               </h1>
-              <p className="text-[10px] text-gray-500 font-semibold mt-1">
-                Supplier ledger details & inward supply logs for {supplier.name}
-              </p>
             </div>
           </div>
           <button

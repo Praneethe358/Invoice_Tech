@@ -236,9 +236,6 @@ export default function UpgradeClient({ shop, supportPhone }: UpgradeClientProps
           <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
             Upgrade Plan
           </h1>
-          <p className="text-[10px] text-gray-500 font-semibold mt-1">
-            Pay securely via Razorpay. Subscription activates instantly.
-          </p>
         </div>
 
         {/* Current status banner */}

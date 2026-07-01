@@ -1079,9 +1079,6 @@ export default function CatalogClient({
           <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
             Product Catalog
           </h1>
-          <p className="text-[10px] text-gray-500 font-semibold mt-1">
-            Good {mounted ? (new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening') : 'day'}! Manage items, barcodes and categories.
-          </p>
         </div>
 
         {/* Content Wrapper */}

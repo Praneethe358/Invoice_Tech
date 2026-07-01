@@ -244,9 +244,6 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
             <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
               Suppliers Directory
             </h1>
-            <p className="text-[10px] text-gray-500 font-semibold mt-1">
-              Track products supplier details & business logs.
-            </p>
           </div>
           <button
             onClick={() => setShowAddModal(true)}

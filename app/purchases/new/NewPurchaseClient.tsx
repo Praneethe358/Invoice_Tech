@@ -247,9 +247,6 @@ export default function NewPurchaseClient({ shop, suppliers, products }: Props) 
               <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
                 Record Purchase
               </h1>
-              <p className="text-[10px] text-gray-500 font-semibold mt-1">
-                Record inward supplies · Fill invoice meta fields & item rows
-              </p>
             </div>
           </div>
           <button

@@ -155,7 +155,6 @@ export default function AuditClient() {
         {/* Mobile Header */}
         <div className="mb-6 md:hidden">
           <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">Audit Trail</h1>
-          <p className="text-[10px] text-gray-500 font-semibold mt-1">Every action taken in your account</p>
         </div>
 
         {/* Filters */}
