@@ -158,7 +158,7 @@ export async function syncSubscriptionStatus(
   ) {
     try {
       const { createAdminClient } = await import('@/lib/supabase/admin');
-      const admin = createAdminClient();
+      const admin = createAdminClient() as any;
       await admin
         .from('shops')
         .update({ subscription_status: 'expired' })
@@ -176,7 +176,7 @@ export async function syncSubscriptionStatus(
   ) {
     try {
       const { createAdminClient } = await import('@/lib/supabase/admin');
-      const admin = createAdminClient();
+      const admin = createAdminClient() as any;
       await admin
         .from('shops')
         .update({ subscription_status: 'expired' })
@@ -191,7 +191,7 @@ export async function autoExpireOutdatedSubscriptions(): Promise<void> {
   if (typeof window !== 'undefined') return;
   try {
     const { createAdminClient } = await import('@/lib/supabase/admin');
-    const admin = createAdminClient();
+    const admin = createAdminClient() as any;
     const nowStr = new Date().toISOString();
 
     // Expire trials that have ended

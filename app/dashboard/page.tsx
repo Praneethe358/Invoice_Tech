@@ -52,26 +52,26 @@ export default async function DashboardPage() {
 
   if (allInvoicesData) {
     const activeInvoices = allInvoicesData.filter(
-      (inv) => inv.status === 'saved' || inv.status === 'sent'
+      (inv: any) => inv.status === 'saved' || inv.status === 'sent'
     );
     totalInvoices = activeInvoices.length;
     
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
-
-    allInvoicesData.forEach((inv) => {
+ 
+    allInvoicesData.forEach((inv: any) => {
       if (inv.status === 'failed' || inv.delivery_status === 'failed') {
         failedInvoices++;
       }
     });
-
-    activeInvoices.forEach((inv) => {
+ 
+    activeInvoices.forEach((inv: any) => {
       const invDate = new Date(inv.created_at);
       if (invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear) {
         thisMonth += Number(inv.total || 0);
       }
-
+ 
       const paymentStatus = inv.payment_status || 'unpaid';
       if (paymentStatus === 'unpaid' || paymentStatus === 'partial') {
         const totalVal = Number(inv.total || 0);

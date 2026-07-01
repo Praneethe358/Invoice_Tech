@@ -59,7 +59,7 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
     const { data, count, error } = await query;
     if (!error && data) {
       // Fetch purchases only for these suppliers to aggregate data
-      const supplierIds = data.map((s) => s.id);
+      const supplierIds = data.map((s: any) => s.id);
       let purchases: any[] = [];
       if (supplierIds.length > 0) {
         const { data: purData } = await supabase
@@ -85,7 +85,7 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
         }
       });
 
-      const enriched = data.map((sup) => ({
+      const enriched = data.map((sup: any) => ({
         ...sup,
         total_purchases: statsMap[sup.id]?.total || 0,
         last_purchase_date: statsMap[sup.id]?.lastDate || null,
@@ -105,7 +105,7 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
         .from('suppliers')
         .select('id', { count: 'exact', head: true })
         .eq('shop_id', shop.id)
-        .then(({ count }) => {
+        .then(({ count }: { count: number | null }) => {
           setTotalCount(count ?? 0);
         });
       return;

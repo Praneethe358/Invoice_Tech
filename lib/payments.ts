@@ -2,12 +2,12 @@ import { createAdminClient } from './supabase/admin';
 
 // Get total paid for an invoice from payments table
 export async function getInvoicePaid(invoiceId: string): Promise<number> {
-  const supabase = createAdminClient();
+  const supabase = createAdminClient() as any;
   const { data } = await supabase
     .from('payments')
     .select('amount')
     .eq('invoice_id', invoiceId);
-  return data?.reduce((sum, p) => sum + Number(p.amount), 0) ?? 0;
+  return data?.reduce((sum: number, p: any) => sum + Number(p.amount), 0) ?? 0;
 }
 
 // Get balance due for an invoice
@@ -32,7 +32,7 @@ export async function syncInvoicePaymentStatus(
     payment_status = 'partial';
   }
 
-  const supabase = createAdminClient();
+  const supabase = createAdminClient() as any;
   await supabase
     .from('invoices')
     .update({
@@ -48,7 +48,7 @@ export async function syncCustomerOutstanding(
   shopId: string,
   customerPhone: string
 ): Promise<void> {
-  const supabase = createAdminClient();
+  const supabase = createAdminClient() as any;
 
   // Get all saved or sent invoices for this customer
   const { data: invoices } = await supabase
@@ -78,7 +78,7 @@ export async function syncCustomerOutstanding(
   let totalCredit = 0;
   let totalDebit = 0;
   if (notes) {
-    notes.forEach((note) => {
+    notes.forEach((note: any) => {
       if (note.note_type === 'credit') {
         totalCredit += Number(note.total || 0);
       } else if (note.note_type === 'debit') {

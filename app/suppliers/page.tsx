@@ -30,7 +30,7 @@ export default async function SuppliersPage() {
     .limit(25);
 
   // Fetch purchases only for these suppliers to aggregate data
-  const supplierIds = (suppliers || []).map((s) => s.id);
+  const supplierIds = (suppliers || []).map((s: any) => s.id);
   let purchases: any[] = [];
   if (supplierIds.length > 0) {
     const { data: purData } = await supabase
@@ -56,7 +56,7 @@ export default async function SuppliersPage() {
     }
   });
 
-  const enrichedSuppliers = (suppliers || []).map((sup) => ({
+  const enrichedSuppliers = (suppliers || []).map((sup: any) => ({
     ...sup,
     total_purchases: supplierStats[sup.id]?.total || 0,
     last_purchase_date: supplierStats[sup.id]?.lastDate || null,

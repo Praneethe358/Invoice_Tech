@@ -22,7 +22,7 @@ export interface AuditLogParams {
  */
 export async function logAudit(params: AuditLogParams): Promise<void> {
   try {
-    const admin = createAdminClient();
+    const admin = createAdminClient() as any;
     await admin.from('audit_logs').insert({
       shop_id: params.shopId,
       actor_user_id: params.actorUserId,

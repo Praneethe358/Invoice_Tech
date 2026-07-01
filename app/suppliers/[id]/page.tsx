@@ -49,7 +49,7 @@ export default async function SupplierDetailPage({ params }: Props) {
   let totalPurchased = 0;
   let totalItcEligible = 0;
 
-  (purchases || []).forEach((p) => {
+  (purchases || []).forEach((p: any) => {
     totalPurchased += parseFloat(p.total as any) || 0;
     if (p.itc_eligible) {
       totalItcEligible += parseFloat((p.total_cgst + p.total_sgst) as any) || 0;
