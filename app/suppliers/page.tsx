@@ -24,7 +24,7 @@ export default async function SuppliersPage() {
   // Fetch initial suppliers list (limit 25)
   const { data: suppliers } = await supabase
     .from('suppliers')
-    .select('id, shop_id, name, contact_person, phone, email, address, gstin, created_at')
+    .select('id, shop_id, name, phone, address, gstin, created_at')
     .eq('shop_id', shop.id)
     .order('name', { ascending: true })
     .limit(25);

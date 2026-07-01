@@ -659,16 +659,13 @@ export default function Navbar({ initialShop, initialRole, initialUserName }: Na
 
       {/* ─── MOBILE HEADER (Visible only on < 768px) ─── */}
       <div className="mobile-header-fixed md:hidden w-full exclude-blur">
-        {/* Dark Top Strip (Navy Blue) */}
-        <div className="bg-[#001048] h-1 w-full" />
-        
-        <nav className="bg-white/95 backdrop-blur-xl border-b border-[#e8eaed]">
+        <nav className="bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-xs">
           <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
             <div className="flex items-center gap-3">
               {/* Hamburger Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 text-[#4b5563] hover:text-[#1a1d26] rounded-xl hover:bg-[#f3f4f6] transition-all cursor-pointer"
+                className="p-2 text-slate-600 hover:text-[#0050e8] rounded-xl hover:bg-blue-50/50 transition-all cursor-pointer"
                 aria-label="Toggle navigation menu"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -689,9 +686,9 @@ export default function Navbar({ initialShop, initialRole, initialUserName }: Na
 
               <Link href="/dashboard" className="flex items-center gap-2">
                 <img src="/trubill-logo.png" alt="TruBill logo" className="w-8 h-8 object-contain shrink-0" loading="lazy" />
-                <span className="font-heading font-black text-sm">
-                  <span className="text-[#001048]">Tru</span>
-                  <span className="text-[#0050e8]">Bill</span>
+                <span className="font-heading font-black text-sm tracking-tight text-slate-800 flex items-center">
+                  <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">TRU</span>
+                  <span className="text-[#001048]">BILL</span>
                 </span>
               </Link>
             </div>
@@ -703,20 +700,18 @@ export default function Navbar({ initialShop, initialRole, initialUserName }: Na
               ) : (
                 <button
                   onClick={() => setMobileMenuOpen(true)}
-                  className="flex items-center gap-1.5 bg-[#f3f4f6] hover:bg-[#e5e7eb] px-2 py-1 rounded-lg transition-colors max-w-[160px]"
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50/80 border border-blue-100 px-3 py-1.5 rounded-xl transition-all active:scale-[0.97] max-w-[170px] shadow-2xs"
                   aria-label="Open navigation menu"
                 >
                   {/* Shop logo / initials */}
-                  <div className="w-5 h-5 rounded bg-[#0050e8]/10 flex items-center justify-center overflow-hidden border border-[#e8eaed] shrink-0">
+                  <div className="w-5 h-5 rounded bg-[#0050e8] text-white flex items-center justify-center overflow-hidden shadow-2xs shrink-0 font-black text-[9px] uppercase tracking-wide">
                     {shopInfo?.logo_url ? (
                       <img src={shopInfo.logo_url} alt="Shop logo" className="w-full h-full object-cover" loading="lazy" />
                     ) : (
-                      <span className="text-[8px] font-bold text-[#0050e8] leading-none">
-                        {(shopInfo?.name || 'TB').slice(0, 2).toUpperCase()}
-                      </span>
+                      (shopInfo?.name || 'TB').slice(0, 2).toUpperCase()
                     )}
                   </div>
-                  <span className="text-[11px] font-bold text-gray-700 truncate max-w-[110px]">
+                  <span className="text-[11px] font-extrabold text-blue-900 truncate max-w-[110px]">
                     {shopInfo?.name || 'My Shop'}
                   </span>
                 </button>
@@ -731,8 +726,6 @@ export default function Navbar({ initialShop, initialRole, initialUserName }: Na
             </div>
           </div>
         </nav>
-        {/* Bottom Accent Strip (Primary Blue) */}
-        <div className="bg-[#0050e8] h-0.5 w-full" />
       </div>
 
       {/* Mobile Drawer Sidebar Overlay */}

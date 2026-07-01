@@ -289,4 +289,20 @@ input[type="number"] { -moz-appearance: textfield; }
   h1 { font-size: 1.25rem !important; }
   h2 { font-size: 1.1rem !important; }
   h3 { font-size: 1rem !important; }
+
+  /* Premium mobile page headers customization */
+  h1.font-heading,
+  h1[class*="font-heading"] {
+    font-family: 'Plus Jakarta Sans', 'Outfit', 'Inter', system-ui, -apple-system, sans-serif !important;
+    font-size: 1.45rem !important;
+    font-weight: 850 !important;
+    letter-spacing: -0.035em !important;
+    text-transform: none !important; /* Override uppercase utility on mobile */
+    background: linear-gradient(135deg, #001048 0%, #004ecc 100%) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    display: inline-block !important;
+    padding-bottom: 2px !important;
+  }
 }

@@ -1338,87 +1338,94 @@ export default function CatalogClient({
                   </div>
 
                   {/* Clean Products Mobile Card View */}
-                  <div className="md:hidden flex flex-col gap-3">
+                  <div className="md:hidden flex flex-col gap-3.5">
                     {searchedProducts.length === 0 ? (
-                      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs py-8 text-center text-slate-400 text-xs">
+                      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs py-8 text-center text-slate-400 text-xs">
                         No products found matching your search.
                       </div>
                     ) : (
                       searchedProducts.map((p) => (
                         <div
                           key={p.id}
-                          className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-3"
+                          className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col gap-3 active:scale-[0.99] transition-all duration-200"
                         >
                           <div className="flex items-start justify-between">
-                            <div className="flex items-start gap-2.5">
-                              {/* Favorite star */}
+                            <div className="flex items-start gap-3">
+                              {/* Favorite star SVG */}
                               <button
                                 onClick={() => handleToggleFavorite(p)}
-                                className={`transition-all hover:scale-110 cursor-pointer text-base leading-none -mt-0.5 ${
-                                  p.is_favorite ? 'text-amber-500' : 'text-slate-300'
+                                className={`transition-all active:scale-[0.8] hover:scale-110 cursor-pointer -mt-0.5 ${
+                                  p.is_favorite ? 'text-amber-500' : 'text-slate-350'
                                 }`}
                               >
-                                ★
+                                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={p.is_favorite ? "0" : "2"}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.24.588 1.81l-3.97 2.883a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.971-2.883a1 1 0 00-1.175 0l-3.97 2.883c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118l-3.97-2.883c-.77-.57-.37-1.81.588-1.81h4.907a1 1 0 00.95-.69l1.519-4.674z" />
+                                </svg>
                               </button>
                               <div>
-                                <h4 className="text-sm font-bold text-[#111827] uppercase">{p.name}</h4>
-                                {p.hsn_code && (
-                                  <span className="text-[10px] text-slate-400 block mt-0.5">HSN: {p.hsn_code}</span>
-                                )}
-                                <div className="mt-1 flex flex-wrap gap-1.5 items-center">
+                                <h4 className="text-sm font-bold text-slate-900 uppercase tracking-tight leading-tight">{p.name}</h4>
+                                <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                                   {p.category ? (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold bg-slate-50 text-slate-700 border border-slate-200">
                                       {p.category}
                                     </span>
                                   ) : (
-                                    <span className="text-slate-300 italic text-[9px]">Uncategorized</span>
+                                    <span className="text-[9px] font-bold text-slate-400 italic">Uncategorized</span>
                                   )}
-                                  <span className="text-[10px] font-medium text-slate-500">
-                                    · {p.totalVariants} variant{p.totalVariants !== 1 ? 's' : ''}
-                                  </span>
+                                  {p.hsn_code && (
+                                    <span className="text-[9px] font-medium text-slate-400 font-mono">HSN: {p.hsn_code}</span>
+                                  )}
                                 </div>
                               </div>
                             </div>
 
                             <div className="text-right">
-                              <span className="text-xs font-bold text-gray-900 block">₹{p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                              <span className="text-sm font-black text-[#0050e8] block">₹{p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                               <span className="text-[10px] font-bold text-slate-500 block mt-0.5">{p.totalStock} units</span>
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                          {/* Variants & Stock Info Box */}
+                          <div className="bg-slate-50/80 border border-slate-100 rounded-xl px-3 py-2 flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                            <span className="flex items-center gap-1">
+                              <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                              </svg>
+                              {p.totalVariants} Variant{p.totalVariants !== 1 ? 's' : ''}
+                            </span>
+                            <span className="text-slate-700 font-bold">{p.totalStock} Unit{p.totalStock !== 1 ? 's' : ''} Total</span>
+                          </div>
+
+                          <div className="flex items-center justify-between pt-1 text-xs">
                             <div>
                               {p.stockStatus === 'out' ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-rose-50 text-rose-700 border border-rose-100">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-rose-50 text-rose-700 border border-rose-100 uppercase tracking-wider">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
                                   Out of Stock
                                 </span>
                               ) : p.stockStatus === 'low' ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-amber-50 text-amber-700 border border-amber-100">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-100 uppercase tracking-wider">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                                   Low Stock
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 uppercase tracking-wider">
                                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                   In Stock
                                 </span>
                               )}
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                               <button
                                 onClick={() => setVariantsProduct(p)}
-                                className="flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded-md cursor-pointer"
+                                className="flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 border border-blue-100/50 px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors"
                               >
-                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                </svg>
                                 Variants
                               </button>
                               <button
                                 onClick={() => openEditProduct(p)}
-                                className="p-1 text-slate-500 hover:text-amber-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                                className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 border border-transparent hover:border-amber-100 rounded-lg transition-colors cursor-pointer"
                               >
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -1426,7 +1433,7 @@ export default function CatalogClient({
                               </button>
                               <button
                                 onClick={() => handleDeleteProduct(p.id)}
-                                className="p-1 text-slate-500 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                                className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 rounded-lg transition-colors cursor-pointer"
                               >
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
