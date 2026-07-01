@@ -166,9 +166,6 @@ export default function DashboardClient({
           <h1 className="text-xl font-black text-gray-900 tracking-tight font-heading uppercase">
             Billing & Invoices
           </h1>
-          <p className="text-[10px] text-gray-500 font-semibold mt-1">
-            Good {mounted ? (new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening') : 'day'}! Track outstanding balances, payments, and sales.
-          </p>
         </div>
 
         {/* Conditional rendering for stats or blocked state */}
@@ -226,7 +223,7 @@ export default function DashboardClient({
                 </div>
                 <div
                   onClick={() => setStatusFilter('failed')}
-                  className={`p-4 flex flex-col justify-between min-h-[90px] rounded-2xl md:rounded-none border cursor-pointer hover:shadow-xs transition-shadow col-span-2 md:col-span-1 ${stats.failedInvoices > 0 ? 'bg-[#fdf2f2] border-[#fde8e8]' : 'bg-white border-[#e5e7eb]'}`}
+                  className={`hidden md:flex p-4 flex-col justify-between min-h-[90px] rounded-2xl md:rounded-none border cursor-pointer hover:shadow-xs transition-shadow col-span-2 md:col-span-1 ${stats.failedInvoices > 0 ? 'bg-[#fdf2f2] border-[#fde8e8]' : 'bg-white border-[#e5e7eb]'}`}
                 >
                   <span className={`text-[10px] font-bold uppercase tracking-wide ${stats.failedInvoices > 0 ? 'text-[#9b1c1c]' : 'text-gray-500'}`}>Failed Deliveries</span>
                   <p className={`text-xl font-extrabold mt-2 ${stats.failedInvoices > 0 ? 'text-[#e02424]' : 'text-gray-900'}`}>{stats.failedInvoices}</p>
