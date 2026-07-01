@@ -45,7 +45,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://checkout.razorpay.com https://unpkg.com https://app.termly.io https://*.termly.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://*.supabase.co; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://api.razorpay.com https://lumberjack-cx.razorpay.com https://app.termly.io https://*.termly.io; frame-src https://api.razorpay.com https://checkout.razorpay.com https://app.termly.io https://*.termly.io;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://checkout.razorpay.com https://unpkg.com https://app.termly.io https://*.termly.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://*.supabase.co; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.razorpay.com https://lumberjack-cx.razorpay.com https://app.termly.io https://*.termly.io; frame-src https://api.razorpay.com https://checkout.razorpay.com https://app.termly.io https://*.termly.io;",
           },
         ],
       },

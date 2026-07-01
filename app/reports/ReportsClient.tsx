@@ -720,7 +720,7 @@ export default function ReportsClient({ shop, userName }: ReportsClientProps) {
                 Section 5 — Daily Sales Chart
               </h2>
               <div className="h-64 mt-4">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                   <AreaChart data={data.dailySales} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
@@ -795,7 +795,7 @@ export default function ReportsClient({ shop, userName }: ReportsClientProps) {
                 </h2>
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="w-full sm:w-1/2 h-52">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                       <PieChart>
                         <Pie
                           data={data.paymentBreakdown.filter((p: any) => p.value > 0)}

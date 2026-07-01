@@ -479,7 +479,7 @@ export default function AdminDashboardClient() {
                   Updating Chart...
                 </div>
               )}
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <AreaChart data={analytics.growth_data}>
                   <defs>
                     <linearGradient id="colorShops" x1="0" y1="0" x2="0" y2="1">
@@ -512,7 +512,7 @@ export default function AdminDashboardClient() {
             </div>
             
             <div className="h-44 relative flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <PieChart>
                   <Pie
                     data={typeChartData}
