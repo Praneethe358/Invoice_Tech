@@ -114,8 +114,9 @@ export default function SignupPage() {
   const { showToast } = useToast();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [isExistingUser, setIsExistingUser] = useState(false);
 
-  // Redirect to dashboard if user is logged in and already has a shop or is active staff
+  // Redirect to dashboard if user already has a shop, or skip to step 2 if auth exists but no shop
   useEffect(() => {
     const checkExistingShopOrStaff = async () => {
       const supabase = createClient();
@@ -141,7 +142,13 @@ export default function SignupPage() {
           .maybeSingle();
         if (staff) {
           router.push('/dashboard');
+          return;
         }
+
+        // User is authenticated but has no shop — show step 1 without credentials
+        setIsExistingUser(true);
+        setEmail(user.email || '');
+        setOwnerName(user.user_metadata?.owner_name || user.user_metadata?.full_name || '');
       }
     };
     checkExistingShopOrStaff();
@@ -218,17 +225,19 @@ export default function SignupPage() {
         showToast('Please enter a valid 10-digit phone number', 'error');
         return;
       }
-      if (!validateEmail(email)) {
-        showToast('Please enter a valid email address', 'error');
-        return;
-      }
-      if (password.length < 8) {
-        showToast('Password must be at least 8 characters', 'error');
-        return;
-      }
-      if (password !== confirmPassword) {
-        showToast('Passwords do not match', 'error');
-        return;
+      if (!isExistingUser) {
+        if (!validateEmail(email)) {
+          showToast('Please enter a valid email address', 'error');
+          return;
+        }
+        if (password.length < 8) {
+          showToast('Password must be at least 8 characters', 'error');
+          return;
+        }
+        if (password !== confirmPassword) {
+          showToast('Passwords do not match', 'error');
+          return;
+        }
       }
       setStep(2);
     } else if (step === 2) {
@@ -295,26 +304,45 @@ export default function SignupPage() {
     setLoading(true);
     try {
       const supabase = createClient();
-      // Step 1: Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: {
-          data: {
-            owner_name: ownerName.trim(),
-          },
-        },
-      });
 
-      if (authError) {
-        showToast(authError.message, 'error');
-        setLoading(false);
-        return;
-      }
-      if (!authData.user) {
-        showToast('Signup failed.', 'error');
-        setLoading(false);
-        return;
+      // If user is already authenticated (returning from a failed shop creation), skip auth
+      if (!isExistingUser) {
+        // Step 1: Create auth user (or sign in if account already exists)
+        let { data: authData, error: authError } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: {
+            data: {
+              owner_name: ownerName.trim(),
+            },
+          },
+        });
+
+        // If auth account already exists, try signing in instead
+        if (authError && (authError.status === 422 || authError.message?.toLowerCase().includes('already'))) {
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: email.trim(),
+            password,
+          });
+          if (signInError) {
+            showToast('An account with this email already exists. Please sign in or use a different email.', 'error');
+            setLoading(false);
+            return;
+          }
+          authData = signInData as typeof authData;
+          authError = null;
+        }
+
+        if (authError) {
+          showToast(authError.message, 'error');
+          setLoading(false);
+          return;
+        }
+        if (!authData?.user) {
+          showToast('Signup failed.', 'error');
+          setLoading(false);
+          return;
+        }
       }
 
       // Extract state code if GSTIN is registered
@@ -328,12 +356,12 @@ export default function SignupPage() {
       }
 
       const bType = getBusinessType(shopType);
-      const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-      const { data: newShop, error: shopError } = await supabase
-        .from('shops')
-        .insert({
-          auth_user_id: authData.user.id,
+      // Create shop via server-side API (bypasses RLS)
+      const createShopRes = await fetch('/api/signup/create-shop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           name: shopName.trim(),
           phone: phone.trim(),
           shop_type: shopType,
@@ -341,20 +369,20 @@ export default function SignupPage() {
           gstin: gstRegistered ? gstin.trim().toUpperCase() : null,
           business_type: bType,
           inventory_enabled: isServiceOnly ? false : inventoryEnabled,
-          onboarding_completed: true,
-          subscription_status: 'trial',
-          trial_ends_at: trialEndsAt,
           state: autoState,
-        })
-        .select('id')
-        .single();
+        }),
+      });
 
-      if (shopError || !newShop) {
-        console.error(shopError);
-        showToast('Account created but shop setup failed.', 'error');
+      const shopResult = await createShopRes.json();
+
+      if (!createShopRes.ok || !shopResult.id) {
+        console.error('Shop creation failed:', shopResult);
+        showToast(shopResult.error || 'Account created but shop setup failed.', 'error');
         setLoading(false);
         return;
       }
+
+      const newShop = { id: shopResult.id };
 
       // Fire platform event for new signup
       try {
@@ -518,8 +546,8 @@ export default function SignupPage() {
               >
                 {step === 1 && (
                   <div className="space-y-4">
-                    <h1 className="text-xl font-black text-[#1a1d26] tracking-tight">Let's create your account</h1>
-                    <p className="text-xs text-[#6b7280]">Enter details about you and your business.</p>
+                    <h1 className="text-xl font-black text-[#1a1d26] tracking-tight">{isExistingUser ? 'Complete your shop setup' : "Let's create your account"}</h1>
+                    <p className="text-xs text-[#6b7280]">{isExistingUser ? 'Your account is ready. Just fill in your shop details.' : 'Enter details about you and your business.'}</p>
                     <Input
                       label="Shop Name"
                       placeholder="e.g. Sri Lakshmi Stores"
@@ -543,34 +571,38 @@ export default function SignupPage() {
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                       required
                     />
-                    <Input
-                      label="Email Address"
-                      type="email"
-                      placeholder="name@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                    <Input
-                      label="Password"
-                      type="password"
-                      placeholder="Min 8 characters"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                    <Input
-                      label="Confirm Password"
-                      type="password"
-                      placeholder="Re-enter password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                    />
+                    {!isExistingUser && (
+                      <>
+                        <Input
+                          label="Email Address"
+                          type="email"
+                          placeholder="name@example.com"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                        />
+                        <Input
+                          label="Password"
+                          type="password"
+                          placeholder="Min 8 characters"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                        />
+                        <Input
+                          label="Confirm Password"
+                          type="password"
+                          placeholder="Re-enter password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          required
+                        />
+                      </>
+                    )}
                     <button
                       type="button"
                       onClick={nextStep}
-                      disabled={!shopName || !ownerName || !phone || !email || !password || !confirmPassword}
+                      disabled={!shopName || !ownerName || !phone || (!isExistingUser && (!email || !password || !confirmPassword))}
                       className="w-full bg-gradient-to-r from-[#0050e8] to-[#3b82f6] hover:from-[#0043c4] hover:to-[#2563eb] text-white font-bold py-3 rounded-xl transition-all disabled:from-slate-100 disabled:to-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed disabled:shadow-none shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 mt-4 min-h-[44px]"
                     >
                       <span>Continue</span>
@@ -830,8 +862,8 @@ export default function SignupPage() {
                 {step === 1 && (
                   <div className="space-y-4">
                     <div className="space-y-1">
-                      <h1 className="text-xl font-black text-[#1a1d26] tracking-tight">Let's create your account</h1>
-                      <p className="text-xs text-slate-400 font-medium">Enter details about you and your business.</p>
+                      <h1 className="text-xl font-black text-[#1a1d26] tracking-tight">{isExistingUser ? 'Complete your shop setup' : "Let's create your account"}</h1>
+                      <p className="text-xs text-slate-400 font-medium">{isExistingUser ? 'Your account is ready. Just fill in your shop details.' : 'Enter details about you and your business.'}</p>
                     </div>
                     <div className="space-y-1.5">
                       <label className="block text-xs font-bold text-slate-500">Shop Name</label>
@@ -870,43 +902,47 @@ export default function SignupPage() {
                         />
                       </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-500">Email Address</label>
-                      <input
-                        type="email"
-                        placeholder="name@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#0050e8] focus:bg-white"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-500">Password</label>
-                      <input
-                        type="password"
-                        placeholder="Min 8 characters"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#0050e8] focus:bg-white"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-500">Confirm Password</label>
-                      <input
-                        type="password"
-                        placeholder="Re-enter password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#0050e8] focus:bg-white"
-                      />
-                    </div>
+                    {!isExistingUser && (
+                      <>
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-bold text-slate-500">Email Address</label>
+                          <input
+                            type="email"
+                            placeholder="name@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#0050e8] focus:bg-white"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-bold text-slate-500">Password</label>
+                          <input
+                            type="password"
+                            placeholder="Min 8 characters"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#0050e8] focus:bg-white"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-bold text-slate-500">Confirm Password</label>
+                          <input
+                            type="password"
+                            placeholder="Re-enter password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#0050e8] focus:bg-white"
+                          />
+                        </div>
+                      </>
+                    )}
                     <button
                       type="button"
                       onClick={nextStep}
-                      disabled={!shopName || !ownerName || !phone || !email || !password || !confirmPassword}
+                      disabled={!shopName || !ownerName || !phone || (!isExistingUser && (!email || !password || !confirmPassword))}
                       className="w-full bg-[#0050e8] hover:bg-[#0043c4] text-white font-bold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] flex items-center justify-center gap-2 mt-4 shadow-lg shadow-blue-500/20"
                     >
                       <span>Continue</span>

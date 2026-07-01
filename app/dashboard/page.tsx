@@ -10,7 +10,14 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const context = await getCurrentUserContext(supabase);
 
-  if (!context) redirect('/login');
+  if (!context) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      redirect('/signup');
+    } else {
+      redirect('/login');
+    }
+  }
 
   // Fetch shop
   const { data: shop } = await supabase
