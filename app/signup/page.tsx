@@ -14,8 +14,7 @@ import { GST_STATES } from '@/lib/gstin-states';
 const stepTitles = [
   'Basic Information',
   'Business Category',
-  'Tax & Inventory Settings',
-  'Catalog Setup'
+  'Tax & Inventory Settings'
 ];
 
 interface CatalogItemState {
@@ -245,11 +244,7 @@ export default function SignupPage() {
           return;
         }
       }
-      if (shopType === 'footwear') {
-        handleSignupSubmit();
-      } else {
-        setStep(4);
-      }
+      handleSignupSubmit();
     }
   };
 
@@ -297,22 +292,6 @@ export default function SignupPage() {
 
   const handleSignupSubmit = async (e?: FormEvent) => {
     if (e) e.preventDefault();
-    if (shopType !== 'footwear' && step !== 4) return;
-
-    // Validate prices on submit (only if NOT footwear shop)
-    if (shopType !== 'footwear') {
-      const invalidItems = catalogItems.filter(
-        (item) => !item.price || parseFloat(item.price) <= 0
-      );
-      if (invalidItems.length > 0) {
-        showToast(
-          'Please enter a valid price for all remaining products or delete them.',
-          'error'
-        );
-        return;
-      }
-    }
-
     setLoading(true);
     try {
       const supabase = createClient();
@@ -638,17 +617,7 @@ export default function SignupPage() {
                       ))}
                     </div>
 
-                    {shopType === 'footwear' && (
-                      <div className="p-3.5 bg-blue-50/40 border border-blue-100 rounded-2xl text-[10px] font-semibold text-[#0050e8] flex items-start gap-2.5 shadow-2xs">
-                        <span className="text-sm shrink-0">💡</span>
-                        <div>
-                          <p className="font-extrabold text-blue-900 uppercase tracking-wide">Footwear Shop Selected</p>
-                          <p className="text-slate-600 mt-0.5 leading-relaxed">
-                            Footwear shops skip the manual catalog pricing wizard. We will pre-load 10 products with size (5-12) & color variant matrix configurations automatically.
-                          </p>
-                        </div>
-                      </div>
-                    )}
+
 
                     <div className="flex gap-3 pt-2">
                       <button
@@ -752,172 +721,8 @@ export default function SignupPage() {
                       <button
                         type="button"
                         onClick={nextStep}
-                        disabled={gstRegistered && (!gstin || !!gstinError)}
+                        disabled={loading || (gstRegistered && (!gstin || !!gstinError))}
                         className="flex-1 bg-gradient-to-r from-[#0050e8] to-[#3b82f6] hover:from-[#0043c4] hover:to-[#2563eb] text-white font-bold py-3 rounded-xl transition-all disabled:from-slate-100 disabled:to-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed disabled:shadow-none shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
-                      >
-                        <span>Continue</span>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                          <polyline points="12 5 19 12 12 5" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {step === 4 && (
-                  <div className="space-y-4">
-                    <h1 className="text-xl font-black text-[#1a1d26] tracking-tight">Set starter catalog prices</h1>
-                    <p className="text-xs text-[#6b7280]">
-                      Provide default unit prices (₹) for these items. Delete any items you don't sell.
-                    </p>
-
-                    <div className="max-h-[260px] overflow-y-auto space-y-2 pr-1 scrollbar-thin">
-                      {catalogItems.length === 0 ? (
-                        <div className="text-center py-6 border border-dashed border-slate-200 rounded-2xl text-slate-400 text-xs">
-                          No items in catalog. Add a custom item below.
-                        </div>
-                      ) : (
-                        catalogItems.map((item, idx) => {
-                          const colors = [
-                            'from-blue-500/10 to-indigo-500/10 text-blue-600',
-                            'from-emerald-500/10 to-teal-500/10 text-emerald-600',
-                            'from-violet-500/10 to-purple-500/10 text-violet-600',
-                            'from-amber-500/10 to-orange-500/10 text-amber-600',
-                            'from-pink-500/10 to-rose-500/10 text-pink-600',
-                          ];
-                          const colorClass = colors[idx % colors.length];
-
-                          return (
-                            <div
-                              key={item.id}
-                              className="group flex items-center gap-3 p-3 bg-white border border-slate-100 hover:border-slate-200 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)] rounded-2xl transition-all duration-200"
-                            >
-                              <div className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${colorClass} flex items-center justify-center shrink-0 font-bold text-sm tracking-wide`}>
-                                {item.name.charAt(0).toUpperCase()}
-                              </div>
-
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-black text-slate-800 truncate">{item.name}</p>
-                                <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                                  {item.hsn_code && (
-                                    <span className="bg-slate-100/80 text-slate-500 text-[9px] font-bold px-1.5 py-0.5 rounded-md border border-slate-200/30">
-                                      HSN {item.hsn_code}
-                                    </span>
-                                  )}
-                                  <span className="bg-blue-50/80 text-blue-600 text-[9px] font-bold px-1.5 py-0.5 rounded-md border border-blue-100/30">
-                                    GST {item.gst_rate}%
-                                  </span>
-                                </div>
-                              </div>
-
-                              <div className="w-24 shrink-0 flex items-center bg-slate-50/50 hover:bg-slate-50 border border-slate-200 focus-within:border-[#0050e8] focus-within:ring-2 focus-within:ring-[#0050e8]/10 rounded-xl px-2.5 transition-all duration-200 min-h-[38px]">
-                                <span className="text-xs text-slate-400 mr-1 font-bold">₹</span>
-                                <input
-                                  type="text"
-                                  value={item.price}
-                                  onChange={(e) => handleUpdatePrice(item.id, e.target.value)}
-                                  placeholder="0"
-                                  className="w-full text-xs font-bold text-slate-800 bg-transparent focus:outline-none"
-                                />
-                              </div>
-
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteItem(item.id)}
-                                className="w-8 h-8 rounded-xl bg-rose-50/50 hover:bg-rose-50 text-rose-500 hover:text-rose-600 flex items-center justify-center shrink-0 transition-colors opacity-80 hover:opacity-100"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-
-                    {/* Add Custom Item form inline toggler */}
-                    {!showAddForm ? (
-                      <button
-                        type="button"
-                        onClick={() => setShowAddForm(true)}
-                        className="w-full py-3 border border-dashed border-slate-200 hover:border-[#0050e8] hover:bg-[#0050e8]/5 rounded-2xl flex items-center justify-center gap-1.5 text-xs font-bold text-[#0050e8] transition-all duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        Add custom product to catalog
-                      </button>
-                    ) : (
-                      <div className="p-4 border border-dashed border-[#0050e8]/30 rounded-2xl space-y-3 bg-gradient-to-br from-blue-50/40 to-indigo-50/5 relative overflow-hidden">
-                        <p className="text-[10px] font-extrabold text-[#0050e8] uppercase tracking-wider">New Custom Catalog Item</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Input
-                            placeholder="Product Name"
-                            value={newItemName}
-                            onChange={(e) => setNewItemName(e.target.value)}
-                          />
-                          <Input
-                            placeholder="Price (₹)"
-                            type="number"
-                            value={newItemPrice}
-                            onChange={(e) => setNewItemPrice(e.target.value)}
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Input
-                            placeholder="HSN Code (optional)"
-                            value={newItemHsn}
-                            onChange={(e) => setNewItemHsn(e.target.value)}
-                          />
-                          <div>
-                            <label className="block text-[10px] font-bold text-slate-500 mb-1">GST Rate (%)</label>
-                            <select
-                              value={newItemGst}
-                              onChange={(e) => setNewItemGst(e.target.value)}
-                              className="w-full bg-white border border-slate-200 focus:border-[#0050e8] rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none transition-all"
-                            >
-                              <option value="0">0% GST</option>
-                              <option value="5">5% GST</option>
-                              <option value="12">12% GST</option>
-                              <option value="18">18% GST</option>
-                              <option value="28">28% GST</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 justify-end pt-1">
-                          <button
-                            type="button"
-                            onClick={() => setShowAddForm(false)}
-                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-250 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleAddCatalogItem}
-                            className="px-3 py-1.5 bg-gradient-to-r from-[#0050e8] to-[#3b82f6] hover:from-[#0043c4] hover:to-[#2563eb] text-white rounded-lg text-xs font-bold shadow-md shadow-blue-500/10 transition-all active:scale-[0.98]"
-                          >
-                            Add Item
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex gap-3 pt-2">
-                      <button
-                        type="button"
-                        onClick={prevStep}
-                        className="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold py-3 rounded-xl transition-all"
-                      >
-                        Back
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleSignupSubmit}
-                        disabled={loading}
-                        className="flex-1 bg-gradient-to-r from-[#0050e8] to-[#3b82f6] hover:from-[#0043c4] hover:to-[#2563eb] text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
                       >
                         {loading ? (
                           <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
@@ -925,7 +730,13 @@ export default function SignupPage() {
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                           </svg>
                         ) : (
-                          <span>Finish & Register</span>
+                          <>
+                            <span>Create Account</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <line x1="5" y1="12" x2="19" y2="12" />
+                              <polyline points="12 5 19 12 12 5" />
+                            </svg>
+                          </>
                         )}
                       </button>
                     </div>
@@ -1143,17 +954,7 @@ export default function SignupPage() {
                       ))}
                     </div>
 
-                    {shopType === 'footwear' && (
-                      <div className="p-3 bg-blue-50/40 border border-blue-100 rounded-xl text-[10px] font-semibold text-[#0050e8] flex items-start gap-2.5 shadow-2xs">
-                        <span className="text-sm shrink-0">💡</span>
-                        <div>
-                          <p className="font-extrabold text-blue-900 uppercase tracking-wide">Footwear Shop Selected</p>
-                          <p className="text-slate-600 mt-0.5 leading-relaxed">
-                            Footwear shops skip manual pricing wizard. We will pre-load 10 products with size & color variant matrices automatically.
-                          </p>
-                        </div>
-                      </div>
-                    )}
+
 
                     <div className="flex gap-3 pt-2">
                       <button
@@ -1263,137 +1064,20 @@ export default function SignupPage() {
                       <button
                         type="button"
                         onClick={nextStep}
-                        disabled={gstRegistered && (!gstin || !!gstinError)}
+                        disabled={loading || (gstRegistered && (!gstin || !!gstinError))}
                         className="flex-1 bg-[#0050e8] hover:bg-[#0043c4] text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 cursor-pointer"
                       >
-                        <span>Continue</span>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                          <polyline points="12 5 19 12 12 5" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {step === 4 && (
-                  <div className="space-y-4">
-                    <div className="space-y-1">
-                      <h1 className="text-xl font-black text-[#1a1d26] tracking-tight">Set starter catalog prices</h1>
-                      <p className="text-xs text-slate-400 font-medium">Provide default unit prices (₹). Delete any items you don't sell.</p>
-                    </div>
-
-                    <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1">
-                      {catalogItems.length === 0 ? (
-                        <div className="text-center py-6 border border-dashed border-slate-200 rounded-2xl text-slate-400 text-xs">
-                          No items in catalog. Add a custom item below.
-                        </div>
-                      ) : (
-                        catalogItems.map((item, idx) => (
-                          <div
-                            key={item.id}
-                            className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-2xl transition-all"
-                          >
-                            <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#0050e8] flex items-center justify-center shrink-0 font-bold text-xs">
-                              {item.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-black text-slate-805 truncate">{item.name}</p>
-                              <p className="text-[9px] text-slate-400 font-semibold mt-0.5">GST {item.gst_rate}%</p>
-                            </div>
-                            <div className="w-20 shrink-0 flex items-center bg-slate-50 border border-slate-200 rounded-xl px-2 min-h-[34px]">
-                              <span className="text-xs text-slate-400 mr-0.5 font-bold">₹</span>
-                              <input
-                                type="text"
-                                value={item.price}
-                                onChange={(e) => handleUpdatePrice(item.id, e.target.value)}
-                                className="w-full text-xs font-bold text-slate-808 bg-transparent focus:outline-none"
-                              />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteItem(item.id)}
-                              className="text-rose-500 hover:text-rose-600 transition-colors cursor-pointer"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
-                        ))
-                      )}
-                    </div>
-
-                    {!showAddForm ? (
-                      <button
-                        type="button"
-                        onClick={() => setShowAddForm(true)}
-                        className="w-full py-2.5 border border-dashed border-slate-200 hover:border-[#0050e8] hover:bg-[#0050e8]/5 rounded-xl flex items-center justify-center gap-1 text-xs font-bold text-[#0050e8] transition-all cursor-pointer"
-                      >
-                        Add custom product to catalog
-                      </button>
-                    ) : (
-                      <div className="p-3 border border-dashed border-[#0050e8]/30 rounded-xl space-y-2 bg-slate-50">
-                        <input
-                          type="text"
-                          placeholder="Product Name"
-                          value={newItemName}
-                          onChange={(e) => setNewItemName(e.target.value)}
-                          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none bg-white"
-                        />
-                        <div className="grid grid-cols-2 gap-2">
-                          <input
-                            type="number"
-                            placeholder="Price (₹)"
-                            value={newItemPrice}
-                            onChange={(e) => setNewItemPrice(e.target.value)}
-                            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none bg-white"
-                          />
-                          <select
-                            value={newItemGst}
-                            onChange={(e) => setNewItemGst(e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-xs font-semibold focus:outline-none"
-                          >
-                            <option value="0">0% GST</option>
-                            <option value="5">5% GST</option>
-                            <option value="12">12% GST</option>
-                            <option value="18">18% GST</option>
-                          </select>
-                        </div>
-                        <div className="flex gap-2 justify-end pt-1">
-                          <button
-                            type="button"
-                            onClick={() => setShowAddForm(false)}
-                            className="px-2.5 py-1 bg-slate-200 text-slate-750 rounded text-[10px] font-semibold cursor-pointer"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleAddCatalogItem}
-                            className="px-2.5 py-1 bg-[#0050e8] text-white rounded text-[10px] font-bold cursor-pointer"
-                          >
-                            Add Item
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex gap-3 pt-2">
-                      <button
-                        type="button"
-                        onClick={prevStep}
-                        className="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold py-3 rounded-xl transition-all cursor-pointer"
-                      >
-                        Back
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleSignupSubmit}
-                        disabled={loading}
-                        className="flex-1 bg-[#0050e8] hover:bg-[#0043c4] text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        {loading ? 'Registering...' : 'Finish & Register'}
+                        {loading ? (
+                          'Registering...'
+                        ) : (
+                          <>
+                            <span>Create Account</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <line x1="5" y1="12" x2="19" y2="12" />
+                              <polyline points="12 5 19 12 12 5" />
+                            </svg>
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
