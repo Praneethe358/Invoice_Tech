@@ -193,7 +193,7 @@ export async function sendInvoiceTemplateMessage(params: {
         type: 'template',
         template: {
           name: 'sales_invoice_delivery',
-          language: { code: 'en_US' },
+          language: { code: 'en' },
           components: [
             {
               type: 'body',
