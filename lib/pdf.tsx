@@ -135,9 +135,8 @@ const styles = StyleSheet.create({
     borderBottomColor: BORDER_COLOR,
     alignItems: 'center',
   },
-  colItem: { flex: 3.5, paddingRight: 10 },
+  colItem: { flex: 5, paddingRight: 10 },
   colQty: { flex: 1, textAlign: 'center' },
-  colRate: { flex: 1.5, textAlign: 'right' },
   colAmount: { flex: 1.5, textAlign: 'right', fontFamily: 'Helvetica-Bold' },
 
   // GST Specific Columns
@@ -426,7 +425,6 @@ function InvoicePDF({
           <View style={styles.tableHeader}>
             <Text style={[styles.tableHeaderText, styles.colItem]}>Description</Text>
             <Text style={[styles.tableHeaderText, styles.colQty]}>Qty</Text>
-            <Text style={[styles.tableHeaderText, styles.colRate]}>Rate</Text>
             <Text style={[styles.tableHeaderText, styles.colAmount]}>Amount</Text>
           </View>
 
@@ -442,6 +440,9 @@ function InvoicePDF({
               <View key={i} style={styles.tableRow}>
                 <View style={styles.colItem}>
                   <Text>{item.name.toUpperCase()}</Text>
+                  <Text style={{ fontSize: 7, color: '#6b7280', marginTop: 1 }}>
+                    Rs. {Number(item.price).toFixed(2)} each
+                  </Text>
                   {itemDiscount > 0 ? (
                     <Text style={{ fontSize: 7, color: '#16a34a', fontFamily: 'Helvetica-Bold', marginTop: 1 }}>
                       DISCOUNT: -Rs. {itemDiscount.toFixed(2)}
@@ -449,7 +450,6 @@ function InvoicePDF({
                   ) : null}
                 </View>
                 <Text style={styles.colQty}>{item.quantity}</Text>
-                <Text style={styles.colRate}>Rs. {Number(item.price).toFixed(2)}</Text>
                 <Text style={styles.colAmount}>Rs. {lineTotal.toFixed(2)}</Text>
               </View>
             );
