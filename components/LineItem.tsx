@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import QtyStepper from './QtyStepper';
 import { InvoiceItem } from '@/lib/types';
@@ -8,38 +7,17 @@ import { InvoiceItem } from '@/lib/types';
 interface LineItemProps {
   item: InvoiceItem;
   onQtyChange: (qty: number) => void;
-  onPriceChange?: (price: number) => void;
-  onDiscountChange?: (discount: number) => void;
   gstRegistered?: boolean;
 }
 
 export default function LineItem({
   item,
   onQtyChange,
-  onPriceChange,
-  onDiscountChange,
   gstRegistered = false,
 }: LineItemProps) {
   const baseTotal = item.price * item.quantity;
-  const discountAmount = item.discount || 0;
-  const taxableValue = Math.max(0, baseTotal - discountAmount);
-  const gstAmount = gstRegistered ? taxableValue * ((item.gst_rate || 0) / 100) : 0;
-  const lineTotal = item.line_total !== undefined ? item.line_total : (taxableValue + gstAmount);
-
-  const [localPrice, setLocalPrice] = useState(item.price.toString());
-  const [localDiscount, setLocalDiscount] = useState((item.discount || 0).toString());
-
-  useEffect(() => {
-    if (parseFloat(localPrice) !== item.price) {
-      setLocalPrice(item.price.toString());
-    }
-  }, [item.price]);
-
-  useEffect(() => {
-    if (parseFloat(localDiscount) !== (item.discount || 0)) {
-      setLocalDiscount((item.discount || 0).toString());
-    }
-  }, [item.discount]);
+  const gstAmount = gstRegistered ? baseTotal * ((item.gst_rate || 0) / 100) : 0;
+  const lineTotal = item.line_total !== undefined ? item.line_total : (baseTotal + gstAmount);
 
   return (
     <motion.div
@@ -64,35 +42,9 @@ export default function LineItem({
         
         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
           <div className="flex items-center gap-1">
-            <span className="text-xs text-[#6b7280]">₹</span>
-            {onPriceChange ? (
-              <input
-                type="text"
-                inputMode="decimal"
-                value={localPrice}
-                onChange={(e) => {
-                  const valStr = e.target.value;
-                  // Allow empty string, digits, and a single decimal point
-                  if (valStr === '' || /^\d*\.?\d*$/.test(valStr)) {
-                    setLocalPrice(valStr);
-                    const parsed = parseFloat(valStr);
-                    if (!isNaN(parsed)) {
-                      onPriceChange(parsed);
-                    } else {
-                      onPriceChange(0);
-                    }
-                  }
-                }}
-                onBlur={() => {
-                  setLocalPrice(item.price.toString());
-                }}
-                className="w-20 h-6 text-xs font-semibold bg-slate-50 hover:bg-slate-100 focus:bg-white border border-[#e5e7eb] rounded px-1.5 focus:outline-none focus:border-[#0050e8] focus:ring-0 text-slate-800 transition-colors text-right"
-              />
-            ) : (
-              <span className="text-xs text-[#6b7280] tabular-nums font-semibold">
-                {item.price.toLocaleString('en-IN')}
-              </span>
-            )}
+            <span className="text-xs text-[#6b7280] font-semibold">
+              ₹{item.price.toLocaleString('en-IN')}
+            </span>
             <span className="text-xs text-[#6b7280]">× {item.quantity}</span>
           </div>
           {item.hsn_code && (
@@ -100,46 +52,6 @@ export default function LineItem({
               HSN: {item.hsn_code}
             </span>
           )}
-        </div>
-
-        {/* Discount Row */}
-        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-          <div className="flex items-center gap-1 text-[11px] text-[#6b7280]">
-            <span>Disc: ₹</span>
-            {onDiscountChange ? (
-              <input
-                type="text"
-                inputMode="decimal"
-                value={localDiscount}
-                onChange={(e) => {
-                  const valStr = e.target.value;
-                  if (valStr === '' || /^\d*\.?\d*$/.test(valStr)) {
-                    setLocalDiscount(valStr);
-                    const parsed = parseFloat(valStr);
-                    if (!isNaN(parsed)) {
-                      onDiscountChange(Math.min(parsed, baseTotal));
-                    } else {
-                      onDiscountChange(0);
-                    }
-                  }
-                }}
-                onBlur={() => {
-                  setLocalDiscount((item.discount || 0).toString());
-                }}
-                className="w-16 h-5 text-[10px] font-semibold bg-slate-50 hover:bg-slate-100 focus:bg-white border border-[#e5e7eb] rounded px-1 focus:outline-none focus:border-[#0050e8] focus:ring-0 text-slate-800 transition-colors text-right"
-                placeholder="0"
-              />
-            ) : (
-              <span className="font-semibold tabular-nums">
-                {(item.discount || 0).toLocaleString('en-IN')}
-              </span>
-            )}
-          </div>
-          {discountAmount > 0 && baseTotal > 0 ? (
-            <span className="text-[9px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
-              -{((discountAmount / baseTotal) * 100).toFixed(0)}%
-            </span>
-          ) : null}
         </div>
       </div>
       <QtyStepper quantity={item.quantity} onChange={onQtyChange} />

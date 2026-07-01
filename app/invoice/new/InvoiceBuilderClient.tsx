@@ -1829,12 +1829,6 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
                         onQtyChange={(qty) =>
                           updateQty(item.name, qty, item.variant_id)
                         }
-                        onPriceChange={(price) =>
-                          updatePrice(item.name, price, item.variant_id)
-                        }
-                        onDiscountChange={(discount) =>
-                          updateDiscount(item.name, discount, item.variant_id)
-                        }
                         gstRegistered={shop.gst_registered}
                       />
                     ))}
