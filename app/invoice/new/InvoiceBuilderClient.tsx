@@ -22,7 +22,6 @@ import { ShopType } from '@/lib/starter-catalogs';
 import { getSubscriptionAccess } from '@/lib/subscription';
 import { getClothingGstRate } from '@/lib/clothing/gst';
 import { getFootwearGstRate, getItemGstRate } from '@/lib/footwear/gst';
-import BarcodeScannerModal from '@/components/BarcodeScannerModal';
 import { resolveBarcode } from '@/lib/barcodeResolver';
 import { playBeep, triggerHaptic } from '@/lib/sound';
 
@@ -53,7 +52,8 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
   const supabase = createClient();
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [variants, setVariants] = useState<ProductVariant[]>(initialVariants);
-  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [barcodeInput, setBarcodeInput] = useState('');
+  const barcodeInputRef = useRef<HTMLInputElement>(null);
 
   const fireEvent = async (type: string, metadata: Record<string, any>) => {
     try {
@@ -562,73 +562,24 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
     }
   };
 
-  // Keyboard wedge listener for hardware USB/Bluetooth barcode scanners
+  // Focus barcode input on mount and tab switch
   useEffect(() => {
-    if (shop.shop_type !== 'clothing' && shop.shop_type !== 'footwear') return;
-
-    let buffer = '';
-    let lastKeyTime = 0;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Filter out modifier keys explicitly at the very top of listener
-      if (e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt') {
-        return; // Skip modifier keys, wait for the actual alphanumeric value
-      }
-
-      const target = e.target as HTMLElement;
-      const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
-
-      const currentTime = Date.now();
-      const delay = currentTime - lastKeyTime;
-      lastKeyTime = currentTime;
-
-      // Fix: If it's the first character in a while, don't wipe it; start the buffer!
-      if (buffer.length > 0 && delay > 75) {
-        buffer = '';
-      }
-
-      // Block scanner keystrokes from polluting inputs
-      if (isInput && (delay < 75 || buffer.length > 0) && e.key.length === 1) {
-        e.preventDefault();
-
-        // If this is the second character and it arrived fast, the first character must have leaked.
-        // Let's remove the leaked first character from the input element value.
-        if (delay < 75 && buffer.length === 1) {
-          const input = target as HTMLInputElement | HTMLTextAreaElement;
-          const val = input.value;
-          const firstChar = buffer[0];
-          if (val && val.endsWith(firstChar)) {
-            input.value = val.slice(0, -1);
-            // Dispatch input event to ensure React state updates correctly
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-          }
-        }
-      }
-
-      if (e.key === 'Enter') {
-        if (buffer.length >= 4) {
-          e.preventDefault();
-          e.stopPropagation();
-          handleBarcodeScanned(buffer);
-        }
-        buffer = '';
-      } else if (e.key.length === 1) {
-        buffer += e.key;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown, true);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown, true);
-    };
-  }, [shop.shop_type, products, variants, selectedCustomer]);
-
-  // Automatically open camera scanner modal on mount for clothing shops (mobile only)
-  useEffect(() => {
-    if (shop.shop_type === 'clothing' && typeof window !== 'undefined' && window.innerWidth < 768) {
-      setIsScannerOpen(true);
+    if (mounted) {
+      const timer = setTimeout(() => {
+        barcodeInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [shop.shop_type]);
+  }, [mounted]);
+
+  useEffect(() => {
+    if (mobileActiveTab === 'catalog') {
+      const timer = setTimeout(() => {
+        barcodeInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [mobileActiveTab]);
 
   // ─── Custom item ──────────────────────────────────────────
   const handleAddCustom = () => {
@@ -1019,11 +970,52 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
           <div className={`lg:col-span-6 xl:col-span-7 space-y-6 ${mobileActiveTab === 'catalog' ? 'block' : 'hidden lg:block'} lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-2`}>
             {/* Products Header & Search */}
             <div className="space-y-4">
-              <h2 className="text-xs font-black text-slate-500 uppercase tracking-wider">
-                Products
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-xs font-black text-slate-500 uppercase tracking-wider">
+                  Products
+                </h2>
+                {(shop.shop_type === 'clothing' || shop.shop_type === 'footwear') && (
+                  <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    Scanner Ready
+                  </span>
+                )}
+              </div>
               {localProducts.length > 0 && (
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {(shop.shop_type === 'clothing' || shop.shop_type === 'footwear') && (
+                    <div className="relative flex-1">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                        🏷️
+                      </span>
+                      <input
+                        ref={barcodeInputRef}
+                        type="text"
+                        placeholder="Scan Barcode / SKU..."
+                        value={barcodeInput}
+                        onChange={(e) => setBarcodeInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (barcodeInput.trim()) {
+                              handleBarcodeScanned(barcodeInput);
+                              setBarcodeInput('');
+                            }
+                          }
+                        }}
+                        autoFocus
+                        className="w-full pl-10 pr-8 py-2.5 bg-white border border-[#e5e7eb] rounded-xl text-sm font-semibold focus:outline-none focus:border-[#0050e8] focus:ring-0 transition-all placeholder-slate-400 min-h-[44px]"
+                      />
+                      {barcodeInput && (
+                        <button
+                          type="button"
+                          onClick={() => setBarcodeInput('')}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  )}
                   <div className="relative flex-1">
                     <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1040,6 +1032,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
                     />
                     {searchQuery && (
                       <button
+                        type="button"
                         onClick={() => setSearchQuery('')}
                         className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
                       >
@@ -1047,18 +1040,6 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
                       </button>
                     )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      refreshCatalog();
-                      setIsScannerOpen(true);
-                    }}
-                    className="md:hidden flex items-center justify-center gap-1.5 px-4 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors border border-slate-950 min-h-[44px]"
-                    title="Scan Barcode / QR Code"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-                    <span className="hidden sm:inline">Scan Barcode</span>
-                  </button>
                 </div>
               )}
             </div>
@@ -2138,15 +2119,6 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
           )}
         </div>
       </div>
-      <BarcodeScannerModal
-        isOpen={isScannerOpen}
-        onClose={() => setIsScannerOpen(false)}
-        onScan={handleBarcodeScanned}
-        keepOpenOnScan={true}
-        items={items}
-        onUpdateQty={updateQty}
-        totalPrice={calculations.total}
-      />
 
     </div>
   );

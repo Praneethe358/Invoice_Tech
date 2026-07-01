@@ -11,7 +11,6 @@ import EmptyState from '@/components/EmptyState';
 import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
 import { Shop, Product, ProductVariant } from '@/lib/types';
-import BarcodeScannerModal from '@/components/BarcodeScannerModal';
 import { playBeep, triggerHaptic } from '@/lib/sound';
 import { sanitizeVariantField } from '@/lib/sanitize';
 import { getShopPlaceholders } from '@/lib/starter-catalogs';
@@ -202,8 +201,6 @@ export default function CatalogClient({
   const [selectedVariantsCheckbox, setSelectedVariantsCheckbox] = useState<Record<string, boolean>>({});
   const [printCopies, setPrintCopies] = useState<Record<string, number>>({});
 
-  // Scanner modal states
-  const [isNewVarSkuScannerOpen, setIsNewVarSkuScannerOpen] = useState(false);
 
   // Initialize and derive custom categories
   useEffect(() => {
@@ -953,12 +950,6 @@ export default function CatalogClient({
     return list;
   }, [computedProducts, selectedCategoryFilter, searchQuery]);
 
-  // Sku Scanned inside add variant
-  const handleNewVarSkuScanned = (code: string) => {
-    setNewVarSku(code);
-    playBeep('success');
-    triggerHaptic();
-  };
 
   // Generated SKU Preview helper
   const generatedSkuPreview = useMemo(() => {
@@ -2093,25 +2084,14 @@ export default function CatalogClient({
                             <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">
                               SKU / Barcode
                             </label>
-                            <div className="flex gap-1">
-                              <input
-                                type="text"
-                                placeholder="Auto-generated"
-                                className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] focus:outline-hidden focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-400"
-                                value={newVarSku}
-                                onChange={(e) => setNewVarSku(e.target.value)}
-                                disabled={!!editingVariant}
-                              />
-                              <button
-                                type="button"
-                                onClick={() => setIsNewVarSkuScannerOpen(true)}
-                                className="md:hidden bg-slate-100 hover:bg-slate-200 border rounded-lg px-2 flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-xs"
-                                title="Scan Barcode"
-                                disabled={!!editingVariant}
-                              >
-                                📸
-                              </button>
-                            </div>
+                            <input
+                              type="text"
+                              placeholder="Auto-generated"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] focus:outline-hidden focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-400"
+                              value={newVarSku}
+                              onChange={(e) => setNewVarSku(e.target.value)}
+                              disabled={!!editingVariant}
+                            />
                           </div>
 
                           {/* Cost Price */}
@@ -2581,15 +2561,6 @@ export default function CatalogClient({
           )}
         </AnimatePresence>
 
-        {/* Barcode Scanner Modal for Variant SKU */}
-        <BarcodeScannerModal
-          isOpen={isNewVarSkuScannerOpen}
-          onClose={() => setIsNewVarSkuScannerOpen(false)}
-          onScan={(code) => {
-            handleNewVarSkuScanned(code);
-            setIsNewVarSkuScannerOpen(false);
-          }}
-        />
 
       </PageTransition>
     </div>
