@@ -65,9 +65,7 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
   const payment = paymentStatusConfig(invoice.payment_status || 'unpaid');
   const router = useRouter();
   const { showToast } = useToast();
-  const [resending, setResending] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [cancelling, setCancelling] = useState(false);
 
   // Quick Payment state
   const balanceDue = Number(invoice.total) - Number(invoice.amount_paid || 0);
@@ -117,50 +115,6 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
     } finally {
       setSavingPayment(false);
     }
-  };
-
-  const handleResend = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setResending(true);
-    try {
-      const res = await fetch(`/api/invoices/${invoice.id}/send`, {
-        method: 'POST',
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        showToast(err.error || 'Failed to send invoice', 'error');
-      } else {
-        showToast('Invoice sent successfully', 'success');
-        router.refresh();
-      }
-    } catch (err) {
-      showToast('An unexpected error occurred', 'error');
-    }
-    setResending(false);
-  };
-
-  const handleCancel = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const reason = window.prompt("Enter reason for cancelling this invoice:");
-    if (reason === null) return;
-    setCancelling(true);
-    try {
-      const res = await fetch(`/api/invoices/${invoice.id}/cancel`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: reason.trim() || 'Cancelled by user' }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        showToast(err.error || 'Failed to cancel invoice', 'error');
-      } else {
-        showToast('Invoice cancelled successfully', 'success');
-        router.refresh();
-      }
-    } catch (err) {
-      showToast('An unexpected error occurred', 'error');
-    }
-    setCancelling(false);
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -262,50 +216,6 @@ export default function InvoiceCard({ invoice, index = 0 }: InvoiceCardProps) {
                   className="inline-flex items-center text-[10px] font-extrabold bg-red-50 hover:bg-red-100 text-red-600 px-2 py-0.5 rounded-full transition-colors cursor-pointer border border-red-200"
                 >
                   {deleting ? '...' : 'Delete'}
-                </button>
-              </div>
-            )}
-            
-            {/* Actions for saved status */}
-            {invoice.status === 'saved' && (
-              <div className="flex gap-1.5 items-center">
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  disabled={resending}
-                  className="inline-flex items-center text-[10px] font-extrabold bg-emerald-50 hover:bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full transition-colors cursor-pointer border border-emerald-200"
-                >
-                  {resending ? '...' : 'Send'}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  disabled={cancelling}
-                  className="inline-flex items-center text-[10px] font-extrabold bg-red-50 hover:bg-red-100 text-red-600 px-2 py-0.5 rounded-full transition-colors cursor-pointer border border-red-200"
-                >
-                  {cancelling ? '...' : 'Cancel'}
-                </button>
-              </div>
-            )}
-            
-            {/* Actions for sent status */}
-            {invoice.status === 'sent' && (
-              <div className="flex gap-1.5 items-center">
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  disabled={resending}
-                  className="inline-flex items-center text-[10px] font-extrabold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full transition-colors cursor-pointer border border-slate-300"
-                >
-                  {resending ? '...' : 'Resend'}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  disabled={cancelling}
-                  className="inline-flex items-center text-[10px] font-extrabold bg-red-50 hover:bg-red-100 text-red-600 px-2 py-0.5 rounded-full transition-colors cursor-pointer border border-red-200"
-                >
-                  {cancelling ? '...' : 'Cancel'}
                 </button>
               </div>
             )}

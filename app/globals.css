@@ -253,9 +253,9 @@ input[type="number"] { -moz-appearance: textfield; }
   input[class~="pr-11"], select[class~="pr-11"], textarea[class~="pr-11"] { padding-right: 2.75rem !important; }
   input[class~="pr-12"], select[class~="pr-12"], textarea[class~="pr-12"] { padding-right: 3rem !important; }
 
-  button, 
-  .btn,
-  .button {
+  button:not(.rounded-full), 
+  .btn:not(.rounded-full),
+  .button:not(.rounded-full) {
     padding-top: 0.5rem !important;
     padding-bottom: 0.5rem !important;
     font-size: 12.5px !important;
