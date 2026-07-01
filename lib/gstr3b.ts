@@ -9,7 +9,7 @@ export async function generateGSTR3B(
   // 1. Fetch shop details
   const { data: shop } = await supabase
     .from('shops')
-    .select('*')
+    .select('id, gstin, gst_registered')
     .eq('id', shopId)
     .single();
 
@@ -26,7 +26,7 @@ export async function generateGSTR3B(
   // 2. Fetch all customers for POS fallback
   const { data: customers } = await supabase
     .from('customers')
-    .select('*')
+    .select('id, phone, state')
     .eq('shop_id', shopId);
 
   const customerMap = (customers || []).reduce((acc: Record<string, { id: string; phone: string; state?: string }>, c: { id: string; phone: string; state?: string }) => {
@@ -49,7 +49,7 @@ export async function generateGSTR3B(
   // 3. Fetch all sent invoices
   const { data: invoices } = await supabase
     .from('invoices')
-    .select('*, invoice_items(*)')
+    .select('id, place_of_supply, customer_phone, customer_name, invoice_items(id, gst_rate, line_total, cgst, sgst, igst)')
     .eq('shop_id', shopId)
     .in('status', ['saved', 'sent'])
     .gte('created_at', `${startDate}T00:00:00+05:30`)
@@ -88,7 +88,7 @@ export async function generateGSTR3B(
   // 3.5 Fetch credit & debit notes and adjust outward supplies
   const { data: cdns } = await supabase
     .from('credit_debit_notes')
-    .select('*, cdn_items(*)')
+    .select('id, customer_gstin, customer_phone, note_type, subtotal, total_cgst, total_sgst, cdn_items(id, line_total, cgst, sgst, igst)')
     .eq('shop_id', shopId)
     .gte('note_date', startDate)
     .lte('note_date', endDate);
@@ -149,7 +149,7 @@ export async function generateGSTR3B(
   // 3. Fetch purchases
   const { data: purchases } = await supabase
     .from('purchases')
-    .select('*')
+    .select('id, supplier_gstin, subtotal, itc_eligible, total_cgst, total_sgst')
     .eq('shop_id', shopId)
     .gte('purchase_date', startDate)
     .lte('purchase_date', endDate);

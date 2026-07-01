@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { data: shop } = await supabase.from('shops').select('*').eq('id', context.shopId).single();
+    const { data: shop } = await supabase.from('shops').select('id, name, gstin, gst_registered').eq('id', context.shopId).single();
     if (!shop) return NextResponse.json({ error: 'Shop not found' }, { status: 404 });
 
     // Call local server endpoint to fetch the reports JSON data directly

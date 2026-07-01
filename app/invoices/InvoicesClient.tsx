@@ -27,17 +27,24 @@ export default function InvoicesClient({ shop, initialInvoices }: Props) {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  
   const [loading, setLoading] = useState(false);
+  
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 25;
 
   // Fetch filtered invoices from Supabase
-  const fetchFilteredInvoices = useCallback(async () => {
+  const fetchFilteredInvoices = useCallback(async (targetPage: number) => {
     setLoading(true);
+    const from = (targetPage - 1) * pageSize;
+    const to = from + pageSize - 1;
+
     let query = supabase
       .from('invoices')
-      .select('*')
+      .select('id, invoice_number, created_at, customer_name, customer_phone, status, delivery_status, total, amount_paid, payment_status, public_token', { count: 'exact' })
       .eq('shop_id', shop.id)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .range(from, to);
 
     // Status filter
     if (statusFilter !== 'all') {
@@ -82,16 +89,26 @@ export default function InvoicesClient({ shop, initialInvoices }: Props) {
       }
     }
 
-    const { data, error } = await query;
+    const { data, count, error } = await query;
     if (!error && data) {
       setInvoices(data as Invoice[]);
+      setTotalCount(count ?? 0);
     }
     setLoading(false);
   }, [supabase, shop.id, search, statusFilter, dateFilter, startDate, endDate]);
 
+  // Reset page and fetch on filter change
   useEffect(() => {
-    fetchFilteredInvoices();
+    setPage(1);
+    fetchFilteredInvoices(1);
   }, [search, statusFilter, dateFilter, startDate, endDate, fetchFilteredInvoices]);
+
+  // Fetch when page changes (only for pages > 1 to avoid double fetch on mount)
+  useEffect(() => {
+    if (page > 1) {
+      fetchFilteredInvoices(page);
+    }
+  }, [page, fetchFilteredInvoices]);
 
   return (
     <div className="min-h-screen bg-[#f5f6fa]">
@@ -445,6 +462,29 @@ export default function InvoicesClient({ shop, initialInvoices }: Props) {
                 />
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {totalCount > pageSize && (
+          <div className="flex items-center justify-between mt-6 bg-white border border-[#e5e7eb] px-4 py-3 rounded-2xl md:rounded-none">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-4 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg md:rounded-none transition-colors"
+            >
+              ← Previous
+            </button>
+            <span className="text-[11px] font-bold text-gray-500">
+              Page {page} of {Math.max(1, Math.ceil(totalCount / pageSize))} ({totalCount} items)
+            </span>
+            <button
+              onClick={() => setPage(p => p + 1)}
+              disabled={page * pageSize >= totalCount}
+              className="px-4 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg md:rounded-none transition-colors"
+            >
+              Next →
+            </button>
           </div>
         )}
       </PageTransition>

@@ -38,7 +38,9 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [tagFilter, setTagFilter] = useState<'all' | CustomerTag>('all');
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(initial.length === 20);
+  const [page, setPage] = useState(1);
+  const [totalCountState, setTotalCountState] = useState(totalCount);
+  const pageSize = 25;
 
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -60,14 +62,17 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const fetchCustomers = useCallback(async (loadMore = false) => {
-    if (loadMore) setLoadingMore(true);
+  const fetchCustomers = useCallback(async (targetPage: number) => {
+    setLoadingMore(true);
+    const from = (targetPage - 1) * pageSize;
+    const to = from + pageSize - 1;
 
     let query = supabase
       .from('customers')
-      .select('*')
+      .select('id, name, phone, tag, total_invoices, total_spent, outstanding_balance, price_tier, gstin, created_at', { count: 'exact' })
       .eq('shop_id', shop.id)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .range(from, to);
 
     if (tagFilter !== 'all') {
       query = query.eq('tag', tagFilter);
@@ -77,25 +82,26 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
       query = query.or(`name.ilike.%${debouncedSearch}%,phone.ilike.%${debouncedSearch}%`);
     }
 
-    const from = loadMore ? customers.length : 0;
-    query = query.range(from, from + 19);
-
-    const { data } = await query;
-    const newCustomers = (data ?? []) as Customer[];
-
-    if (loadMore) {
-      setCustomers(prev => [...prev, ...newCustomers]);
-      setLoadingMore(false);
-    } else {
-      setCustomers(newCustomers);
+    const { data, count, error } = await query;
+    if (!error && data) {
+      setCustomers(data as Customer[]);
+      setTotalCountState(count ?? 0);
     }
-    setHasMore(newCustomers.length === 20);
-  }, [debouncedSearch, tagFilter, shop.id, customers.length, supabase]);
+    setLoadingMore(false);
+  }, [debouncedSearch, tagFilter, shop.id, supabase]);
 
+  // Reset page and fetch on filter change
   useEffect(() => {
-    fetchCustomers(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, tagFilter]);
+    setPage(1);
+    fetchCustomers(1);
+  }, [debouncedSearch, tagFilter, fetchCustomers]);
+
+  // Fetch when page changes
+  useEffect(() => {
+    if (page > 1) {
+      fetchCustomers(page);
+    }
+  }, [page, fetchCustomers]);
 
   // Open modals & setup forms
   const openAddModal = () => {
@@ -540,14 +546,24 @@ export default function CustomersClient({ shop, customers: initial, totalCount }
               ))}
             </div>
 
-            {hasMore && (
-              <div className="p-4 border-t border-[#e5e7eb] flex justify-center bg-gray-50/50">
+            {totalCountState > pageSize && (
+              <div className="flex items-center justify-between p-4 border-t border-[#e5e7eb] bg-gray-50/50">
                 <button
-                  onClick={() => fetchCustomers(true)}
-                  disabled={loadingMore}
-                  className="px-6 py-2 bg-white border border-[#e5e7eb] text-gray-700 text-xs font-bold rounded-none hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2 text-xs font-bold bg-white border border-[#e5e7eb] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-none transition-colors"
                 >
-                  {loadingMore ? 'Loading...' : 'Load More Customers'}
+                  ← Previous
+                </button>
+                <span className="text-[11px] font-bold text-gray-500">
+                  Page {page} of {Math.max(1, Math.ceil(totalCountState / pageSize))} ({totalCountState} items)
+                </span>
+                <button
+                  onClick={() => setPage(p => p + 1)}
+                  disabled={page * pageSize >= totalCountState}
+                  className="px-4 py-2 text-xs font-bold bg-white border border-[#e5e7eb] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-none transition-colors"
+                >
+                  Next →
                 </button>
               </div>
             )}

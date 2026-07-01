@@ -13,7 +13,7 @@ export default async function SuppliersPage() {
 
   const { data: shop } = await supabase
     .from('shops')
-    .select('*')
+    .select('id, name, logo_url, shop_type')
     .eq('id', context.shopId)
     .single();
 
@@ -21,35 +21,40 @@ export default async function SuppliersPage() {
     redirect('/signup');
   }
 
-  // Fetch initial suppliers list
+  // Fetch initial suppliers list (limit 25)
   const { data: suppliers } = await supabase
     .from('suppliers')
-    .select('*')
+    .select('id, shop_id, name, contact_person, phone, email, address, gstin, created_at')
     .eq('shop_id', shop.id)
-    .order('name', { ascending: true });
+    .order('name', { ascending: true })
+    .limit(25);
 
-  // Fetch all purchases to aggregate data
-  const { data: purchases } = await supabase
-    .from('purchases')
-    .select('supplier_id, total, purchase_date')
-    .eq('shop_id', shop.id);
+  // Fetch purchases only for these suppliers to aggregate data
+  const supplierIds = (suppliers || []).map((s) => s.id);
+  let purchases: any[] = [];
+  if (supplierIds.length > 0) {
+    const { data: purData } = await supabase
+      .from('purchases')
+      .select('supplier_id, total, purchase_date')
+      .eq('shop_id', shop.id)
+      .in('supplier_id', supplierIds);
+    purchases = purData || [];
+  }
 
   // Group purchases by supplier_id
   const supplierStats: { [supplierId: string]: { total: number; lastDate: string | null } } = {};
-  if (purchases) {
-    purchases.forEach((p) => {
-      if (!p.supplier_id) return;
-      if (!supplierStats[p.supplier_id]) {
-        supplierStats[p.supplier_id] = { total: 0, lastDate: null };
-      }
-      supplierStats[p.supplier_id].total += parseFloat(p.total as any) || 0;
-      
-      const dateStr = p.purchase_date;
-      if (!supplierStats[p.supplier_id].lastDate || dateStr > supplierStats[p.supplier_id].lastDate!) {
-        supplierStats[p.supplier_id].lastDate = dateStr;
-      }
-    });
-  }
+  purchases.forEach((p) => {
+    if (!p.supplier_id) return;
+    if (!supplierStats[p.supplier_id]) {
+      supplierStats[p.supplier_id] = { total: 0, lastDate: null };
+    }
+    supplierStats[p.supplier_id].total += parseFloat(p.total as any) || 0;
+    
+    const dateStr = p.purchase_date;
+    if (!supplierStats[p.supplier_id].lastDate || dateStr > supplierStats[p.supplier_id].lastDate!) {
+      supplierStats[p.supplier_id].lastDate = dateStr;
+    }
+  });
 
   const enrichedSuppliers = (suppliers || []).map((sup) => ({
     ...sup,

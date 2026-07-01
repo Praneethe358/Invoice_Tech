@@ -20,7 +20,7 @@ export default async function ReportsPage() {
 
   const { data: shop } = await supabase
     .from('shops')
-    .select('*')
+    .select('id, name, logo_url, gst_registered')
     .eq('id', context.shopId)
     .single();
 

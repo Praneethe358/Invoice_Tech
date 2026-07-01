@@ -22,7 +22,7 @@ export default async function DashboardPage() {
   // Fetch shop
   const { data: shop } = await supabase
     .from('shops')
-    .select('*')
+    .select('id, name, logo_url, shop_type, gst_registered, gstin, phone, address, created_at')
     .eq('id', context.shopId)
     .single();
 
@@ -31,7 +31,7 @@ export default async function DashboardPage() {
   // Fetch recent invoices for the list
   const { data: invoices } = await supabase
     .from('invoices')
-    .select('*')
+    .select('id, invoice_number, created_at, customer_name, customer_phone, total, amount_paid, payment_status, delivery_status, status')
     .eq('shop_id', shop.id)
     .order('created_at', { ascending: false })
     .limit(12);

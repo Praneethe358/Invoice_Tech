@@ -14,7 +14,7 @@ export default async function CustomersPage() {
 
   const { data: shop } = await supabase
     .from('shops')
-    .select('*')
+    .select('id, name, logo_url')
     .eq('id', context.shopId)
     .single();
 
@@ -22,10 +22,10 @@ export default async function CustomersPage() {
 
   const { data: customers } = await supabase
     .from('customers')
-    .select('*')
+    .select('id, name, phone, tag, total_invoices, total_spent, outstanding_balance, price_tier, gstin, created_at')
     .eq('shop_id', shop.id)
     .order('created_at', { ascending: false })
-    .limit(20);
+    .limit(25);
 
   const { count: totalCount } = await supabase
     .from('customers')

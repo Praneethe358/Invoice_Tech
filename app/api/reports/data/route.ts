@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { data: shop } = await supabase.from('shops').select('*').eq('id', context.shopId).single();
+    const { data: shop } = await supabase.from('shops').select('id, name, gstin, gst_registered').eq('id', context.shopId).single();
     if (!shop) return NextResponse.json({ error: 'Shop not found' }, { status: 404 });
 
     // Calculate dates
@@ -191,7 +191,7 @@ export async function GET(request: NextRequest) {
       // Purchases for the current month
       const { data: purchases } = await supabase
         .from('purchases')
-        .select('*')
+        .select('id, total, total_cgst, total_sgst, itc_eligible, supplier_id, supplier_name')
         .eq('shop_id', shop.id)
         .gte('purchase_date', startDateStr.split('T')[0])
         .lte('purchase_date', endDateStr.split('T')[0]);

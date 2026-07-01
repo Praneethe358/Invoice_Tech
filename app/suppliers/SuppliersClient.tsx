@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import PageTransition from '@/components/PageTransition';
@@ -10,6 +10,7 @@ import Input from '@/components/Input';
 import { useToast } from '@/components/Toast';
 import { Supplier, Shop } from '@/lib/types';
 import { getShopPlaceholders } from '@/lib/starter-catalogs';
+import { createClient } from '@/lib/supabase/client';
 
 interface Props {
   shop: Shop;
@@ -21,6 +22,7 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
   const { showToast } = useToast();
   const placeholders = getShopPlaceholders(shop.shop_type);
 
+  const supabase = createClient();
   const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -32,16 +34,92 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
   const [address, setAddress] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const filteredSuppliers = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) return suppliers;
-    return suppliers.filter(
-      (s) =>
-        s.name.toLowerCase().includes(query) ||
-        (s.gstin && s.gstin.toLowerCase().includes(query)) ||
-        (s.phone && s.phone.includes(query))
-    );
-  }, [searchQuery, suppliers]);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const pageSize = 25;
+
+  const fetchSuppliers = useCallback(async (targetPage: number) => {
+    setLoading(true);
+    const from = (targetPage - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    let query = supabase
+      .from('suppliers')
+      .select('id, shop_id, name, contact_person, phone, email, address, gstin, created_at', { count: 'exact' })
+      .eq('shop_id', shop.id)
+      .order('name', { ascending: true })
+      .range(from, to);
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim();
+      query = query.or(`name.ilike.%${q}%,phone.ilike.%${q}%,gstin.ilike.%${q}%`);
+    }
+
+    const { data, count, error } = await query;
+    if (!error && data) {
+      // Fetch purchases only for these suppliers to aggregate data
+      const supplierIds = data.map((s) => s.id);
+      let purchases: any[] = [];
+      if (supplierIds.length > 0) {
+        const { data: purData } = await supabase
+          .from('purchases')
+          .select('supplier_id, total, purchase_date')
+          .eq('shop_id', shop.id)
+          .in('supplier_id', supplierIds);
+        purchases = purData || [];
+      }
+
+      // Group purchases by supplier_id
+      const statsMap: { [supplierId: string]: { total: number; lastDate: string | null } } = {};
+      purchases.forEach((p) => {
+        if (!p.supplier_id) return;
+        if (!statsMap[p.supplier_id]) {
+          statsMap[p.supplier_id] = { total: 0, lastDate: null };
+        }
+        statsMap[p.supplier_id].total += parseFloat(p.total as any) || 0;
+        
+        const dateStr = p.purchase_date;
+        if (!statsMap[p.supplier_id].lastDate || dateStr > statsMap[p.supplier_id].lastDate!) {
+          statsMap[p.supplier_id].lastDate = dateStr;
+        }
+      });
+
+      const enriched = data.map((sup) => ({
+        ...sup,
+        total_purchases: statsMap[sup.id]?.total || 0,
+        last_purchase_date: statsMap[sup.id]?.lastDate || null,
+      }));
+
+      setSuppliers(enriched as Supplier[]);
+      setTotalCount(count ?? 0);
+    }
+    setLoading(false);
+  }, [supabase, shop.id, searchQuery]);
+
+  // Reset page and fetch on filter change
+  useEffect(() => {
+    // Check if initial mount
+    if (page === 1 && searchQuery === '') {
+      supabase
+        .from('suppliers')
+        .select('id', { count: 'exact', head: true })
+        .eq('shop_id', shop.id)
+        .then(({ count }) => {
+          setTotalCount(count ?? 0);
+        });
+      return;
+    }
+    setPage(1);
+    fetchSuppliers(1);
+  }, [searchQuery, fetchSuppliers]);
+
+  // Fetch when page changes
+  useEffect(() => {
+    if (page > 1) {
+      fetchSuppliers(page);
+    }
+  }, [page, fetchSuppliers]);
 
   // Aggregated Stats
   const stats = useMemo(() => {
@@ -59,9 +137,9 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
       totalPurchases,
       registeredCount,
       unregisteredCount,
-      totalSuppliers: suppliers.length,
+      totalSuppliers: totalCount,
     };
-  }, [suppliers]);
+  }, [suppliers, totalCount]);
 
   const handleAddSupplier = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -258,7 +336,7 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
         </div>
 
         {/* Suppliers tabular log */}
-        {filteredSuppliers.length === 0 ? (
+        {suppliers.length === 0 ? (
           <EmptyState
             title="No suppliers found"
             description="Add your fertilizer or goods suppliers to record purchases and track Input Tax Credit (ITC)."
@@ -288,7 +366,7 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filteredSuppliers.map((sup) => {
+                  {suppliers.map((sup) => {
                     const dateStr = sup.last_purchase_date
                       ? new Date(sup.last_purchase_date).toLocaleDateString('en-IN', {
                           day: '2-digit',
@@ -333,7 +411,7 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
 
             {/* Mobile Responsive Cards View */}
             <div className="md:hidden divide-y divide-slate-100">
-              {filteredSuppliers.map((sup) => (
+              {suppliers.map((sup) => (
                 <div
                   key={sup.id}
                   onClick={() => router.push(`/suppliers/${sup.id}`)}
@@ -355,6 +433,29 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
                 </div>
               ))}
             </div>
+
+            {/* Pagination Controls */}
+            {totalCount > pageSize && (
+              <div className="flex items-center justify-between p-4 border-t border-slate-200 bg-slate-50/50">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2 text-xs font-bold bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-colors cursor-pointer shadow-xs"
+                >
+                  ← Previous
+                </button>
+                <span className="text-[11px] font-bold text-slate-500">
+                  Page {page} of {Math.max(1, Math.ceil(totalCount / pageSize))} ({totalCount} items)
+                </span>
+                <button
+                  onClick={() => setPage(p => p + 1)}
+                  disabled={page * pageSize >= totalCount}
+                  className="px-4 py-2 text-xs font-bold bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-colors cursor-pointer shadow-xs"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
           </div>
         )}
 

@@ -1,5 +1,7 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
+let adminClient: ReturnType<typeof createSupabaseClient> | null = null;
+
 /**
  * Admin Supabase client that bypasses RLS.
  * Use only in API routes for operations like creating
@@ -15,10 +17,14 @@ export function createAdminClient() {
     );
   }
 
-  return createSupabaseClient(url, key, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
+  if (!adminClient) {
+    adminClient = createSupabaseClient(url, key, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+  }
+
+  return adminClient;
 }

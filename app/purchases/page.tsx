@@ -13,7 +13,7 @@ export default async function PurchasesPage() {
 
   const { data: shop } = await supabase
     .from('shops')
-    .select('*')
+    .select('id, name, logo_url')
     .eq('id', context.shopId)
     .single();
 
@@ -24,9 +24,10 @@ export default async function PurchasesPage() {
   // Fetch initial purchases list
   const { data: purchases } = await supabase
     .from('purchases')
-    .select('*')
+    .select('id, shop_id, purchase_invoice_number, supplier_name, supplier_phone, purchase_date, subtotal, total_gst, total_cgst, total_sgst, total, itc_eligible, created_at')
     .eq('shop_id', shop.id)
-    .order('purchase_date', { ascending: false });
+    .order('purchase_date', { ascending: false })
+    .limit(25);
 
   return (
     <PurchasesClient

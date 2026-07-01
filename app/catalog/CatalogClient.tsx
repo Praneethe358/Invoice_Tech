@@ -89,6 +89,80 @@ export default function CatalogClient({
   // State Management
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [variants, setVariants] = useState<ProductVariant[]>(initialVariants);
+  const [page, setPage] = useState(1);
+  const [totalProductsCount, setTotalProductsCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const pageSize = 25;
+
+  const fetchProducts = useCallback(async (targetPage: number) => {
+    setLoading(true);
+    const from = (targetPage - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    let query = supabase
+      .from('products')
+      .select('id, shop_id, name, price, created_at, hsn_code, gst_rate, stock_qty, low_stock_threshold, track_inventory, is_favorite, category, last_used_at, use_count, wholesale_price, season_tag', { count: 'exact' })
+      .eq('shop_id', shop.id)
+      .order('created_at', { ascending: true })
+      .range(from, to);
+
+    // Apply category filter in query if selected
+    if (selectedCategoryFilter !== 'All') {
+      if (selectedCategoryFilter === 'Uncategorized') {
+        query = query.is('category', null);
+      } else {
+        query = query.eq('category', selectedCategoryFilter);
+      }
+    }
+
+    // Apply search query in query if entered
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim();
+      query = query.or(`name.ilike.%${q}%,category.ilike.%${q}%,hsn_code.ilike.%${q}%`);
+    }
+
+    const { data, count, error } = await query;
+    if (!error && data) {
+      setProducts(data as Product[]);
+      setTotalProductsCount(count ?? 0);
+
+      // Fetch variants for these products
+      if (data.length > 0) {
+        const { data: varData } = await supabase
+          .from('product_variants')
+          .select('id, product_id, size, color, sku, stock_qty, low_stock_threshold, barcode, barcode_source, created_at')
+          .in('product_id', data.map((p: any) => p.id));
+        setVariants((varData || []) as ProductVariant[]);
+      } else {
+        setVariants([]);
+      }
+    }
+    setLoading(false);
+  }, [supabase, shop.id, selectedCategoryFilter, searchQuery]);
+
+  // Reset page and fetch on filter change
+  useEffect(() => {
+    // Check if this is the initial mount and we can use initial server data
+    if (page === 1 && selectedCategoryFilter === 'All' && searchQuery === '') {
+      supabase
+        .from('products')
+        .select('id', { count: 'exact', head: true })
+        .eq('shop_id', shop.id)
+        .then(({ count }) => {
+          setTotalProductsCount(count ?? 0);
+        });
+      return;
+    }
+    setPage(1);
+    fetchProducts(1);
+  }, [selectedCategoryFilter, searchQuery, fetchProducts]);
+
+  // Fetch when page changes
+  useEffect(() => {
+    if (page > 1) {
+      fetchProducts(page);
+    }
+  }, [page, fetchProducts]);
   const [customCategories, setCustomCategories] = useState<string[]>([]);
 
   // Modals state
@@ -1367,6 +1441,29 @@ export default function CatalogClient({
                       ))
                     )}
                   </div>
+
+                  {/* Pagination Controls */}
+                  {totalProductsCount > pageSize && (
+                    <div className="flex items-center justify-between mt-4 bg-white border border-slate-200 px-4 py-3 rounded-xl shadow-2xs">
+                      <button
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="px-4 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
+                      >
+                        ← Previous
+                      </button>
+                      <span className="text-[11px] font-bold text-slate-500">
+                        Page {page} of {Math.max(1, Math.ceil(totalProductsCount / pageSize))} ({totalProductsCount} items)
+                      </span>
+                      <button
+                        onClick={() => setPage(p => p + 1)}
+                        disabled={page * pageSize >= totalProductsCount}
+                        className="px-4 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  )}
 
                 </div>
               )}

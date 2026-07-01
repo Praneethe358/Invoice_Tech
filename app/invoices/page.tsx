@@ -24,10 +24,10 @@ export default async function InvoicesPage() {
   // Fetch initial invoices
   const { data: invoices } = await supabase
     .from('invoices')
-    .select('*')
+    .select('id, invoice_number, created_at, customer_name, customer_phone, status, delivery_status, total, amount_paid, payment_status, public_token')
     .eq('shop_id', shop.id)
     .order('created_at', { ascending: false })
-    .limit(40);
+    .limit(25);
 
   return (
     <InvoicesClient

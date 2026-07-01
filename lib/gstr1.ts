@@ -28,7 +28,7 @@ export async function validateGstr1Data(
   // Fetch shop
   const { data: shop } = await supabase
     .from('shops')
-    .select('*')
+    .select('id, gstin, gst_registered')
     .eq('id', shopId)
     .single();
 
@@ -56,7 +56,7 @@ export async function validateGstr1Data(
   // Fetch invoices
   const { data: invoices } = await supabase
     .from('invoices')
-    .select('*, invoice_items(*)')
+    .select('id, status, created_at, invoice_number, total, customer_gstin, customer_phone, customer_name, place_of_supply, uses_items_table, invoice_items(id, invoice_id, gst_rate, cgst, sgst, igst, line_total, hsn_code, qty, name)')
     .eq('shop_id', shopId)
     .in('status', ['saved', 'sent'])
     .gte('created_at', `${startDate}T00:00:00+05:30`)
@@ -119,7 +119,7 @@ export async function generateGSTR1(
   // 1. Fetch shop data
   const { data: shop } = await supabase
     .from('shops')
-    .select('*')
+    .select('id, gstin, gst_registered')
     .eq('id', shopId)
     .single();
 
@@ -137,7 +137,7 @@ export async function generateGSTR1(
   // Fetch all customers for state lookup
   const { data: customers } = await supabase
     .from('customers')
-    .select('*')
+    .select('id, phone, state')
     .eq('shop_id', shopId);
 
   const customerMap = (customers || []).reduce((acc: any, c: any) => {
@@ -160,7 +160,7 @@ export async function generateGSTR1(
   // 2. Fetch all sent invoices
   const { data: invoices } = await supabase
     .from('invoices')
-    .select('*, invoice_items(*)')
+    .select('id, status, created_at, invoice_number, total, customer_gstin, customer_phone, customer_name, place_of_supply, uses_items_table, invoice_items(id, invoice_id, gst_rate, cgst, sgst, igst, line_total, hsn_code, qty, name)')
     .eq('shop_id', shopId)
     .in('status', ['saved', 'sent'])
     .gte('created_at', `${startDate}T00:00:00+05:30`)
@@ -370,7 +370,7 @@ export async function generateGSTR1(
   // 3. Fetch credit & debit notes
   const { data: cdns } = await supabase
     .from('credit_debit_notes')
-    .select('*, cdn_items(*)')
+    .select('id, note_type, note_number, note_date, total, subtotal, total_cgst, total_sgst, customer_gstin, customer_phone, cdn_items(id, gst_rate, cgst, sgst, igst, line_total)')
     .eq('shop_id', shopId)
     .gte('note_date', startDate)
     .lte('note_date', endDate);

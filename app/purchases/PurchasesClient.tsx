@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import PageTransition from '@/components/PageTransition';
 import EmptyState from '@/components/EmptyState';
 import Button from '@/components/Button';
 import { Purchase, Shop } from '@/lib/types';
+import { createClient } from '@/lib/supabase/client';
 
 interface Props {
   shop: Shop;
@@ -16,23 +17,33 @@ interface Props {
 export default function PurchasesClient({ shop, initialPurchases }: Props) {
   const router = useRouter();
 
-  const [purchases] = useState<Purchase[]>(initialPurchases);
+  const supabase = createClient();
+  const [purchases, setPurchases] = useState<Purchase[]>(initialPurchases);
   const [filterPeriod, setFilterPeriod] = useState<'all' | 'this_month' | 'last_month' | 'custom'>('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const pageSize = 25;
 
-  const filteredPurchases = useMemo(() => {
-    let result = purchases;
+  const fetchPurchases = useCallback(async (targetPage: number) => {
+    setLoading(true);
+    const from = (targetPage - 1) * pageSize;
+    const to = from + pageSize - 1;
 
-    // Search Query
+    let query = supabase
+      .from('purchases')
+      .select('id, shop_id, purchase_invoice_number, supplier_name, supplier_phone, purchase_date, subtotal, total_gst, total_cgst, total_sgst, total, itc_eligible, created_at', { count: 'exact' })
+      .eq('shop_id', shop.id)
+      .order('purchase_date', { ascending: false })
+      .range(from, to);
+
+    // Apply search query in database
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      result = result.filter(
-        (p) =>
-          p.purchase_invoice_number.toLowerCase().includes(q) ||
-          p.supplier_name.toLowerCase().includes(q)
-      );
+      const q = searchQuery.trim();
+      query = query.or(`purchase_invoice_number.ilike.%${q}%,supplier_name.ilike.%${q}%`);
     }
 
     // Period Filter
@@ -40,17 +51,46 @@ export default function PurchasesClient({ shop, initialPurchases }: Props) {
     if (filterPeriod === 'this_month') {
       const start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
       const end = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
-      result = result.filter((p) => p.purchase_date >= start && p.purchase_date <= end);
+      query = query.gte('purchase_date', start).lte('purchase_date', end);
     } else if (filterPeriod === 'last_month') {
       const start = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().split('T')[0];
       const end = new Date(today.getFullYear(), today.getMonth(), 0).toISOString().split('T')[0];
-      result = result.filter((p) => p.purchase_date >= start && p.purchase_date <= end);
+      query = query.gte('purchase_date', start).lte('purchase_date', end);
     } else if (filterPeriod === 'custom' && startDate && endDate) {
-      result = result.filter((p) => p.purchase_date >= startDate && p.purchase_date <= endDate);
+      query = query.gte('purchase_date', startDate).lte('purchase_date', endDate);
     }
 
-    return result;
-  }, [purchases, filterPeriod, startDate, endDate, searchQuery]);
+    const { data, count, error } = await query;
+    if (!error && data) {
+      setPurchases(data as Purchase[]);
+      setTotalCount(count ?? 0);
+    }
+    setLoading(false);
+  }, [supabase, shop.id, searchQuery, filterPeriod, startDate, endDate]);
+
+  // Reset page and fetch on filter change
+  useEffect(() => {
+    // Check if initial mount
+    if (page === 1 && searchQuery === '' && filterPeriod === 'all') {
+      supabase
+        .from('purchases')
+        .select('id', { count: 'exact', head: true })
+        .eq('shop_id', shop.id)
+        .then(({ count }) => {
+          setTotalCount(count ?? 0);
+        });
+      return;
+    }
+    setPage(1);
+    fetchPurchases(1);
+  }, [searchQuery, filterPeriod, startDate, endDate, fetchPurchases]);
+
+  // Fetch when page changes
+  useEffect(() => {
+    if (page > 1) {
+      fetchPurchases(page);
+    }
+  }, [page, fetchPurchases]);
 
   // Aggregated Stats
   const stats = useMemo(() => {
@@ -59,7 +99,7 @@ export default function PurchasesClient({ shop, initialPurchases }: Props) {
     let sgstClaimed = 0;
     let itcEligibleCount = 0;
 
-    filteredPurchases.forEach((p) => {
+    purchases.forEach((p) => {
       outlayTotal += Number(p.total);
       if (p.itc_eligible) {
         cgstClaimed += Number(p.total_cgst);
@@ -72,9 +112,9 @@ export default function PurchasesClient({ shop, initialPurchases }: Props) {
       outlayTotal,
       gstClaimed: cgstClaimed + sgstClaimed,
       itcEligibleCount,
-      billsCount: filteredPurchases.length,
+      billsCount: totalCount,
     };
-  }, [filteredPurchases]);
+  }, [purchases, totalCount]);
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
@@ -267,7 +307,8 @@ export default function PurchasesClient({ shop, initialPurchases }: Props) {
         </div>
 
         {/* Tabular purchase log */}
-        {filteredPurchases.length === 0 ? (
+        {purchases.length === 0 ? (
+
           <EmptyState
             title="No purchases recorded"
             description="Log supplier purchase bills to claim Input Tax Credit (ITC) and automatically update your catalog stock inventory."
@@ -297,7 +338,7 @@ export default function PurchasesClient({ shop, initialPurchases }: Props) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filteredPurchases.map((p) => {
+                  {purchases.map((p) => {
                     const dateStr = new Date(p.purchase_date).toLocaleDateString('en-IN', {
                       day: '2-digit',
                       month: 'short',
@@ -339,7 +380,7 @@ export default function PurchasesClient({ shop, initialPurchases }: Props) {
 
             {/* Mobile Responsive Cards View */}
             <div className="md:hidden divide-y divide-slate-100">
-              {filteredPurchases.map((p) => {
+              {purchases.map((p) => {
                 const dateStr = new Date(p.purchase_date).toLocaleDateString('en-IN', {
                   day: '2-digit',
                   month: 'short',
@@ -370,6 +411,29 @@ export default function PurchasesClient({ shop, initialPurchases }: Props) {
                 );
               })}
             </div>
+
+            {/* Pagination Controls */}
+            {totalCount > pageSize && (
+              <div className="flex items-center justify-between p-4 border-t border-slate-200 bg-slate-50/50">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2 text-xs font-bold bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-colors cursor-pointer shadow-xs"
+                >
+                  ← Previous
+                </button>
+                <span className="text-[11px] font-bold text-slate-500">
+                  Page {page} of {Math.max(1, Math.ceil(totalCount / pageSize))} ({totalCount} items)
+                </span>
+                <button
+                  onClick={() => setPage(p => p + 1)}
+                  disabled={page * pageSize >= totalCount}
+                  className="px-4 py-2 text-xs font-bold bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-colors cursor-pointer shadow-xs"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
           </div>
         )}
       </PageTransition>
