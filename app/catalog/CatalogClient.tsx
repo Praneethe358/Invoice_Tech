@@ -142,8 +142,8 @@ export default function CatalogClient({
 
   // Reset page and fetch on filter change
   useEffect(() => {
-    // Check if this is the initial mount and we can use initial server data
-    if (page === 1 && selectedCategoryFilter === 'All' && searchQuery === '') {
+    // Check if this is the initial mount and server-side data is populated
+    if (page === 1 && selectedCategoryFilter === 'All' && searchQuery === '' && initialProducts.length > 0) {
       supabase
         .from('products')
         .select('id', { count: 'exact', head: true })
@@ -155,7 +155,7 @@ export default function CatalogClient({
     }
     setPage(1);
     fetchProducts(1);
-  }, [selectedCategoryFilter, searchQuery, fetchProducts]);
+  }, [selectedCategoryFilter, searchQuery, fetchProducts, initialProducts]);
 
   // Fetch when page changes
   useEffect(() => {

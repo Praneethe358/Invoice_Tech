@@ -70,8 +70,8 @@ export default function PurchasesClient({ shop, initialPurchases }: Props) {
 
   // Reset page and fetch on filter change
   useEffect(() => {
-    // Check if initial mount
-    if (page === 1 && searchQuery === '' && filterPeriod === 'all') {
+    // Check if initial mount and server-side data is populated
+    if (page === 1 && searchQuery === '' && filterPeriod === 'all' && initialPurchases.length > 0) {
       supabase
         .from('purchases')
         .select('id', { count: 'exact', head: true })
@@ -83,7 +83,7 @@ export default function PurchasesClient({ shop, initialPurchases }: Props) {
     }
     setPage(1);
     fetchPurchases(1);
-  }, [searchQuery, filterPeriod, startDate, endDate, fetchPurchases]);
+  }, [searchQuery, filterPeriod, startDate, endDate, fetchPurchases, initialPurchases]);
 
   // Fetch when page changes
   useEffect(() => {

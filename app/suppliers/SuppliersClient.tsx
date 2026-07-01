@@ -99,8 +99,8 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
 
   // Reset page and fetch on filter change
   useEffect(() => {
-    // Check if initial mount
-    if (page === 1 && searchQuery === '') {
+    // Check if initial mount and server-side data is populated
+    if (page === 1 && searchQuery === '' && initialSuppliers.length > 0) {
       supabase
         .from('suppliers')
         .select('id', { count: 'exact', head: true })
@@ -112,7 +112,7 @@ export default function SuppliersClient({ shop, initialSuppliers }: Props) {
     }
     setPage(1);
     fetchSuppliers(1);
-  }, [searchQuery, fetchSuppliers]);
+  }, [searchQuery, fetchSuppliers, initialSuppliers]);
 
   // Fetch when page changes
   useEffect(() => {
