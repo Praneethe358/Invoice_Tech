@@ -687,7 +687,7 @@ export default function AdminDashboardClient() {
       )}
 
       {/* Shops Table */}
-      <div className="hidden md:block bg-white border border-slate-250/80 rounded-2xl shadow-xs overflow-x-auto">
+      <div className="hidden md:block bg-white border border-slate-250/80 rounded-2xl shadow-xs md:overflow-visible overflow-x-auto">
         <table className="w-full text-xs text-left">
           <thead>
             <tr className="bg-slate-50/70 border-b border-slate-200 text-[9px] font-black text-slate-400 uppercase tracking-widest">
@@ -770,7 +770,7 @@ export default function AdminDashboardClient() {
                       >Impersonate</button>
                       <div className="relative group">
                         <button className="px-2.5 py-1.5 rounded-xl text-[10px] font-black bg-white text-slate-400 border border-slate-200 hover:bg-slate-50">⋯</button>
-                        <div className="hidden group-hover:block absolute right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-20 min-w-[140px] py-1">
+                        <div className="hidden group-hover:block absolute right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-50 min-w-[140px] py-1">
                           <button
                             onClick={() => handleImpersonate(shop.auth_user_id)}
                             className="w-full text-left px-3.5 py-2.5 text-[10px] font-bold text-amber-600 hover:bg-amber-50 transition-colors border-b border-slate-100"

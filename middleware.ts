@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
   // ─── Write Guard for Impersonation ──────────────────────────
   if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
     const impersonateToken = request.cookies.get('impersonate_token')?.value;
-    if (impersonateToken && !pathname.startsWith('/api/admin/impersonate')) {
+    if (impersonateToken && !pathname.startsWith('/api/admin')) {
       const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
       if (serviceRoleKey) {
         const { createClient: createSupabaseClient } = await import('@supabase/supabase-js');
