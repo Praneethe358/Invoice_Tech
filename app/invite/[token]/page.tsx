@@ -24,6 +24,9 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
   const [confirmPassword, setConfirmPassword] = useState('');
   const [email, setEmail] = useState('');
   const [signinPassword, setSigninPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showSigninPassword, setShowSigninPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -228,13 +231,55 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
               </div>
               <div>
                 <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Password</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters"
-                  className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-none py-2.5 px-3 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#0050e8]" />
+                <div className="relative">
+                  <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters"
+                    className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-none py-2.5 pl-3 pr-10 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#0050e8]" />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    {showPassword ? (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                        <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                        <line x1="2" x2="22" y1="2" y2="22" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Confirm Password</label>
-                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-none py-2.5 px-3 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#0050e8]" />
+                <div className="relative">
+                  <input type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-none py-2.5 pl-3 pr-10 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#0050e8]" />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    {showConfirmPassword ? (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                        <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                        <line x1="2" x2="22" y1="2" y2="22" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {submitError && <p className="text-xs text-red-600 font-bold">{submitError}</p>}
@@ -261,8 +306,29 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
               </div>
               <div>
                 <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Password</label>
-                <input type="password" value={signinPassword} onChange={(e) => setSigninPassword(e.target.value)}
-                  className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-none py-2.5 px-3 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#0050e8]" />
+                <div className="relative">
+                  <input type={showSigninPassword ? 'text' : 'password'} value={signinPassword} onChange={(e) => setSigninPassword(e.target.value)}
+                    className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-none py-2.5 pl-3 pr-10 text-xs font-semibold text-[#111827] focus:outline-none focus:border-[#0050e8]" />
+                  <button
+                    type="button"
+                    onClick={() => setShowSigninPassword(!showSigninPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    {showSigninPassword ? (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                        <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                        <line x1="2" x2="22" y1="2" y2="22" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {submitError && <p className="text-xs text-red-600 font-bold">{submitError}</p>}
