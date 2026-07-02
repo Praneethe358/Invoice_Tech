@@ -200,10 +200,9 @@ export async function sendInvoiceTemplateMessage(params: {
               parameters: [
                 { type: 'text', text: params.customerName },
                 { type: 'text', text: params.invoiceNumber },
+                { type: 'text', text: params.shopName },
                 { type: 'text', text: params.invoiceAmount.toString() },
                 { type: 'text', text: params.balanceDue.toString() },
-                { type: 'text', text: statusUrl },
-                { type: 'text', text: params.shopName },
               ],
             },
           ],
