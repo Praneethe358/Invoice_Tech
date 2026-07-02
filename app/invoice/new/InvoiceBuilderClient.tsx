@@ -702,8 +702,9 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
     setLoading(true);
 
     console.log('NEXT_PUBLIC_WA_MODE:', process.env.NEXT_PUBLIC_WA_MODE);
+    const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     let newWindow: Window | null = null;
-    if (targetStatus === 'sent' && process.env.NEXT_PUBLIC_WA_MODE === 'deeplink') {
+    if (targetStatus === 'sent' && process.env.NEXT_PUBLIC_WA_MODE === 'deeplink' && !isMobile) {
       newWindow = window.open('about:blank', '_blank');
     }
 
@@ -847,10 +848,14 @@ ${shop.name}`;
           const formattedPhone = formatWhatsAppNumber(phone);
           const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
           
-          if (newWindow) {
-            newWindow.location.href = url;
+          if (isMobile) {
+            window.location.href = url;
           } else {
-            window.open(url, '_blank');
+            if (newWindow) {
+              newWindow.location.href = url;
+            } else {
+              window.open(url, '_blank');
+            }
           }
         } else {
           newWindow?.close();
