@@ -122,6 +122,17 @@ export const SHOP_CONFIG: Record<ShopType, ShopTypeConfig> = {
     stockUnitShort: null,
   },
 
+  juice: {
+    inventoryEnabled: true,
+    showBarcode: false,
+    showBundles: true,
+    categoryLabels: 'Beverage Types',
+    itemLabel: 'Juices/Beverages',
+    defaultCategories: ['Fresh Juices', 'Milkshakes', 'Smoothies', 'Soft Drinks'],
+    stockUnit: 'glasses/bottles',
+    stockUnitShort: 'units',
+  },
+
   other: {
     inventoryEnabled: false,
     showBarcode: false,

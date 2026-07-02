@@ -9,6 +9,7 @@ export type ShopType =
   | 'food'
   | 'electronics'
   | 'salon'
+  | 'juice'
   | 'other';
 
 export interface StarterItem {
@@ -124,6 +125,8 @@ export const STARTER_CATALOGS: Record<ShopType, StarterItem[]> = {
     { name: 'Item 2', price: 0, hsn_code: '', gst_rate: 0 },
     { name: 'Item 3', price: 0, hsn_code: '', gst_rate: 0 },
   ],
+
+  juice: [],
 
   footwear: [
     { name: "Men's Formal Shoes", price: 1499, hsn_code: '6403', gst_rate: 12, category: 'Formal Shoes' },
@@ -333,6 +336,15 @@ export const SHOP_PLACEHOLDERS: Record<ShopType, ShopPlaceholderConfig> = {
     variantSize: "e.g. 50kg, 10kg",
     variantColor: "e.g. Standard",
     returnRemarks: "e.g. Return of 2 bags Urea"
+  },
+  juice: {
+    productName: "e.g. FRESH ORANGE JUICE",
+    hsnCode: "e.g. 2009 (Fruit Juices HSN)",
+    categoryName: "e.g. Fresh Juices, Milkshakes",
+    supplierName: "e.g. COVAI FRUIT MARKET",
+    variantSize: "e.g. 250ml, 500ml",
+    variantColor: "e.g. Sugar-free, Extra Ice",
+    returnRemarks: "e.g. Return of spoiled fruit crates"
   },
   other: {
     productName: "e.g. GENERAL ITEM",

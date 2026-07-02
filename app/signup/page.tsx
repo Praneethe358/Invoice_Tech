@@ -97,6 +97,15 @@ function CategoryIcon({ type, active }: { type: ShopType; active: boolean }) {
           <path d="M4 22V4c0-.5.2-1 .6-1.4C5 2.2 5.5 2 6 2s1 .2 1.4.6c.4.4.6.9.6 1.4v18M11 22V4c0-.5.2-1 .6-1.4.4-.4.9-.6 1.4-.6s1 .2 1.4.6c.4.4.6.9.6 1.4v18M18 22V4c0-.5.2-1 .6-1.4C19 2.2 19.5 2 20 2s1 .2 1.4.6c.4.4.6.9.6 1.4v18"/>
         </svg>
       );
+    case 'juice':
+      return (
+        <svg className={`w-5 h-5 ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 8h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2" />
+          <path d="M5 8h12l-1.5 11.25A2 2 0 0 1 13.53 21H8.47a2 2 0 0 1-1.97-1.75L5 8Z" />
+          <line x1="12" y1="2" x2="12" y2="8" />
+          <line x1="12" y1="2" x2="15" y2="2" />
+        </svg>
+      );
     case 'other':
     default:
       return (
@@ -633,6 +642,7 @@ export default function SignupPage() {
                         { type: 'food', label: 'Food / Restaurant' },
                         { type: 'electronics', label: 'Mobile / Electronics' },
                         { type: 'salon', label: 'Salon / Beauty' },
+                        { type: 'juice', label: 'Juice Shop' },
                         { type: 'other', label: 'Other Business' }
                       ] as const).map((opt) => (
                         <button
@@ -1016,6 +1026,7 @@ export default function SignupPage() {
                         { type: 'food', label: 'Food / Restaurant' },
                         { type: 'electronics', label: 'Mobile / Electronics' },
                         { type: 'salon', label: 'Salon / Beauty' },
+                        { type: 'juice', label: 'Juice Shop' },
                         { type: 'other', label: 'Other Business' }
                       ] as const).map((opt) => (
                         <button
