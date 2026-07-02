@@ -701,6 +701,12 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
 
     setLoading(true);
 
+    console.log('NEXT_PUBLIC_WA_MODE:', process.env.NEXT_PUBLIC_WA_MODE);
+    let newWindow: Window | null = null;
+    if (targetStatus === 'sent' && process.env.NEXT_PUBLIC_WA_MODE === 'deeplink') {
+      newWindow = window.open('about:blank', '_blank');
+    }
+
     try {
       const isEditingDraft = !!initialDraft;
       const url = isEditingDraft ? `/api/invoices/${initialDraft.id}` : '/api/invoices';
@@ -809,6 +815,7 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
 
         const sendData = await sendRes.json().catch(() => ({}));
         if (!sendRes.ok) {
+          newWindow?.close();
           throw new Error(sendData.error || 'Invoice saved, but failed to send WhatsApp message');
         }
 
@@ -839,7 +846,14 @@ ${shop.name}`;
 
           const formattedPhone = formatWhatsAppNumber(phone);
           const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
-          window.open(url, '_blank');
+          
+          if (newWindow) {
+            newWindow.location.href = url;
+          } else {
+            window.open(url, '_blank');
+          }
+        } else {
+          newWindow?.close();
         }
 
         // Success!

@@ -233,13 +233,20 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
   }, [cooldown, inv.id]);
 
   const handleResend = async () => {
+    console.log('NEXT_PUBLIC_WA_MODE:', process.env.NEXT_PUBLIC_WA_MODE);
     setResending(true);
+    let newWindow: Window | null = null;
+    if (process.env.NEXT_PUBLIC_WA_MODE === 'deeplink') {
+      newWindow = window.open('about:blank', '_blank');
+    }
+
     try {
       const res = await fetch(`/api/invoices/${inv.id}/send`, {
         method: 'POST',
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        newWindow?.close();
         showToast(data.error || 'Failed to resend invoice', 'error');
       } else {
         if (data.mode === 'deeplink') {
@@ -269,7 +276,14 @@ ${shop?.name || 'Kavitha Textiles'}`;
 
           const formattedPhone = formatWhatsAppNumber(inv.customer_phone);
           const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
-          window.open(url, '_blank');
+          
+          if (newWindow) {
+            newWindow.location.href = url;
+          } else {
+            window.open(url, '_blank');
+          }
+        } else {
+          newWindow?.close();
         }
 
         showToast('Invoice resent successfully', 'success');
@@ -277,6 +291,7 @@ ${shop?.name || 'Kavitha Textiles'}`;
         fetchAuditLogs();
       }
     } catch (err) {
+      newWindow?.close();
       showToast('An unexpected error occurred', 'error');
     }
     setResending(false);
