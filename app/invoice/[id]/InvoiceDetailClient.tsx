@@ -242,6 +242,36 @@ export default function InvoiceDetailClient({ invoice, shop }: Props) {
       if (!res.ok) {
         showToast(data.error || 'Failed to resend invoice', 'error');
       } else {
+        if (data.mode === 'deeplink') {
+          const publicToken = data.public_token || inv.public_token;
+          const balance = inv.total - (inv.amount_paid || 0);
+
+          const formatWhatsAppNumber = (phoneStr: string) => {
+            const cleaned = phoneStr.replace(/[\s\-\(\)]/g, '');
+            if (cleaned.startsWith('0')) return '91' + cleaned.slice(1);
+            if (cleaned.startsWith('91')) return cleaned;
+            return '91' + cleaned;
+          };
+
+          const message = `Hello ${inv.customer_name?.trim() || 'Customer'},
+
+Your Sales Invoice is ready. Please find the details below:
+
+Invoice No  : ${inv.invoice_number}
+Amount      : ₹${inv.total}
+Balance Due : ₹${balance}
+
+View your invoice here: ${process.env.NEXT_PUBLIC_APP_URL || 'https://trubill.in'}/status/${publicToken}
+
+We appreciate your business and look forward to serving you again!
+Warm regards,
+${shop?.name || 'Kavitha Textiles'}`;
+
+          const formattedPhone = formatWhatsAppNumber(inv.customer_phone);
+          const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+          window.open(url, '_blank');
+        }
+
         showToast('Invoice resent successfully', 'success');
         router.refresh();
         fetchAuditLogs();

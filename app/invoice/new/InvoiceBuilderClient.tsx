@@ -812,6 +812,36 @@ export default function InvoiceBuilderClient({ products: initialProducts, initia
           throw new Error(sendData.error || 'Invoice saved, but failed to send WhatsApp message');
         }
 
+        if (sendData.mode === 'deeplink') {
+          const publicToken = isEditingDraft ? initialDraft.public_token : (sendData.public_token || resData.public_token);
+          const balance = paymentStatus === 'paid' ? 0 : paymentStatus === 'partial' ? (total - Number(partialAmount)) : total;
+          
+          const formatWhatsAppNumber = (phoneStr: string) => {
+            const cleaned = phoneStr.replace(/[\s\-\(\)]/g, '');
+            if (cleaned.startsWith('0')) return '91' + cleaned.slice(1);
+            if (cleaned.startsWith('91')) return cleaned;
+            return '91' + cleaned;
+          };
+
+          const message = `Hello ${customerName.trim()},
+
+Your Sales Invoice is ready. Please find the details below:
+
+Invoice No  : ${invoice_number}
+Amount      : ₹${total}
+Balance Due : ₹${balance}
+
+View your invoice here: ${process.env.NEXT_PUBLIC_APP_URL || 'https://trubill.in'}/status/${publicToken}
+
+We appreciate your business and look forward to serving you again!
+Warm regards,
+${shop.name}`;
+
+          const formattedPhone = formatWhatsAppNumber(phone);
+          const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+          window.open(url, '_blank');
+        }
+
         // Success!
         setSuccessInvoice(invoice_number);
       } else {

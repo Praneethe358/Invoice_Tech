@@ -213,9 +213,17 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Fetch public_token of the created invoice
+    const { data: createdInv } = await supabase
+      .from('invoices')
+      .select('public_token')
+      .eq('id', rpcData.id)
+      .single();
+
     return NextResponse.json({
       id: rpcData.id,
       invoice_number: rpcData.invoice_number,
+      public_token: createdInv?.public_token || null,
     });
   } catch (err) {
     console.error('Unexpected error in POST /api/invoices:', err);

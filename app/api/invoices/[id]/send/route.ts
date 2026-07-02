@@ -152,6 +152,38 @@ export async function POST(
     const balanceDue = Math.max(0, total - amountPaid);
     const customerName = typedInvoice.customer_name ? typedInvoice.customer_name.trim() : 'Customer';
 
+    const isDeeplinkMode = process.env.NEXT_PUBLIC_WA_MODE === 'deeplink';
+
+    if (isDeeplinkMode) {
+      // Step 2: Directly update status to sent, record timestamps and delivery status as sent_manual
+      await supabase
+        .from('invoices')
+        .update({ 
+          status: 'sent', 
+          sent_at: new Date().toISOString(),
+          sent_by: user.id,
+          delivery_status: 'sent_manual'
+        })
+        .eq('id', id);
+
+      // Record audit log
+      await supabase
+        .from('invoice_audit_logs')
+        .insert({
+          invoice_id: id,
+          shop_id: typedInvoice.shop_id,
+          user_id: user.id,
+          action: 'sent'
+        });
+
+      return NextResponse.json({
+        success: true,
+        message: 'Invoice manual send recorded',
+        mode: 'deeplink',
+        public_token: typedInvoice.public_token,
+      });
+    }
+
     // Step 2: Send WhatsApp Template Notification
     await sendInvoiceTemplateMessage({
       customerPhone: typedInvoice.customer_phone,
